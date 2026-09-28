@@ -102,6 +102,49 @@ def test_confirmed_candidate_required_for_timeline(setup):
     response=c.post('/api/v1/timelines/'+timeline['timeline_id']+'/render',json={})
     assert response.status_code==202,response.text
     assert response.json()['status']=='queued'
+    editorial=response.json()['payload']['parameters']['segment_options'][timeline['segments'][0]['segment_id']]['editorial_review']
+    assert editorial['reviewer_type']=='human'
+    assert editorial['event_revisions']=={'e1':1,'e2':1}
+    timeline['segments'][0]['in_ms']=100
+    assert c.post('/api/v1/timelines',json=timeline).status_code==200
+    assert c.post('/api/v1/timelines/'+timeline['timeline_id']+'/render',json={}).status_code==409
+    assert c.post('/api/v1/timelines',json={'timeline':timeline,'reviewer':'agent','reviewer_type':'agent'}).status_code==200
+    assert c.post('/api/v1/timelines/'+timeline['timeline_id']+'/render',json={}).status_code==409
+    assert c.post('/api/v1/timelines',json={'timeline':timeline,'reviewer':'tester','reviewer_type':'human'}).status_code==200
+    assert c.post('/api/v1/timelines/'+timeline['timeline_id']+'/render',json={}).status_code==202
+    changed={**event(), 'labels':{'stroke':'smash'}}
+    assert save(c,changed,1).status_code==200
+    assert c.post('/api/v1/timelines/'+timeline['timeline_id']+'/render',json={}).status_code==409
+
+
+def test_probe_apply_large_source_uses_worker_digest_without_rehash(setup,monkeypatch):
+    c,app,a,l,root=setup
+    raw=b'x'*8_000_001
+    (root/'data/large.mp4').write_bytes(raw)
+    large={**a,'asset_id':'large','relative_path':'data/large.mp4','size_bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+    job=app.state.queue.enqueue('probe',{'library_id':l['library_id'],'relative_path':large['relative_path']})
+    app.state.queue.claim('worker')
+    app.state.queue.finish(job['job_id'],'worker','succeeded',result={'asset':large})
+    def rehash_forbidden(*args,**kwargs):
+        raise AssertionError('probe apply must not hash large media in web process')
+    monkeypatch.setattr(hashlib,'file_digest',rehash_forbidden)
+    response=c.post('/api/v1/jobs/'+job['job_id']+'/apply')
+    assert response.status_code==200,response.text
+    assert response.json()['imported'][0]['asset']['asset_id']=='large'
+    assert len(app.state.queue.list())==1
+    assert len(c.get('/api/v1/assets').json())==2
+
+
+def test_global_top_candidates_keep_late_exact_match(setup):
+    from apps.platform.retrieval import search
+    c,app,a,*_=setup
+    events=[{**event('unknown-'+str(i),i,i+1,labels={'stroke':'unknown'}),'visibility':'insufficient','review_status':'unreviewed'} for i in range(500)]
+    events.append({**event('late-exact',600,601),'reviewer_type':'human'})
+    q=query();q['steps']=q['steps'][:1];q['relations']=[];q['include_uncertain']=True
+    results=search(q,events,[a])
+    assert len(results)==500
+    assert results[0]['event_ids']==['late-exact']
+    assert results[0]['rank_score']==1
 
 
 def test_asset_dedup_and_unsafe_paths(setup):

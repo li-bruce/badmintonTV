@@ -1,4 +1,6 @@
 import copy
+import hashlib
+import json
 
 import pytest
 
@@ -133,3 +135,139 @@ def test_client_local_only_and_secret_masked(monkeypatch):
         LabelStudioClient().create_project("test")
     assert "VideoRectangle" in label_config()
     assert "TimelineLabels" in label_config()
+
+
+@pytest.fixture
+def ls_api(tmp_path, monkeypatch, mapping):
+    from fastapi.testclient import TestClient
+
+    root = tmp_path / 'video'
+    (root / 'data').mkdir(parents=True)
+    (root / 'data/test.mp4').write_bytes(b'not-real-video')
+    monkeypatch.setenv('BTV_STORAGE_ROOT', str(root))
+    from apps.platform.main import create_app
+
+    app = create_app(root, root / 'platform/platform.sqlite3')
+    client = TestClient(app)
+    library = client.post('/api/v1/libraries', json={'name': 'LS regression'}).json()
+    asset = {'asset_id': 'a', 'match_id': 'm', 'relative_path': 'data/test.mp4',
+             'sha256': hashlib.sha256(b'not-real-video').hexdigest(), 'size_bytes': 14,
+             'duration_ms': 200, 'width': 2, 'height': 2, 'title': 'LS contract fixture',
+             'source_type': 'synthetic', 'rights': {'status': 'owned'}}
+    response = client.post('/api/v1/assets/import', json={'library_id': library['library_id'],
+                           'manifest': {'assets': [asset]}})
+    assert response.status_code == 200, response.text
+    return client, app, mapping
+
+
+def ls_snapshot(client, mapping, *, seed=None):
+    if seed:
+        response = client.post('/api/v1/events', json={'event': seed, 'expected_revision': 0, 'reviewer': 'tester'})
+        assert response.status_code == 200, response.text
+    task = client.post('/api/v1/annotation/label-studio/task',
+                       json={'asset_id': 'a', 'frame_map': mapping.as_dict()}).json()
+    task['id'] = 11
+    regions = task.get('annotations', [{'result': [{
+        'id': 'new-region', 'from_name': 'events', 'to_name': 'video', 'type': 'timelinelabels',
+        'value': {'ranges': [{'start': 1, 'end': 1}], 'timelinelabels': ['stroke.net_shot']},
+    }]}])[0]['result']
+    task['annotations'] = [{'id': 22, 'updated_at': '2026-09-28T00:00:01Z', 'result': regions}]
+    return task
+
+
+def edit_snapshot(task, second=2, end_frame=2):
+    edited = copy.deepcopy(task)
+    edited['annotations'][0]['updated_at'] = f'2026-09-28T00:00:{second:02d}Z'
+    edited['annotations'][0]['result'][0]['value']['ranges'][0]['end'] = end_frame
+    return edited
+
+
+def post_ls(client, task):
+    return client.post('/api/v1/annotation/label-studio/import', json={
+        'export': [task], 'reviewer': 'agent-regression', 'reviewer_type': 'agent', 'tool_version': '1.23.1'})
+
+
+@pytest.mark.parametrize('seeded', [False, True])
+def test_api_import_then_edit_uses_last_imported_revision(ls_api, event, seeded):
+    c, app, mapping = ls_api
+    seed = {**event, 'revision': 1, 'review_status': 'unreviewed', 'start_ms': 0, 'end_ms': 33, 'contact_ms': None} if seeded else None
+    task = ls_snapshot(c, mapping, seed=seed)
+    initial = post_ls(c, task)
+    assert initial.status_code == 200, initial.text
+    first = initial.json()['events'][0]
+    second = post_ls(c, edit_snapshot(task))
+    assert second.status_code == 200, second.text
+    changed = second.json()['events'][0]
+    assert changed['event_id'] == first['event_id']
+    assert changed['revision'] == first['revision'] + 1
+    assert changed['end_ms'] == 100 and changed['review_status'] == 'unreviewed'
+    assert changed['provenance']['previous_revision'] == first['revision']
+    # Replaying either accepted snapshot never restores old time bounds or tracks.
+    assert post_ls(c, task).json()['events'] == []
+    assert post_ls(c, edit_snapshot(task)).json()['events'] == []
+    current = app.state.store.event(first['event_id'])
+    assert current['end_ms'] == 100 and current['revision'] == changed['revision']
+    # A never-before-imported stale snapshot is rejected based on updated_at.
+    assert post_ls(c, edit_snapshot(task, second=0, end_frame=3)).status_code == 409
+
+
+@pytest.mark.parametrize('status', ['unreviewed', 'confirmed'])
+def test_api_local_edit_conflicts_even_if_hash_is_preserved(ls_api, status):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    first = post_ls(c, task).json()['events'][0]
+    local = {**first, 'labels': {'stroke': 'smash'}, 'review_status': status}
+    response = c.post('/api/v1/events', json={'event': local, 'expected_revision': 1, 'reviewer': 'local-human'})
+    assert response.status_code == 200, response.text
+    assert post_ls(c, edit_snapshot(task)).status_code == 409
+    assert post_ls(c, task).json()['events'] == []
+    retained = app.state.store.event(first['event_id'])
+    assert retained['revision'] == 2 and retained['labels'] == {'stroke': 'smash'}
+    assert retained['review_status'] == status
+
+
+def test_api_ls_batch_conflict_rolls_back_events_tracks_and_cursor(ls_api):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    second_region = copy.deepcopy(task['annotations'][0]['result'][0])
+    second_region['id'] = 'region-two'
+    task['annotations'][0]['result'].append(second_region)
+    first = post_ls(c, task).json()['events']
+    local = c.post('/api/v1/events', json={'event': first[1], 'expected_revision': 1, 'reviewer': 'local-human'})
+    assert local.status_code == 200
+    before_cursor = app.state.store.list('ls_sync')
+    assert post_ls(c, edit_snapshot(task)).status_code == 409
+    assert app.state.store.event(first[0]['event_id'])['revision'] == 1
+    assert app.state.store.event(first[1]['event_id'])['revision'] == 2
+    assert app.state.store.list('ls_sync') == before_cursor
+
+
+def test_api_changed_snapshot_needs_newer_timestamp(ls_api):
+    c, _, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    assert post_ls(c, task).status_code == 200
+    changed = edit_snapshot(task)
+    changed['annotations'][0].pop('updated_at')
+    assert post_ls(c, changed).status_code == 409
+
+
+def test_legacy_import_history_does_not_treat_local_audit_as_sync(ls_api):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    converted = convert(task, task['annotations'][0])
+    # Simulate pre-cursor importer and a later local change preserving its hash.
+    first = app.state.store.save_event(converted['events'][0], 0, 'legacy-import')
+    local = app.state.store.save_event({**first, 'labels': {'stroke': 'smash'}}, 1, 'local-human')
+    assert post_ls(c, task).json()['events'] == []
+    assert post_ls(c, edit_snapshot(task)).status_code == 409
+    assert app.state.store.event(first['event_id']) == local
+
+
+def test_legacy_import_can_continue_from_actual_import_revision(ls_api):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    converted = convert(task, task['annotations'][0])
+    first = app.state.store.save_event(converted['events'][0], 0, 'legacy-import')
+    response = post_ls(c, edit_snapshot(task))
+    assert response.status_code == 200, response.text
+    assert response.json()['events'][0]['revision'] == first['revision'] + 1
