@@ -12,5 +12,5 @@
 - 限制/未测：0.5x脉冲仍约38ms瞬态偏移（已量测，不宣称零偏差）；真实片源无音轨所以补静音。VFR真实输入、个人录像、NVENC/目标跟随/OTIO、旋转或非方像素crop未验。
 - 外部待办：人类确认选片/身份/细手法、完整场次时间映射、原画面发布权未知；分别记录 `docs/issues/render-human-review-and-source-rights.md` 与 `render-atempo-transient-offset.md`。现有交付明确研究预览，不能声称细技法业务验收通过。
 - 下一步：主任务集成，platform完成网页真实闭环；收到具体兼容问题继续修复；人工审阅通过后按明确来源导出正式confirmed版本。
-- 提交SHA：本状态与源码即将形成首个本地模块提交，随后补入实际SHA；不推送、不自行合并main。
+- 实现提交SHA：`9762e9000dd90e6a23bf1e3673e8d40149310388`（work/render）；随后仅补本状态SHA记录。不推送、不自行合并main。
 - 启动命令：`python -m packages.render run --request <json> --result <json> --storage-root D:/video --ffmpeg <env检查路径> --ffprobe <env检查路径> --cancel-file render/handoff/<job>.cancel`。完整PowerShell/Python示例见README。
