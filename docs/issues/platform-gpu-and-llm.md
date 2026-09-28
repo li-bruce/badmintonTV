@@ -1,0 +1,9 @@
+# 尚未验证的外部能力
+
+状态：platform人工链路已验证；这些能力没有冒充已完成。
+
+GPU共享资源租约未实现，models持有实验排期。平台服务对gpu_required任务在启动任何子进程前返回blocked/GPU_LEASE_REQUIRED；没有通过环境隔离之外的方式抢占GPU，也不结束用户进程。后续由主协调集成统一租约和WSL launcher再开放。
+
+真实LLM端点与密钥未提供。本地受限规则QuerySpec和编辑/查询可用；连接测试的成功路径尚无真实远程服务可验证，错误与密钥屏蔽已有自动化测试。配置页仅接环境变量名。
+
+models独占writer锁在真实CPU规则联调首次返回output_exists，平台保留failed attempt1；与models协调释放窗口后attempt2 succeeded。models已在00de444修复锁竞争语义为OWNER_BUSY。平台没有删除或跨owner释放锁。
