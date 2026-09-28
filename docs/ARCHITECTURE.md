@@ -8,7 +8,7 @@
 
 业务服务和轻量任务 worker 用独立 Python 环境；模型训练/推理在 WSL Ubuntu 的独立 Conda 环境；FFmpeg 在媒体环境中执行。先提供本机 CPU 可运行方案。核心包不依赖 torch、CUDA、MMCV 或某个标注产品的私有对象。
 
-首轮 DB 用 SQLite + 明确迁移、事务、外键和持久 job 表；仅一个控制面服务、一组受控 worker。SQLite 主数据库放 WSL 原生 Linux 文件系统，不把 WAL 数据库跨 Windows/WSL 共享；备份输出到 D:\video\platform\backups，并把原生路径实际占用计入 platform 配额。Windows 本地开发可使用其独立本地 DB，不能同时操作同一数据库文件。后续并发需求出现时替换 PostgreSQL，不改变领域接口。
+首轮 DB 用 SQLite + 明确迁移、事务、外键和持久 job 表；仅一个控制面服务、一组受控 worker。首轮正式控制面和队列worker选择 Windows 独立Python环境，数据库在原生路径 D:\video\platform，WSL模型进程通过JSON请求/产物协议交接，不读写该数据库。以后若整体迁移控制面到WSL，API、队列worker与SQLite需一起迁至Linux原生文件系统，并把实际占用计入platform配额；禁止通过UNC或/mnt/d跨Windows/WSL共享WAL。备份输出到 D:\video\platform\backups。后续并发需求出现时替换 PostgreSQL，不改变领域接口。
 
 ## 2. 模块边界
 
@@ -59,7 +59,7 @@ flowchart TD
 Job 状态：queued → running → succeeded / failed / cancelled / blocked；依赖未满足先 blocked，条件满足后显式重新排队。cancel_requested 是控制字段，不是虚假的已取消。
 
 - 创建任务保存 input、模型版本、参数快照、代码提交和幂等键，返回202/job_id。
-- 独立worker事务领取任务，写 owner、lease_expires_at 与心跳。租约过期恢复为 interrupted/可重试记录，再决定排队；不能把程序重启误报成功。
+- 独立worker事务领取任务，写 owner、attempt_id、lease_expires_at 与心跳。崩溃/租约到期记录为failed，error.code=WORKER_INTERRUPTED，显式retry创建新attempt；不能把程序重启误报成功。租约到期不等于旧进程已停止，重新授予GPU前要确认本任务旧执行器终止；所有产物须校验当前attempt_id以拒绝旧进程迟到的写回。
 - 每阶段保存 checkpoint/artifact，临时文件完成验证后原子改名；幂等处理与最大重试次数避免重复入库/导出。
 - 进度含 stage、current、total、unit；无可靠总量时显示不确定进度。实时轮询或SSE读取持久事件，断线重连可按seq续读。
 - GPU 同时默认只运行一个重型任务，登记gpu_id与lease；CPU/IO任务有独立并发限制。显存不足标明配置、峰值、替代方案和重试结果。
@@ -86,7 +86,7 @@ LLM配置含provider、base_url、model、timeout、密钥环境变量名；密�
 
 统一前缀 `/api/v1`：`libraries`、`assets`（含manifest import、probe、受控media）、`players`、`events`（revision/review/import/export）、`models`（health/capabilities）、`jobs`（create/detail/logs/cancel/retry）、`queries`（parse/search）、`timelines`（preview/render）、`settings/llm`（masked config/test）、`reports`。平台任务发布实际OpenAPI和运行示例。
 
-文件跨模块交接目录：`D:\video\<owner>\handoff`。生产DB只能由平台服务写；其他任务提交manifest、events、model card、timeline等，通过API或导入器校验入库。
+文件跨模块交接目录固定为 `D:\video\data\handoff`（library）、`D:\video\platform\handoff`、`D:\video\models\handoff`、`D:\video\render\handoff`。生产DB只能由平台服务写；其他任务提交manifest、events、model card、timeline等，通过API或导入器校验入库。
 
 ## 8. 稳定性和验证
 

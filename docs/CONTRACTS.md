@@ -1,6 +1,6 @@
 # 跨任务数据合同 v1.0
 
-所有传输采用 UTF-8 JSON/JSONL，顶层 `schema_version: "1.0"`。本文件是第一轮的共同接口。平台任务将其实现为 `packages/contracts` 中可验证的类型/schema；其他任务可先用字典和本地校验器，字段名称与语义保持一致。
+所有传输采用 UTF-8 JSON/JSONL，顶层 `schema_version: "1.0"`。本文件是第一轮的共同接口。平台任务优先将其实现为 `packages/contracts` 中可验证的类型/schema，并单独提交contracts与canonical请求/结果fixtures；主任务先集成此提交，将SHA告知其余任务。其他任务可先用字典和本地校验器，随后必须用同一组fixtures进行兼容检查，不能只记录差异后各自结束。
 
 ## 通用规则
 
@@ -81,9 +81,10 @@
 - weights 每个含relative_path、sha256、license_url。entrypoint是管理员注册的命令模板，用户不可传任意shell命令。
 - capabilities 可有 pose,tracking,stroke_detection,movement_classification,video_embedding,query_parse。
 - 模块CLI协议：`python -m <module> run --request <request.json> --result <result.json>`；执行参数数组调用，禁止shell拼接。具体module路径在model manifest登记。
-- request=`{schema_version,job_id,operation,assets,parameters,output_dir}`，output_dir只能是该owner受控子目录。
+- request=`{schema_version,job_id,attempt_id,operation,assets,parameters,output_dir}`；assets固定为Asset数组。output_dir必须是共享根下该owner目录内的POSIX相对路径，例如render/jobs/job-01/attempt-01；执行器根据配置的Windows或WSL存储根解析。
 - stdout JSONL=`{schema_version,job_id,seq,event,stage,current,total,unit,message}`，event=progress/artifact/warning/error；stderr日志不得包含secret。
-- result=`{schema_version,job_id,status,artifacts,events,error}`，status=succeeded/failed/cancelled/blocked；未就绪应blocked并有error.code。stdout进度不是成功凭据，结果文件和返回码均要检查。
+- result=`{schema_version,job_id,attempt_id,status,artifacts,events,error}`，status=succeeded/failed/cancelled/blocked；未就绪应blocked并有error.code。stdout进度不是成功凭据，结果文件和返回码均要检查。退出码约定：0=succeeded、1=failed、2=blocked、130=cancelled；强制终止导致没有result时由worker如实记录取消或WORKER_INTERRUPTED，不能伪造结果。
+- `--request`与`--result`是子进程所在操作系统可访问的文件路径；跨Windows/WSL由受控launcher转换，不让模型猜路径。模型不得打开平台SQLite。写回必须匹配当前attempt_id，防止旧重试覆盖新结果。
 
 ## Timeline 与渲染协议
 
@@ -103,4 +104,26 @@
 
 Timeline 是可编辑工程；片段通过Asset映射解析路径，不能直接执行传来的FFmpeg过滤器。speed>0，音频策略source/mute；慢放使用匹配音频变速或显式静音。fit=contain/crop；默认contain保留整个比赛画面，crop必须有明确裁切窗口，运动跟随可作为后续扩展。序列合并/回放去重应保留被合并事件的回查关系。
 
-渲染采用同一CLI请求/result协议，operation=render，parameters含timeline与assets映射。render result 的artifacts至少有MP4、timeline JSON、逐段原片/输出时间映射、QA报告；OTIO为可选互操作产物，不替代实际编码。QA记录输出尺寸、时长、音视频流、解码检查和人工观看结论。导出本地研究样片与公开发布资格分别报告。
+渲染采用同一CLI请求/result协议，operation=render，parameters仅含timeline及渲染设置，assets数组只放顶层，由执行器内部按asset_id建立映射。render result 的artifacts至少有MP4、timeline JSON、逐段原片/输出时间映射、QA报告；OTIO为可选互操作产物，不替代实际编码。QA记录输出尺寸、时长、音视频流、解码检查和人工观看结论。导出本地研究样片与公开发布资格分别报告。
+
+完整外层请求形状（assets中的对象字段按上表填齐，下面只表示结构，不是可下载/已验证素材）：
+
+```json
+{
+  "schema_version": "1.0",
+  "job_id": "job-01",
+  "attempt_id": "attempt-01",
+  "operation": "render",
+  "assets": [],
+  "parameters": {
+    "timeline": {
+      "schema_version": "1.0", "timeline_id": "timeline-01", "title": "空结构示例",
+      "segments": [],
+      "output": {"width": 1080, "height": 1920, "fps": 30, "video_codec": "h264", "audio_codec": "aac"}
+    }
+  },
+  "output_dir": "render/jobs/job-01/attempt-01"
+}
+```
+
+空segments必须作为无可渲染片段失败，不能生成空白视频假称成功。可运行非空示例由platform在contracts fixtures中提供，并由render共同验证。

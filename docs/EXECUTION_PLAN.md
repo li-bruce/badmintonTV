@@ -17,7 +17,7 @@
 
 - Windows GPU：RTX 5090，32607 MiB，驱动591.86；WSL内nvidia-smi能看到同一张卡。
 - WSL：Ubuntu，WSL2，运行中；docker-desktop也存在，但训练只使用Ubuntu。
-- Ubuntu PATH有 `/usr/bin/python3`，未找到conda和ffmpeg；尚不能称训练环境已就绪。
+- Ubuntu PATH有 `/usr/bin/python3`，PATH未找到conda和ffmpeg；models任务随后发现 `/home/ubuntu/miniforge3` 已存在，将检查并优先复用，不重复安装。尚不能称训练环境已就绪。
 - D:\video 初始为空；D盘约968,079,273,984 bytes可用。后续任务每次重测，不依赖初始数值。
 - 普通沙箱枚举WSL遭权限限制，授权提升后的只读检查成功。不是硬件不支持。
 - WSL启动曾提示localhost代理未映射；下载若受影响记录具体网络问题，不绕过安全配置。
@@ -51,6 +51,6 @@ models任务是唯一公共Conda安装者，优先官方Miniforge并校验来源
 
 ## Git与交付
 
-创建main初始设计提交后，四任务从该提交创建worktree。任务名与ID写docs/STATUS.md。各任务在自己的分支提交模块代码与报告，向主任务提供SHA；主任务审查、合并、解决兼容和运行闭环。未经用户指定，不创建远程仓库或推送；本地提交不是异地备份。
+创建main初始设计提交后，四任务从该提交创建worktree。任务名与ID写docs/STATUS.md。platform须首先单独提交contracts+canonical请求/结果fixtures，主任务先集成并协调各模块同步同一SHA做协议检查。各任务在自己的分支提交模块代码与报告，向主任务提供SHA；主任务审查、合并、解决兼容和运行闭环。未经用户指定，不创建远程仓库或推送；本地提交不是异地备份。
 
 首轮每个任务至少提供：可运行命令、关键验证结果、已知不足、独立问题MD、环境/容量记录、提交SHA及跨模块交接文件。可以保留真实阻塞，但不能只写计划就声称实现完毕。
