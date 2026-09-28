@@ -59,6 +59,8 @@ Windows 子进程先启动等待指令的轻量 launcher，加入 worker 独占�
 
 ## 验证状态
 
+最终复核补充：worker所有终态在计算停止核验及GPU释放之后发布；取消等待期间仍为running/cancel_requested且心跳继续，无匹配done则failed/WORKER_INTERRUPTED+GPU orphan。Queue的enqueue/claim/heartbeat/finish/recover_expired统一在取得BEGIN IMMEDIATE后采时，避免写锁等待跨租约到期仍续租或提交成功；5项新增测试用真实SQLite锁与受控时钟复现边界。
+
 2026-09-28 实际测试：`D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform/test_runtime.py -q` → **40 passed, 1 skipped**。覆盖同库重开、幂等冲突、8线程竞争领取、最大重试、过期失败与旧尝试隔离、排队/运行取消、危险路径、原子容量竞争、真实进程协议错误、陈旧attempt、实际Artifact哈希不符、缺失模型blocked、stderr密钥屏蔽、心跳与完整进程树取消；追加验证模型 capability 传递、模型版本参数不可覆盖、缺少快照拒绝、管理员表无模型阻塞、模型及渲染 GPU 需求在启动前阻塞。清单核验新增实际文件字节流读取成功（5.2MB+小文件）、错误hash/size拒绝、不发布部分资产、1001条拒绝。日志预算测试让CLI连续输出200条合法长中文progress，以1,400字节测试预算验证实际持久UTF-8 JSON总量不超限、仅一个省略warning、CLI仍真实成功；饱和后取消检查仍有效。容量边界测试验证遍历权限错误传播、其他owner全配额回退不重复计量、回退仅用于全局逻辑上限而不污染物理free检查、本owner不可读拒绝。此类任意字节fixture仅证明完整性检查，不是视频解码或识别成绩。唯一跳过为 Windows 当前测试账号不能创建 symlink，普通穿越、盘符、ADS、设备别名均已测；根外实际 symlink 情形需具备创建权限的环境补测。
 
 失败记录：第一次进程树取消测试发现沙箱内 `taskkill /T` 返回 Access denied，只杀父进程不满足约定；已改为专属 Job Object，复测父子进程皆终止。第一次真实容量扫描遇 WSL 环境文件 `runtime/models/env/bin/2to3` 的 Windows reparse point 跟随失败（WinError1920）；改为 lstat 计量实际条目并禁止追随 owner 外链接，复测通过。首轮probe将4633.333ms四舍五入成4633ms，与library末帧覆盖4634ms不一致；统一向上取整后重测相符。失败产生的独立小型验证数据库保留，没有自动清除。

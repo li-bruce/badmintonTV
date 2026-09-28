@@ -92,8 +92,8 @@ class Queue:
         if not isinstance(max_attempts, int) or isinstance(max_attempts, bool) or not 1 <= max_attempts <= 10:
             raise ValueError("max_attempts must be between 1 and 10")
         encoded = json.dumps(payload, ensure_ascii=False, allow_nan=False)
-        now = time.time()
         with self.connection(write=True) as db:
+            now = time.time()
             if idempotency_key is not None:
                 existing = db.execute("SELECT * FROM jobs WHERE idempotency_key=?", (idempotency_key,)).fetchone()
                 if existing is not None:
@@ -123,8 +123,8 @@ class Queue:
     def claim(self, worker_id, lease_seconds=30):
         if not worker_id or lease_seconds <= 0:
             raise ValueError("worker_id and positive lease_seconds required")
-        now = time.time()
         with self.connection(write=True) as db:
+            now = time.time()
             row = db.execute("SELECT * FROM jobs WHERE status='queued' AND cancel_requested=0 AND attempt<max_attempts ORDER BY created_at,job_id LIMIT 1").fetchone()
             if row is None:
                 return None
@@ -135,8 +135,8 @@ class Queue:
     def heartbeat(self, job_id, worker_id, lease_seconds=30, expected_attempt=None):
         if lease_seconds <= 0:
             raise ValueError("positive lease_seconds required")
-        now = time.time()
         with self.connection(write=True) as db:
+            now = time.time()
             cursor = db.execute("UPDATE jobs SET lease_expires_at=?,updated_at=? WHERE job_id=? AND worker_id=? AND status='running' AND lease_expires_at>? AND (? IS NULL OR attempt=?)", (now + lease_seconds, now, job_id, worker_id, now, expected_attempt, expected_attempt))
             return cursor.rowcount == 1
 
@@ -152,8 +152,8 @@ class Queue:
     def finish(self, job_id, worker_id, status, result=None, error=None, expected_attempt=None):
         if status not in TERMINAL:
             raise ValueError("finish requires a terminal status")
-        now = time.time()
         with self.connection(write=True) as db:
+            now = time.time()
             row = self._require(db, job_id)
             if row["status"] != "running" or row["worker_id"] != worker_id or row["lease_expires_at"] <= now or (expected_attempt is not None and row["attempt"] != expected_attempt):
                 raise RuntimeError("job lease is no longer owned by this worker")
@@ -186,9 +186,9 @@ class Queue:
             return self._job(self._require(db, job_id))
 
     def recover_expired(self):
-        now = time.time()
         recovered = []
         with self.connection(write=True) as db:
+            now = time.time()
             for row in db.execute("SELECT job_id,worker_id FROM jobs WHERE status='running' AND lease_expires_at<=?", (now,)).fetchall():
                 error = {"code": "WORKER_INTERRUPTED", "message": "worker 租约已过期；保留产物，需要显式重试", "worker_id": row["worker_id"]}
                 db.execute("UPDATE jobs SET status='failed',error=?,lease_expires_at=NULL,updated_at=? WHERE job_id=?", (json.dumps(error, ensure_ascii=False), now, row["job_id"]))
