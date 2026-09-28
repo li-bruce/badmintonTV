@@ -1,0 +1,443 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "schema_version": "1.0",
+      "model_id": "query-rule-v1",
+      "version": "0.1.0",
+      "display_name": "受限中文规则解析",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "ready",
+      "reason": null,
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "stdlib",
+        "prefix": null
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "query-rule-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "query-endpoint-v1",
+      "version": "0.1.0",
+      "display_name": "管理员配置的兼容LLM端点",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "unavailable",
+      "reason": "未设置管理员 BTV_LLM_CONFIG",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "stdlib",
+        "prefix": null
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "query-endpoint-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "qwen3-0.6b",
+      "version": "0.1.0",
+      "display_name": "Qwen3 0.6B 中文条件实验",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "not_installed",
+      "reason": "当前Python缺少依赖: torch, transformers",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "qwen3-0.6b"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "torchvision-keypointrcnn",
+      "version": "0.1.0",
+      "display_name": "COCO17 姿态预标注",
+      "capabilities": [
+        "pose"
+      ],
+      "status": "not_installed",
+      "reason": "当前Python缺少依赖: torch, torchvision, av",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "torchvision-keypointrcnn"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "clip-frame-mean",
+      "version": "0.1.0",
+      "display_name": "CLIP 短窗抽帧均值基线",
+      "capabilities": [
+        "video_embedding"
+      ],
+      "status": "not_installed",
+      "reason": "当前Python缺少依赖: torch, transformers, av",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "clip-frame-mean"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "skeleton-temporal-v1",
+      "version": "0.1.0",
+      "display_name": "骨骼细动作分类（未训练）",
+      "capabilities": [
+        "movement_classification"
+      ],
+      "status": "unavailable",
+      "reason": "缺少专家冻结细标签、跨比赛真值和训练checkpoint；不产生预测",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "stdlib",
+        "prefix": null
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "skeleton-temporal-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/HANDOFF.md",
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    }
+  ]
+}
