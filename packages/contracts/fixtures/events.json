@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "events": [
+    {
+      "schema_version": "1.0",
+      "event_id": "event-contract-synthetic",
+      "asset_id": "asset-contract-synthetic",
+      "match_id": "match-contract-synthetic",
+      "rally_id": "rally-contract-synthetic",
+      "shot_id": null,
+      "player_id": "player-contract-synthetic",
+      "track_id": null,
+      "kind": "stroke",
+      "start_ms": 500,
+      "end_ms": 1500,
+      "contact_ms": 1000,
+      "labels": {
+        "stroke": "net_shot",
+        "hand_technique": "unknown",
+        "footwork": null
+      },
+      "visibility": "insufficient",
+      "confidence": null,
+      "review_status": "confirmed",
+      "revision": 1,
+      "provenance": {
+        "source": "manual",
+        "model_id": null,
+        "model_version": null,
+        "run_id": null,
+        "fixture_only": true
+      },
+      "evidence": [
+        {
+          "type": "source_interval",
+          "asset_id": "asset-contract-synthetic",
+          "start_ms": 500,
+          "end_ms": 1500
+        }
+      ],
+      "unknown_reason": "Synthetic structural example; no actual badminton action",
+      "reviewer": "fixture-generator",
+      "reviewed_at": "2026-09-28T00:00:00Z",
+      "previous_revision": null
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "model_id": "model-contract-uninstalled",
+  "version": "0.0.0",
+  "display_name": "Synthetic not-installed model fixture",
+  "capabilities": [
+    "stroke_detection"
+  ],
+  "status": "not_installed",
+  "reason": "Structural fixture; no model or weights installed",
+  "entrypoint": [
+    "python",
+    "-m",
+    "packages.models",
+    "run",
+    "--request",
+    "{request}",
+    "--result",
+    "{result}"
+  ],
+  "environment": null,
+  "weights": [],
+  "parameters_schema": {},
+  "input_schema": null,
+  "output_schema": null,
+  "supported_labels": {},
+  "supported_camera_types": [],
+  "evaluation_report": null,
+  "license": null,
+  "resource_requirements": {}
+}

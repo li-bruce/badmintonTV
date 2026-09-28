@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "timeline_id": "timeline-contract-synthetic",
+  "title": "Synthetic contract render smoke test",
+  "segments": [
+    {
+      "segment_id": "clip-contract-01",
+      "asset_id": "asset-contract-synthetic",
+      "in_ms": 0,
+      "out_ms": 2000,
+      "speed": 1.0,
+      "event_ids": [
+        "event-contract-synthetic"
+      ],
+      "fit": "contain",
+      "crop": null,
+      "title": "Synthetic structure fixture",
+      "audio": "source",
+      "review_status": "confirmed"
+    },
+    {
+      "segment_id": "clip-contract-02",
+      "asset_id": "asset-contract-synthetic",
+      "in_ms": 2000,
+      "out_ms": 4000,
+      "speed": 0.5,
+      "event_ids": [],
+      "fit": "contain",
+      "crop": null,
+      "title": "Synthetic slow motion",
+      "audio": "mute",
+      "review_status": "confirmed"
+    }
+  ],
+  "output": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30.0,
+    "video_codec": "h264",
+    "audio_codec": "aac"
+  }
+}

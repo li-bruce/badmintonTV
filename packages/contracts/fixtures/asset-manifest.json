@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "schema_version": "1.0",
+      "asset_id": "asset-contract-synthetic",
+      "relative_path": "platform/contract-fixtures/STRUCTURE-ONLY/source.mp4",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 123456,
+      "duration_ms": 4000,
+      "width": 320,
+      "height": 180,
+      "fps_num": 25,
+      "fps_den": 1,
+      "time_base": "1/12800",
+      "title": "Synthetic contract fixture, not an existing media asset",
+      "match_id": "match-contract-synthetic",
+      "source_type": "synthetic",
+      "source_url": null,
+      "source_page": null,
+      "acquired_at": "2026-09-28T00:00:00Z",
+      "camera_type": "unknown",
+      "discipline": "unknown",
+      "players": [],
+      "rights": {
+        "status": "unknown",
+        "license_url": null,
+        "evidence": "Structure-only fixture; instantiate media before execution",
+        "allowed_uses": [
+          "contract_test"
+        ]
+      },
+      "split": "unassigned",
+      "probe": {},
+      "provenance": {
+        "synthetic": true,
+        "fixture_only": true
+      }
+    }
+  ]
+}
