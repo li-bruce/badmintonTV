@@ -21,3 +21,14 @@ owner：render。状态：工具可运行；尚不代表真实羽球集锦验收
 ## 跨系统容量统计
 
 Windows不能解析部分WSL环境链接时，不得把读取错误等同于0字节。可对无法读取的其他owner目录按完整已分配额度保守计数，并确保不与已统计子树重复计算；自己的目录必须完整核算，否则停止新增写入并记录问题。不得跟随重解析点到受控根外，也不删除其他模块链接。初始650GB分配和总700GB硬上限保持不变。
+
+## WSL RTX 5090 算子检查点
+
+models任务已实际运行，主协调读取了其记录；完整记录待ML提交后集成为 `environments/models-gpu-smoke.json`。
+
+- 环境：`/mnt/d/video/runtime/models/env`，Python3.11.16，torch2.7.1+cu128，torchvision0.22.1+cu128，CUDA12.8，cuDNN90701。
+- GPU：RTX5090、capability12.0，编译架构列表含sm_120。
+- 合成算子：矩阵运算、卷积、BF16 SDPA、torchvision NMS与ROIAlign通过。算子测试段1.097秒，峰值allocated 8,974,848 bytes。
+- 这些数值只描述合成算子测试，不能代表视频处理吞吐、模型显存需求或识别准确率。
+- Qwen与姿态权重已下载校验，真实模型前向另行报告；底座仍以逐模型health/实测状态决定可用能力，不因GPU算子通过将所有模型标为ready。
+- PyAV14.4源码安装失败（pkg-config/FFmpeg开发依赖不足）已记录，models改用官方15.0.0 Linux wheel，未往全局环境安装编译链。

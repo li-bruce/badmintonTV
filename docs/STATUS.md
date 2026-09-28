@@ -26,4 +26,6 @@
 
 首轮集成：contracts、library已合入main，分别69与53测试独立复跑通过。models协议初版与审查修复已合入，Windows100测试98通过/2权限跳过（模块WSL100全过），合同互验通过；真实GPU推理仍待完成。render三项边界修复中，尚未合入。平台工作树已完成真实Web→worker→14.8秒MP4链路，主协调核验QA与视频hash；平台源码待提交并在main复验。所有真实样片都保留agent来源/细技法未知，不称人工真值。细节见[集成记录](INTEGRATION_LOG.md)。
 
+GPU环境检查点：WSL独立环境中RTX5090实际matmul/conv2d/BF16 SDPA/torchvision NMS/ROIAlign通过；真实视频模型推理仍单列待验。详见[环境交接](ENVIRONMENT_HANDOFF.md)。
+
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
