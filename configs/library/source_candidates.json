@@ -1,0 +1,636 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-09-28",
+  "evidence_document": "docs/library/SOURCES.md",
+  "record_type": "source_candidates",
+  "notes": [
+    "候选目录，不是已下载Asset或实时下载状态；禁止据此填充探测值。",
+    "estimated_peak_bytes与download_max_bytes为null时必须先补有限预算，禁止解释为无限下载。",
+    "rights分层记录代码、标注、画面、权重；任一层许可不能外推另一层。",
+    "未给出当前世界前十断言。历史排名带依据日期；赛事种子与世界排名分开。"
+  ],
+  "candidates": [
+    {
+      "source_id": "shuttleset-dataset",
+      "url": "https://github.com/wywyWang/CoachAI-Projects/tree/45517f7d4cb936b03f3eabf939cc7959d39226fe/ShuttleSet",
+      "source_page": "https://github.com/wywyWang/CoachAI-Projects/tree/main/ShuttleSet",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "核验并小量获取逐拍18类球种、时间/帧号与球场位置CSV；不用于证明细手法。",
+      "rights": {
+        "code": {
+          "status": "permitted",
+          "declared_license": "MIT",
+          "license_url": "https://github.com/wywyWang/CoachAI-Projects/blob/main/LICENSE",
+          "allowed_uses": [
+            "code_use_under_mit"
+          ],
+          "evidence": "仓库MIT，Copyright (c) 2022 Wei-Yao Wang。"
+        },
+        "annotations": {
+          "status": "unknown",
+          "declared_license": "repository MIT; no separate annotation license found",
+          "license_url": "https://github.com/wywyWang/CoachAI-Projects/blob/main/LICENSE",
+          "allowed_uses": [],
+          "evidence": "仓库MIT，未发现单列标注授权声明。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "数据目录无原比赛视频；标注独立许可未见，须保存仓库许可证据且不外推画面许可。",
+      "discipline": "singles",
+      "players": [],
+      "match_id": null,
+      "source_kind": "dataset_index",
+      "version": "45517f7d4cb936b03f3eabf939cc7959d39226fe",
+      "notes": [
+        "44场2018–2021年单打；CSV中的net shot不能映射为展搓/收搓。"
+      ]
+    },
+    {
+      "source_id": "tracknetv3-trajectory-dataset",
+      "url": "https://nycu1-my.sharepoint.com/:u:/g/personal/tik_m365_nycu_edu_tw/EWisYhAiai9Ju7L-tQp0ykEBZJd9VQkKqsFrjcqqYIDP-g?e=S0AB1Z",
+      "source_page": "https://hackmd.io/@TUIK/rJkRW54cU",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "研究逐帧羽球轨迹、可见性与真实回合视频，包括作者自打样本。",
+      "rights": {
+        "code": {
+          "status": "permitted",
+          "declared_license": "MIT",
+          "license_url": "https://github.com/qaz812345/TrackNetV3/blob/master/LICENSE",
+          "allowed_uses": [
+            "code_use_under_mit"
+          ],
+          "evidence": "TrackNetV3官方README明确代码与预训练权重MIT。"
+        },
+        "annotations": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "轨迹数据说明未见独立许可。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": {
+          "status": "permitted",
+          "declared_license": "MIT",
+          "license_url": "https://github.com/qaz812345/TrackNetV3",
+          "allowed_uses": [
+            "weights_use_under_mit"
+          ],
+          "evidence": "README明确包含Google Drive预训练权重；不能外推到数据集。"
+        }
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "HEAD 200到TrackNetV2.zip网页；单回合直链、压缩包实际大小及标注/画面许可未核实。",
+      "discipline": "singles",
+      "players": [],
+      "match_id": null,
+      "source_kind": "archive_landing",
+      "version": null,
+      "notes": [
+        "未下载压缩包；不得以默认无限上限直接下载。",
+        "职业样本和作者自打样本需独立记录rights。"
+      ]
+    },
+    {
+      "source_id": "bfmd-annotations",
+      "url": "https://drive.google.com/drive/folders/1wQr4DpMbx-e8jFnvOH9WUJXxfXgTC1IJ?usp=drive_link",
+      "source_page": "https://ning-d.github.io/BFMD-Dataset/",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "研究整场回合/回放、击球、球种、姿态与轨迹多层数据；区分手工、预测和推导标签。",
+      "rights": {
+        "code": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "已查看根目录未见LICENSE。"
+        },
+        "annotations": {
+          "status": "research_only",
+          "license_url": "https://ning-d.github.io/BFMD-Dataset/",
+          "allowed_uses": [
+            "noncommercial_academic_research"
+          ],
+          "evidence": "数据页限制非商业学术研究、不得再分发。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "作者说明原画面属于BWF TV；作者非商业研究用途声明不是BWF给本项目的授权链。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "Drive目录可定位但网页抓取未得包内清单；约1.8GB是发布者体积说明，实际峰值和直链未知。原比赛视频不在标注包中。",
+      "discipline": "unknown",
+      "players": [],
+      "match_id": null,
+      "source_kind": "dataset_index",
+      "version": "repository:c7c7e8e4c815085dda42746f16e07f1172503312",
+      "notes": [
+        "含singles和doubles，discipline用unknown表示混合来源待按文件拆分。",
+        "释放说明12男单+7男双；双打尚无完整球种分类标签。",
+        "总介绍与实际释放数量不一致，实际导入后按文件统计。"
+      ]
+    },
+    {
+      "source_id": "finebadminton-benchmark",
+      "url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/tree/ff86093a51efdf9a243a0635704952d404e99e52",
+      "source_page": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "逐个选择数百KB真实视频和对应QA，验证下载、探测、导入链路。",
+      "rights": {
+        "code": {
+          "status": "permitted",
+          "declared_license": "Apache-2.0",
+          "license_url": "https://github.com/iLearn-Lab/MM25-FineBadminton",
+          "allowed_uses": [
+            "code_use_under_apache_2_0"
+          ],
+          "evidence": "官方代码仓库声明Apache-2.0。"
+        },
+        "annotations": {
+          "status": "permitted",
+          "declared_license": "Apache-2.0",
+          "license_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark",
+          "allowed_uses": [
+            "annotation_research"
+          ],
+          "evidence": "官方HF数据卡声明Apache-2.0；该声明不外推到原赛事画面。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "research_sample_planned",
+      "failure_reason": "公开API可访问且不需要授权令牌；原赛事画面授权链、整场ID和原片偏移未核实。",
+      "discipline": "unknown",
+      "players": [],
+      "match_id": null,
+      "source_kind": "dataset_index",
+      "version": "ff86093a51efdf9a243a0635704952d404e99e52",
+      "notes": [
+        "本条是来源计划，非本地下载状态。",
+        "video_uid不是比赛ID；未核实来源前split=unassigned，不能按小片段随机拆训练测试。"
+      ]
+    },
+    {
+      "source_id": "finebadminton-20k",
+      "url": "https://huggingface.co/datasets/iLearn-Lab/Finebadminton-20K/tree/main",
+      "source_page": "https://huggingface.co/datasets/iLearn-Lab/Finebadminton-20K",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "后续按整场取得FineBadminton原标注与来源映射，核验与FBBench交叠。",
+      "rights": {
+        "code": {
+          "status": "permitted",
+          "declared_license": "Apache-2.0",
+          "license_url": "https://github.com/iLearn-Lab/MM25-FineBadminton",
+          "allowed_uses": [
+            "code_use_under_apache_2_0"
+          ],
+          "evidence": "官方代码仓库声明Apache-2.0。"
+        },
+        "annotations": {
+          "status": "permitted",
+          "declared_license": "Apache-2.0",
+          "license_url": "https://huggingface.co/datasets/iLearn-Lab/Finebadminton-20K",
+          "allowed_uses": [
+            "annotation_research"
+          ],
+          "evidence": "官方HF数据卡声明Apache-2.0；该声明不外推到原赛事画面。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "全量约43.4GB，不属于首次小样；原画面授权链未见，需先核验整场清单和选择有限下载范围。",
+      "discipline": "unknown",
+      "players": [],
+      "match_id": null,
+      "source_kind": "dataset_index",
+      "version": null,
+      "notes": [
+        "70整场；20个整场来源与FBBench有交叠，使用benchmark_source_videos.txt去泄露。"
+      ]
+    },
+    {
+      "source_id": "fine-badminton-zenodo-20292976",
+      "url": "https://zenodo.org/records/20292976",
+      "source_page": "https://zenodo.org/records/20292976",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "候补研究29类时序动作标注；不是iLearn-Lab的FineBadminton。",
+      "rights": {
+        "code": null,
+        "annotations": {
+          "status": "research_only",
+          "license_url": "https://zenodo.org/records/20292976",
+          "allowed_uses": [
+            "noncommercial_academic_research"
+          ],
+          "evidence": "发布页只允许非商业学术研究。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "单ZIP约6.5GB，未核验包内单文件目录/29类词表；不执行全量盲下载。",
+      "discipline": "singles",
+      "players": [],
+      "match_id": null,
+      "source_kind": "archive_landing",
+      "version": "2026-05-19:v1.0",
+      "notes": [
+        "页面MD5 cb3fcaca0ae9b08c564ac2a19ae4e7a0；不替代本地SHA-256校验。"
+      ]
+    },
+    {
+      "source_id": "bfmd-malaysia-2025-demo",
+      "url": "https://raw.githubusercontent.com/Ning-D/BFMD/c7c7e8e4c815085dda42746f16e07f1172503312/demo_petronas.mp4",
+      "source_page": "https://ning-d.github.io/BFMD-Dataset/",
+      "estimated_peak_bytes": 4000000,
+      "download_max_bytes": 1000000,
+      "purpose": "研究作者提供的真实广播小样，验证技术链；不用于公开发布。",
+      "rights": {
+        "code": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "已查看根目录未见LICENSE。"
+        },
+        "annotations": {
+          "status": "research_only",
+          "license_url": "https://ning-d.github.io/BFMD-Dataset/",
+          "allowed_uses": [
+            "noncommercial_academic_research"
+          ],
+          "evidence": "数据页限制非商业学术研究、不得再分发。"
+        },
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "作者说明原画面属于BWF TV；作者非商业研究用途声明不是BWF给本项目的授权链。"
+        },
+        "weights": null
+      },
+      "download_status": "research_sample_planned",
+      "failure_reason": "作者提供demo并声明研究限制；未见单独覆盖demo的再许可或BWF授权链。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "Kodai Naraoka",
+          "identity_status": "source_named",
+          "historical_background": "2025马来西亚公开赛Super1000男单半决赛球员。",
+          "evidence_url": "https://ning-d.github.io/BFMD-Dataset/",
+          "evidence_date": "2025",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "Anders Antonsen",
+          "identity_status": "source_named",
+          "historical_background": "2025马来西亚公开赛Super1000男单半决赛球员。",
+          "evidence_url": "https://ning-d.github.io/BFMD-Dataset/",
+          "evidence_date": "2025",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2025-malaysia-open-ms-semifinal-antonsen-naraoka",
+      "source_kind": "video_sample",
+      "version": "c7c7e8e4c815085dda42746f16e07f1172503312",
+      "notes": [
+        "发布者文件大小481202字节；estimated_peak为保守工程预算，非实测峰值。",
+        "官网同页嵌入地址https://ning-d.github.io/BFMD-Dataset/videos/demo_petronas.mp4，HEAD已核验200。"
+      ]
+    },
+    {
+      "source_id": "classic-2011-worlds-lin-lee",
+      "url": "https://www.youtube.com/watch?v=WI8Od4jBpUc",
+      "source_page": "https://www.youtube.com/watch?v=WI8Od4jBpUc",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "林李经典男单；候选授权后取得整场并人工标注。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "林丹",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "李宗伟",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2011-world-championships-ms-final-lee-lin",
+      "source_kind": "broadcast_page",
+      "version": null,
+      "notes": [
+        "BWF TV官方视频，发布于2011-08-14。"
+      ]
+    },
+    {
+      "source_id": "classic-2011-all-england-lee-lin",
+      "url": "https://www.youtube.com/watch?v=5F1Pn8-Lp0c",
+      "source_page": "https://www.youtube.com/watch?v=5F1Pn8-Lp0c",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "林李经典男单；与2011世锦赛分开整场分组。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "李宗伟",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "林丹",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2011-all-england-ms-final-lee-lin",
+      "source_kind": "broadcast_page",
+      "version": null,
+      "notes": [
+        "赛事2011-03-08至13日；BWF TV视频发布于2011-10-12，不能当比赛日期。"
+      ]
+    },
+    {
+      "source_id": "classic-2012-olympics-lin-lee",
+      "url": "https://www.youtube.com/watch?v=ytjD4f_I0sc",
+      "source_page": "https://www.youtube.com/watch?v=ytjD4f_I0sc",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "伦敦奥运男单决赛，历史顶尖选手经典候选。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "林丹",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "李宗伟",
+          "identity_status": "source_named",
+          "historical_background": "历史顶尖男单；2023年BWF名人堂入选者，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=s3UUavKaeog",
+          "evidence_date": "2023-05-26",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2012-london-olympics-ms-final-lee-lin",
+      "source_kind": "broadcast_page",
+      "version": null,
+      "notes": [
+        "Olympic Games官方视频，发布于2012-08-07；官方说明林丹获金牌。"
+      ]
+    },
+    {
+      "source_id": "elite-2020-malaysia-masters-momota-axelsen",
+      "url": "https://www.youtube.com/watch?v=J9UjiLffAbk",
+      "source_page": "https://www.youtube.com/watch?v=J9UjiLffAbk",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "其他顶尖男单候选；官方集锦与原整场共用match_id。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "Kento Momota",
+          "identity_status": "source_named",
+          "historical_background": "2019-07-06 BWF官方报道明确其当时世界第1；并非2026当前排名。",
+          "evidence_url": "https://bwfworldtourfinals.bwfbadminton.com/news-single/2019/07/06/momota-highest-earner-this-season/",
+          "evidence_date": "2019-07-06",
+          "current_top10_claim": false,
+          "historical_world_rank": 1
+        },
+        {
+          "display_name": "Viktor Axelsen",
+          "identity_status": "source_named",
+          "historical_background": "2020马来西亚大师赛男单决赛球员；不在本清单猜测周排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=J9UjiLffAbk",
+          "evidence_date": "2020-01-12",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2020-malaysia-masters-ms-final-axelsen-momota",
+      "source_kind": "broadcast_highlight_page",
+      "version": null,
+      "notes": [
+        "BWF TV官方集锦，发布于2020-01-12；非完整比赛。",
+        "不能用集锦时间轴直接校准ShuttleSet整场时间码。"
+      ]
+    },
+    {
+      "source_id": "elite-2018-indonesia-open-tai-chen",
+      "url": "https://www.youtube.com/watch?v=Vs3ZUem_nT0",
+      "source_page": "https://www.youtube.com/watch?v=Vs3ZUem_nT0",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "顶尖女单素材候选，补充性别和球员覆盖。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "singles",
+      "players": [
+        {
+          "display_name": "Tai Tzu Ying",
+          "identity_status": "source_named",
+          "historical_background": "2018印尼公开赛Super1000官方视频标题标种子1；种子不是周排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=Vs3ZUem_nT0",
+          "evidence_date": "2018-07-07",
+          "current_top10_claim": false,
+          "event_seed": 1
+        },
+        {
+          "display_name": "Chen Yufei",
+          "identity_status": "source_named",
+          "historical_background": "2018视频标题标种子5；2020-03-11 BWF报道明确该日世界第1，不倒推2018周排名。",
+          "evidence_url": "https://bwfworldtour.bwfbadminton.com/news-single/2020/03/11/all-england-after-challenging-first-round-a-message-for-rivals/",
+          "evidence_date": "2020-03-11",
+          "current_top10_claim": false,
+          "event_seed": 5,
+          "historical_world_rank": 1
+        }
+      ],
+      "match_id": null,
+      "source_kind": "broadcast_page",
+      "version": null,
+      "notes": [
+        "BWF TV官方视频2018-07-07发布，轮次未明确，canonical match_id待核。",
+        "TrackNet说明与这条比赛视频的轮次需重新对齐。"
+      ]
+    },
+    {
+      "source_id": "classic-2012-olympics-md-china-denmark",
+      "url": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+      "source_page": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+      "estimated_peak_bytes": null,
+      "download_max_bytes": null,
+      "purpose": "历史顶尖男双金牌赛素材，独立验证双打身份与动作。",
+      "rights": {
+        "code": null,
+        "annotations": null,
+        "footage": {
+          "status": "unknown",
+          "license_url": null,
+          "allowed_uses": [],
+          "evidence": "原赛事画面的独立授权链未核实；公开观看/作者提供下载不等于项目获得再分发许可。"
+        },
+        "weights": null
+      },
+      "download_status": "not_attempted",
+      "failure_reason": "尚未尝试下载；缺乏本项目取得原画面及再使用的授权证据。具体地域/登录/反机器人限制未测试，不作已发生失败断言。",
+      "discipline": "doubles",
+      "players": [
+        {
+          "display_name": "Cai Yun",
+          "identity_status": "source_named",
+          "historical_background": "2012伦敦奥运男双金牌赛球员；用历史大赛背景说明，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+          "evidence_date": "2012",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "Fu Haifeng",
+          "identity_status": "source_named",
+          "historical_background": "2012伦敦奥运男双金牌赛球员；用历史大赛背景说明，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+          "evidence_date": "2012",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "Mathias Boe",
+          "identity_status": "source_named",
+          "historical_background": "2012伦敦奥运男双金牌赛球员；用历史大赛背景说明，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+          "evidence_date": "2012",
+          "current_top10_claim": false
+        },
+        {
+          "display_name": "Carsten Mogensen",
+          "identity_status": "source_named",
+          "historical_background": "2012伦敦奥运男双金牌赛球员；用历史大赛背景说明，不声称当前排名。",
+          "evidence_url": "https://www.youtube.com/watch?v=uBwLPvW7lYs",
+          "evidence_date": "2012",
+          "current_top10_claim": false
+        }
+      ],
+      "match_id": "match-2012-london-olympics-md-final-boe-mogensen-cai-fu",
+      "source_kind": "broadcast_page",
+      "version": null,
+      "notes": [
+        "2026-09-28官方oEmbed确认作者Olympic Games及金牌赛标题；未实播。",
+        "双打模型不能继承单打成绩。"
+      ]
+    }
+  ]
+}

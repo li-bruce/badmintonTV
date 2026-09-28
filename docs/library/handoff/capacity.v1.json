@@ -1,0 +1,37 @@
+{
+  "owner_used_bytes": 4220637,
+  "project_used_bytes": 73047714331,
+  "active_reserved_bytes": 0,
+  "free_bytes": 962033790976,
+  "owner_limit_bytes": 300000000000,
+  "project_limit_bytes": 700000000000,
+  "min_free_bytes": 1000000000,
+  "opaque_project_owners": [
+    "runtime"
+  ],
+  "project_accounting": {
+    "data": {
+      "mode": "measured",
+      "bytes": 4220637
+    },
+    "models": {
+      "mode": "measured",
+      "bytes": 3025287465
+    },
+    "platform": {
+      "mode": "measured",
+      "bytes": 2473966
+    },
+    "render": {
+      "mode": "measured",
+      "bytes": 15732263
+    },
+    "runtime": {
+      "mode": "allocated_upper_bound",
+      "bytes": 70000000000,
+      "reason": "OSError"
+    }
+  },
+  "snapshot_phase": "after_batch_before_capacity_publication",
+  "captured_at": "2026-09-28T15:25:24.428251+00:00"
+}

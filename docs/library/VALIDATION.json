@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-09-28T15:26:28.651751+00:00",
+  "unittest": {
+    "command": "python -m unittest discover -s tests/library -q",
+    "tests": 53,
+    "passed": 53,
+    "skipped": 0
+  },
+  "real_video": {
+    "assets": 4,
+    "full_cpu_decode_passed": 4,
+    "publisher_sha256_matched": 4,
+    "bytes": 2402653,
+    "frames": 597
+  },
+  "repeated_acquisition": {
+    "source_files_verified_existing": 10,
+    "new_downloads": 0,
+    "errors": [],
+    "final_active_reserved_bytes": 0,
+    "final_owner_used_bytes": 4221747
+  },
+  "contract_check": {
+    "upstream_commit": "6a3e3deb4ff34bf4eb22f18d20e995f9e8d28e1d",
+    "main_integration_commit": "8900958",
+    "command": "D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.check_contracts --contracts-root C:/Users/USER/Desktop/Program/badmintonTV",
+    "real_assets_accepted_by_canonical": 4,
+    "real_source_and_pts_hashes_checked": 4,
+    "canonical_asset_fixtures_accepted_by_library": 1,
+    "fixture_is_synthetic_structure_only": true
+  },
+  "git_handoff_copies": [
+    {
+      "path": "docs/library/handoff/annotations-summary.v1.json",
+      "sha256": "1150e248a8b2c65a3a763ba6549fec197ce16576052990f23553a3f8d10c3fba",
+      "size_bytes": 2332
+    },
+    {
+      "path": "docs/library/handoff/assets.v1.json",
+      "sha256": "f6a646668ec688ecbbe85386f64db9d81b4c6b951a8284a1a581195cd57563aa",
+      "size_bytes": 18578
+    },
+    {
+      "path": "docs/library/handoff/capacity.v1.json",
+      "sha256": "2618ebcd90cd25e7d2120cd2144ce46abdcb18ac773b2e138064dccd726a8f00",
+      "size_bytes": 842
+    },
+    {
+      "path": "docs/library/handoff/downloads.v1.json",
+      "sha256": "7a69d8f80999f98f017c56d1551a24aa5cd1bf88921d9445561dd4601fb99f37",
+      "size_bytes": 4354
+    },
+    {
+      "path": "docs/library/handoff/splits.v1.json",
+      "sha256": "3e8e118e8a1c865cea0c5833ea4c8487fba87c5a1ef377193b8dc27378144c4b",
+      "size_bytes": 397
+    }
+  ]
+}
