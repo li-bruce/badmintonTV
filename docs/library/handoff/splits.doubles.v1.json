@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "matches": {
+    "dronebd-study-recording-bd12": "unassigned"
+  },
+  "sha256": {
+    "52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118": "dronebd-study-recording-bd12"
+  }
+}

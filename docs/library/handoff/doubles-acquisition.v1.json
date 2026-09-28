@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "status": "verified",
+  "asset_id": "asset-52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+  "source_download_bytes": 5890076,
+  "round_download_limit_bytes": 1000000000,
+  "original_manifest_sha256_preserved": "f6a646668ec688ecbbe85386f64db9d81b4c6b951a8284a1a581195cd57563aa",
+  "original_video_hashes_preserved": {
+    "data/raw/finebadmintonbenchmark/video_000001.mp4": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+    "data/raw/finebadmintonbenchmark/video_000002.mp4": "9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956",
+    "data/raw/finebadmintonbenchmark/video_000003.mp4": "58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13",
+    "data/raw/finebadmintonbenchmark/video_001951.mp4": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90"
+  },
+  "doubles_manifest": "data/handoff/assets.doubles.v1.json",
+  "decode": {
+    "status": "passed",
+    "scope": "full_video_stream",
+    "device": "cpu",
+    "frames": 132,
+    "exit_code": 0
+  },
+  "source_size_matches_public_metadata": true,
+  "publisher_sha256_available": false,
+  "camera_type": "rear",
+  "readme_relative_path": "data/sources/dronebd/README.md",
+  "annotation_relative_path": "data/annotations/dronebd/BD12-Rally-1-1.csv",
+  "annotation_alignment": "unverified"
+}
