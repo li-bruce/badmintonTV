@@ -193,7 +193,7 @@ Path(a.result).write_text(json.dumps(result), encoding='utf-8')
 sys.exit(1 if a.mode == 'wrong-exit' else 2 if a.mode == 'blocked' else 0)
 ''', encoding="utf-8")
     def configure(mode):
-        monkeypatch.setenv("BTV_MODEL_COMMAND_JSON", json.dumps([sys.executable, "-u", str(script), mode]))
+        monkeypatch.setenv("BTV_MODEL_COMMANDS_JSON", json.dumps({"fixture-model": [sys.executable, "-u", str(script), mode]}))
         return script
     return configure
 
@@ -274,7 +274,7 @@ def test_suppressed_logging_still_checks_cancellation(tmp_path, queue):
 def test_missing_model_is_blocked_not_fake_success(tmp_path, queue, monkeypatch):
     monkeypatch.delenv("BTV_MODEL_COMMAND_JSON", raising=False)
     monkeypatch.delenv("BTV_MODEL_COMMANDS_JSON", raising=False)
-    queue.enqueue("model", {"assets": []})
+    queue.enqueue("model", model_payload())
     result = run_once(queue, tmp_path)
     assert result["status"] == "blocked"
     assert result["error"]["code"] == "not_installed"
