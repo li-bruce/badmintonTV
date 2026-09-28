@@ -56,7 +56,7 @@ source environments/models.env.sh
 
 上述耗时从源文件hash校验之后开始，含解码、torch导入、权重hash/模型加载、推理和features写入；不含进程启动、容量扫描、源hash、report/result写入。是单片冷启动，不能据外推字段声称完整一小时视频的实测吞吐。实际PTS与源hash、每帧QA见docs/experiments/models-002-real-baselines.md。
 
-产物均在 `D:/video/models/handoff/<运行名>/attempt-01/`：features.json/report.json/result.json；原始请求在requests/。单双打各检查三个分散时点：场上人物可见检测，但场边裁判/重复框与编号互换已观察到，远端/遮挡关节不确定，没有track/player身份。CLIP英语prompt余弦只是诊断相似度，不是动作概率；A/B/C正式优劣、细手法和检索准确率均未评测。
+产物均在 `D:/video/models/handoff/<运行名>/attempt-01/`：features.json/report.json/result.json；原始请求在requests/。Agent查看overlay（非人类真值确认）覆盖单双打各三个分散时点：场上人物可见检测，但场边裁判/重复框与编号互换已观察到，远端/遮挡关节不确定，没有track/player身份。CLIP英语prompt余弦只是诊断相似度，不是动作概率；A/B/C正式优劣、细手法和检索准确率均未评测。
 
 Qwen原始记录在query-diagnostic-001与002（每轮run-metadata、24条raw及report）。固定bf16/greedy/non-thinking、768 token上限，首轮0/24，加入3示例后2/24；第二轮看过第一轮结果后调试，属于开发集诊断而非独立用户测试。默认CLI复杂查询qwen3-0.6b-002为blocked2/LLM_SCHEMA_OR_SEMANTIC_FAILURE。受限规则解析可用，但不冒充LLM成功。详见docs/experiments/models-003-query-diagnostics.md。
 
@@ -74,4 +74,6 @@ WSL共享base=/home/ubuntu/miniforge3（conda25.9.1已有）；新models prefix=
 
 model权重/特征等<=180GB；models runtime<=35GB；公共base+cache<=15GB（原生base+旧pkgs保守约5.925GB计入，其他用户env单独记录不修改）；其他runtime20GB保留。没有删除用户数据。下载中断partial保留有记录，下载流实际字节受限；models写者原子排他预留，其他owner按固定全额配额保守计数。
 
-权重原始manifest位于D:/video/models/weights各目录，Git仅保存configs/models/weights-lock.json（来源、固定revision、每文件hash、license）。代码许可、预训练权重、标注、原视频分别记录；unknown视频权利不因开源模型改变。平台实际受控WSL/GPU租约端到端结果由platform任务保存，不把本模块直接CLI运行冒充平台联调。
+权重原始manifest位于D:/video/models/weights各目录，Git仅保存configs/models/weights-lock.json（来源、固定revision、每文件hash、license）。代码许可、预训练权重、标注、原视频分别记录；unknown视频权利不因开源模型改变。
+
+2026-09-29（北京时间）平台真实联调另已完成：网页→Windows worker→受控WSL→pose，job `job-3dc9ece15e914eecb9616ac306ece6b8` / `attempt-1`，6秒24帧，报告28.702605725s，allocated489201152/reserved792723456bytes。模型任务只读核对平台result状态succeeded、events=[]、bridge compute_stopped=true/exit0及report，主任务/平台另核验两产物hash。原result与bridge在`D:/video/platform/jobs/<job>/attempt-1/{result.json,bridge.done.json}`，features/report在`D:/video/models/jobs/<job>/attempt-1/`。本次平台Asset快照camera_type/discipline仍unknown，不声称平台已完成分层质量验收。平台回执已提前revoke授权窗口，active_window=null、lease=null，不再启动GPU。
