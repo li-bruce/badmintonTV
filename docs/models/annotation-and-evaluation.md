@@ -221,3 +221,7 @@ library 提供原始素材关系；models 在任何训练/阈值/融合选择前
 项目来源是已读取的 `PROJECT_PLAN_SIMPLE.md`、`docs/PRODUCT_CONTEXT.md`、`docs/ARCHITECTURE.md`、`docs/CONTRACTS.md`、`docs/EXECUTION_PLAN.md` 和 `docs/ACCEPTANCE.md`。2026-09-28 另尝试核验 [BWF Coach Education Level 1](https://development.bwfbadminton.com/coaches/level-1) 与 [BWF Shuttle Time 视频入口](https://shuttletime.bwfbadminton.com/video-clips)，当前网页工具均返回 402，未取得可用原文；未绕过限制。中文展搓/收搓的一手检索未取得可直接支撑技术定义的资料。以上链接仅为后续核验入口，本文不把搜索片段、转载或无法读取页面当作细手法依据，也没有下载媒体。
 
 因此本文中的窗口、匹配容差、阶段划分、审核组织和实验矩阵均是可复核的工程建议；具体技术标签含义依第 3、4 节的专家冻结流程确认。未安装技能或软件依赖，未使用生成数据充当动作真值。
+# 正式划分证据实现补充（2026-09-28）
+
+`validate_splits(formal=True)` 除比赛分组/同源哈希不泄漏，还要求每条 Asset 的 `provenance.match_identity_status="confirmed"`，以及 `provenance.split_assignment={"unit":"match","version":"有效版本文本","evidence":"审核记录或来源路径文本"}`。缺失/空白/unknown等占位不算证据，正式评测拒绝；exploratory只警告。上述字段是provenance的兼容扩展，不改共同Asset合同。当前四片match_id=unknown即使被误设test也不得进入正式评测。代码校验存在有效证据文本，实际证据真实性仍由审核快照保证。
+

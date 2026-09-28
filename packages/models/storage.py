@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import time
-from .protocol import resolve_relative
+from .protocol import ModelBlocked, resolve_relative
 
 LIMITS = {'models': 180_000_000_000, 'runtime': 70_000_000_000,
           'data': 300_000_000_000, 'render': 40_000_000_000, 'platform': 60_000_000_000}
@@ -32,7 +32,11 @@ def reserve(root, peak_bytes):
     lock = owner / '.writer-reservation.json'
     if type(peak_bytes) is not int or peak_bytes <= 0:
         raise ValueError('positive peak_bytes required')
-    with lock.open('x', encoding='utf-8') as stream:
+    try:
+        stream = lock.open('x', encoding='utf-8')
+    except FileExistsError:
+        raise ModelBlocked('OWNER_BUSY','models写入容量正由另一任务预留；保留锁并在其完成后显式重试') from None
+    with stream:
         json.dump({'pid': os.getpid(), 'peak_bytes': peak_bytes, 'created': time.time()}, stream)
     try:
         # Fixed, disjoint quotas bound concurrent writers without traversing
