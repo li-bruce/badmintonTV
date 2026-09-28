@@ -16,9 +16,11 @@
 
 后续检查点：library提交9a33fe9+cd1ad74，主协调独立53单元测试通过、只读代码审查无阻塞，已集成main `8207a40`+`5c48688`；合并后4条真实Asset/PTS/hash与canonical合同互验通过。已在原任务内继续补充源场映射和双打小样，新增下载预算先限1GB。
 
-models提交611eb39尚待集成。主协调Windows复跑90项，88通过、2项符号链接权限跳过，models报告同一组在WSL90全部通过。独立审查另发现零字节partial续传与unknown match进入formal评测两个场景，已交模型任务修复并补回归。模型依赖与真实GPU推理仍在进行，不能将标准库测试当推理效果。
+models提交611eb39及修复00de444已集成。零字节partial续传、unknown match进入formal评测两项均修复，并将资源锁竞争映射为OWNER_BUSY blocked/exit2。独立复核通过，主协调Windows复跑100项98通过/2项符号链接权限跳过，模块WSL100全过；合并后catalog/fixtures/4真实Asset/QuerySpec互验通过。模型依赖与真实GPU推理仍在进行，不能将标准库测试当推理效果。
 
 整体验收仍待平台工作流实际导入→标注→检索→选片→调用render；首条样片来自模块CLI，不宣称Web闭环已完成。
+
+平台工作树已报告完成第一条真实Web闭环：浏览器保存区间→编辑QuerySpec→检索3候选→以agent来源选片→中文标题/0.75倍速→后台worker导出。job=`job-3ebf04b748644087b1328283382df830`，attempt-1；输出 `D:/video/render/jobs/job-3ebf04b748644087b1328283382df830/attempt-1/export.mp4`，14.833333秒、445帧、1080×1920、938,753 bytes；SHA-256 `8fb63e7587494f7d679db9f331966e06c711a9229b04fe109fe5f65d76dbf8ae`。主协调已读取QA并重算视频hash，技术项通过，human_confirmed_segments=false且research_preview=true。平台源码尚待提交与main独立验证，不能因此宣布正式模型/人工技法验收完成。
 
 ## 2026-09-28：render源码集成审查
 
