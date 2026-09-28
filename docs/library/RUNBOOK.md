@@ -55,3 +55,14 @@ Windows/WSL只能由一个操作系统写本owner账本；模型进程只读原�
 ## 环境来源
 
 当前解释器：已存在 `C:/Users/USER/miniforge3/python.exe` Python3.12.11，只调用标准库、不更改base。ffmpeg/ffprobe由render任务安装并核验，library只读复用9.0.2 essentials；来源/构建/许可和SHA由render环境清单维护。无新技能、MCP或插件安装；来源研究使用已有web工具及经审批的标准库公开HTTP读取。runtime/library新增环境占用0，额度上限5GB。
+
+## 追加双打小样
+
+```powershell
+C:/Users/USER/miniforge3/python.exe -m scripts.library.acquire_doubles_sample --ffprobe D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin/ffprobe.exe --ffmpeg D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin/ffmpeg.exe
+D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.check_contracts --contracts-root C:/Users/USER/Desktop/Program/badmintonTV --manifest D:/video/data/handoff/assets.doubles.v1.json
+```
+
+脚本只接受已核验Drone_BD单片URL与5,857,600 bytes上限，配套CSV固定28,707 bytes，README固定Git提交且最多100KB。批次预留50MB；幂等运行逐一验证原始收据和SHA，无新下载；独立`assets.doubles.v1.json`、`annotations.doubles.v1.json`、`splits.doubles.v1.json`及`doubles-acquisition.v1.json`都在data/handoff，修改留下审计。保留原四片与旧manifest。孤立的新小样PTS保留并显式报错，人工查明后选新的attempt路径，不盲目覆写。
+
+可选归档API：`packages.library.archive.inspect_zip(path)`只读有界中央目录（最多10,000项/16MiB）；`extract_member(archive, member_name, relative_path, quota=..., max_bytes=..., expected_archive_sha256=...)`只流式提取一个明确普通文件。原ZIP必须位于data owner并保留；禁路径穿越、链接/加密/重复成员，不覆盖目标；`.extract.part/.extract.json/.lock`保留失败与锁信息。首次实现不支持ZIP64中央目录、多卷或尾随数据，不提供无界extractall。本轮没有真实ZIP取回/解压，不能把本地ZIP测试算真实素材成功。

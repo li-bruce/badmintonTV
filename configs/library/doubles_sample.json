@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "source_id": "dronebd-study-bd12-rally1-camera1",
+  "source_url": "https://drive.usercontent.google.com/uc?id=1tncTXoI4IWBBL6qg8D9QtaE1f-EPZii5&export=download",
+  "source_page": "https://github.com/Ning-D/Drone_BD_ControlArea/tree/14a6a74969f54adb57e013faa4fb24298794e985",
+  "source_revision": "14a6a74969f54adb57e013faa4fb24298794e985",
+  "original_file_name": "(1).mp4",
+  "published_size_bytes": 5857600,
+  "max_download_bytes": 5857600,
+  "round_download_limit_bytes": 1000000000,
+  "batch_peak_bytes": 50000000,
+  "relative_path": "data/raw/dronebd/study-bd12-rally1-camera1.mp4",
+  "match_id": "dronebd-study-recording-bd12",
+  "grouping_basis": "Publisher folder Study_Videos/BD12/Rally-1; BD12 is used as a conservative recording group. Exact real-world match/date and complete-session offsets are not supplied.",
+  "split": "unassigned",
+  "camera_type": "rear",
+  "visual_review": "One-second frame reviewed: four players on one court, two on each side, elevated rear view. Player identities are not confirmed.",
+  "discipline": "doubles",
+  "players": [],
+  "official_folder_chain": [
+    "https://drive.google.com/drive/folders/1sIKIDLjyhccO_y6gXeaIkr_1gu1o0vYw",
+    "https://drive.google.com/drive/folders/1pviHfD3o3M7GUNDJYYaNWKzW7y64_8uf",
+    "https://drive.google.com/drive/folders/1t3Wt7dXOVuLkk-BtV2bJjh-xv3uKmILd",
+    "https://drive.google.com/drive/folders/1hwDNfsF2IzX3PnnjFqE1iNx9DqzLcWlB"
+  ],
+  "rights": {
+    "status": "unknown",
+    "license_url": null,
+    "evidence": "Study author publishes real doubles drone videos through the linked public Study_Videos directory. No standalone video redistribution/commercial licence was found; public download does not establish those rights.",
+    "allowed_uses": []
+  },
+  "annotation_rights": {"status": "unknown", "license_url": null, "evidence": "No separate annotation licence found. Corresponding CSV must be independently verified before any event conversion."}
+}

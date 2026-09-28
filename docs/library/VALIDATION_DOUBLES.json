@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-09-28T15:49:08.151046+00:00",
+  "unittest": {
+    "command": "C:/Users/USER/miniforge3/python.exe -m unittest discover -s tests/library -q",
+    "tests": 75,
+    "passed": 75,
+    "skipped": 0,
+    "seconds": 9.142,
+    "archive_tests": 22
+  },
+  "real_video": {
+    "assets": 1,
+    "full_cpu_decode_passed": 1,
+    "publisher_sha256_available": false,
+    "publisher_size_matched": true,
+    "bytes": 5857600,
+    "frames": 132,
+    "duration_ms": 4404,
+    "width": 3840,
+    "height": 2160,
+    "camera_type": "rear",
+    "discipline": "doubles"
+  },
+  "repeated_acquisition": {
+    "source_files_verified_existing": 3,
+    "new_downloads": 0,
+    "network_download_function_rejected_if_called": true,
+    "source_bytes_already_persisted": 5890076,
+    "original_manifest_sha256_preserved": "f6a646668ec688ecbbe85386f64db9d81b4c6b951a8284a1a581195cd57563aa",
+    "original_video_hashes_preserved": {
+      "data/raw/finebadmintonbenchmark/video_000001.mp4": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+      "data/raw/finebadmintonbenchmark/video_000002.mp4": "9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956",
+      "data/raw/finebadmintonbenchmark/video_000003.mp4": "58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13",
+      "data/raw/finebadmintonbenchmark/video_001951.mp4": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90"
+    }
+  },
+  "contract_check": {
+    "command": "D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.check_contracts --contracts-root C:/Users/USER/Desktop/Program/badmintonTV --manifest D:/video/data/handoff/assets.doubles.v1.json",
+    "real_assets_accepted_by_canonical": 1,
+    "real_source_and_pts_hashes_checked": 1,
+    "canonical_fixture_assets_accepted_by_library": 1,
+    "fixture_is_synthetic_structure_only": true
+  },
+  "annotation": {
+    "rows": 130,
+    "columns": 44,
+    "alignment_status": "unverified",
+    "converted_events": 0
+  },
+  "capacity": {
+    "owner_used_bytes": 10767716,
+    "project_used_bytes": 72479589615,
+    "active_reserved_bytes": 0,
+    "free_bytes": 955508727808,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 10767716
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 2426303819
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 2719352
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 39798728
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "git_handoff_copies": [
+    {
+      "path": "docs/library/handoff/assets.doubles.v1.json",
+      "sha256": "3b8b76738bc8a5ca1197fec71cd7a5d48efea22d6977bd614ff6f1ffa001815f",
+      "size_bytes": 5286
+    },
+    {
+      "path": "docs/library/handoff/annotations.doubles.v1.json",
+      "sha256": "54df10d4c5d43c6d9edb92febf3eeb8381edaf7470bdcf35ec318b1ee1ccf841",
+      "size_bytes": 1990
+    },
+    {
+      "path": "docs/library/handoff/splits.doubles.v1.json",
+      "sha256": "3243eea3f5a52d7bc311ae14f23bf9abe30011aa04027ddc4f64ed9ab4997016",
+      "size_bytes": 221
+    },
+    {
+      "path": "docs/library/handoff/doubles-acquisition.v1.json",
+      "sha256": "3aa78941dbb21e5996d8c8da37f79fd39928c8ccdfff3651e02a7fa23ec953b5",
+      "size_bytes": 1354
+    }
+  ],
+  "limits": [
+    "Original four FBBench source-match mappings/offsets remain unresolved.",
+    "README assigns bounding boxes/shuttle annotations to top view; no mapping to downloaded rear view established.",
+    "No professional top-ten or personal benchmark claim.",
+    "No real ZIP downloaded or extracted; archive tests use local fixtures.",
+    "Video, annotation and source-code licences remain unknown."
+  ]
+}

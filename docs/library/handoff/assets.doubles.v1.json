@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "title": "Drone badminton doubles: Study_Videos / BD12 / Rally-1 / (1).mp4",
+      "match_id": "dronebd-study-recording-bd12",
+      "source_type": "dataset",
+      "source_url": "https://drive.usercontent.google.com/uc?id=1tncTXoI4IWBBL6qg8D9QtaE1f-EPZii5&export=download",
+      "source_page": "https://github.com/Ning-D/Drone_BD_ControlArea/tree/14a6a74969f54adb57e013faa4fb24298794e985",
+      "acquired_at": "2026-09-28T15:39:57.859149+00:00",
+      "camera_type": "rear",
+      "discipline": "doubles",
+      "players": [],
+      "rights": {
+        "status": "unknown",
+        "license_url": null,
+        "evidence": "Study author publishes real doubles drone videos through the linked public Study_Videos directory. No standalone video redistribution/commercial licence was found; public download does not establish those rights.",
+        "allowed_uses": []
+      },
+      "split": "unassigned",
+      "provenance": {
+        "dataset": "Drone_BD_ControlArea",
+        "source_revision": "14a6a74969f54adb57e013faa4fb24298794e985",
+        "original_file_name": "(1).mp4",
+        "official_folder_chain": [
+          "https://drive.google.com/drive/folders/1sIKIDLjyhccO_y6gXeaIkr_1gu1o0vYw",
+          "https://drive.google.com/drive/folders/1pviHfD3o3M7GUNDJYYaNWKzW7y64_8uf",
+          "https://drive.google.com/drive/folders/1t3Wt7dXOVuLkk-BtV2bJjh-xv3uKmILd",
+          "https://drive.google.com/drive/folders/1hwDNfsF2IzX3PnnjFqE1iNx9DqzLcWlB"
+        ],
+        "grouping_basis": "Publisher folder Study_Videos/BD12/Rally-1; BD12 is used as a conservative recording group. Exact real-world match/date and complete-session offsets are not supplied.",
+        "source_match_offset_ms": null,
+        "identity_status": "unconfirmed",
+        "annotation_rights": {
+          "status": "unknown",
+          "license_url": null,
+          "evidence": "No separate annotation licence found. Corresponding CSV must be independently verified before any event conversion."
+        },
+        "visual_review": "One-second frame reviewed: four players on one court, two on each side, elevated rear view. Player identities are not confirmed.",
+        "associated_csv": {
+          "relative_path": "data/annotations/dronebd/BD12-Rally-1-1.csv",
+          "source_url": "https://drive.usercontent.google.com/uc?id=1EdLWb-2xeCD3N0ZcnxLJbEesVnKl_wF4&export=download",
+          "sha256": "2c1919ee1f9f0ac327e7ab802afb1e1dc9c32dfa31c133f9cc17139f32954384",
+          "alignment_status": "unverified",
+          "basis": "Publisher README table assigns bounding-box/shuttle annotations to top-view only. This downloaded clip is rear-view; no frame or coordinate mapping is established. CSV frame numbers are not project milliseconds."
+        },
+        "publisher_sha256": null,
+        "hash_verification": "Local SHA256 receipt plus publisher byte size; no publisher SHA256 supplied.",
+        "fine_labels": {
+          "hand_technique": "unknown",
+          "footwork": "unknown"
+        },
+        "still_relative_path": "data/qa/stills/dronebd-study-bd12-rally1-camera1.jpg",
+        "source_readme_sha256": "bbc1182e8b7d30dc73c0c1615d062059e8ebbe64f5ac205063f62fffab38042e"
+      },
+      "schema_version": "1.0",
+      "asset_id": "asset-52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+      "relative_path": "data/raw/dronebd/study-bd12-rally1-camera1.mp4",
+      "sha256": "52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+      "size_bytes": 5857600,
+      "duration_ms": 4404,
+      "width": 3840,
+      "height": 2160,
+      "fps_num": 41100,
+      "fps_den": 1367,
+      "time_base": "1/600",
+      "probe": {
+        "ffprobe_version": "ffprobe version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+        "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+        "probed_at": "2026-09-28T15:39:58.958230+00:00",
+        "codec_name": "h264",
+        "stream_index": 0,
+        "fps_source": "avg_frame_rate",
+        "duration_source": "stream.duration",
+        "start_time": "0.000000",
+        "start_pts": 0,
+        "avg_frame_rate": "41100/1367",
+        "r_frame_rate": "30000/1001",
+        "vfr_status": "unknown",
+        "pts_index": {
+          "relative_path": "data/probes/dronebd-study-bd12-rally1-camera1.pts.jsonl",
+          "sha256": "01260e59618bd9bc996688a6f31dbc37df2aceceb65ef182d72e666bf853cdf4",
+          "size_bytes": 3926,
+          "format": "jsonl",
+          "frame_count": 132,
+          "time_base": "1/600",
+          "pts_field": "best_effort_timestamp",
+          "complete": true,
+          "vfr_status": "unknown",
+          "min_delta_ticks": 20,
+          "max_delta_ticks": 21
+        },
+        "timing_note": "Container rates alone do not prove CFR; original timestamps retained when indexed.",
+        "decode": {
+          "status": "passed",
+          "scope": "full_video_stream",
+          "device": "cpu",
+          "frames": 132,
+          "exit_code": 0
+        },
+        "source_sha256": "52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+        "source_size_bytes": 5857600
+      }
+    }
+  ]
+}
