@@ -15,7 +15,7 @@ import time
 import uuid
 
 from .storage import atomic_json, directory_bytes, reservation, sha256, utcnow
-from .timeline import RenderError, assets_by_id, normalize_timeline, require, safe_path, text
+from .timeline import RenderError, assets_by_id, export_timeline, normalize_timeline, require, safe_path, selection_review_summary, text
 
 
 @dataclass
@@ -250,7 +250,7 @@ def render(request, config=None, emit=None, cancelled=None):
             atomic_json(output / "request.json", request)
             (output / "ffmpeg-version.txt").write_text(version, encoding="utf-8")
             mapping, cursor_frames = [], 0
-            w, h, fps = (t["output"][k] for k in ("width", "height", "fps"))
+            w, h, fps = (t["render_metadata"]["effective_output"][k] for k in ("width", "height", "fps"))
             for index, s in enumerate(t["segments"]):
                 r.check()
                 aid, speed = s["asset_id"], s["speed"]
@@ -315,17 +315,14 @@ def render(request, config=None, emit=None, cancelled=None):
             checks["full_decode"] = True
             qa = dict(schema_version="1.0", job_id=r.job, checks=checks, technical_pass=all(checks.values()),
                       expected_duration_ms=total_ms, actual_duration_ms=actual_duration, probe=final_probe,
-                      preview=params.get("preview", False), research_preview=params.get("research_preview", False), human_confirmed_segments=all(s.get("review_status")=="confirmed" and s.get("editorial_review", {}).get("reviewer_type")=="human" for s in t["segments"]), selection_review=[dict(segment_id=s["segment_id"],review_status=s["review_status"],provenance=s.get("editorial_review", {})) for s in t["segments"]], source_types=sorted({assets[s['asset_id']]['source_type'] for s in t['segments']}),
+                      preview=params.get("preview", False), effective_output=t["render_metadata"]["effective_output"], research_preview=params.get("research_preview", False), **selection_review_summary(t["segments"]), source_types=sorted({assets[s['asset_id']]['source_type'] for s in t['segments']}),
                       manual_review={"status": "pending", "note": "Source context, identity, shuttle visibility and perceived A/V sync need viewing"},
                       rights=[dict(asset_id=aid, rights=assets[aid].get("rights", {})) for aid in paths],
                       publication_clearance="not_verified", ffmpeg_version=version, storage=ledger)
             atomic_json(output / "qa.json", qa)
             require(all(checks.values()), f"QA failed: {[k for k,v in checks.items() if not v]}", "qa_failed")
-            canonical = {key: t[key] for key in ("schema_version", "timeline_id", "title", "output") if key in t}
-            fields = ("segment_id", "asset_id", "in_ms", "out_ms", "speed", "event_ids", "fit", "crop", "title", "audio", "review_status")
-            canonical["segments"] = [{key: s[key] for key in fields if key in s} for s in t["segments"]]
-            atomic_json(output / "timeline.json", canonical)
-            atomic_json(output / "source_map.json", dict(schema_version="1.0", timeline_id=t["timeline_id"], output_fps=fps, segments=mapping,
+            atomic_json(output / "timeline.json", export_timeline(t))
+            atomic_json(output / "source_map.json", dict(schema_version="1.0", timeline_id=t["timeline_id"], output_fps=fps, effective_output=t["render_metadata"]["effective_output"], segments=mapping,
                                                         editorial_metadata=t["render_metadata"], segment_options={s["segment_id"]:{k:s[k] for k in ("subtitles","replay_group_id","editorial_review") if k in s} for s in t["segments"]}, excluded_replays=t["render_metadata"]["excluded_replays"],
                                                         time_mapping="source_ms = source_in_ms + (output_ms-output_in_ms)*speed; clamp to source interval at quantized last frame"))
             r.check()

@@ -35,7 +35,7 @@ PEAK_LIMIT = DOWNLOAD_LIMIT + EXTRACT_LIMIT + QA_LIMIT
 OWNER_LIMIT = 5_000_000_000
 SHARED_LIMIT = 700_000_000_000
 OTHER_OWNER_CEILING = 645_000_000_000  # 650GB allocation less render runtime 5GB
-DISK_MARGIN = 1_000_000_000
+DISK_MARGIN = 256_000_000
 
 
 def now() -> str:
@@ -70,22 +70,27 @@ def capacity(additional: int) -> dict:
     owner_used = safe_size(OWNER_ROOT)
     shared_used = safe_size(SHARED_ROOT)
     free = shutil.disk_usage(SHARED_ROOT).free
-    # Reserve the full allocation of all other owners. This upper-bounds all
-    # their active reservations, including WSL-native environments unseen here.
-    # Existing bytes outside this owner are deliberately double-counted, so a
-    # crowded machine fails conservatively instead of borrowing the 50GB reserve.
-    shared_with_reserves = shared_used + OTHER_OWNER_CEILING + additional
+    # The allocation envelope accounts for unmeasurable WSL-native environments.
+    # Check it independently from measured shared usage: adding both would
+    # double-count already allocated bytes. An allocation is not a disk reserve.
+    measured_peak = shared_used + additional
+    allocation_peak = owner_used + additional + OTHER_OWNER_CEILING
     value = {"owner_used_bytes": owner_used, "shared_used_bytes": shared_used,
              "additional_reserved_bytes": additional,
-             "other_owner_reservations_ceiling_bytes": OTHER_OWNER_CEILING,
-             "conservative_shared_peak_bytes": shared_with_reserves,
+             "other_owner_allocation_ceiling_bytes": OTHER_OWNER_CEILING,
+             "measured_shared_peak_bytes": measured_peak,
+             "allocated_owner_peak_bytes": allocation_peak,
+             "other_active_reserved_bytes": None,
+             "physical_safety_margin_bytes": DISK_MARGIN,
              "physical_free_bytes": free, "owner_quota_bytes": OWNER_LIMIT,
              "shared_hard_limit_bytes": SHARED_LIMIT}
     if owner_used + additional > OWNER_LIMIT:
         raise RuntimeError(f"runtime/render quota exceeded: {value}")
-    if shared_with_reserves > SHARED_LIMIT:
-        raise RuntimeError(f"Conservative shared capacity check failed: {value}")
-    if free < additional + OTHER_OWNER_CEILING + DISK_MARGIN:
+    if measured_peak > SHARED_LIMIT or allocation_peak > SHARED_LIMIT:
+        raise RuntimeError(f"Shared capacity check failed: {value}")
+    # Cross-owner active reservations are unknown until a shared ledger exists;
+    # never substitute the owners' complete quotas for actual pending writes.
+    if free < additional + DISK_MARGIN:
         raise RuntimeError(f"Insufficient physical disk capacity: {value}")
     return value
 

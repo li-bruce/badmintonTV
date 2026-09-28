@@ -72,14 +72,18 @@ def reservation(root, job_id, peak_bytes, owner_limit=40_000_000_000):
         free = shutil.disk_usage(root).free
         require(used + peak_bytes <= owner_limit, "render owner quota exceeded", "quota_exceeded")
         require(global_used + peak_bytes <= 700_000_000_000, "global storage limit exceeded", "quota_exceeded")
-        # Other fixed owner allocations total 610GB, including WSL native runtime.
-        # Reserving their full ceilings is conservative and avoids depending on their ledger formats.
+        # The independent allocation envelope includes WSL-native environments
+        # that cannot be measured here. It is a logical upper bound, not an
+        # active disk reservation, and must not be added to global_used again.
         other_owner_ceiling = 610_000_000_000
         require(used + peak_bytes + other_owner_ceiling <= 700_000_000_000, "allocated owner ceilings exceed hard limit", "quota_exceeded")
-        require(free >= peak_bytes + other_owner_ceiling + 256_000_000, "insufficient physical free space for concurrent owner ceilings", "disk_full")
+        # No shared active-reservation ledger exists yet. Fixed owner quotas do
+        # not consume free space; only this job's additional peak and margin do.
+        require(free >= peak_bytes + 256_000_000, "insufficient physical free space for render peak and safety margin", "disk_full")
         ledger = dict(schema_version="1.0", pid=os.getpid(), job_id=job_id, created_at=utcnow(),
                       reserved_bytes=peak_bytes, owner_used_bytes=used, global_used_bytes=global_used,
-                      physical_free_bytes=free, other_owner_reservation_ceiling_bytes=other_owner_ceiling)
+                      physical_free_bytes=free, other_owner_allocation_ceiling_bytes=other_owner_ceiling,
+                      other_active_reserved_bytes=None, physical_safety_margin_bytes=256_000_000)
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
             fd = None
             json.dump(ledger, stream)

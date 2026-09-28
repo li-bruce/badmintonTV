@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "status": "passed",
+  "handoff": "D:\\video\\render\\handoff\\review-preview-fix-8dc0f630",
+  "actual_dimensions": [
+    360,
+    640
+  ],
+  "saved_project_dimensions": [
+    1080,
+    1920
+  ],
+  "human_confirmed_segments": false,
+  "review_status": "unreviewed",
+  "review_inputs": [
+    {
+      "segment_id": "human",
+      "asset_id": "asset-5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+      "in_ms": 0,
+      "out_ms": 600,
+      "review_status": "confirmed",
+      "editorial_review": {
+        "reviewer_type": "human",
+        "reviewer": "regression-fixture"
+      }
+    },
+    {
+      "segment_id": "agent",
+      "asset_id": "asset-5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+      "in_ms": 400,
+      "out_ms": 1000,
+      "review_status": "unreviewed",
+      "editorial_review": {
+        "reviewer_type": "agent"
+      }
+    }
+  ],
+  "reload_preview_and_final": "passed"
+}

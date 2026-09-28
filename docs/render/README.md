@@ -40,9 +40,9 @@ request/result必填attempt_id；stdout严格ProgressEvent JSONL，seq递增；�
 参数均放`parameters`：
 
 - `timeline`：canonical Timeline。
-- `preview=true`：360×640轻量输出，时间/构图逻辑一致。
+- `preview=true`：实际360×640轻量输出，时间/构图逻辑一致；保存的Timeline仍为1080×1920正式工程，实际尺寸记在QA/source_map。
 - `research_preview=true`：未人工确认的本地研究演示，画面加固定说明；默认false。
-- `merge_overlaps=true`：仅合并相邻、同源且编辑设置相同的重叠窗口。
+- `merge_overlaps=true`：仅合并相邻、同源且编辑设置相同的重叠窗口；审核状态取保守结果，原区间与全部审核者来源保留，任一未确认不会自动升级。
 - `deduplicate_replays=true`：仅按人工提供的显式replay_group_id去重，不自动识别回放。
 - `segment_options`：以segment_id为键，每项可含`subtitles`（片段输出毫秒）、`replay_group_id`、`editorial_review`（含reviewer_type）。所有扩展保存在source_map；恢复工程须连同扩展加载。
 

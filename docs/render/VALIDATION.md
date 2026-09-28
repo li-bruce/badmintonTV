@@ -28,3 +28,13 @@
 NVENC、目标跟随、OTIO往返、VFR真实输入、非Windows字体、旋转或非方像素crop、损坏真实源的编码时取消未全覆盖。已测显式crop和普通contain，真实原片机位为固定后场广播。个人录像未提供，人工确认/完整比赛原时间/画面发布授权均未具备。
 
 完整“网页导入→标注→检索→确认→导出”由主任务与platform集成验收；本模块成功不代替全产品通过。
+
+## 主协调审查后的修复
+
+三项独立复现已修复，保留原48项验证历史：
+
+- 合并首段审核继承会把新增未审核区间升级。现在汇总全部输入原边界/审核状态/来源，任一unreviewed则结果unreviewed，混合human/agent不会报告human_confirmed_segments=true；两种顺序、三段全human、未知审核者、重新加载来源及去重均有回归。
+- 物理free误加其它owner完整610GB（安装器645GB）导致已用360GB时误报不足。固定预算改为独立逻辑检查，物理free仅新增peak+256MB；不把shared实占与完整owner额度相加。360GB实占/600GB free、精确临界值、差1byte失败及配额/锁回归通过。
+- 预览导出的Timeline错误保存360×640，无法重新加载。项目保留正式1080×1920，实际规格单独effective_output；导出项目重新做预览/正式规范校验均通过。
+
+更新后 `python -m unittest discover -s tests/render`：62项，61通过、1symlink权限skip。另做1秒定向CPU预览，验证实际360×640、保存工程1080×1920、合并审核unreviewed/human_confirmed=false、两种回载均成功；见`REVIEW_FIX_VALIDATION.json`。该回归中的human字段明确标记regression-fixture，属测试元数据，不是现实人类审片声明。未重跑全部成片；旧业务样片不涉及合并且hash保持不变。
