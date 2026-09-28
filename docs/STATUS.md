@@ -18,4 +18,6 @@
 
 协调修订：控制面首轮Windows原生Python+SQLite；模型在WSL通过JSON接口执行；CLI统一顶层Asset数组、相对output_dir、attempt_id、固定退出码；worker中断记failed/WORKER_INTERRUPTED。各任务已通知，细节见最新ARCHITECTURE/CONTRACTS。
 
+工具链检查点：render已安装FFmpeg/FFprobe 9.0.2并完成合成技术烟测，主协调验证版本可运行；已向platform/library/models共享只读路径。详见[环境交接](ENVIRONMENT_HANDOFF.md)。真实素材闭环仍待验证。
+
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
