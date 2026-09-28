@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "developer-query-diagnostic-v1",
+  "provenance": {
+    "origin": "developer_authored_diagnostic",
+    "is_user_corpus": false,
+    "is_video_ground_truth": false,
+    "purpose": "Finite-grammar parser fidelity diagnostics; not retrieval accuracy, video recognition accuracy, or general Chinese understanding. Expected conditions were authored explicitly for these probes."
+  },
+  "probes": [
+    {"probe_id":"single-01","category":"single_stroke","text":"杀球","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"smash"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"single-02","category":"single_stroke","text":"展搓","expected":{"steps":[{"kind":"stroke","labels":{"hand_technique":"net_zhan_cuo"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"single-03","category":"single_stroke","text":"收搓","expected":{"steps":[{"kind":"stroke","labels":{"hand_technique":"net_shou_cuo"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"single-04","category":"single_stroke","text":"网前击球","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"net_shot"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"single-05","category":"single_stroke","text":"吊球","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"drop"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"footwork-01","category":"footwork","text":"后退","expected":{"steps":[{"kind":"movement","labels":{"movement":"backward"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"footwork-02","category":"footwork","text":"后退小跳启动","expected":{"steps":[{"kind":"movement","labels":{"footwork":"backward_small_hop_start"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"footwork-03","category":"footwork","text":"交叉步","expected":{"steps":[{"kind":"movement","labels":{"footwork":"cross_step"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"footwork-04","category":"footwork","text":"弓步","expected":{"steps":[{"kind":"movement","labels":{"footwork":"lunge"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"combination-01","category":"combination","text":"交叉步后退","expected":{"steps":[{"kind":"movement","labels":{"footwork":"cross_step","movement":"backward"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"combination-02","category":"combination","text":"起跳杀球","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"smash","footwork":"jump"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"combination-03","category":"combination","text":"上网扑球","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"net_kill","movement":"forward"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"combination-04","category":"combination","text":"后退同时杀球","expected":{"steps":[{"kind":"movement","labels":{"movement":"backward"}},{"kind":"stroke","labels":{"stroke":"smash"}}],"relations":[{"from_index":0,"to_index":1,"relation":"overlaps","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"sequence-01","category":"sequence","text":"展搓然后收搓","expected":{"steps":[{"kind":"stroke","labels":{"hand_technique":"net_zhan_cuo"}},{"kind":"stroke","labels":{"hand_technique":"net_shou_cuo"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"sequence-02","category":"sequence","text":"后退随后杀球","expected":{"steps":[{"kind":"movement","labels":{"movement":"backward"}},{"kind":"stroke","labels":{"stroke":"smash"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"sequence-03","category":"sequence","text":"杀球随后后退","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"smash"}},{"kind":"movement","labels":{"movement":"backward"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"sequence-04","category":"sequence","text":"交叉步后退随后起跳杀球然后上网扑球","expected":{"steps":[{"kind":"movement","labels":{"footwork":"cross_step","movement":"backward"}},{"kind":"stroke","labels":{"stroke":"smash","footwork":"jump"}},{"kind":"stroke","labels":{"stroke":"net_kill","movement":"forward"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":null},{"from_index":1,"to_index":2,"relation":"before","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"sequence-05","category":"sequence","text":"杀球2秒内再上网","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"smash"}},{"kind":"movement","labels":{"movement":"forward"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":2000}],"include_uncertain":false}},
+    {"probe_id":"sequence-06","category":"sequence","text":"杀球1.5秒内附近上网","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"smash"}},{"kind":"movement","labels":{"movement":"forward"}}],"relations":[{"from_index":0,"to_index":1,"relation":"near","max_gap_ms":1500}],"include_uncertain":false}},
+    {"probe_id":"sequence-07","category":"sequence","text":"展搓，随后后退小跳启动","expected":{"steps":[{"kind":"stroke","labels":{"hand_technique":"net_zhan_cuo"}},{"kind":"movement","labels":{"footwork":"backward_small_hop_start"}}],"relations":[{"from_index":0,"to_index":1,"relation":"before","max_gap_ms":null}],"include_uncertain":false}},
+    {"probe_id":"unknown-01","category":"unknown","text":"手法未知","expected":{"steps":[{"kind":"stroke","labels":{"hand_technique":"unknown"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"unknown-02","category":"unknown","text":"步法无法判断","expected":{"steps":[{"kind":"movement","labels":{"footwork":"unknown"}}],"relations":[],"include_uncertain":false}},
+    {"probe_id":"unknown-03","category":"unknown","text":"球种未知，包括不确定","expected":{"steps":[{"kind":"stroke","labels":{"stroke":"unknown"}}],"relations":[],"include_uncertain":true}},
+    {"probe_id":"unknown-04","category":"unknown","text":"移动方向未知","expected":{"steps":[{"kind":"movement","labels":{"movement":"unknown"}}],"relations":[],"include_uncertain":false}}
+  ]
+}

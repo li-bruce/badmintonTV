@@ -175,6 +175,14 @@ class AdapterGuardTests(unittest.TestCase):
                 inference.get_torch()
             self.assertEqual(caught.exception.code, "CUDA_UNAVAILABLE")
 
+    def test_binary_dependency_load_errors_are_blocked_without_leaking_details(self):
+        for error in (OSError('private binary path'), RuntimeError('private driver detail')):
+            with self.subTest(error=type(error).__name__), patch('builtins.__import__', side_effect=error):
+                with self.assertRaises(ModelBlocked) as caught:
+                    inference.get_torch()
+            self.assertEqual(caught.exception.code, 'DEPENDENCY_UNAVAILABLE')
+            self.assertNotIn('private', caught.exception.message)
+
     def test_weights_require_manifest_and_expected_files(self):
         with self.assertRaises(ModelBlocked):
             inference.weights_dir(self.root, "qwen3-0.6b")
