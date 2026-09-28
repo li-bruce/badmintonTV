@@ -66,3 +66,5 @@ D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.check_con
 脚本只接受已核验Drone_BD单片URL与5,857,600 bytes上限，配套CSV固定28,707 bytes，README固定Git提交且最多100KB。批次预留50MB；幂等运行逐一验证原始收据和SHA，无新下载；独立`assets.doubles.v1.json`、`annotations.doubles.v1.json`、`splits.doubles.v1.json`及`doubles-acquisition.v1.json`都在data/handoff，修改留下审计。保留原四片与旧manifest。孤立的新小样PTS保留并显式报错，人工查明后选新的attempt路径，不盲目覆写。
 
 可选归档API：`packages.library.archive.inspect_zip(path)`只读有界中央目录（最多10,000项/16MiB）；`extract_member(archive, member_name, relative_path, quota=..., max_bytes=..., expected_archive_sha256=...)`只流式提取一个明确普通文件。原ZIP必须位于data owner并保留；禁路径穿越、链接/加密/重复成员，不覆盖目标；`.extract.part/.extract.json/.lock`保留失败与锁信息。首次实现不支持ZIP64中央目录、多卷或尾随数据，不提供无界extractall。本轮没有真实ZIP取回/解压，不能把本地ZIP测试算真实素材成功。
+
+选中成员只允许`ZIP_STORED`/`ZIP_DEFLATED`。BZIP2、LZMA及其他格式在打开成员前返回`unsupported_compression`，因为固定read长度不能限制这些路径的内部解压分配。详见[内存边界修复](../issues/library-zip-compression-memory.md)。

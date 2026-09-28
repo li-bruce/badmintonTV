@@ -117,6 +117,29 @@ class ArchiveTests(unittest.TestCase):
         self.assertEqual(self.metadata()["member"]["size_bytes"], len(self.payload))
         self.assertFalse(self.partial.exists())
 
+    def assert_compression_rejected_before_member_open(self, compression):
+        payload = b"\0" * (1024 * 1024)
+        archive_hash = self.make_zip(entries=[("match/one.bin", payload)], compression=compression)
+        self.assertEqual(inspect_zip(self.archive)[0]["compression"], compression)
+        with mock.patch("packages.library.archive.zipfile.ZipFile.open", side_effect=AssertionError("unsupported codec must not open a member")) as member_open:
+            with self.assertRaises(ArchiveError) as caught:
+                self.extract(max_bytes=len(payload))
+        self.assertEqual(caught.exception.code, "unsupported_compression")
+        member_open.assert_not_called()
+        self.assertEqual(self.metadata()["error"]["code"], "unsupported_compression")
+        self.assertEqual(self.metadata()["member"]["compression"], compression)
+        self.assertEqual(hashlib.sha256(self.archive.read_bytes()).hexdigest(), archive_hash)
+        self.assertFalse(self.partial.exists())
+        self.assertFalse(self.output.exists())
+        self.assertFalse(self.output.with_name("one.bin.lock").exists())
+        self.assertEqual(self.quota.active_reservations(), [])
+
+    def test_bzip2_is_rejected_before_member_open(self):
+        self.assert_compression_rejected_before_member_open(zipfile.ZIP_BZIP2)
+
+    def test_lzma_is_rejected_before_member_open(self):
+        self.assert_compression_rejected_before_member_open(zipfile.ZIP_LZMA)
+
     def test_streaming_limit_is_independent_of_declared_size(self):
         self.make_zip(entries=[("match/one.bin", b"declared small")])
         with mock.patch("packages.library.archive.zipfile.ZipFile.open", return_value=io.BytesIO(self.payload)):

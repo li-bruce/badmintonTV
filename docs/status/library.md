@@ -37,3 +37,10 @@
 - 协调/下一步：已通知main、platform、models、render真实样本可读。主任务合并追加提交后由下游报告导入/模型/渲染；外部补齐权利与原片映射后才能开展独立评估。
 - 下游反馈：render已报告真实双打132帧竖屏研究预览全解码/合同通过，handoff为`D:/video/render/handoff/doubles-preview-c47d5492`，报告提交e06ce8b；此为render任务验证结果，library未重复渲染或声称模型识别通过。
 - 追加实现与验证提交SHA：`0cc1214917d40f49a7341d3cd7887ba1d809dc68`；随后仅记录本SHA的文档提交以分支HEAD为准。只提交library所有文件，不推送、不合并main。
+
+## ZIP压缩器追加修复
+
+- 主协调独立review指出BZIP2/LZMA的内部解压分配不受read长度约束；已在打开选中成员前仅允许STORED/DEFLATED，其他返回unsupported_compression，记录失败且不创建partial。
+- 验证：新增两种真实压缩格式的本地拒绝测试，强制禁止container.open；完整77/77测试通过、0跳过（9.151秒，其中ZIP24项）。原75项交付结果保留为历史，最新结果以本节为准。
+- 问题与范围：docs/issues/library-zip-compression-memory.md；本轮无下载、无共享盘素材/清单改动、无新环境/GPU/端口或数据容量增长。
+- 提交：本节随`fix(library): reject unbounded ZIP codecs before extraction`独立修复提交；精确SHA随主任务交接消息提供，当前work/library HEAD可核验。下一步由主任务集成该修复。
