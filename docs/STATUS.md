@@ -24,6 +24,6 @@
 
 渲染检查点：已协调research_preview显式预览参数，允许未确认片段形成带状态标记的本地样片；不等待细标签真值即可验证成片流程。render报告已修复约21.333ms的AAC拼接起点偏移，合成音视频双流起点为0、完整解码通过；真实3片段样片制作中。
 
-首轮集成：统一contracts提交已合入main `8900958`；4条真实Asset和真实渲染request/result通过同一合同。17秒真实研究样片已生成，4项产物哈希核验通过。交叉审查发现的“model来源已确认事件被自动结果覆盖”已修复并合入main `1da8b7a`，新增回归后69项合同测试独立复跑全过。library53测试独立通过，models Windows88通过/2权限跳过（模块WSL90全过），两模块代码集成审查中。Web端到端流程与模型实测仍未完成。细节见[集成记录](INTEGRATION_LOG.md)。
+首轮集成：统一contracts提交已合入main `8900958`；4条真实Asset和真实渲染request/result通过同一合同。17秒真实研究样片已生成，4项产物哈希核验通过。交叉审查发现的“model来源已确认事件被自动结果覆盖”已修复并合入main `1da8b7a`，新增回归后69项合同测试独立复跑全过。library53测试独立通过，代码审查无阻塞，已合入main `8207a40`+`5c48688`。models协议测试Windows88通过/2权限跳过（模块WSL90全过），额外审查的下载恢复/正式评测边界正在修复，尚未集成。Web端到端流程与模型实测仍未完成。细节见[集成记录](INTEGRATION_LOG.md)。
 
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
