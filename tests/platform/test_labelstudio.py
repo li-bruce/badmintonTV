@@ -1,6 +1,5 @@
 import copy
 import hashlib
-import json
 
 import pytest
 
@@ -187,15 +186,25 @@ def post_ls(client, task):
         'export': [task], 'reviewer': 'agent-regression', 'reviewer_type': 'agent', 'tool_version': '1.23.1'})
 
 
+def add_track(task):
+    task['annotations'][0]['result'].append({
+        'id': 'box', 'from_name': 'box', 'to_name': 'video', 'type': 'videorectangle',
+        'value': {'labels': ['player_unconfirmed'], 'sequence': [
+            {'frame': 1, 'time': 0, 'x': 10, 'y': 10, 'width': 20, 'height': 30, 'enabled': True}]}})
+
+
 @pytest.mark.parametrize('seeded', [False, True])
 def test_api_import_then_edit_uses_last_imported_revision(ls_api, event, seeded):
     c, app, mapping = ls_api
     seed = {**event, 'revision': 1, 'review_status': 'unreviewed', 'start_ms': 0, 'end_ms': 33, 'contact_ms': None} if seeded else None
     task = ls_snapshot(c, mapping, seed=seed)
+    add_track(task)
     initial = post_ls(c, task)
     assert initial.status_code == 200, initial.text
     first = initial.json()['events'][0]
-    second = post_ls(c, edit_snapshot(task))
+    edited = edit_snapshot(task)
+    edited['annotations'][0]['result'][-1]['value']['sequence'][0]['x'] = 20
+    second = post_ls(c, edited)
     assert second.status_code == 200, second.text
     changed = second.json()['events'][0]
     assert changed['event_id'] == first['event_id']
@@ -204,9 +213,10 @@ def test_api_import_then_edit_uses_last_imported_revision(ls_api, event, seeded)
     assert changed['provenance']['previous_revision'] == first['revision']
     # Replaying either accepted snapshot never restores old time bounds or tracks.
     assert post_ls(c, task).json()['events'] == []
-    assert post_ls(c, edit_snapshot(task)).json()['events'] == []
+    assert post_ls(c, edited).json()['events'] == []
     current = app.state.store.event(first['event_id'])
     assert current['end_ms'] == 100 and current['revision'] == changed['revision']
+    assert app.state.store.get('track', 'ls:11:22:box')['keyframes'][0]['x'] == 20
     # A never-before-imported stale snapshot is rejected based on updated_at.
     assert post_ls(c, edit_snapshot(task, second=0, end_frame=3)).status_code == 409
 
@@ -232,14 +242,28 @@ def test_api_ls_batch_conflict_rolls_back_events_tracks_and_cursor(ls_api):
     second_region = copy.deepcopy(task['annotations'][0]['result'][0])
     second_region['id'] = 'region-two'
     task['annotations'][0]['result'].append(second_region)
+    add_track(task)
     first = post_ls(c, task).json()['events']
     local = c.post('/api/v1/events', json={'event': first[1], 'expected_revision': 1, 'reviewer': 'local-human'})
     assert local.status_code == 200
     before_cursor = app.state.store.list('ls_sync')
-    assert post_ls(c, edit_snapshot(task)).status_code == 409
+    before_track = app.state.store.get('track', 'ls:11:22:box')
+    edited = edit_snapshot(task)
+    edited['annotations'][0]['result'][-1]['value']['sequence'][0]['x'] = 20
+    assert post_ls(c, edited).status_code == 409
     assert app.state.store.event(first[0]['event_id'])['revision'] == 1
     assert app.state.store.event(first[1]['event_id'])['revision'] == 2
     assert app.state.store.list('ls_sync') == before_cursor
+    assert app.state.store.get('track', 'ls:11:22:box') == before_track
+
+
+def test_api_first_ls_import_does_not_overwrite_confirmed_seed(ls_api, event):
+    c, app, mapping = ls_api
+    seed = {**event, 'revision': 1, 'start_ms': 0, 'end_ms': 33, 'contact_ms': None}
+    task = ls_snapshot(c, mapping, seed=seed)
+    assert post_ls(c, task).status_code == 409
+    assert app.state.store.event(event['event_id'])['revision'] == 1
+    assert app.state.store.list('ls_sync') == []
 
 
 def test_api_changed_snapshot_needs_newer_timestamp(ls_api):
@@ -271,3 +295,82 @@ def test_legacy_import_can_continue_from_actual_import_revision(ls_api):
     response = post_ls(c, edit_snapshot(task))
     assert response.status_code == 200, response.text
     assert response.json()['events'][0]['revision'] == first['revision'] + 1
+
+
+def test_old_task_cannot_borrow_new_export_seed_revision(ls_api, event):
+    c, app, mapping = ls_api
+    seed = {**event, 'revision': 1, 'review_status': 'unreviewed', 'start_ms': 0, 'end_ms': 33, 'contact_ms': None}
+    old_task = ls_snapshot(c, mapping, seed=seed)
+    original_snapshot_id = old_task['data']['btv']['snapshot_id']
+    local = {**app.state.store.event(seed['event_id']), 'labels': {'stroke': 'smash'}}
+    saved = c.post('/api/v1/events', json={'event': local, 'expected_revision': 1, 'reviewer': 'local-human'})
+    assert saved.status_code == 200
+    newer_task = c.post('/api/v1/annotation/label-studio/task',
+                       json={'asset_id': 'a', 'frame_map': mapping.as_dict()}).json()
+    assert newer_task['data']['btv']['snapshot_id'] != original_snapshot_id
+    assert len(app.state.store.list('ls_task_snapshot')) == 2
+    old_seed = next(iter(app.state.store.get('ls_task_snapshot', original_snapshot_id)['data']['btv']['seed_events'].values()))
+    assert old_seed['event']['revision'] == 1
+    response = post_ls(c, edit_snapshot(old_task))
+    assert response.status_code == 409, response.text
+    assert app.state.store.event(seed['event_id']) == saved.json()
+    assert len(app.state.store.revisions(seed['event_id'])) == 2
+    # A deliberately imported newer snapshot must not lend its cursor to the old
+    # snapshot even when the external LS task and annotation IDs are reused.
+    newer_task['id'] = old_task['id']
+    newer_task['annotations'][0].update(id=22, updated_at='2026-09-28T00:00:03Z')
+    accepted_new = post_ls(c, newer_task)
+    assert accepted_new.status_code == 200, accepted_new.text
+    assert accepted_new.json()['events'][0]['revision'] == 3
+    assert post_ls(c, edit_snapshot(old_task, second=4)).status_code == 409
+    assert app.state.store.event(seed['event_id']) == accepted_new.json()['events'][0]
+
+
+def test_snapshots_keep_their_own_pts_map_after_another_export(ls_api):
+    c, app, mapping = ls_api
+    old_task = ls_snapshot(c, mapping)
+    changed = mapping.as_dict()
+    changed['mapping_id'] = 'another-map'
+    changed['frames'][0]['source_end_ms'] = 50
+    changed['frames'][1]['source_start_ms'] = 50
+    newer = c.post('/api/v1/annotation/label-studio/task', json={'asset_id': 'a', 'frame_map': changed})
+    assert newer.status_code == 200
+    response = post_ls(c, old_task)
+    assert response.status_code == 200, response.text
+    assert response.json()['events'][0]['end_ms'] == 33
+    assert response.json()['events'][0]['provenance']['mapping_id'] == mapping.mapping_id
+
+
+@pytest.mark.parametrize('snapshot_id', [None, '', 'nonexistent-snapshot'])
+def test_missing_or_unknown_snapshot_never_uses_latest_asset_seed(ls_api, snapshot_id):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    if snapshot_id is None:
+        task['data']['btv'].pop('snapshot_id')
+    else:
+        task['data']['btv']['snapshot_id'] = snapshot_id
+    # A legacy by-asset task must not silently authorize this unbound export.
+    app.state.store.put('ls_task', 'a', copy.deepcopy(task))
+    assert post_ls(c, task).status_code == 409
+    assert app.state.store.events('a') == []
+
+
+def test_snapshot_cannot_reference_a_different_asset_and_is_immutable(ls_api):
+    c, app, mapping = ls_api
+    task = ls_snapshot(c, mapping)
+    snapshot_id = task['data']['btv']['snapshot_id']
+    trusted = app.state.store.get('ls_task_snapshot', snapshot_id)
+    from apps.platform.store import Conflict
+
+    altered = copy.deepcopy(trusted)
+    altered['data']['btv']['frame_map']['mapping_id'] = 'tampered'
+    with pytest.raises(Conflict):
+        app.state.store.create_label_studio_snapshot(snapshot_id, altered)
+    assert app.state.store.get('ls_task_snapshot', snapshot_id) == trusted
+    other = copy.deepcopy(trusted)
+    other['data']['asset_id'] = 'another-asset'
+    other['data']['btv']['snapshot_id'] = 'another-snapshot'
+    app.state.store.create_label_studio_snapshot('another-snapshot', other)
+    task['data']['btv']['snapshot_id'] = 'another-snapshot'
+    assert post_ls(c, task).status_code == 409
+    assert app.state.store.events('a') == []

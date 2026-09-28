@@ -203,6 +203,7 @@ def import_annotation(task: dict[str, Any], annotation: dict[str, Any], *,
                        "task_id": task["id"], "annotation_id": annotation["id"],
                        "annotation_updated_at": annotation.get("updated_at"),
                        "annotator": annotation.get("completed_by"), "mapping_id": frame_map.mapping_id,
+                       "snapshot_id": btv.get("snapshot_id"),
                        "raw_export_relative_path": raw_ref, "annotation_sha256": raw_hash}
     for region in annotation.get("result", []):
         if region.get("to_name") != "video":

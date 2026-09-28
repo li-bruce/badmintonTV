@@ -519,7 +519,9 @@ def create_app(storage_root=None, db_path=None):
         a=asset_or_404(body['asset_id'])
         fm=FrameMap.from_dict(body.get('frame_map') or frame_map(a['asset_id']))
         task=build_task(a,'http://127.0.0.1:18080/api/v1/assets/'+a['asset_id']+'/media',fm,store.events(a['asset_id']))
-        store.put('ls_task',a['asset_id'],task)
+        snapshot_id=uid('ls-snapshot')
+        task['data']['btv']['snapshot_id']=snapshot_id
+        store.create_label_studio_snapshot(snapshot_id,task)
         return task
 
     @app.post('/api/v1/annotation/label-studio/import')
@@ -544,14 +546,19 @@ def create_app(storage_root=None, db_path=None):
         batches=[]
         for task in tasks:
             a=asset_or_404(task['data']['asset_id'])
-            trusted=resource('ls_task',a['asset_id'])
+            snapshot_id=task['data'].get('btv',{}).get('snapshot_id')
+            if not isinstance(snapshot_id,str) or not snapshot_id:
+                raise Conflict('Label Studio 任务缺少不可变 snapshot_id；请从平台重新导出任务')
+            trusted=store.get('ls_task_snapshot',snapshot_id)
+            if trusted is None or trusted['data']['asset_id']!=a['asset_id']:
+                raise Conflict('Label Studio 导出快照不存在或素材不匹配；请从平台重新导出任务')
             safe_task={**task,'data':trusted['data']}
             fm=FrameMap.from_dict(trusted['data']['btv']['frame_map'])
             for annotation in task.get('annotations',[]):
                 converted=import_annotation(safe_task,annotation,frame_map=fm,
                   tool_version=str(body.get('tool_version','1.23.1')),raw_export_relative_path=relative)
                 converted['events']=[validate_event(e) for e in converted['events']]
-                batches.append({'asset_id':a['asset_id'],'task_id':task['id'],'annotation_id':annotation['id'],
+                batches.append({'snapshot_id':snapshot_id,'asset_id':a['asset_id'],'task_id':task['id'],'annotation_id':annotation['id'],
                                 'annotation_sha256':annotation_hash(annotation),'updated_at':annotation.get('updated_at'),
                                 'converted':converted})
         imported=store.import_label_studio(batches,body.get('reviewer','label-studio-import'),body.get('reviewer_type','human'))
