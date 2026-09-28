@@ -21,4 +21,5 @@ $env:BTV_MODEL_COMMANDS_JSON=@{
 $env:BTV_RENDER_COMMAND_JSON=@($platformPython,'-m','packages.render') | ConvertTo-Json -Compress
 if ($FfmpegPath) { $env:BTV_FFMPEG=(Resolve-Path -LiteralPath $FfmpegPath).Path }
 if ($FfprobePath) { $env:BTV_FFPROBE=(Resolve-Path -LiteralPath $FfprobePath).Path }
-$env:BTV_CODE_REVISION=git -c "safe.directory=$PSScriptRoot" -C $PSScriptRoot rev-parse HEAD
+$platformRepoGit=$PSScriptRoot.Replace('\','/')
+$env:BTV_CODE_REVISION=git -c "safe.directory=$platformRepoGit" -C $PSScriptRoot rev-parse HEAD
