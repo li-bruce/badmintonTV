@@ -110,19 +110,22 @@ def validate_timeline_assets(timeline: Timeline, assets: Mapping[str, Asset] | S
             raise ValueError("rendering requires confirmed segments")
 
 
-def validate_event_revision(current: Event, replacement: Event, expected_revision: int) -> None:
+def validate_event_revision(current: Event, replacement: Event, expected_revision: int, *, actor: str = "automatic") -> None:
     """Validate a complete replacement before the platform's atomic DB CAS.
 
-    This helper alone does not lock the database and does not perform an update.
+    The service must supply actor from its trusted execution path, never from
+    event JSON.  This helper neither locks the database nor performs an update.
     """
+    if actor not in ("human", "automatic"):
+        raise ValueError("actor must identify a trusted human or automatic execution path")
     if type(expected_revision) is not int or expected_revision != current.revision:
         raise RevisionConflict("expected_revision does not match the current event revision")
     if (replacement.event_id, replacement.asset_id, replacement.match_id) != (current.event_id, current.asset_id, current.match_id):
         raise ValueError("a revision cannot change event_id, asset_id, or match_id")
     if replacement.revision != current.revision + 1 or replacement.previous_revision != current.revision:
         raise RevisionConflict("replacement must identify and increment the current revision")
-    if current.review_status == "confirmed" and current.provenance.source in ("manual", "import") and replacement.provenance.source == "model":
-        raise RevisionConflict("model predictions cannot overwrite confirmed human events")
-    if replacement.provenance.source in ("manual", "import"):
+    if current.review_status == "confirmed" and actor == "automatic":
+        raise RevisionConflict("automatic predictions cannot overwrite confirmed events")
+    if actor == "human":
         if not replacement.reviewer or replacement.reviewed_at is None:
             raise ValueError("human revisions require reviewer and reviewed_at")

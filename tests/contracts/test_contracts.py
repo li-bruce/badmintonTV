@@ -148,7 +148,7 @@ def test_human_revisions_and_model_predictions_stay_separate():
     replacement = Event.model_validate(event_payload(
         revision=2, previous_revision=1, reviewer="reviewer-test", reviewed_at=datetime.now(timezone.utc),
     ))
-    validate_event_revision(current, replacement, 1)
+    validate_event_revision(current, replacement, 1, actor="human")
     with pytest.raises(RevisionConflict):
         validate_event_revision(current, replacement, 0)
     with pytest.raises(RevisionConflict):
@@ -158,7 +158,34 @@ def test_human_revisions_and_model_predictions_stay_separate():
         validate_event_revision(current, prediction, 1)
     unaudited = Event.model_validate(event_payload(revision=2, previous_revision=1))
     with pytest.raises(ValueError, match="reviewer"):
-        validate_event_revision(current, unaudited, 1)
+        validate_event_revision(current, unaudited, 1, actor="human")
+
+
+def test_review_origin_remains_explicit_and_optional():
+    old_event = Event.model_validate(event_payload())
+    assert old_event.reviewer_type is None
+    assert old_event.provenance.reviewer_type is None
+    agent_event = Event.model_validate(event_payload(reviewer="agent-review", reviewer_type="agent"))
+    assert agent_event.reviewer_type == "agent"
+    candidate = Candidate(candidate_id="review-test", asset_id="asset-test", start_ms=0, end_ms=1)
+    assert candidate.reviewer_type is None
+    assert Candidate.model_validate({**candidate.model_dump(), "reviewer_type": "human", "reviewer": "tester"}).reviewer_type == "human"
+    with pytest.raises(ValidationError):
+        Event.model_validate(event_payload(reviewer_type="model"))
+
+
+@pytest.mark.parametrize("source", ["model", "rule", "manual", "import"])
+def test_confirmed_revision_protection_depends_on_trusted_actor_not_event_source(source):
+    current = Event.model_validate(event_payload(review_status="confirmed", provenance={"source": source}))
+    revised = Event.model_validate(event_payload(
+        revision=2, previous_revision=1, reviewer="tester", reviewed_at="2026-09-28T12:00:00Z",
+        reviewer_type="human", provenance={"source": source},
+    ))
+    with pytest.raises(RevisionConflict, match="cannot overwrite"):
+        validate_event_revision(current, revised, 1, actor="automatic")
+    with pytest.raises(RevisionConflict, match="cannot overwrite"):
+        validate_event_revision(current, revised, 1)  # Fail closed when omitted.
+    validate_event_revision(current, revised, 1, actor="human")
 
 
 def test_query_relations_reference_steps_and_are_not_event_adjacency():
