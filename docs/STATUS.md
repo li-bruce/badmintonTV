@@ -24,4 +24,6 @@
 
 渲染检查点：已协调research_preview显式预览参数，允许未确认片段形成带状态标记的本地样片；不等待细标签真值即可验证成片流程。render报告已修复约21.333ms的AAC拼接起点偏移，合成音视频双流起点为0、完整解码通过；真实3片段样片制作中。
 
+首轮集成：统一contracts提交已合入main `8900958`，主协调独立64测试通过；4条真实Asset和真实渲染request/result通过同一合同。17秒真实研究样片已生成，4项产物哈希核验通过。交叉审查发现“model来源的已确认事件被自动结果覆盖”缺口，platform正在修复；Web端到端流程与模型实测仍未完成。细节见[集成记录](INTEGRATION_LOG.md)。
+
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
