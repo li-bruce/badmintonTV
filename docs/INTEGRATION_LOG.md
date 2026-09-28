@@ -19,3 +19,15 @@
 models提交611eb39尚待集成。主协调Windows复跑90项，88通过、2项符号链接权限跳过，models报告同一组在WSL90全部通过。独立审查另发现零字节partial续传与unknown match进入formal评测两个场景，已交模型任务修复并补回归。模型依赖与真实GPU推理仍在进行，不能将标准库测试当推理效果。
 
 整体验收仍待平台工作流实际导入→标注→检索→选片→调用render；首条样片来自模块CLI，不宣称Web闭环已完成。
+
+## 2026-09-28：render源码集成审查
+
+候选提交 `9762e90`（状态补充`16a903a`）。主协调独立48单元测试：47通过、1Windows symlink权限跳过。最新真实handoff `D:/video/render/handoff/real-research-e071063a44` 的request/result、内部与输出Timeline、22条JSONL进度均通过当前main合同，全部4产物大小/hash核验通过。新版MP4与已查看版本hash一致。
+
+只读代码审查另发现3项已有快测未覆盖的边界，暂缓合入并交render独立修复：
+
+1. research_preview合并不同审核状态的重叠段会把未审核扩展区间提升为human confirmed。
+2. 物理空闲空间条件额外完整预留其他owner的610GB，重复预留已占用空间，合法大量数据时提前失败。
+3. preview实际360×640被写入工程Timeline，但再次导入只接受1080×1920，工程无法重用。
+
+platform可继续使用默认不合并的真实片段做联调；工程正式规格应独立于预览实际编码规格。已通知两任务，不把模块技术测试通过等同于源码所有边界通过。
