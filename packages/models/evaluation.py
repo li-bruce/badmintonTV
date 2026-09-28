@@ -42,14 +42,25 @@ def _records(values: Iterable[Mapping[str, Any]], field: str) -> list[dict[str, 
     return [dict(item) for item in records]
 
 
+def _evidence_text(value: Any) -> bool:
+    """A record/reference must contain text, not a null-like placeholder."""
+    return (isinstance(value, str) and bool(value.strip())
+            and value.strip().casefold() not in {"unknown", "null", "none", "n/a"})
+
+
 def validate_splits(assets: Iterable[Mapping[str, Any]], *, formal: bool = True) -> dict[str, Any]:
     """Reject split leakage, including transitive derivation/hash relationships.
 
     Same match_id, same SHA256 (case-insensitive), and provenance.source_asset_id
     form connected groups. A source ID may reference an asset in this manifest
     or an external original shared by several derived assets. Formal evaluation
-    rejects absent match_id, empty manifests and unassigned splits. Exploratory
-    mode permits missing match_id/unassigned but still rejects known leakage.
+    rejects absent/"unknown" match_id, empty manifests and unassigned splits.
+    It also requires provenance.match_identity_status == "confirmed" and a
+    provenance.split_assignment mapping with unit == "match" plus non-empty
+    textual version/evidence (null-like placeholders are not evidence).
+    Exploratory mode permits missing match_id/unassigned but rejects leakage;
+    case/whitespace variants of "unknown" stay in one quarantined match group.
+    Missing confirmation/split evidence becomes warnings in exploratory mode.
     This checks a full split manifest, not just the selected test subset.
     """
     if type(formal) is not bool:
@@ -79,10 +90,13 @@ def validate_splits(assets: Iterable[Mapping[str, Any]], *, formal: bool = True)
             union(index, by_id[asset_id])
         by_id[asset_id] = index
         match_id = asset.get("match_id")
-        if match_id is None or match_id == "" or (isinstance(match_id, str) and not match_id.strip()):
+        unknown_match = isinstance(match_id, str) and match_id.strip().casefold() == "unknown"
+        if match_id is None or match_id == "" or unknown_match or (isinstance(match_id, str) and not match_id.strip()):
             issue = {"code": "missing_match_id", "asset_id": asset_id}
             (issues if formal else warnings).append(issue)
-            match_id = None
+            # Unknown is not an identity, but must not permit derived/related
+            # samples to be split merely by spelling the placeholder differently.
+            match_id = "unknown" if unknown_match else None
         else:
             _identifier(match_id, "match_id")
         split = asset.get("split", "unassigned")
@@ -100,6 +114,13 @@ def validate_splits(assets: Iterable[Mapping[str, Any]], *, formal: bool = True)
             provenance = {}
         if not isinstance(provenance, Mapping):
             raise EvaluationInputError("provenance must be a mapping")
+        if provenance.get("match_identity_status") != "confirmed":
+            (issues if formal else warnings).append({"code": "missing_match_evidence", "asset_id": asset_id})
+        assignment = provenance.get("split_assignment")
+        if (not isinstance(assignment, Mapping) or assignment.get("unit") != "match"
+                or not _evidence_text(assignment.get("version"))
+                or not _evidence_text(assignment.get("evidence"))):
+            (issues if formal else warnings).append({"code": "missing_split_evidence", "asset_id": asset_id})
         source_id = provenance.get("source_asset_id")
         if source_id is not None:
             _identifier(source_id, "provenance.source_asset_id")

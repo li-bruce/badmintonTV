@@ -14,9 +14,17 @@ from packages.models.evaluation import (
 
 
 def asset(asset_id, match_id, split="test", **fields):
+    provenance = {"match_identity_status": "confirmed", "split_assignment": {
+        "unit": "match", "version": "test-fixture-v1",
+        "evidence": "Synthetic unit-test fixture only; not real dataset evidence."}}
+    extra_provenance = fields.pop("provenance", {})
+    if isinstance(extra_provenance, dict):
+        provenance.update(extra_provenance)
+    else:
+        provenance = extra_provenance
     return {"asset_id": asset_id, "match_id": match_id, "split": split,
             "source_type": "broadcast", "discipline": "singles", "camera_type": "rear",
-            **fields}
+            "provenance": provenance, **fields}
 
 
 def frame(source_ms, x=0, score=1, track_id="track-a"):
@@ -43,6 +51,24 @@ class SplitTests(unittest.TestCase):
             validate_splits([asset("a", None)])
         report = validate_splits([asset("a", None)], formal=False)
         self.assertEqual(report["warnings"][0]["code"], "missing_match_id")
+
+    def test_unknown_match_remains_missing_even_when_split_is_test(self):
+        rows = [asset(str(index), value, "test")
+                for index, value in enumerate(("unknown", "UNKNOWN", "UnKnOwN", " unknown "))]
+        with self.assertRaises(EvaluationInputError) as raised:
+            validate_splits(rows)
+        self.assertEqual([issue["code"] for issue in raised.exception.issues], ["missing_match_id"] * 4)
+
+    def test_exploratory_unknown_variants_stay_one_quarantined_group(self):
+        rows = [asset("a", "unknown", "unassigned"), asset("b", " UNKNOWN ", "unassigned")]
+        result = validate_splits(rows, formal=False)
+        self.assertEqual(result["group_count"], 1)
+        self.assertEqual(result["groups"][0]["asset_ids"], ["a", "b"])
+        rows[0]["split"] = "train"
+        rows[1]["split"] = "test"
+        with self.assertRaises(EvaluationInputError) as raised:
+            validate_splits(rows, formal=False)
+        self.assertIn("split_leakage", {issue["code"] for issue in raised.exception.issues})
 
     def test_same_hash_different_match_still_leaks(self):
         with self.assertRaises(EvaluationInputError):
@@ -78,6 +104,41 @@ class SplitTests(unittest.TestCase):
         for provenance in ([], False, ""):
             with self.subTest(provenance=provenance), self.assertRaises(EvaluationInputError):
                 validate_splits([asset("a", "m1", provenance=provenance)])
+
+    def test_nonempty_id_without_evidence_cannot_enter_formal_evaluation(self):
+        row = asset("a", "plausible-match-id", "test")
+        del row["provenance"]
+        with self.assertRaises(EvaluationInputError) as raised:
+            validate_splits([row])
+        self.assertEqual({issue["code"] for issue in raised.exception.issues},
+                         {"missing_match_evidence", "missing_split_evidence"})
+
+    def test_unconfirmed_or_unknown_match_evidence_rejected(self):
+        for status in (None, "unknown", "unconfirmed", "", "CONFIRMED", True):
+            row = asset("a", "m1", provenance={"match_identity_status": status})
+            with self.subTest(status=status), self.assertRaises(EvaluationInputError) as raised:
+                validate_splits([row])
+            self.assertIn("missing_match_evidence", {issue["code"] for issue in raised.exception.issues})
+
+    def test_missing_wrong_unit_or_placeholder_split_evidence_rejected(self):
+        valid = {"unit": "match", "version": "v1", "evidence": "reviewed split manifest revision 1"}
+        assignments = [None, {}, [], dict(valid, unit="clip"), dict(valid, unit="unknown")]
+        for field in ("version", "evidence"):
+            assignments.extend(dict(valid, **{field: value}) for value in
+                               (None, "", " ", " UNKNOWN ", "null", "None", "n/a", True))
+        for assignment in assignments:
+            row = asset("a", "m1", provenance={"split_assignment": assignment})
+            with self.subTest(assignment=assignment), self.assertRaises(EvaluationInputError) as raised:
+                validate_splits([row])
+            self.assertIn("missing_split_evidence", {issue["code"] for issue in raised.exception.issues})
+
+    def test_exploratory_missing_evidence_warns_without_claiming_confirmation(self):
+        row = asset("a", "m1")
+        row["provenance"] = {"match_identity_status": "unknown"}
+        result = validate_splits([row], formal=False)
+        self.assertEqual({warning["code"] for warning in result["warnings"]},
+                         {"missing_match_evidence", "missing_split_evidence"})
+        self.assertEqual(row["provenance"]["match_identity_status"], "unknown")
 
 
 class MetricTests(unittest.TestCase):

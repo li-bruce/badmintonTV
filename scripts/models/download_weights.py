@@ -66,7 +66,10 @@ def fetch(url, target, maximum, expected_sha=None, expected_blob=None, hash_pref
         print(json.dumps({'resume_file':target.name,'existing_bytes':count}),flush=True)
     if count != maximum:
         request = urllib.request.Request(url,headers={'Range':f'bytes={count}-'} if count else {})
-        with urllib.request.urlopen(request, timeout=45) as response, temp.open('ab' if count else 'xb') as output:
+        # An authenticated zero-byte partial can remain after a first-read
+        # timeout. Its source metadata was checked above; append mode also
+        # permits retrying that case without replacing an unknown file.
+        with urllib.request.urlopen(request, timeout=45) as response, temp.open('ab' if temp.exists() else 'xb') as output:
             if count and (response.status != 206 or not response.headers.get('Content-Range','').startswith(f'bytes {count}-')):
                 raise ValueError('server did not honor bounded resume; partial preserved')
             length = response.headers.get('Content-Length')

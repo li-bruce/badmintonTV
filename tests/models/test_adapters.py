@@ -199,10 +199,36 @@ class AdapterGuardTests(unittest.TestCase):
         with storage.reserve(self.root, 1000):
             ledger = self.root / "models/.writer-reservation.json"
             original = ledger.read_bytes()
-            with self.assertRaises(FileExistsError):
+            with self.assertRaises(ModelBlocked) as caught:
                 with storage.reserve(self.root, 1000):
                     self.fail("nested writer must not acquire the reservation")
+            self.assertEqual(caught.exception.code, "OWNER_BUSY")
             self.assertEqual(ledger.read_bytes(), original)
+        self.assert_no_writer_lock()
+
+    def test_real_query_run_with_busy_owner_reports_blocked_and_preserves_lock(self):
+        request = self.request()
+        request["attempt_id"] = "attempt-busy-owner"
+        request_path = self.base / "owner-busy-request.json"
+        result_path = self.base / "owner-busy-result.json"
+        request_path.write_text(json.dumps(request), encoding="utf-8")
+        with storage.reserve(self.root, 1000):
+            ledger = self.root / "models/.writer-reservation.json"
+            original = ledger.read_bytes()
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = protocol.run_request(request_path, result_path)
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+            self.assertEqual((exit_code, result["status"]), (2, "blocked"))
+            self.assertEqual(result["error"]["code"], "OWNER_BUSY")
+            self.assertEqual(result["job_id"], request["job_id"])
+            self.assertEqual(result["attempt_id"], "attempt-busy-owner")
+            self.assertEqual(result["artifacts"], [])
+            self.assertEqual(result["events"], [])
+            self.assertEqual(ledger.read_bytes(), original)
+            self.assertFalse((self.output / "query.json").exists())
+            progress = [json.loads(line) for line in stdout.getvalue().splitlines()]
+            self.assertEqual(progress[-1]["stage"], "blocked")
         self.assert_no_writer_lock()
 
     def test_reservation_released_after_body_error_and_quota_failure(self):
@@ -374,6 +400,59 @@ class AdapterGuardTests(unittest.TestCase):
                 download_weights.fetch("https://invalid.test/mock", target, 6)
         self.assertEqual(partial.read_bytes(), b"abc")
         self.assertFalse(target.exists())
+
+    def test_zero_byte_partial_from_read_timeout_can_retry_same_source(self):
+        target = self.root / "models/weights/mock.bin"
+        partial = target.with_name(target.name + ".partial")
+        metadata = partial.with_name(partial.name + ".source.json")
+        expected = hashlib.sha256(b"abc").hexdigest()
+        interrupted = Response(b"")
+        interrupted.read = Mock(side_effect=TimeoutError("synthetic first-read timeout"))
+        with patch.object(download_weights.urllib.request, "urlopen", return_value=interrupted), redirect_stdout(io.StringIO()):
+            with self.assertRaises(TimeoutError):
+                download_weights.fetch("https://invalid.test/mock", target, 3, expected)
+        self.assertFalse(target.exists())
+        self.assertEqual(partial.read_bytes(), b"")
+        self.assertTrue(metadata.is_file())
+        original_metadata = metadata.read_bytes()
+        with patch.object(download_weights.urllib.request, "urlopen", return_value=Response(b"abc")) as urlopen, redirect_stdout(io.StringIO()):
+            result = download_weights.fetch("https://invalid.test/mock", target, 3, expected)
+        self.assertIsNone(urlopen.call_args.args[0].get_header("Range"))
+        self.assertEqual(target.read_bytes(), b"abc")
+        self.assertEqual(result["sha256"], expected)
+        self.assertEqual(metadata.read_bytes(), original_metadata)
+        self.assertFalse(partial.exists())
+        self.assertEqual(list(target.parent.glob("mock.bin.partial.unverified-*")), [])
+
+    def test_zero_byte_partial_without_source_is_retained_before_fresh_download(self):
+        target = self.root / "models/weights/mock.bin"
+        target.parent.mkdir(parents=True)
+        partial = target.with_name(target.name + ".partial")
+        partial.write_bytes(b"")
+        expected = hashlib.sha256(b"abc").hexdigest()
+        with patch.object(download_weights.urllib.request, "urlopen", return_value=Response(b"abc")), redirect_stdout(io.StringIO()):
+            download_weights.fetch("https://invalid.test/mock", target, 3, expected)
+        retained = list(target.parent.glob("mock.bin.partial.unverified-*"))
+        self.assertEqual(len(retained), 1)
+        self.assertEqual(retained[0].read_bytes(), b"")
+        self.assertEqual(target.read_bytes(), b"abc")
+        self.assertFalse(partial.exists())
+
+    def test_zero_byte_partial_with_different_source_is_preserved_and_rejected(self):
+        target = self.root / "models/weights/mock.bin"
+        target.parent.mkdir(parents=True)
+        partial = target.with_name(target.name + ".partial")
+        partial.write_bytes(b"")
+        self.partial_metadata(partial, 3, url="https://invalid.test/old-revision/mock")
+        metadata = partial.with_name(partial.name + ".source.json")
+        original_metadata = metadata.read_bytes()
+        with patch.object(download_weights.urllib.request, "urlopen", side_effect=AssertionError("different source must not be downloaded")):
+            with self.assertRaisesRegex(ValueError, "source identity"):
+                download_weights.fetch("https://invalid.test/mock", target, 3)
+        self.assertEqual(partial.read_bytes(), b"")
+        self.assertEqual(metadata.read_bytes(), original_metadata)
+        self.assertFalse(target.exists())
+        self.assertEqual(list(target.parent.glob("mock.bin.partial.unverified-*")), [])
 
     def test_download_truncated_body_and_hash_mismatch_never_publish(self):
         for name, content, expected_size, expected_hash in (
