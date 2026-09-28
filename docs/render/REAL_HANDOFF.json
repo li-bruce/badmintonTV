@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-28T15:28:14.551149+00:00",
+  "job_id": "real-research-e071063a44",
+  "request": "render/handoff/real-research-e071063a44/request.json",
+  "result": "render/handoff/real-research-e071063a44/result.json",
+  "render_output": "render/jobs/real-research-e071063a44/attempt-01",
+  "status": "succeeded",
+  "kind": "real_source_research_preview",
+  "human_acceptance": "pending",
+  "source_rights": "unknown; not for publication",
+  "command": [
+    "C:\\Users\\USER\\miniforge3\\python.exe",
+    "-m",
+    "packages.render",
+    "run",
+    "--request",
+    "D:\\video\\render\\handoff\\real-research-e071063a44\\request.json",
+    "--result",
+    "D:\\video\\render\\handoff\\real-research-e071063a44\\result.json",
+    "--storage-root",
+    "D:\\video",
+    "--ffmpeg",
+    "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\ffmpeg-9.0.2-essentials_build\\bin\\ffmpeg.exe",
+    "--ffprobe",
+    "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\ffmpeg-9.0.2-essentials_build\\bin\\ffprobe.exe"
+  ]
+}
