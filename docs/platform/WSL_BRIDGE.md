@@ -14,13 +14,13 @@ worker追加 `run --request <Windows request.json> --result <Windows result.json
 
 Windows外层原子更新该attempt的 `bridge-heartbeat.json`。Linux前台入口启动独立session的guardian后等待；guardian启动固定模型CLI的独立process group，检查心跳和取消文件，只终止自己持有的模型进程组。Windows worker/桥接死亡导致心跳失联时，默认8秒内发SIGTERM，最多3秒后SIGKILL。模型结束后guardian清理遗留同组子进程，发布 `bridge.done.json`（job_id、attempt_id、compute_stopped、pgid、退出码与原因）。禁用全局pkill。
 
-worker取消时Windows Job Object停止外层bridge；GPU租约须等最多15秒并核对done身份与compute_stopped=true才释放，否则标记orphaned保留锁。GPU窗口由管理员单独授权，桥接不创设或延长GPU授权。GPU表与窗口接口见[GPU.md](GPU.md)。worker已在交换目录、模型输出及返回Artifact处接入物理owner路径校验；platform/jobs指向data的junction不允许写入。
+worker取消时Windows Job Object停止外层bridge；job保持running/cancel_requested，job与GPU心跳继续，最多15秒等待并核对done身份与compute_stopped=true。核验完成且GPU租约释放后才写cancelled终态。无匹配停止证据则写failed/WORKER_INTERRUPTED并标记orphaned保留锁；正常CLI返回也不能绕过停止核验提前写succeeded。GPU窗口由管理员单独授权，桥接不创设或延长GPU授权。GPU表与窗口接口见[GPU.md](GPU.md)。worker已在交换目录、模型输出及返回Artifact处接入物理owner路径校验；platform/jobs指向data的junction不允许写入。
 
 固定离线环境通过 `/usr/bin/env` argv逐项传入：BTV_STORAGE_ROOT、BTV_MODELS_ENV、CONDA_PKGS_DIRS、CONDA_ENVS_PATH、HF_HOME、TORCH_HOME、TMPDIR、PIP_CACHE_DIR、PYTHONDONTWRITEBYTECODE、HF_HUB_DISABLE_TELEMETRY、HF_HUB_OFFLINE、TRANSFORMERS_OFFLINE和TOKENIZERS_PARALLELISM。值与models任务确认的环境一致，缓存分别在models与runtime/models owner目录；不通过shell source脚本。
 
 已运行的验证：
 
-- `python -m pytest tests/platform/test_wsl_bridge.py -q -p no:cacheprovider` → 27 passed、1 skipped；常规跳过项为需要显式授权的实际Windows/WSL边界测试。覆盖驱动器/穿越/ADS/设备名/同attempt边界、argv与离线环境、done身份校验、即使payload声称CPU仍必须租约、只有匹配done才释放GPU而陈旧done保留orphan。
+- `python -m pytest tests/platform/test_wsl_bridge.py -q -p no:cacheprovider` → 31 passed、1 skipped；常规跳过项为需要显式授权的实际Windows/WSL边界测试。覆盖驱动器/穿越/ADS/设备名/同attempt边界、argv与离线环境、done身份校验、即使payload声称CPU仍必须租约、只有匹配done才释放GPU而陈旧done保留orphan。新增四种取消停止证据回归，在等待内部断言running/cancel_requested与两条心跳继续；没有启动GPU。
 - Windows实际CPU watchdog测试单独开启 `BTV_WSL_BRIDGE_TEST_ENV=/mnt/d/video/runtime/models/env` 后运行 `-k windows_job_death` → 1 passed（3.34s）。使用仅标准库的假模型（不载torch、不使用GPU），模型创建一个60秒子进程。Windows Job Object被强制关闭，外层bridge和wsl.exe被停止，detached guardian检测失联并终止自己的模型进程组。
 - 证据：`D:/video/platform/jobs/job-bridge-watchdog-9133279272d84a75857973c762b168fb/attempt-1/bridge.done.json`。job_id同路径，attempt-1，reason=heartbeat_lost，compute_stopped=true，exit_code=130；guardian_pid=149391、model_pgid=149392，started_at=1790611062.4788423、finished_at=1790611064.91388。该测试特意使用2秒心跳期限；生产默认8秒。
 - 该运行仅出现pytest缓存目录写入权限警告，测试断言与Linux停机证据均通过；后续测试使用 `-p no:cacheprovider`。

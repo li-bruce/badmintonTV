@@ -4,7 +4,7 @@
 
 ## 自动化
 
-`D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform tests/contracts -q`：227 passed、2 skipped。跳过项是runtime测试账号不能创建symlink与需显式选择的WSL实机测试；后者已另外实机运行1 passed。contracts及storage真实Windows junction越界测试已通过。Starlette针对httpx测试客户端发弃用提示，当前功能测试通过。
+`D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform tests/contracts -q`：236 passed、2 skipped。跳过项是runtime测试账号不能创建symlink与需显式选择的WSL实机测试；后者已另外实机运行1 passed。contracts及storage真实Windows junction越界测试已通过。Starlette针对httpx测试客户端发弃用提示，当前功能测试通过。
 
 覆盖：统一合同与attempt/退出码；实际SHA欺骗拒绝；路径逃逸；event修订409/批量事务回滚/来源为model的人类确认保护；human/agent审计；同球员同回合对手插拍；unknown候选不视为已命中；否定/混合查询拒绝；候选明确确认；传递重叠合并；LLM密钥遮盖；跨来源写入拒绝；任务领取竞争、租约中断、心跳、重试、取消完整子进程树、产物hash、资源容量、缺失模型blocked。
 

@@ -504,6 +504,7 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
     context.thread.start()
     ledger = None
     reservation = None
+    status, result, error = "failed", None, {"code": "WORKER_INTERRUPTED", "message": "worker interrupted before completion"}
     try:
         ledger = CapacityLedger(queue.db_path, storage_root)
         context.check()
@@ -533,37 +534,43 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
         handler = {"probe": probe, "verify_manifest": verify_manifest}.get(job["operation"], adapter)
         result = handler(context, exchange_dir)
         context.check()
-        queue.finish(job["job_id"], worker_id, result["status"], result=result, error=result.get("error"), expected_attempt=job["attempt"])
+        status, error = result["status"], result.get("error")
     except JobCancelled as exc:
-        try:
-            queue.finish(job["job_id"], worker_id, "cancelled", error={"code": "cancelled", "message": context.redact(exc)}, expected_attempt=job["attempt"])
-        except RuntimeError:
-            pass  # A newer lease/recovery owns the durable state; never overwrite it.
+        status, result, error = "cancelled", None, {"code": "cancelled", "message": context.redact(exc)}
     except JobBlocked as exc:
-        try:
-            queue.finish(job["job_id"], worker_id, "blocked", error={"code": exc.code, "message": context.redact(exc)}, expected_attempt=job["attempt"])
-        except RuntimeError:
-            pass
+        status, result, error = "blocked", None, {"code": exc.code, "message": context.redact(exc)}
     except Exception as exc:
-        try:
-            queue.finish(job["job_id"], worker_id, "failed", error={"code": type(exc).__name__, "message": context.redact(exc)}, expected_attempt=job["attempt"])
-        except RuntimeError:
-            pass
+        status, result, error = "failed", None, {"code": type(exc).__name__, "message": context.redact(exc)}
     finally:
-        if context.gpu_lease:
+        # Keep the job running and both heartbeats alive until the external
+        # compute tree is proven stopped. Terminal state is the last write.
+        cleanup_error = None
+        try:
             compute_stopped = not context.compute_started or context.compute_stopped
             if context.bridge_done_path and context.compute_started:
                 from .wsl_bridge import wait_for_bridge_done
                 compute_stopped = wait_for_bridge_done(context.bridge_done_path, job["job_id"], f"attempt-{job['attempt']}", timeout=15)
-            if compute_stopped:
-                context.gpu_coordinator.release(context.gpu_lease["lease_id"], worker_id, compute_stopped=True)
-            else:
-                context.gpu_coordinator.mark_orphaned(context.gpu_lease["lease_id"], worker_id, "Compute stop was not confirmed by matching bridge done evidence")
-                queue.append_log(job["job_id"], "error", stage="gpu_cleanup", message="未确认计算停止；GPU租约已保留为orphaned，需管理员核验")
-        context.stopped.set()
-        context.thread.join(timeout=6)
-        if reservation:
-            ledger.release(reservation)
+            if not compute_stopped:
+                cleanup_error = "未确认本任务计算进程停止；保留GPU租约，需管理员核验"
+            elif context.gpu_lease and not context.gpu_coordinator.release(context.gpu_lease["lease_id"], worker_id, compute_stopped=True):
+                cleanup_error = "计算已停止，但GPU租约不再由当前worker有效持有；需管理员核验"
+        except Exception as exc:
+            cleanup_error = "计算停止核验失败：" + context.redact(exc)
+        try:
+            if cleanup_error:
+                status, result, error = "failed", None, {"code": "WORKER_INTERRUPTED", "message": cleanup_error}
+                if context.gpu_lease:
+                    context.gpu_coordinator.mark_orphaned(context.gpu_lease["lease_id"], worker_id, cleanup_error)
+                queue.append_log(job["job_id"], "error", stage="compute_cleanup", message=cleanup_error)
+            try:
+                queue.finish(job["job_id"], worker_id, status, result=result, error=error, expected_attempt=job["attempt"])
+            except RuntimeError:
+                pass  # A newer lease/recovery owns durable state; never overwrite it.
+        finally:
+            context.stopped.set()
+            context.thread.join(timeout=6)
+            if reservation:
+                ledger.release(reservation)
     return queue.get(job["job_id"])
 
 

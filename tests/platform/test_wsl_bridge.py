@@ -106,11 +106,74 @@ def test_worker_gpu_release_requires_matching_bridge_done(tmp_path, monkeypatch,
         return 0, "", ""
     monkeypatch.setattr(WorkerContext, "execute", fixture_execute)
     queue.enqueue("model", {"model_id": "pose", "model_version": "1", "adapter_operation": "pose", "gpu_required": False, "assets": [], "parameters": {}})
-    assert run_once(queue, tmp_path)["status"] == "succeeded"
+    result = run_once(queue, tmp_path)
     if matching_done:
+        assert result["status"] == "succeeded"
         assert coordinator.status()["lease"] is None
     else:
+        assert result["status"] == "failed"
+        assert result["error"]["code"] == "WORKER_INTERRUPTED"
         assert coordinator.status()["code"] == expected_code
+
+
+@pytest.mark.parametrize("done_case", ["matching", "false", "mismatched", "missing"])
+def test_cancel_stays_running_and_heartbeating_until_bridge_cleanup(tmp_path, monkeypatch, done_case):
+    from packages.runtime import Queue
+    from packages.runtime.gpu import GPUCoordinator
+    from packages.runtime.worker import JobCancelled, WorkerContext, run_once
+    import packages.runtime.wsl_bridge as bridge
+    queue = Queue(tmp_path / "runtime.sqlite3")
+    coordinator = GPUCoordinator(queue.db_path)
+    coordinator.grant_window("fixture-window", ["pose"], 60, coordination_note="NoGPU cancellation/cleanup protocol fixture")
+    monkeypatch.setenv("BTV_MODEL_COMMANDS_JSON", json.dumps({"pose": [sys.executable, "-m", "packages.runtime.wsl_bridge"]}))
+    original_wait = bridge.wait_for_bridge_done
+    observed_leases = []
+
+    def fixture_execute(self, argv, *args, **kwargs):
+        self.compute_started, self.compute_stopped = True, True
+        queue.request_cancel(self.job["job_id"])
+        raise JobCancelled("fixture Windows bridge stopped; Linux stop confirmation is still pending")
+
+    def wait_for_cleanup(path, job_id, attempt_id, timeout=15):
+        live = queue.get(job_id)
+        lease = coordinator.status()["lease"]
+        assert live["status"] == "running"
+        assert live["cancel_requested"] is True
+        assert lease["status"] == "active"
+        observed_leases.append(lease["lease_id"])
+        before_job_heartbeat = live["lease_expires_at"]
+        before_gpu_heartbeat = lease["expires_at"]
+        deadline = time.monotonic() + 1.2
+        while time.monotonic() < deadline:
+            live = queue.get(job_id)
+            lease = coordinator.get(lease["lease_id"])
+            assert live["status"] == "running"
+            assert live["cancel_requested"] is True
+            assert lease["status"] == "active"
+            if live["lease_expires_at"] > before_job_heartbeat and lease["expires_at"] > before_gpu_heartbeat:
+                break
+            time.sleep(0.02)
+        else:
+            pytest.fail("job and GPU heartbeats did not advance during bridge cleanup")
+        if done_case != "missing":
+            Path(path).write_text(json.dumps({"job_id": job_id, "attempt_id": attempt_id if done_case != "mismatched" else "attempt-stale",
+                                             "compute_stopped": done_case != "false"}), encoding="utf-8")
+        return original_wait(path, job_id, attempt_id, timeout=0)
+
+    monkeypatch.setattr(WorkerContext, "execute", fixture_execute)
+    monkeypatch.setattr(bridge, "wait_for_bridge_done", wait_for_cleanup)
+    job = queue.enqueue("model", {"model_id": "pose", "model_version": "1", "adapter_operation": "pose", "gpu_required": False, "assets": [], "parameters": {}})
+    result = run_once(queue, tmp_path, worker_id="cleanup-fixture-worker", lease_seconds=1.5)
+    assert len(observed_leases) == 1
+    lease = coordinator.get(observed_leases[0])
+    if done_case == "matching":
+        assert result["status"] == "cancelled"
+        assert lease["status"] == "released"
+    else:
+        assert result["status"] == "failed"
+        assert result["error"]["code"] == "WORKER_INTERRUPTED"
+        assert lease["status"] == "orphaned"
+    assert queue.get(job["job_id"])["cancel_requested"] is True
 
 
 @pytest.mark.skipif(os.name != "nt" or not os.environ.get("BTV_WSL_BRIDGE_TEST_ENV"), reason="explicit Windows/WSL CPU watchdog integration opt-in required")

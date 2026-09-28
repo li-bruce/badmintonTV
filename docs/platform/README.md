@@ -40,6 +40,6 @@ LLM仅发送查询文字+schema；设置保存base_url/model/timeout/key_env，�
 D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform tests/contracts -q
 ```
 
-当前测试227 passed、2 skipped（runtime独立symlink创建权限、显式选择的WSL实机测试；后者已另行通过）。真实视频与浏览器记录见 [VALIDATION.md](VALIDATION.md)。测试合成字节只证明合同/状态机，不是视频识别成绩。无私人录像、无细手法专家真值；自动动作识别准确率未作承诺。
+当前测试236 passed、2 skipped（runtime独立symlink创建权限、显式选择的WSL实机测试；后者已另行通过）。真实视频与浏览器记录见 [VALIDATION.md](VALIDATION.md)。测试合成字节只证明合同/状态机，不是视频识别成绩。无私人录像、无细手法专家真值；自动动作识别准确率未作承诺。
 
 库扫描/网络下载不属于当前平台长任务适配器；通过library已生成manifest与原位引用接入。前端没有复杂轨迹编辑器，视频跟踪框使用已实测Label Studio。跨WSL为按任务启动的受控模型CLI；尚无跨镜头回放自动去重与常驻模型服务。
