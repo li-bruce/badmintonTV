@@ -204,6 +204,8 @@ def extract_member(
     ``.extract.json`` records source hash, member CRC, outcome, and errors. Failed
     partials/records are retained and never silently reused. Crashed locks and
     reservations require explicit recovery after confirming no writer is active.
+    Only STORED and DEFLATED members are supported: ZipExtFile's other codecs
+    can expand unbounded internal buffers even when read() requests are small.
     """
     _strict_member_name(member_name)
     if type(max_bytes) is not int or max_bytes <= 0:
@@ -263,6 +265,8 @@ def extract_member(
                 raise ArchiveError("unsafe_member_type", "Selected ZIP member must be a regular file")
             if member["encrypted"]:
                 raise ArchiveError("encrypted_member", "Encrypted ZIP members are not extracted")
+            if info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+                raise ArchiveError("unsupported_compression", "Only ZIP_STORED and ZIP_DEFLATED members support bounded extraction")
             if info.file_size > max_bytes:
                 raise ArchiveError("size_limit", "Selected member's declared size exceeds max_bytes")
         except Exception as error:
