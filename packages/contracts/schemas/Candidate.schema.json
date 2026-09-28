@@ -171,6 +171,48 @@
       "title": "Review Status",
       "type": "string"
     },
+    "reviewer": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewer"
+    },
+    "reviewer_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "human",
+            "agent"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewer Type"
+    },
+    "reviewed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewed At"
+    },
     "evidence": {
       "items": {
         "$ref": "#/$defs/Evidence"

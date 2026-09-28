@@ -150,6 +150,7 @@ class EventProvenance(ContractModel):
     model_id: Identifier | None = None
     model_version: NonEmpty | None = None
     run_id: Identifier | None = None
+    reviewer_type: Literal["human", "agent"] | None = None
 
 
 class Event(VersionedModel):
@@ -173,6 +174,7 @@ class Event(VersionedModel):
     evidence: list[Evidence] = Field(default_factory=list)
     unknown_reason: str | None = None
     reviewer: NonEmpty | None = None
+    reviewer_type: Literal["human", "agent"] | None = None
     reviewed_at: datetime | None = None
     previous_revision: PositiveInt | None = None
 
@@ -274,6 +276,9 @@ class Candidate(VersionedModel):
     uncertainty_reasons: list[str] = Field(default_factory=list)
     rank_score: FiniteFloat | None = None
     review_status: ReviewStatus = "unreviewed"
+    reviewer: NonEmpty | None = None
+    reviewer_type: Literal["human", "agent"] | None = None
+    reviewed_at: datetime | None = None
     evidence: list[Evidence] = Field(default_factory=list)
 
     @model_validator(mode="after")

@@ -54,6 +54,22 @@
           ],
           "default": null,
           "title": "Run Id"
+        },
+        "reviewer_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "human",
+                "agent"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer Type"
         }
       },
       "title": "EventProvenance",
@@ -318,6 +334,22 @@
       ],
       "default": null,
       "title": "Reviewer"
+    },
+    "reviewer_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "human",
+            "agent"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewer Type"
     },
     "reviewed_at": {
       "anyOf": [
