@@ -62,7 +62,7 @@ python3 scripts/models/budget_check.py --reserve-runtime 18000000000 --reserve-m
 "$BTV_MODELS_ENV/bin/python" -m pip check
 ```
 
-`bootstrap.sh` 保存首轮安装流程，`complete_environment.sh` 保存补齐依赖流程；上面的显式 Conda 清单加完整 pip 锁用于重建冻结版本。包源不可达、指定 wheel 不可用或 `pip check` 失败时，应记录具体错误；不能把安装部分完成称为环境就绪。
+`bootstrap.sh` 保存首轮安装流程，`complete_environment.sh` 保存补齐依赖流程；上面的显式Conda清单加完整pip锁用于重建冻结版本。补装脚本持有共享安装锁后，先用CPU包metadata确认torch/vision精确版本并运行pip check，阻止缺框架时意外下载大型CUDA依赖；随后用`--reserve-runtime 3000000000`检查剩余依赖下载/解包额外峰值，再以完整版本锁作为约束执行pip；安装后再次复核容量。`set -euo pipefail`使预检失败时在pip install前停止；3GB预算只用于既有完整torch/vision环境的本轮依赖补装，不是任意未来依赖保证。此修正通过bash语法/顺序静态检查及3种metadata模拟，未重复安装/下载。包源不可达、指定wheel不可用或pip check失败时记录错误，不能把部分安装称为环境就绪。
 
 ## 路径、离线权重与容量
 
