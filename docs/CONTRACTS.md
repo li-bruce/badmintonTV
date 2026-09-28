@@ -104,6 +104,8 @@
 
 Timeline 是可编辑工程；片段通过Asset映射解析路径，不能直接执行传来的FFmpeg过滤器。speed>0，音频策略source/mute；慢放使用匹配音频变速或显式静音。fit=contain/crop；默认contain保留整个比赛画面，crop必须有明确裁切窗口，运动跟随可作为后续扩展。序列合并/回放去重应保留被合并事件的回查关系。
 
+研究预览兼容扩展：`parameters.research_preview=true` 可处理未人工确认的片段，输出必须带“待人工确认·本地研究样片”标记，QA记录 `human_confirmed_segments=false`。这用于先交付本地可审阅样片，不会将unreviewed事件变为confirmed。片段边界/播放检查、技法真值审核、公开发布权限分别记录；代理审片来源为agent，不能冒充human审核。无该参数时保持确认片段的正式流程。
+
 渲染采用同一CLI请求/result协议，operation=render，parameters仅含timeline及渲染设置，assets数组只放顶层，由执行器内部按asset_id建立映射。render result 的artifacts至少有MP4、timeline JSON、逐段原片/输出时间映射、QA报告；OTIO为可选互操作产物，不替代实际编码。QA记录输出尺寸、时长、音视频流、解码检查和人工观看结论。导出本地研究样片与公开发布资格分别报告。
 
 完整外层请求形状（assets中的对象字段按上表填齐，下面只表示结构，不是可下载/已验证素材）：

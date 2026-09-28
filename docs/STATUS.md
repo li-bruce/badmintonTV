@@ -22,4 +22,6 @@
 
 真实素材检查点：`D:/video/data/handoff/assets.v1.json` 已发布4段FineBadmintonBenchmark小样，长度4634/5367/3900/6000ms、1280×720/30fps，保留逐帧PTS；library已完整解码，主协调独立复核文件大小与SHA-256全部匹配。源比赛映射、球员身份与细手法尚未核验，统一split=unassigned，不用于宣称训练/测试独立或细动作准确率。已交给其他三模块开展真实素材联调；端到端业务闭环仍待完成。
 
+渲染检查点：已协调research_preview显式预览参数，允许未确认片段形成带状态标记的本地样片；不等待细标签真值即可验证成片流程。render报告已修复约21.333ms的AAC拼接起点偏移，合成音视频双流起点为0、完整解码通过；真实3片段样片制作中。
+
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
