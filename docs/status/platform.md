@@ -28,3 +28,4 @@
 - 集成启动：新增configure-platform-adapters.ps1默认使用其所在集成仓库构造argv/PYTHONPATH；旧工作树仅本轮临时联调。服务交接前API父26020/子52252，worker父772/子34568；LS18081保持。主任务接管前由本任务核对精确命令并停止这组进程。
 - 后续已提交：923bb76（业务审查修复）；0a60a83e38f90fdadc6025cbad1fa56f4abda41c（不可变LS快照，旧任务不能借新seed/CAS权限，无snapshot旧导出409须重导）；e4c2749ed9bc3c5fbd55b73790ce63f3e0c8d2c2（GPU/WSL/容量扫描/物理owner/启动配置）。主任务负责cherry-pick审查与最终服务切换，本任务未推送。
 - 最终复核修正：取消等待保持running/cancel_requested且两条心跳继续；停止核验后才发布终态，无证据failed/WORKER_INTERRUPTED并保留GPU orphan。Queue获得写事务后重新采时，5项实际SQLite争锁回归覆盖过期续租/完成拒绝与领取时钟。未重跑GPU，未新增模型能力。
+- 最终修复提交：fcb6574743d19d4382def565b67c4ca5b585d6f4，236 passed/2 skipped；主任务独立11回归及main全模块检查通过后授权服务切换。2026-09-29已再次确认原生队列running/queued=0、GPU lease/window均null，停止本工作树API26020/52252与worker772/34568，核验四PID退出、18080端口无监听。Label Studio 127.0.0.1:18081/PID56520保留。主任务随后从main启动并接管，本工作树不再恢复旧服务。
