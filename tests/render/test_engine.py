@@ -236,6 +236,22 @@ class StorageReservationTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, "quota_exceeded")
         self.assertFalse(self.lock.exists())
 
+    def test_existing_360gb_and_600gb_free_allow_a_small_job(self):
+        self.disk_usage.return_value = SimpleNamespace(free=600_000_000_000)
+        with patch("packages.render.storage.directory_bytes", side_effect=[10_000_000_000, 360_000_000_000]):
+            with reservation(self.root, "normal-small-job", 100_000_000) as ledger:
+                self.assertEqual(ledger["global_used_bytes"], 360_000_000_000)
+                self.assertEqual(ledger["reserved_bytes"], 100_000_000)
+                self.assertEqual(ledger["other_owner_allocation_ceiling_bytes"], 610_000_000_000)
+                self.assertIsNone(ledger["other_active_reserved_bytes"])
+        self.assertFalse(self.lock.exists())
+
+    def test_physical_free_space_exact_peak_plus_margin_succeeds(self):
+        self.disk_usage.return_value = SimpleNamespace(free=256_000_101)
+        with reservation(self.root, "disk-exact", 101) as ledger:
+            self.assertEqual(ledger["physical_safety_margin_bytes"], 256_000_000)
+        self.assertFalse(self.lock.exists())
+
     def test_physical_free_space_includes_the_required_safety_margin(self):
         self.disk_usage.return_value = SimpleNamespace(free=256_000_100)
         with self.assertRaises(RenderError) as raised:

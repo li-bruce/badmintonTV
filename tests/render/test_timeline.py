@@ -7,8 +7,10 @@ import unittest
 from packages.render.timeline import (
     RenderError,
     assets_by_id,
+    export_timeline,
     normalize_timeline,
     safe_path,
+    selection_review_summary,
 )
 
 
@@ -237,10 +239,24 @@ class TimelineTests(TimelineFixture, unittest.TestCase):
                 self.assertEqual(result["output_frames"], frames)
                 self.assertAlmostEqual(result["output_duration_ms"], milliseconds, places=6)
 
-    def test_preview_changes_dimensions_and_marks_metadata(self):
+    def test_preview_changes_effective_dimensions_but_preserves_project(self):
         result = self.normalize(preview=True)
-        self.assertEqual((result["output"]["width"], result["output"]["height"]), (360, 640))
+        self.assertEqual((result["output"]["width"], result["output"]["height"]), (1080, 1920))
+        actual = result["render_metadata"]["effective_output"]
+        self.assertEqual((actual["width"], actual["height"]), (360, 640))
         self.assertTrue(result["render_metadata"]["preview"])
+
+    def test_preview_exported_project_can_be_reopened_for_preview_and_final(self):
+        preview = self.normalize(segment(speed=0.5), preview=True)
+        saved = export_timeline(preview)
+        self.assertNotIn("render_metadata", saved)
+        for as_preview, dimensions in ((True, (360, 640)), (False, (1080, 1920))):
+            with self.subTest(preview=as_preview):
+                reopened = normalize_timeline(saved, self.assets, preview=as_preview)
+                actual = reopened["render_metadata"]["effective_output"]
+                self.assertEqual((actual["width"], actual["height"]), dimensions)
+                self.assertEqual(reopened["segments"][0]["output_frames"], preview["segments"][0]["output_frames"])
+                self.assertEqual(export_timeline(reopened), saved)
 
     def test_subtitles_use_output_time_and_allow_the_exact_end(self):
         sub = {"start_ms": 1500, "end_ms": 2000, "text": "Slow motion"}
@@ -256,6 +272,60 @@ class TimelineTests(TimelineFixture, unittest.TestCase):
 
 
 class EditorialTests(TimelineFixture, unittest.TestCase):
+    def test_merge_unreviewed_coverage_never_inherits_human_confirmation_in_either_order(self):
+        human = segment("human", in_ms=1000, out_ms=2000,
+                        editorial_review={"reviewer_type": "human", "reviewer": "reviewer-1"})
+        agent = segment("agent", in_ms=1500, out_ms=2500, review_status="unreviewed",
+                        editorial_review={"reviewer_type": "agent", "note": "candidate only"})
+        for inputs in ((human, agent), (agent, human)):
+            with self.subTest(first=inputs[0]["segment_id"]):
+                result = self.normalize(*inputs, merge_overlaps=True, research_preview=True)
+                merged = result["segments"][0]
+                self.assertEqual((merged["in_ms"], merged["out_ms"]), (1000, 2500))
+                self.assertEqual(merged["review_status"], "unreviewed")
+                self.assertEqual(merged["editorial_review"]["reviewer_type"], "mixed")
+                audit = merged["editorial_review"]["inputs"]
+                self.assertEqual([(s["segment_id"], s["in_ms"], s["out_ms"], s["review_status"]) for s in audit],
+                                 [(s["segment_id"], s["in_ms"], s["out_ms"], s["review_status"]) for s in inputs])
+                self.assertEqual([s["editorial_review"] for s in audit], [s["editorial_review"] for s in inputs])
+                self.assertFalse(selection_review_summary(result["segments"])["human_confirmed_segments"])
+
+    def test_confirmed_mixed_reviewers_never_become_all_human_in_either_order(self):
+        for actor in ("agent", "unknown"):
+            first = segment("human", editorial_review={"reviewer_type": "human"})
+            second = segment("other", in_ms=1500, out_ms=2500, editorial_review={"reviewer_type": actor})
+            for inputs in ((first, second), (second, first)):
+                with self.subTest(actor=actor, first=inputs[0]["segment_id"]):
+                    result = self.normalize(*inputs, merge_overlaps=True)
+                    self.assertEqual(result["segments"][0]["review_status"], "confirmed")
+                    self.assertFalse(selection_review_summary(result["segments"])["human_confirmed_segments"])
+                    self.assertEqual(len(result["segments"][0]["editorial_review"]["inputs"]), 2)
+
+    def test_all_human_confirmed_inputs_retain_confirmation_and_all_provenance(self):
+        inputs = [segment(f"human-{i}", in_ms=1000+i*500, out_ms=2000+i*500,
+                          editorial_review={"reviewer_type": "human", "reviewer": f"person-{i}"}) for i in range(3)]
+        result = self.normalize(*inputs, merge_overlaps=True)
+        self.assertEqual(len(result["segments"]), 1)
+        self.assertTrue(selection_review_summary(result["segments"])["human_confirmed_segments"])
+        self.assertEqual([s["editorial_review"]["reviewer"] for s in result["segments"][0]["editorial_review"]["inputs"]],
+                         ["person-0", "person-1", "person-2"])
+
+    def test_reopened_merged_review_cannot_upgrade_its_unreviewed_source(self):
+        provenance = {"reviewer_type": "human", "aggregation": "all_input_segments", "inputs": [
+            {"review_status": "confirmed", "editorial_review": {"reviewer_type": "human"}},
+            {"review_status": "unreviewed", "editorial_review": {"reviewer_type": "agent"}},
+        ]}
+        result = self.normalize(segment(editorial_review=provenance))
+        self.assertFalse(selection_review_summary(result["segments"])["human_confirmed_segments"])
+
+    def test_replay_event_aggregation_preserves_review_uncertainty(self):
+        result = self.normalize(
+            segment("human", replay_group_id="r", editorial_review={"reviewer_type": "human"}),
+            segment("agent", replay_group_id="r", review_status="unreviewed", editorial_review={"reviewer_type": "agent"}),
+            deduplicate_replays=True, research_preview=True)
+        self.assertEqual(result["segments"][0]["review_status"], "unreviewed")
+        self.assertFalse(selection_review_summary(result["segments"])["human_confirmed_segments"])
+
     def test_deduplication_requires_an_explicit_group_and_opt_in(self):
         first = segment("first", replay_group_id="shot-1")
         replay = segment("replay", replay_group_id="shot-1", asset_id="court-b")

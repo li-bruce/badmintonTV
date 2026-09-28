@@ -73,6 +73,57 @@ def assets_by_id(raw):
     return result
 
 
+def _review_input(segment):
+    return {key: deepcopy(segment.get(key)) for key in
+            ("segment_id", "asset_id", "in_ms", "out_ms", "review_status", "editorial_review")}
+
+
+def _input_human_confirmed(item):
+    if not isinstance(item, dict):
+        return False
+    provenance = item.get("editorial_review") or {}
+    if not isinstance(provenance, dict) or item.get("review_status") != "confirmed" or provenance.get("reviewer_type") != "human":
+        return False
+    # Preserve conservative provenance when a previously merged project is reopened.
+    inputs = provenance.get("inputs")
+    return inputs is None or (isinstance(inputs, list) and bool(inputs) and
+                              all(_input_human_confirmed(source) for source in inputs))
+
+
+def _aggregate_review(kept, incoming):
+    inputs = deepcopy(kept["review_inputs"] + incoming["review_inputs"])
+    kept["review_inputs"] = inputs
+    kept["review_status"] = "confirmed" if all(s["review_status"] == "confirmed" for s in inputs) else "unreviewed"
+    actors = {(s.get("editorial_review") or {}).get("reviewer_type", "unknown") for s in inputs}
+    kept["editorial_review"] = {
+        "reviewer_type": next(iter(actors)) if len(actors) == 1 else "mixed",
+        "aggregation": "all_input_segments",
+        "inputs": inputs,
+    }
+
+
+def selection_review_summary(segments):
+    """Human confirmation covers every contributing interval, never just the first."""
+    return {
+        "human_confirmed_segments": bool(segments) and all(
+            s.get("review_status") == "confirmed" and bool(s.get("review_inputs", [_review_input(s)])) and all(
+                _input_human_confirmed(item) for item in s.get("review_inputs", [_review_input(s)]))
+            for s in segments),
+        "selection_review": [dict(segment_id=s["segment_id"], review_status=s["review_status"],
+                                  provenance=deepcopy(s.get("editorial_review", {})),
+                                  inputs=deepcopy(s.get("review_inputs", [_review_input(s)]))) for s in segments],
+    }
+
+
+def export_timeline(timeline):
+    """Keep the reusable project independent of the current preview resolution."""
+    canonical = {key: deepcopy(timeline[key]) for key in
+                 ("schema_version", "timeline_id", "title", "output") if key in timeline}
+    fields = ("segment_id", "asset_id", "in_ms", "out_ms", "speed", "event_ids", "fit", "crop", "title", "audio", "review_status")
+    canonical["segments"] = [{key: deepcopy(s[key]) for key in fields if key in s} for s in timeline["segments"]]
+    return canonical
+
+
 def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_replays=False, preview=False, research_preview=False):
     require(isinstance(timeline, dict) and timeline.get("schema_version") == "1.0", "Timeline schema_version must be 1.0")
     t = deepcopy(timeline)
@@ -85,8 +136,7 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
     require(type(out["fps"]) in (int, float) and out["fps"] in (24, 25, 30, 50, 60), "unsupported output fps")
     out["fps"] = int(out["fps"])
     require(out["video_codec"] == "h264" and out["audio_codec"] == "aac", "v1 requires h264/aac")
-    if preview:
-        out.update(width=360, height=640)
+    effective_output = {**out, "width": 360, "height": 640} if preview else deepcopy(out)
     t["output"] = out
     segments = t.get("segments")
     require(isinstance(segments, list) and 1 <= len(segments) <= 200, "Timeline requires 1..200 segments")
@@ -104,6 +154,8 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
         require(type(speed) in (int, float) and math.isfinite(speed) and 0.125 <= speed <= 8,
                 "supported speed is 0.125..8")
         require(s.get("review_status") == "confirmed" or (research_preview and s.get("review_status") == "unreviewed"), "render requires confirmed segments (or explicit research_preview)", "review_required")
+        require(isinstance(s.get("editorial_review", {}), dict), "editorial_review must be an object")
+        require(isinstance(s.get("editorial_review", {}).get("reviewer_type", "unknown"), str), "reviewer_type must be text")
         require(s.setdefault("audio", "source") in ("source", "mute"), "invalid audio strategy")
         require(s.setdefault("fit", "contain") in ("contain", "crop"), "invalid fit")
         text(s.setdefault("title", ""), "segment title", 100)
@@ -132,6 +184,7 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
         if "replay_group_id" in s:
             require(text(s["replay_group_id"], "replay_group_id", 200), "empty replay_group_id")
         s["source_segment_ids"] = [sid]
+        s["review_inputs"] = [_review_input(s)]
         checked.append(s)
 
     original_segments = deepcopy(checked)
@@ -141,6 +194,7 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
         if deduplicate_replays and group and group in groups:
             kept = groups[group]
             kept["event_ids"] = list(dict.fromkeys(kept["event_ids"] + s["event_ids"]))
+            _aggregate_review(kept, s)
             excluded.append({"reason": "explicit_replay_group", "kept_segment_id": kept["segment_id"], "segment": s})
             continue
         if group:
@@ -148,6 +202,7 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
         prev = normalized[-1] if normalized else None
         keys = ("asset_id", "speed", "audio", "fit", "crop", "title", "replay_group_id")
         if merge_overlaps and prev and all(prev.get(k) == s.get(k) for k in keys) and not prev["subtitles"] and not s["subtitles"] and s["in_ms"] <= prev["out_ms"] and s["out_ms"] >= prev["in_ms"]:
+            _aggregate_review(prev, s)
             prev["in_ms"] = min(prev["in_ms"], s["in_ms"])
             prev["out_ms"] = max(prev["out_ms"], s["out_ms"])
             prev["source_segment_ids"] += s["source_segment_ids"]
@@ -160,6 +215,6 @@ def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_re
         else:
             normalized.append(s)
     t["segments"] = normalized
-    t["render_metadata"] = {"preview": preview, "research_preview": research_preview, "excluded_replays": excluded, "input_segments": original_segments,
+    t["render_metadata"] = {"preview": preview, "effective_output": effective_output, "research_preview": research_preview, "excluded_replays": excluded, "input_segments": original_segments,
                             "merge_overlaps": merge_overlaps, "deduplicate_replays": deduplicate_replays}
     return t
