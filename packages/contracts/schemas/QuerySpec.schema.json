@@ -1,0 +1,212 @@
+{
+  "$defs": {
+    "QueryRelation": {
+      "additionalProperties": false,
+      "properties": {
+        "from_step": {
+          "minLength": 1,
+          "title": "From Step",
+          "type": "string"
+        },
+        "to_step": {
+          "minLength": 1,
+          "title": "To Step",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "before",
+            "overlaps",
+            "near"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "max_gap_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Gap Ms"
+        },
+        "same_player": {
+          "default": true,
+          "title": "Same Player",
+          "type": "boolean"
+        },
+        "same_rally": {
+          "default": true,
+          "title": "Same Rally",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "from_step",
+        "to_step",
+        "relation"
+      ],
+      "title": "QueryRelation",
+      "type": "object"
+    },
+    "QueryScope": {
+      "additionalProperties": false,
+      "properties": {
+        "library_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Ids",
+          "type": "array"
+        },
+        "asset_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Asset Ids",
+          "type": "array"
+        },
+        "match_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Match Ids",
+          "type": "array"
+        },
+        "source_types": {
+          "items": {
+            "enum": [
+              "broadcast",
+              "personal",
+              "dataset",
+              "synthetic"
+            ],
+            "type": "string"
+          },
+          "title": "Source Types",
+          "type": "array"
+        }
+      },
+      "title": "QueryScope",
+      "type": "object"
+    },
+    "QueryStep": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "minLength": 1,
+          "title": "Step Id",
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "shot",
+                "rally",
+                "stroke",
+                "movement"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "labels": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Labels",
+          "type": "object"
+        }
+      },
+      "required": [
+        "step_id"
+      ],
+      "title": "QueryStep",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "query_id": {
+      "minLength": 1,
+      "title": "Query Id",
+      "type": "string"
+    },
+    "text": {
+      "default": "",
+      "title": "Text",
+      "type": "string"
+    },
+    "player_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Player Id"
+    },
+    "scope": {
+      "$ref": "#/$defs/QueryScope"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/QueryStep"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "relations": {
+      "items": {
+        "$ref": "#/$defs/QueryRelation"
+      },
+      "title": "Relations",
+      "type": "array"
+    },
+    "include_uncertain": {
+      "default": false,
+      "title": "Include Uncertain",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "query_id"
+  ],
+  "title": "QuerySpec",
+  "type": "object"
+}

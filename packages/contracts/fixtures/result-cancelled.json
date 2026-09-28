@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "job_id": "job-contract-synthetic",
+  "attempt_id": "attempt-01",
+  "status": "cancelled",
+  "artifacts": [],
+  "events": [],
+  "error": {
+    "code": "CANCELLED_BY_USER",
+    "message": "Synthetic protocol fixture; not an actual execution record",
+    "details": {}
+  }
+}

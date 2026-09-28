@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "candidate_id": "candidate-contract-synthetic",
+  "asset_id": "asset-contract-synthetic",
+  "start_ms": 500,
+  "end_ms": 1500,
+  "player_id": "player-contract-synthetic",
+  "event_ids": [
+    "event-contract-synthetic"
+  ],
+  "matched_conditions": [
+    "net"
+  ],
+  "missing_conditions": [],
+  "uncertainty_reasons": [
+    "hand_technique=unknown; synthetic fixture only"
+  ],
+  "rank_score": 1.0,
+  "review_status": "unreviewed",
+  "evidence": [
+    {
+      "type": "source_interval",
+      "asset_id": "asset-contract-synthetic",
+      "start_ms": 500,
+      "end_ms": 1500
+    }
+  ]
+}

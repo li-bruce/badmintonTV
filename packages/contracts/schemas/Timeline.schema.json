@@ -1,0 +1,204 @@
+{
+  "$defs": {
+    "CropWindow": {
+      "additionalProperties": false,
+      "description": "Normalized source-image rectangle; not a raw FFmpeg expression.",
+      "properties": {
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "CropWindow",
+      "type": "object"
+    },
+    "TimelineOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "default": 1080,
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "default": 1920,
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "fps": {
+          "default": 30.0,
+          "exclusiveMinimum": 0,
+          "title": "Fps",
+          "type": "number"
+        },
+        "video_codec": {
+          "const": "h264",
+          "default": "h264",
+          "title": "Video Codec",
+          "type": "string"
+        },
+        "audio_codec": {
+          "const": "aac",
+          "default": "aac",
+          "title": "Audio Codec",
+          "type": "string"
+        }
+      },
+      "title": "TimelineOutput",
+      "type": "object"
+    },
+    "TimelineSegment": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "in_ms": {
+          "minimum": 0,
+          "title": "In Ms",
+          "type": "integer"
+        },
+        "out_ms": {
+          "minimum": 0,
+          "title": "Out Ms",
+          "type": "integer"
+        },
+        "speed": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "title": "Speed",
+          "type": "number"
+        },
+        "event_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "fit": {
+          "default": "contain",
+          "enum": [
+            "contain",
+            "crop"
+          ],
+          "title": "Fit",
+          "type": "string"
+        },
+        "crop": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CropWindow"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "audio": {
+          "default": "source",
+          "enum": [
+            "source",
+            "mute"
+          ],
+          "title": "Audio",
+          "type": "string"
+        },
+        "review_status": {
+          "default": "unreviewed",
+          "enum": [
+            "unreviewed",
+            "confirmed",
+            "rejected"
+          ],
+          "title": "Review Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_id",
+        "asset_id",
+        "in_ms",
+        "out_ms"
+      ],
+      "title": "TimelineSegment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "timeline_id": {
+      "minLength": 1,
+      "title": "Timeline Id",
+      "type": "string"
+    },
+    "title": {
+      "default": "",
+      "title": "Title",
+      "type": "string"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/TimelineSegment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "output": {
+      "$ref": "#/$defs/TimelineOutput"
+    }
+  },
+  "required": [
+    "timeline_id"
+  ],
+  "title": "Timeline",
+  "type": "object"
+}

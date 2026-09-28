@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "job_id": "job-contract-synthetic",
+  "attempt_id": "attempt-01",
+  "status": "blocked",
+  "artifacts": [],
+  "events": [],
+  "error": {
+    "code": "MODEL_NOT_INSTALLED",
+    "message": "Synthetic protocol fixture; not an actual execution record",
+    "details": {}
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "job_id": "job-contract-synthetic",
+  "attempt_id": "attempt-01",
+  "status": "succeeded",
+  "artifacts": [
+    {
+      "schema_version": "1.0",
+      "artifact_id": "artifact-contract-mp4",
+      "kind": "mp4",
+      "relative_path": "render/jobs/job-contract-synthetic/attempt-01/output.mp4",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 123,
+      "created_at": "2026-09-28T00:00:00Z",
+      "producer": {
+        "module": "contract_fixture",
+        "synthetic": true,
+        "fixture_only": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "artifact_id": "artifact-contract-timeline",
+      "kind": "timeline",
+      "relative_path": "render/jobs/job-contract-synthetic/attempt-01/timeline.json",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 123,
+      "created_at": "2026-09-28T00:00:00Z",
+      "producer": {
+        "module": "contract_fixture",
+        "synthetic": true,
+        "fixture_only": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "artifact_id": "artifact-contract-source_map",
+      "kind": "source_map",
+      "relative_path": "render/jobs/job-contract-synthetic/attempt-01/source-map.json",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 123,
+      "created_at": "2026-09-28T00:00:00Z",
+      "producer": {
+        "module": "contract_fixture",
+        "synthetic": true,
+        "fixture_only": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "artifact_id": "artifact-contract-qa_report",
+      "kind": "qa_report",
+      "relative_path": "render/jobs/job-contract-synthetic/attempt-01/qa.json",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 123,
+      "created_at": "2026-09-28T00:00:00Z",
+      "producer": {
+        "module": "contract_fixture",
+        "synthetic": true,
+        "fixture_only": true
+      }
+    }
+  ],
+  "events": [],
+  "error": null
+}

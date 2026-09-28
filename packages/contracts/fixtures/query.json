@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "query_id": "query-contract-synthetic",
+  "text": "网前击球",
+  "player_id": "player-contract-synthetic",
+  "scope": {
+    "library_ids": [],
+    "asset_ids": [],
+    "match_ids": [],
+    "source_types": []
+  },
+  "steps": [
+    {
+      "step_id": "net",
+      "kind": "stroke",
+      "labels": {
+        "stroke": "net_shot"
+      }
+    }
+  ],
+  "relations": [],
+  "include_uncertain": false
+}

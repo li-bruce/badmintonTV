@@ -1,0 +1,304 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "Player": {
+      "additionalProperties": false,
+      "properties": {
+        "player_id": {
+          "minLength": 1,
+          "title": "Player Id",
+          "type": "string"
+        },
+        "display_name": {
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "identity_status": {
+          "default": "unconfirmed",
+          "enum": [
+            "unconfirmed",
+            "confirmed",
+            "unknown"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "player_id",
+        "display_name"
+      ],
+      "title": "Player",
+      "type": "object"
+    },
+    "Rights": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "research_only",
+            "permitted",
+            "owned"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "license_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Url"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "array"
+            },
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Evidence"
+        },
+        "allowed_uses": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Uses",
+          "type": "array"
+        }
+      },
+      "title": "Rights",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "asset_id": {
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "relative_path": {
+      "minLength": 1,
+      "title": "Relative Path",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "duration_ms": {
+      "minimum": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "width": {
+      "minimum": 0,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "minimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "fps_num": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fps Num"
+    },
+    "fps_den": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fps Den"
+    },
+    "time_base": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Time Base"
+    },
+    "title": {
+      "default": "",
+      "title": "Title",
+      "type": "string"
+    },
+    "match_id": {
+      "minLength": 1,
+      "title": "Match Id",
+      "type": "string"
+    },
+    "source_type": {
+      "enum": [
+        "broadcast",
+        "personal",
+        "dataset",
+        "synthetic"
+      ],
+      "title": "Source Type",
+      "type": "string"
+    },
+    "source_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Url"
+    },
+    "source_page": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Page"
+    },
+    "acquired_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Acquired At"
+    },
+    "camera_type": {
+      "default": "unknown",
+      "enum": [
+        "rear",
+        "side",
+        "overhead",
+        "handheld",
+        "mixed",
+        "unknown"
+      ],
+      "title": "Camera Type",
+      "type": "string"
+    },
+    "discipline": {
+      "default": "unknown",
+      "enum": [
+        "singles",
+        "doubles",
+        "unknown"
+      ],
+      "title": "Discipline",
+      "type": "string"
+    },
+    "players": {
+      "items": {
+        "$ref": "#/$defs/Player"
+      },
+      "title": "Players",
+      "type": "array"
+    },
+    "rights": {
+      "$ref": "#/$defs/Rights"
+    },
+    "split": {
+      "default": "unassigned",
+      "enum": [
+        "unassigned",
+        "train",
+        "validation",
+        "test"
+      ],
+      "title": "Split",
+      "type": "string"
+    },
+    "probe": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Probe",
+      "type": "object"
+    },
+    "provenance": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "required": [
+    "asset_id",
+    "relative_path",
+    "sha256",
+    "size_bytes",
+    "duration_ms",
+    "width",
+    "height",
+    "match_id",
+    "source_type"
+  ],
+  "title": "Asset",
+  "type": "object"
+}
