@@ -54,6 +54,18 @@ class Store:
                        (kind, id, json.dumps(body, ensure_ascii=False)))
         return body
 
+    def create_label_studio_snapshot(self, snapshot_id, task):
+        """Insert an export-time seed/PTS baseline exactly once; never replace it."""
+        if task['data']['btv'].get('snapshot_id') != snapshot_id:
+            raise ValueError('Label Studio snapshot_id 与任务不一致')
+        try:
+            with self.connect() as db:
+                db.execute('INSERT INTO objects VALUES(?,?,?)',
+                           ('ls_task_snapshot', snapshot_id, json.dumps(task, ensure_ascii=False)))
+        except sqlite3.IntegrityError:
+            raise Conflict('Label Studio 导出快照已存在，不可覆盖') from None
+        return task
+
     def get(self, kind, id):
         with self.connect() as db:
             row = db.execute('SELECT body FROM objects WHERE kind=? AND id=?', (kind,id)).fetchone()
@@ -181,7 +193,7 @@ class Store:
             db.execute('BEGIN IMMEDIATE')
             for batch in batches:
                 converted = batch['converted']
-                key = json.dumps([batch['asset_id'], batch['task_id'], batch['annotation_id']], separators=(',', ':'))
+                key = json.dumps([batch['snapshot_id'], batch['asset_id'], batch['task_id'], batch['annotation_id']], separators=(',', ':'))
                 row = db.execute("SELECT body FROM objects WHERE kind='ls_sync' AND id=?", (key,)).fetchone()
                 cursor = json.loads(row[0]) if row else None
                 if cursor is None:
@@ -212,7 +224,7 @@ class Store:
                                ('track', track['track_id'], json.dumps(track, ensure_ascii=False)))
                     tracks.append(track)
                 new_cursor = {
-                    'asset_id': batch['asset_id'], 'task_id': batch['task_id'], 'annotation_id': batch['annotation_id'],
+                    'snapshot_id': batch['snapshot_id'], 'asset_id': batch['asset_id'], 'task_id': batch['task_id'], 'annotation_id': batch['annotation_id'],
                     'annotation_sha256': digest, 'updated_at': batch.get('updated_at'),
                     'event_revisions': {**baseline, **{event['event_id']: event['revision'] for event in applied}},
                     'accepted_hashes': [*(cursor['accepted_hashes'] if cursor else []), digest],
@@ -239,6 +251,7 @@ class Store:
             provenance = event.get('provenance', {})
             digest = provenance.get('annotation_sha256')
             if (provenance.get('tool') != 'label-studio' or not digest
+                    or provenance.get('snapshot_id') != batch['snapshot_id']
                     or provenance.get('task_id') != batch['task_id']
                     or provenance.get('annotation_id') != batch['annotation_id']):
                 continue
