@@ -43,6 +43,8 @@ def get_torch():
         import torch
     except ImportError:
         raise ModelBlocked('DEPENDENCY_NOT_INSTALLED','当前Python未安装torch；请使用模型WSL环境') from None
+    except (OSError,RuntimeError):
+        raise ModelBlocked('DEPENDENCY_UNAVAILABLE','torch二进制依赖加载失败；请核验隔离环境与驱动兼容') from None
     if not torch.cuda.is_available():
         raise ModelBlocked('CUDA_UNAVAILABLE','当前模型配置需要可用CUDA设备')
     torch.cuda.reset_peak_memory_stats()
@@ -254,6 +256,10 @@ def run_clip(root,frames,p,torch,progress):
     model = CLIPModel.from_pretrained(str(folder),local_files_only=True,use_safetensors=False).to('cuda').eval()
     processor = CLIPProcessor.from_pretrained(str(folder),local_files_only=True)
     vectors = []
+    texts = p.get('texts',['a badminton player hitting a net shot','a badminton player smashing',
+                         'a badminton player moving backwards','a badminton player serving'])
+    if not isinstance(texts,list) or not 1 <= len(texts) <= 16 or any(not isinstance(t,str) or not 1 <= len(t) <= 200 for t in texts):
+        raise ValueError('texts must contain 1..16 prompts, at most 200 characters each')
     with torch.inference_mode():
         for index,(_,_,_,pil) in enumerate(frames):
             inputs = processor(images=pil,return_tensors='pt').to('cuda')
@@ -262,6 +268,11 @@ def run_clip(root,frames,p,torch,progress):
             progress('video_embedding',current=index+1,total=len(frames),unit='frame',message='Frame CLIP feature')
         mean = torch.cat(vectors).mean(dim=0)
         mean /= mean.norm()
+        text_inputs = processor(text=texts,return_tensors='pt',padding=True,truncation=True).to('cuda')
+        text_features = model.get_text_features(**text_inputs)
+        text_features /= text_features.norm(dim=-1,keepdim=True)
+        similarities = (text_features @ mean).cpu().tolist()
     return {'format':'clip-frame-mean-512','embedding':mean.cpu().tolist(),
             'sample_times_ms':[f[0] for f in frames],
+            'text_similarity':[{'text':text,'cosine_similarity':score,'is_probability':False} for text,score in zip(texts,similarities)],
             'warning':'Frame average has no temporal order and does not establish fine badminton techniques; multilingual retrieval unvalidated'}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "python": "3.11.16",
+  "torch": "2.7.1+cu128",
+  "torchvision": "0.22.1+cu128",
+  "cuda_build": "12.8",
+  "cudnn": 90701,
+  "device": "NVIDIA GeForce RTX 5090",
+  "capability": [12, 0],
+  "compiled_arches": ["sm_75", "sm_80", "sm_86", "sm_90", "sm_100", "sm_120", "compute_120"],
+  "checks": {"matmul": true, "conv2d": true, "sdpa_bfloat16": true, "torchvision_nms": true, "roi_align": true},
+  "elapsed_seconds": 1.0972453759750351,
+  "peak_allocated_bytes": 8974848,
+  "kind": "synthetic_operator_smoke_not_video_accuracy"
+}
