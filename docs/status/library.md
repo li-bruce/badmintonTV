@@ -13,7 +13,7 @@
 - 未测：个人录像、双打真实下载与识别、细手法真值、完整比赛检索泛化；平台DB/UI导入与下游渲染由相应任务报告，library已完成共享合同兼容检查。
 - 阻塞/限制：原广播画面再分发权未知；FBBench无整场ID/原场偏移，保持unknown/unassigned，禁止训练测试泄漏；ShuttleSet所选CSV未配原场视频，不转换伪Event。详见source-rights-and-alignment问题。
 - 下一步：首版已可交付，主任务集成；外部后续需要持权赛事/个人原片、原整场映射和人工身份/细标签复核。保留unknown/unassigned直到证据齐备。
-- 提交SHA：待首个提交。
+- 实现与验证提交SHA：`9a33fe992efc526c2f932ea01d6929fa432baaf7`（work/library）；随后仅更新本状态引用的文档提交以分支HEAD为准。未推送、未合并main。
 - 环境：Windows，已有Python 3.12.11；不装公共Conda，无服务端口，无GPU使用。
 - 容量：data≤300,000,000,000 bytes；最终实测4,221,747 bytes（含QA/PTS/审计/账本），活动预留0；runtime/library新增0，≤5,000,000,000。共享runtime不可读部分按70GB完整上界计数，不重计。实际快照见D:/video/data/handoff/capacity.v1.json。
 - 启动命令：`python -m packages.library --help`；`python -m scripts.library.acquire_small_sample --ffprobe <render共享ffprobe.exe> --ffmpeg <render共享ffmpeg.exe>`；`python -m unittest discover -s tests/library -v`。精确命令见docs/library/RUNBOOK.md。
