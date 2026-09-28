@@ -1,33 +1,40 @@
 # 项目状态
 
-更新：2026-09-28。
+更新：2026-09-29（北京时间）。以下为运行证据检查点，不代表全部产品要求均已验收。
 
-- 已读取共享对话与简版计划，确认四任务划分，并完成初始架构、合同、资源预算与验收文档。
-- 已确认本机RTX 5090、WSL Ubuntu2 GPU可见、D:\video初始为空。
-- 尚未完成业务实现、下载、Conda安装、训练或MP4交付；不得从计划推断已完成。
-- 已建立Git main，设计基线提交 `a7b8e00`；四个额外任务均已启动，并回报设计和开发进展。
+## 已完成
 
-| 任务 | 模块 | 任务ID | 状态 |
-|---|---|---|---|
-| 01 Python业务底座与完整工作流 | platform | 01a0e88b-2410-7da0-970e-7f4187ed485f | 已写模块设计，开发合同/队列/标注适配与页面 |
-| 02 比赛素材与训练资料库 | library | 01a0e88b-31fa-7fd3-939c-b7e0c895deef | 已写模块设计，核验来源与开发受限下载器 |
-| 03 WSL模型基线、训练与评测 | models | 01a0e88b-416f-7ca2-bfec-c09ec1462866 | 已找到WSL已有Miniforge，检查兼容与设计实验 |
-| 04 竖屏集锦与完整视频渲染 | render | 01a0e88b-5005-7991-9fb0-d2dec3af8b4f | 开发CPU渲染协议与受控工具链 |
+- 已读取共享讨论与简版计划，完成架构、统一合同、四任务职责、容量预算与验收条件。Git 使用 main 加四个 worktree 分支。
+- contracts 已集成，69 项测试通过；自动输出不得覆盖 confirmed 记录。
+- library 初版已集成。原四段真实单打小样，以及追加一段 4K 双打小样均已独立核验合同、SHA 和逐帧 PTS；双打 132 个可见帧。
+- render 已集成 main，包括审核来源合并、容量计算、可重用预览工程三项修复。62 项测试：61 通过、1 项 Windows 符号链接权限跳过；独立审查通过。
+- 已输出真实 17.07 秒 1080×1920 研究样片，含标题、0.75 倍慢放和源时间映射；另有双打 360×640 预览。合同、产物大小/hash 与技术 QA 通过。所有演示保留待人工确认状态，不冒充展搓/收搓真值。
+- models 协议与评测防泄漏修复已集成；100 项测试在 Windows 98 通过/2 权限跳过，模块 WSL 100 通过。
+- WSL 独立 Conda 环境实际运行 RTX 5090 CUDA 算子。6 秒真实单打完成 24 帧 COCO17 姿态与 CLIP 特征，结果和全部产物哈希已独立核验；没有生成动作 Event，不代表分类或跟踪达标。
 
-工作树：`C:/Users/USER/.codex/worktrees/6991/badmintonTV`（platform）、`9163/badmintonTV`（library）、`c5b1/badmintonTV`（models）、`3e52/badmintonTV`（render）。分支分别为work/platform、work/library、work/models、work/render。主工作区保持main。
+## 正在集成
 
-协调修订：控制面首轮Windows原生Python+SQLite；模型在WSL通过JSON接口执行；CLI统一顶层Asset数组、相对output_dir、attempt_id、固定退出码；worker中断记failed/WORKER_INTERRUPTED。各任务已通知，细节见最新ARCHITECTURE/CONTRACTS。
+| 任务 | 任务 ID | 检查点 |
+|---|---|---|
+| 01 Python业务底座与完整工作流 | 01a0e88b-2410-7da0-970e-7f4187ed485f | 工作树真实 Web→标注→检索→选片→worker→14.83 秒 MP4 已跑通；主协调独立 72 业务测试通过、1 跳过。审查发现的导入/检索/标注回写/任务边界正在修复，受控 WSL GPU 启动链路在联调。 |
+| 02 比赛素材与训练资料库 | 01a0e88b-31fa-7fd3-939c-b7e0c895deef | 共 5 条真实小样，停止新增下载；追加双打源码已提交，有界 ZIP 工具审查修复中。 |
+| 03 WSL模型基线、训练与评测 | 01a0e88b-416f-7ca2-bfec-c09ec1462866 | 真实 GPU 特征基线已跑，Qwen 查询解析诊断及环境锁/实验记录正在交付。 |
+| 04 竖屏集锦与完整视频渲染 | 01a0e88b-5005-7991-9fb0-d2dec3af8b4f | 初版、审查修复和双打兼容报告已集成 main。 |
 
-工具链检查点：render已安装FFmpeg/FFprobe 9.0.2并完成合成技术烟测，主协调验证版本可运行；已向platform/library/models共享只读路径。详见[环境交接](ENVIRONMENT_HANDOFF.md)。
+## 尚未达到
 
-真实素材检查点：`D:/video/data/handoff/assets.v1.json` 已发布4段FineBadmintonBenchmark小样，长度4634/5367/3900/6000ms、1280×720/30fps，保留逐帧PTS；library已完整解码，主协调独立复核文件大小与SHA-256全部匹配。源比赛映射、球员身份与细手法尚未核验，统一split=unassigned，不用于宣称训练/测试独立或细动作准确率。已交给其他三模块开展真实素材联调；端到端业务闭环仍待完成。
+- 展搓/收搓、后退小跳启动没有人工核实的完整正负例、可观测性定义和按整场隔离的正式测试集；不声称有效监督训练。
+- 四段单打缺少精确 UID→原场次/裁切偏移映射，身份、细标签未知。双打来自大学社团，仅有保守录制组，不是世界前十比赛。经典林李/职业赛事目前只有来源候选。
+- 公开视频、权重、标注许可分别记录；现有样片只作为本地研究证据。
+- 姿态/CLIP 特征不等于击球检测、跨镜头身份、时序分类或经过验收的视频检索模型。LLM 只负责查询解析，失败不能伪装为成功。
+- 主分支统一启动及 Web→WSL→GPU→结果回传仍需完成，不能以工作树单模块成功代替。
 
-渲染检查点：已协调research_preview显式预览参数，允许未确认片段形成带状态标记的本地样片；不等待细标签真值即可验证成片流程。render报告已修复约21.333ms的AAC拼接起点偏移，合成音视频双流起点为0、完整解码通过；真实3片段样片制作中。
+## 环境与容量
 
-首轮集成：contracts、library已合入main，分别69与53测试独立复跑通过。models协议初版与审查修复已合入，Windows100测试98通过/2权限跳过（模块WSL100全过），合同互验通过；真实GPU推理仍待完成。render三项边界修复中，尚未合入。平台工作树已完成真实Web→worker→14.8秒MP4链路，主协调核验QA与视频hash；平台源码待提交并在main复验。所有真实样片都保留agent来源/细技法未知，不称人工真值。细节见[集成记录](INTEGRATION_LOG.md)。
+控制面 Windows 原生 Python + SQLite；模型 WSL Ubuntu 独立 Conda 环境，通过 JSON 进程边界通信，不跨系统共享 SQLite WAL。CPU FFmpeg 渲染独立于模型 GPU 排期。
 
-GPU环境检查点：WSL独立环境中RTX5090实际matmul/conv2d/BF16 SDPA/torchvision NMS/ROIAlign通过；真实视频模型推理仍单列待验。详见[环境交接](ENVIRONMENT_HANDOFF.md)。
+总硬上限 700,000,000,000 bytes。owner 配额共 650GB，另留 50GB；预算包括临时文件与解压双份。媒体约 8.3MB，library 目录检查点 10,767,716 bytes；这不是整个环境/权重占用量。模块实测和保守容量上界见各模块记录，不把额度当实际占用。
 
-真实GPU检查点：6秒真实单打小片段已离线完成24帧COCO17姿态和24帧CLIP特征，主协调核验JobResult及全部产物哈希通过。没有动作Event、身份或准确率结论；Qwen诊断/overlay/main代码记录及平台WSL启动链路仍在继续。
+工作树为 C:/Users/USER/.codex/worktrees/ 下的 6991、9163、c5b1、3e52/badmintonTV；分支 work/platform、work/library、work/models、work/render。主工作区保持 main。
 
-模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。
+详见 [集成记录](INTEGRATION_LOG.md)、[环境交接](ENVIRONMENT_HANDOFF.md)、docs/status/ 和 docs/issues/。

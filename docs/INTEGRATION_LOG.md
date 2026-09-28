@@ -33,3 +33,11 @@ models提交611eb39及修复00de444已集成。零字节partial续传、unknown 
 3. preview实际360×640被写入工程Timeline，但再次导入只接受1080×1920，工程无法重用。
 
 platform可继续使用默认不合并的真实片段做联调；工程正式规格应独立于预览实际编码规格。已通知两任务，不把模块技术测试通过等同于源码所有边界通过。
+
+## 2026-09-29：渲染修复集成与平台交叉审查
+
+- render 原提交 9762e90 + 16a903a + 6bff133 + e06ce8b 已依次合入 main（8742d3e、62f8be8、50f5ecd、4ba01a0）。三项审查问题均由独立 reviewer 复核通过。root 复跑修复后 62 测试：61 通过、1 Windows symlink 权限跳过。
+- 双打 Asset、原片 SHA 和 132 条单调 PTS 已在 main 合同上核验。doubles-preview-c47d5492 的 JobRequest/Result、全部产物大小/hash、导出 Timeline 通过。实际 360×640 预览与正式 1080×1920 工程规格分离；不声称人工技法确认。
+- platform 候选提交 356b98f 的业务测试由 root 独立运行：72 passed、1 skipped。交叉审查发现六项边界需修复：probe 大文件应用异步返回处理、渲染人工审核来源、LS 二次编辑 CAS、检索先截断后排序、同库容量扫描阻塞心跳、写路径 junction 跨 owner。修复与新增 WSL GPU 桥接分别验收。
+- library 追加候选 0cc1214 + 21114ec：root 75/75 unittest 通过。独立 reviewer 用纯内存反例发现 BZIP2/LZMA 解压内部无输出长度限制；已请求白名单 STORED/DEFLATED，修复前不合入新增 ZIP 工具。真实双打数据可继续只读消费。
+- root 在另一 worktree 用 pytest 自动发现测试时遇到目录 ACL，改为模块现有 unittest 从该 worktree 执行后 75/75 通过；未修改系统权限。第一次双打验证脚本误用了合同参数名 exit_code，改为实际签名 returncode 后通过，此为验证脚本调用错误，不是产品缺陷。
