@@ -36,4 +36,4 @@
 - handoff：`D:/video/data/handoff/assets.doubles.v1.json`、annotations.doubles.v1.json、splits.doubles.v1.json、doubles-acquisition.v1.json；仅小型元数据复制进docs/library/handoff，无媒体或原标注进入Git。
 - 协调/下一步：已通知main、platform、models、render真实样本可读。主任务合并追加提交后由下游报告导入/模型/渲染；外部补齐权利与原片映射后才能开展独立评估。
 - 下游反馈：render已报告真实双打132帧竖屏研究预览全解码/合同通过，handoff为`D:/video/render/handoff/doubles-preview-c47d5492`，报告提交e06ce8b；此为render任务验证结果，library未重复渲染或声称模型识别通过。
-- 追加提交SHA：待本轮提交后更新；只提交library所有文件，不推送、不合并main。
+- 追加实现与验证提交SHA：`0cc1214917d40f49a7341d3cd7887ba1d809dc68`；随后仅记录本SHA的文档提交以分支HEAD为准。只提交library所有文件，不推送、不合并main。
