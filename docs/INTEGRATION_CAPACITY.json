@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "recorded_local_date": "2026-09-29",
+  "measurement": "GNU du --summarize --bytes, no symlink dereference, five shared-root owners; exit 0",
+  "storage_root": "D:/video",
+  "owners_bytes": {
+    "data": 10767716,
+    "platform": 52937030,
+    "models": 2427004784,
+    "render": 39798728,
+    "runtime": 9856287335
+  },
+  "native_conda_base_and_pkgs_bytes": 5924496893,
+  "native_conda_evidence": "models successful earlier du snapshot; old user environments excluded; no base changes",
+  "hard_limit_bytes": 700000000000,
+  "shared_root_bytes": 12386795593,
+  "project_accounted_bytes": 18311292486,
+  "remaining_to_hard_limit_bytes": 681688707514,
+  "notes": [
+    "Snapshot, not a reservation; later jobs must perform their owner preflight.",
+    "This accounted total covers shared data/runtime plus reused native Conda base/cache. Source worktrees and test scratch are not part of this byte total: a separate read-only workspace scan encountered an ACL-denied historical pytest directory; no permissions were changed.",
+    "Root Python per-file scan was stopped after several minutes after exact PID/command verification; it did not complete and is not counted as a passed scan.",
+    "A separate bounded GNU du scan subsequently completed successfully; native Conda base/pkg number is explicitly a prior snapshot.",
+    "Includes 50MB local FFV1 regression derivative; only five independent downloaded clips."
+  ]
+}
