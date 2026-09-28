@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "owner": "render",
+  "status": "ready",
+  "prepared_at": "2026-09-28T15:11:24.799825+00:00",
+  "runtime_root": "D:\\video\\runtime\\render",
+  "python": {
+    "executable": "C:\\Users\\USER\\miniforge3\\python.exe",
+    "version": "3.12.11 | packaged by conda-forge | (main, Jun  4 2025, 14:29:09) [MSC v.1943 64 bit (AMD64)]",
+    "use": "standard-library installer only; no base modifications"
+  },
+  "sources": {
+    "official_download_index": "https://ffmpeg.org/download.html",
+    "build_provider": "https://www.gyan.dev/ffmpeg/builds/",
+    "ffmpeg_source_commit": "https://github.com/FFmpeg/FFmpeg/commit/946fcce07b",
+    "license": "GPLv3",
+    "license_reference": "https://ffmpeg.org/legal.html"
+  },
+  "acquisition": {
+    "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+    "sha256_url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip.sha256",
+    "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+    "size_bytes": 114768076,
+    "path": "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\ffmpeg-9.0.2-essentials_build.zip",
+    "verified_at": "2026-09-28T15:11:21.661041+00:00"
+  },
+  "unpacked_bytes": 329221735,
+  "checks": {
+    "ffmpeg": "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\ffmpeg-9.0.2-essentials_build\\bin\\ffmpeg.exe",
+    "ffprobe": "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\ffmpeg-9.0.2-essentials_build\\bin\\ffprobe.exe",
+    "ffmpeg_sha256": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec",
+    "ffprobe_sha256": "f0d36ecbbdd3bcfac3efa078c96c7271c2e68b3810595552ac3b7f17e9a65c52",
+    "version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "build_configuration": "configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband",
+    "required_encoders": {
+      "libx264": "verified",
+      "aac": "verified"
+    },
+    "subtitles_filter": "verified",
+    "chinese_font_files": [
+      "C:\\Windows\\Fonts\\msyh.ttc",
+      "C:\\Windows\\Fonts\\simhei.ttf"
+    ],
+    "font_selection_log": [
+      "[Parsed_subtitles_0 @ 000002489cd7ed80] fontselect: (Microsoft YaHei, 400, 0) -> MicrosoftYaHei, 0, MicrosoftYaHei"
+    ],
+    "smoke_mp4": "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\runtime-smoke.mp4",
+    "smoke_frame": "D:\\video\\runtime\\render\\install-20260928T151048Z-8cca16ed\\chinese-test.png",
+    "smoke_type": "synthetic_runtime_check_only",
+    "smoke_duration": "1.000000",
+    "full_decode": "passed",
+    "manual_chinese_frame_review": "pending",
+    "agent_visual_chinese_frame_review": {
+      "status": "passed",
+      "method": "view_image of runtime smoke first frame",
+      "observation": "网前击球 · 中文字幕测试 visible without missing-glyph boxes; user viewing acceptance remains pending"
+    }
+  },
+  "capacity_before": {
+    "owner_used_bytes": 196,
+    "shared_used_bytes": 1664079784,
+    "additional_reserved_bytes": 870000000,
+    "other_owner_reservations_ceiling_bytes": 645000000000,
+    "conservative_shared_peak_bytes": 647534079784,
+    "physical_free_bytes": 966360342528,
+    "owner_quota_bytes": 5000000000,
+    "shared_hard_limit_bytes": 700000000000
+  },
+  "capacity_after": {
+    "owner_used_bytes": 444047356,
+    "shared_used_bytes": 2290213041,
+    "additional_reserved_bytes": 0,
+    "other_owner_reservations_ceiling_bytes": 645000000000,
+    "conservative_shared_peak_bytes": 647290213041,
+    "physical_free_bytes": 965735444480,
+    "owner_quota_bytes": 5000000000,
+    "shared_hard_limit_bytes": 700000000000
+  },
+  "planned_peak_bytes": 870000000,
+  "gpu_used": false,
+  "network_services_started": false,
+  "existing_files_deleted_or_overwritten": false
+}

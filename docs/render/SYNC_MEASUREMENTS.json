@@ -1,0 +1,296 @@
+{
+  "schema_version": "1.0",
+  "measured_at": "2026-09-28T15:22:53.856797+00:00",
+  "purpose": "synthetic_onset_sync_check_only",
+  "invocation": [
+    "python",
+    "scripts/render/measure_sync.py",
+    "--environment",
+    "environments/render-runtime.json",
+    "--input",
+    "D:/video/render/smoke-inputs/smoke-1bf1a869c2/source-0.mp4",
+    "--input",
+    "D:/video/render/jobs/smoke-1bf1a869c2/attempt-01/export.mp4",
+    "--input",
+    "D:/video/render/smoke-inputs/smoke-dcefd8e300/source-0.mp4",
+    "--input",
+    "D:/video/render/jobs/smoke-dcefd8e300/attempt-01/export.mp4"
+  ],
+  "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "method": {
+    "window_seconds": [
+      0,
+      3
+    ],
+    "video": "PTS-preserved central quarter-height crop; 32x18 grayscale mean",
+    "white_threshold": 240,
+    "audio": "48kHz mono PCM; first_pts=0; non-overlapping 1ms RMS windows",
+    "rms_peak_fractions": [
+      0.05,
+      0.1,
+      0.2,
+      0.5
+    ],
+    "offset_sign": "negative means audio leads video",
+    "audio_onset_resolution_ms": 1,
+    "limitations": [
+      "Measures this synthetic white-flash/tone cue only; no real-video synchronization claim",
+      "Visual timing is limited to decoded frame PTS; audio onset depends on the stated RMS thresholds",
+      "No pass/fail threshold or perceived human viewing acceptance is inferred"
+    ]
+  },
+  "measurements": [
+    {
+      "path": "D:/video/render/smoke-inputs/smoke-1bf1a869c2/source-0.mp4",
+      "sha256": "10d3bce8573349e9f96a91dc73e317e72e7709e6d3a9691e99ae1e645826a633",
+      "size_bytes": 341008,
+      "video_start_time": "0.000000",
+      "audio_start_time": "0.000000",
+      "format_start_time": "0.000000",
+      "video_fps": "25/1",
+      "decoded_frames": 75,
+      "decoded_audio_samples": 144000,
+      "flash_frames": [
+        {
+          "pts_seconds": 1.0,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 1.04,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 1.08,
+          "gray_mean": 255.0
+        }
+      ],
+      "flash_start_seconds": 1.0,
+      "audio_rms_peak": 0.250458794,
+      "audio_onsets": {
+        "0.05": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.01252294,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.1": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.025045879,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.2": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.050091759,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.5": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.125229397,
+          "audio_minus_video_ms": 0.0
+        }
+      },
+      "audio_minus_video_ms_at_10_percent_peak": 0.0,
+      "cue_detected": true
+    },
+    {
+      "path": "D:/video/render/jobs/smoke-1bf1a869c2/attempt-01/export.mp4",
+      "sha256": "a377d9f494ec359b7bcbc0c8b53a83666e056575185afb1530a87266a49b161e",
+      "size_bytes": 1096802,
+      "video_start_time": "0.021333",
+      "audio_start_time": "0.000000",
+      "format_start_time": "0.000000",
+      "video_fps": "30/1",
+      "decoded_frames": 90,
+      "decoded_audio_samples": 144000,
+      "flash_frames": [
+        {
+          "pts_seconds": 2.021333,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.054667,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.088,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.121333,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.154667,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.188,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.221333,
+          "gray_mean": 255.0
+        }
+      ],
+      "flash_start_seconds": 2.021333,
+      "audio_rms_peak": 0.25032018,
+      "audio_onsets": {
+        "0.05": {
+          "start_seconds": 1.983,
+          "end_seconds": 2.216,
+          "threshold_rms": 0.012516009,
+          "audio_minus_video_ms": -38.333
+        },
+        "0.1": {
+          "start_seconds": 1.983,
+          "end_seconds": 2.216,
+          "threshold_rms": 0.025032018,
+          "audio_minus_video_ms": -38.333
+        },
+        "0.2": {
+          "start_seconds": 1.983,
+          "end_seconds": 2.216,
+          "threshold_rms": 0.050064036,
+          "audio_minus_video_ms": -38.333
+        },
+        "0.5": {
+          "start_seconds": 1.983,
+          "end_seconds": 2.216,
+          "threshold_rms": 0.12516009,
+          "audio_minus_video_ms": -38.333
+        }
+      },
+      "audio_minus_video_ms_at_10_percent_peak": -38.333,
+      "cue_detected": true
+    },
+    {
+      "path": "D:/video/render/smoke-inputs/smoke-dcefd8e300/source-0.mp4",
+      "sha256": "10d3bce8573349e9f96a91dc73e317e72e7709e6d3a9691e99ae1e645826a633",
+      "size_bytes": 341008,
+      "video_start_time": "0.000000",
+      "audio_start_time": "0.000000",
+      "format_start_time": "0.000000",
+      "video_fps": "25/1",
+      "decoded_frames": 75,
+      "decoded_audio_samples": 144000,
+      "flash_frames": [
+        {
+          "pts_seconds": 1.0,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 1.04,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 1.08,
+          "gray_mean": 255.0
+        }
+      ],
+      "flash_start_seconds": 1.0,
+      "audio_rms_peak": 0.250458794,
+      "audio_onsets": {
+        "0.05": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.01252294,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.1": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.025045879,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.2": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.050091759,
+          "audio_minus_video_ms": 0.0
+        },
+        "0.5": {
+          "start_seconds": 1.0,
+          "end_seconds": 1.1,
+          "threshold_rms": 0.125229397,
+          "audio_minus_video_ms": 0.0
+        }
+      },
+      "audio_minus_video_ms_at_10_percent_peak": 0.0,
+      "cue_detected": true
+    },
+    {
+      "path": "D:/video/render/jobs/smoke-dcefd8e300/attempt-01/export.mp4",
+      "sha256": "dd4f6cba946d56000305db2ce2ad05d31809d1a9f6389eeb09b6abeb80c950ae",
+      "size_bytes": 1096940,
+      "video_start_time": "0.000000",
+      "audio_start_time": "0.000000",
+      "format_start_time": "0.000000",
+      "video_fps": "30/1",
+      "decoded_frames": 90,
+      "decoded_audio_samples": 144000,
+      "flash_frames": [
+        {
+          "pts_seconds": 2.0,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.033333,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.066667,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.1,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.133333,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.166667,
+          "gray_mean": 255.0
+        },
+        {
+          "pts_seconds": 2.2,
+          "gray_mean": 255.0
+        }
+      ],
+      "flash_start_seconds": 2.0,
+      "audio_rms_peak": 0.250232772,
+      "audio_onsets": {
+        "0.05": {
+          "start_seconds": 1.959,
+          "end_seconds": 2.195,
+          "threshold_rms": 0.012511639,
+          "audio_minus_video_ms": -41.0
+        },
+        "0.1": {
+          "start_seconds": 1.962,
+          "end_seconds": 2.194,
+          "threshold_rms": 0.025023277,
+          "audio_minus_video_ms": -38.0
+        },
+        "0.2": {
+          "start_seconds": 1.962,
+          "end_seconds": 2.194,
+          "threshold_rms": 0.050046554,
+          "audio_minus_video_ms": -38.0
+        },
+        "0.5": {
+          "start_seconds": 1.962,
+          "end_seconds": 2.194,
+          "threshold_rms": 0.125116386,
+          "audio_minus_video_ms": -38.0
+        }
+      },
+      "audio_minus_video_ms_at_10_percent_peak": -38.0,
+      "cue_detected": true
+    }
+  ]
+}

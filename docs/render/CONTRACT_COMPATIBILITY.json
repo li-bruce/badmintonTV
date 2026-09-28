@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-28T15:26:10.412393+00:00",
+  "contract_commit": "8900958 / 6a3e3deb4ff34bf4eb22f18d20e995f9e8d28e1d",
+  "canonical_fixture": "packages/contracts/fixtures/render-request.json (same timeline and top-level shape; source asset instantiated from existing synthetic test)",
+  "checks": [
+    {
+      "case": "success",
+      "status": "succeeded",
+      "returncode": 0,
+      "progress_events": 16,
+      "inflight_cancel_sent": false,
+      "stderr": "",
+      "request_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\success.request.json",
+      "result_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\success.result.json"
+    },
+    {
+      "case": "preview",
+      "status": "succeeded",
+      "returncode": 0,
+      "progress_events": 14,
+      "inflight_cancel_sent": false,
+      "stderr": "",
+      "request_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\preview.request.json",
+      "result_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\preview.result.json"
+    },
+    {
+      "case": "blocked",
+      "status": "blocked",
+      "returncode": 2,
+      "progress_events": 1,
+      "inflight_cancel_sent": false,
+      "stderr": "",
+      "request_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\blocked.request.json",
+      "result_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\blocked.result.json"
+    },
+    {
+      "case": "failed",
+      "status": "failed",
+      "returncode": 1,
+      "progress_events": 1,
+      "inflight_cancel_sent": false,
+      "stderr": "",
+      "request_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\failed.request.json",
+      "result_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\failed.result.json"
+    },
+    {
+      "case": "cancelled",
+      "status": "cancelled",
+      "returncode": 130,
+      "progress_events": 4,
+      "inflight_cancel_sent": true,
+      "stderr": "",
+      "request_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\cancelled.request.json",
+      "result_path": "D:\\video\\render\\handoff\\contracts-20ebcdccd2\\cancelled.result.json"
+    }
+  ],
+  "passed": true
+}
