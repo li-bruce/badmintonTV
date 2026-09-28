@@ -1,6 +1,8 @@
 """Conservative rules over reviewed events, with explicit uncertainty."""
 import re
 import uuid
+import heapq
+import itertools
 from copy import deepcopy
 
 
@@ -104,6 +106,7 @@ def search(query, events, assets):
                 matches.append((event,missing))
         choices.append(matches)
     results = []
+    sequence = itertools.count()
 
     def compatible(selected):
         by_step = {s['step_id']:item[0] for s,item in zip(query['steps'],selected)}
@@ -129,8 +132,6 @@ def search(query, events, assets):
         return True
 
     def visit(selected):
-        if len(results) >= 500:
-            return
         if len(selected) < len(choices):
             for item in choices[len(selected)]:
                 if compatible(selected+[item]):
@@ -144,12 +145,17 @@ def search(query, events, assets):
         uncertainty=list(dict.fromkeys(uncertainty))
         if missing:
             uncertainty.append('部分标签未知，不能判定符合或不符合')
-        results.append({'schema_version':'1.0','candidate_id':str(uuid.uuid4()),'asset_id':matched[0]['asset_id'],
+        candidate={'schema_version':'1.0','candidate_id':str(uuid.uuid4()),'asset_id':matched[0]['asset_id'],
             'start_ms':min(e['start_ms'] for e in matched),'end_ms':max(e['end_ms'] for e in matched),
             'player_id':matched[0].get('player_id'), 'event_ids':[e['event_id'] for e in matched],
             'matched_conditions':[s for s in query['steps'] if not any(m.startswith(s['step_id']+'.') for m in missing)],
             'missing_conditions':missing,'uncertainty_reasons':uncertainty,'rank_score':1/(1+len(missing)+len(uncertainty)),
-            'review_status':'unreviewed','evidence':[{'type':'source_interval','event_id':e['event_id'],'asset_id':e['asset_id'],'start_ms':e['start_ms'],'end_ms':e['end_ms']} for e in matched]})
+            'review_status':'unreviewed','evidence':[{'type':'source_interval','event_id':e['event_id'],'asset_id':e['asset_id'],'start_ms':e['start_ms'],'end_ms':e['end_ms']} for e in matched]}
+        entry=(candidate['rank_score'],-next(sequence),candidate)
+        if len(results)<500:
+            heapq.heappush(results,entry)
+        elif entry[:2]>results[0][:2]:
+            heapq.heapreplace(results,entry)
     if choices and all(choices):
         visit([])
-    return sorted(results,key=lambda c:-c['rank_score'])
+    return [entry[2] for entry in sorted(results,key=lambda entry:entry[:2],reverse=True)]

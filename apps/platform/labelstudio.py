@@ -12,6 +12,7 @@ import math
 import os
 from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import PurePosixPath
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -22,6 +23,24 @@ from xml.sax.saxutils import escape
 
 class LabelStudioError(ValueError):
     pass
+
+
+def annotation_timestamp(value: str | None) -> datetime | None:
+    """Only timezone-qualified LS timestamps can establish snapshot ordering."""
+    if value is None:
+        return None
+    try:
+        stamp = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        if stamp.tzinfo is None or stamp.utcoffset() is None:
+            raise ValueError
+        return stamp.astimezone(timezone.utc)
+    except (ValueError, TypeError, AttributeError):
+        raise LabelStudioError('Label Studio updated_at must be an ISO8601 timestamp with timezone') from None
+
+
+def annotation_hash(annotation: dict[str, Any]) -> str:
+    return hashlib.sha256(json.dumps(annotation, sort_keys=True, ensure_ascii=False,
+                                    separators=(",", ":")).encode()).hexdigest()
 
 
 LABEL_DEFINITIONS = {
@@ -179,8 +198,7 @@ def import_annotation(task: dict[str, Any], annotation: dict[str, Any], *,
     seeds, context = btv.get("seed_events", {}), btv.get("context", {})
     result = {"schema_version": "1.0", "events": [], "expected_revisions": {}, "tracks": [], "warnings": []}
     seen = set()
-    raw_hash = hashlib.sha256(json.dumps(annotation, sort_keys=True, ensure_ascii=False,
-                                         separators=(",", ":")).encode()).hexdigest()
+    raw_hash = annotation_hash(annotation)
     base_provenance = {"source": "import", "tool": "label-studio", "tool_version": tool_version,
                        "task_id": task["id"], "annotation_id": annotation["id"],
                        "annotation_updated_at": annotation.get("updated_at"),

@@ -126,40 +126,138 @@ class Store:
         Each update is (event, expected_revision, reviewer, reviewer_type).  A
         conflict or invalid event anywhere in the batch rolls everything back.
         """
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            saved = self._save_events(db, updates, actor=actor)
+        return saved
+
+    @staticmethod
+    def _save_events(db, updates, *, actor):
+        """The caller owns the write transaction, including accompanying sync state."""
         from packages.contracts import Event
 
         if actor not in ('human', 'automatic'):
             raise ValueError('actor 必须由服务端设为 human 或 automatic')
         saved = []
+        for event, expected_revision, reviewer, reviewer_type in updates:
+            if type(expected_revision) is not int or expected_revision < 0:
+                raise ValueError('expected_revision 必须是非负整数')
+            if reviewer_type not in ('human', 'agent'):
+                raise ValueError('reviewer_type 必须是 human 或 agent')
+            row = db.execute('SELECT revision,body FROM events WHERE id=?', (event['event_id'],)).fetchone()
+            actual = row[0] if row else 0
+            if actual != expected_revision:
+                raise Conflict(f'标注版本冲突：当前{actual}，提交基于{expected_revision}')
+            if row:
+                prior = json.loads(row[1])
+                if prior['asset_id'] != event['asset_id'] or prior['match_id'] != event['match_id']:
+                    raise Conflict('修订不可更换源素材或比赛')
+                if prior['review_status'] == 'confirmed' and actor == 'automatic':
+                    raise Conflict('自动结果不得覆盖已确认标注')
+            timestamp = now()
+            event = Event.model_validate({
+                **event, 'revision': actual + 1, 'reviewer': reviewer,
+                'reviewer_type': reviewer_type, 'reviewed_at': timestamp,
+                'previous_revision': actual or None,
+                'provenance': {**event.get('provenance', {}), 'reviewer_type': reviewer_type},
+            }).model_dump(mode='json')
+            body = json.dumps(event,ensure_ascii=False)
+            db.execute('INSERT INTO events VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision, body=excluded.body', (event['event_id'],event['asset_id'],actual+1,body))
+            db.execute('INSERT INTO event_revisions VALUES(?,?,?,?,?)', (event['event_id'],actual+1,body,reviewer,timestamp))
+            saved.append(event)
+        return saved
+
+    def import_label_studio(self, batches, reviewer, reviewer_type='human'):
+        """Atomically advance trusted per-annotation revision cursors.
+
+        A cursor records only revisions this importer wrote, never the latest
+        platform revision. Thus even an unconfirmed local edit remains protected.
+        Accepted annotation hashes are immutable receipts: replay does no writes.
+        """
+        from .labelstudio import annotation_timestamp
+
+        saved, tracks, warnings = [], [], []
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
-            for event, expected_revision, reviewer, reviewer_type in updates:
-                if type(expected_revision) is not int or expected_revision < 0:
-                    raise ValueError('expected_revision 必须是非负整数')
-                if reviewer_type not in ('human', 'agent'):
-                    raise ValueError('reviewer_type 必须是 human 或 agent')
-                row = db.execute('SELECT revision,body FROM events WHERE id=?', (event['event_id'],)).fetchone()
-                actual = row[0] if row else 0
-                if actual != expected_revision:
-                    raise Conflict(f'标注版本冲突：当前{actual}，提交基于{expected_revision}')
-                if row:
-                    prior = json.loads(row[1])
-                    if prior['asset_id'] != event['asset_id'] or prior['match_id'] != event['match_id']:
-                        raise Conflict('修订不可更换源素材或比赛')
-                    if prior['review_status'] == 'confirmed' and actor == 'automatic':
-                        raise Conflict('自动结果不得覆盖已确认标注')
-                timestamp = now()
-                event = Event.model_validate({
-                    **event, 'revision': actual + 1, 'reviewer': reviewer,
-                    'reviewer_type': reviewer_type, 'reviewed_at': timestamp,
-                    'previous_revision': actual or None,
-                    'provenance': {**event.get('provenance', {}), 'reviewer_type': reviewer_type},
-                }).model_dump(mode='json')
-                body = json.dumps(event,ensure_ascii=False)
-                db.execute('INSERT INTO events VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision, body=excluded.body', (event['event_id'],event['asset_id'],actual+1,body))
-                db.execute('INSERT INTO event_revisions VALUES(?,?,?,?,?)', (event['event_id'],actual+1,body,reviewer,timestamp))
-                saved.append(event)
-        return saved
+            for batch in batches:
+                converted = batch['converted']
+                key = json.dumps([batch['asset_id'], batch['task_id'], batch['annotation_id']], separators=(',', ':'))
+                row = db.execute("SELECT body FROM objects WHERE kind='ls_sync' AND id=?", (key,)).fetchone()
+                cursor = json.loads(row[0]) if row else None
+                if cursor is None:
+                    cursor = self._legacy_label_studio_cursor(db, batch)
+                digest = batch['annotation_sha256']
+                warnings.extend(converted['warnings'])
+                if cursor and digest in cursor['accepted_hashes']:
+                    # Do not roll back tracks either when replaying an old export.
+                    continue
+                incoming_time = annotation_timestamp(batch.get('updated_at'))
+                if cursor:
+                    prior_time = annotation_timestamp(cursor.get('updated_at'))
+                    if incoming_time is None or prior_time is None or incoming_time <= prior_time:
+                        raise Conflict('Label Studio 导出不是可验证的新版本；请重新导出含递增 updated_at 的标注')
+                baseline = cursor['event_revisions'] if cursor else {}
+                updates = []
+                for event in converted['events']:
+                    event_id = event['event_id']
+                    expected = baseline.get(event_id, converted['expected_revisions'].get(event_id) or 0)
+                    # The adapter's seed revision is only an initial baseline.
+                    event = {**event, 'revision': expected + 1, 'previous_revision': expected or None,
+                             'provenance': {**event['provenance'], 'previous_revision': expected or None}}
+                    updates.append((event, expected, reviewer, reviewer_type))
+                applied = self._save_events(db, updates, actor='automatic')
+                saved.extend(applied)
+                for track in converted['tracks']:
+                    db.execute('INSERT INTO objects VALUES(?,?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body',
+                               ('track', track['track_id'], json.dumps(track, ensure_ascii=False)))
+                    tracks.append(track)
+                new_cursor = {
+                    'asset_id': batch['asset_id'], 'task_id': batch['task_id'], 'annotation_id': batch['annotation_id'],
+                    'annotation_sha256': digest, 'updated_at': batch.get('updated_at'),
+                    'event_revisions': {**baseline, **{event['event_id']: event['revision'] for event in applied}},
+                    'accepted_hashes': [*(cursor['accepted_hashes'] if cursor else []), digest],
+                }
+                db.execute('INSERT INTO objects VALUES(?,?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body',
+                           ('ls_sync', key, json.dumps(new_cursor, ensure_ascii=False)))
+        return {'events': saved, 'tracks': tracks, 'warnings': warnings}
+
+    @staticmethod
+    def _legacy_label_studio_cursor(db, batch):
+        """Recover only historical import revisions, excluding later local edits.
+
+        Older releases retained annotation hashes in each revision, but lacked
+        cursors. Local edits may preserve that provenance, so the first revision
+        for each event/hash is the only defensible imported baseline.
+        """
+        from .labelstudio import annotation_timestamp
+
+        receipts, revisions, timestamps = {}, {}, {}
+        rows = db.execute('SELECT r.body FROM event_revisions r JOIN events e ON e.id=r.event_id WHERE e.asset_id=? ORDER BY r.revision',
+                          (batch['asset_id'],))
+        for row in rows:
+            event = json.loads(row[0])
+            provenance = event.get('provenance', {})
+            digest = provenance.get('annotation_sha256')
+            if (provenance.get('tool') != 'label-studio' or not digest
+                    or provenance.get('task_id') != batch['task_id']
+                    or provenance.get('annotation_id') != batch['annotation_id']):
+                continue
+            # Subsequent local revisions with the same hash are not LS imports.
+            first = receipts.setdefault(digest, {})
+            if event['event_id'] not in first:
+                first[event['event_id']] = event['revision']
+                revisions[event['event_id']] = max(revisions.get(event['event_id'], 0), event['revision'])
+            timestamps.setdefault(digest, provenance.get('annotation_updated_at'))
+        if not receipts:
+            return None
+        try:
+            latest = max(receipts, key=lambda digest: annotation_timestamp(timestamps[digest]) or datetime.min.replace(tzinfo=timezone.utc))
+        except ValueError:
+            # An unverifiable legacy ordering permits replays but not new writes.
+            latest = next(reversed(receipts))
+            timestamps[latest] = None
+        return {'event_revisions': revisions, 'accepted_hashes': list(receipts),
+                'annotation_sha256': latest, 'updated_at': timestamps[latest]}
 
     def revisions(self, id):
         with self.connect() as db:

@@ -10,7 +10,15 @@
 - 未测：真实LLM端点未提供；GPU共享租约/WSL launcher未实现，平台明确blocked；个人录像/专家细技术真值缺失。
 - 阻塞：无阻塞人工流程的外部条件；跨WSL模型未安装能力保持不可用。
 - 下一步：主协调审查集成；按专家真值、GPU租约与实际LLM端点补后续能力。不要将Agent区间审阅当技术真值。
-- 提交 SHA：6a3e3deb4ff34bf4eb22f18d20e995f9e8d28e1d（统一合同，可独立集成）；业务待提交。
+- 提交 SHA：6a3e3deb4ff34bf4eb22f18d20e995f9e8d28e1d（统一合同）；09be6ffc6c7d60a18a3c5d86e687298b1ae35aad（可信审核actor）；356b98f656033842aec6638c4029ba229e528286（平台完整业务基线）。
 - 启动：./start-platform.ps1（18080）；./start-worker.ps1；Label Studio实际18081，命令见 docs/platform/LABEL_STUDIO.md。
 - 环境/容量：Windows Python3.12.11；D:/video/runtime/platform/env独立venv，FastAPI0.141.1/Pydantic2.13.5；锁定清单docs/platform/requirements-lock.txt。实际platform约2,711,054bytes/60GB；runtime/platform约1,047,249,473bytes/10GB（含LS约994MB与所有pip缓存）。任务协议/日志峰值预留当前128MB，日志单attempt上限8MB。只读复用FFmpeg9.0.2；无GPU。computer-use技能使用本机Edge，未新增插件。
 - handoff：D:/video/platform/handoff/platform-real-flow.json、platform-restart-check.json、events.v1.json、assets-imported.v1.json；成片由render owner持有，路径见VALIDATION.md。
+
+## 独立审查修复与 GPU 后续
+
+- 大于8MB的probe结果直接使用worker全量hash结果入库，避免二次异步导入返回值类型错误；应用前检查文件存在和大小，Web不重复hash大文件。
+- 检索改为全局有界top500，后出现的精确匹配不会被前500个未知候选挤掉。
+- 时间线保存可携带明确human/agent审核人；绑定完整时间线hash及事件revision。正式导出需要当前人工事件与当前剪辑审核，向renderer传segment_options.editorial_review；变化后须重新审核。首页显示标注事件总数与人工确认数。
+- LS可信同步游标与事件/track在同一事务：二次编辑基于上次导入revision做CAS，旧已收hash幂等、未收旧时间409、本地修改冲突409。具体见LABEL_STUDIO.md。
+- 本轮中间全套199 passed/2 skipped（包括GPU/bridge在开发中的测试）；原生WSL CPU watchdog另行实机通过。真实平台GPU姿态任务尚在联调，不能据此宣称通过。

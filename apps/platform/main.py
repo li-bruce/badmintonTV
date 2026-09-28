@@ -97,7 +97,7 @@ def create_app(storage_root=None, db_path=None):
     @app.get('/api/v1/workflow')
     def workflow():
         events = store.events()
-        return {'assets':len(store.assets()),'events':len(events),'confirmed_events':sum(e['review_status']=='confirmed' for e in events),
+        return {'assets':len(store.assets()),'events':len(events),'confirmed_events':sum(e['review_status']=='confirmed' and e.get('reviewer_type')=='human' for e in events),
                 'timelines':len(store.list('timeline')),'jobs':queue.list(limit=30),
                 'stages':[{'stage':'导入','status':'ready'},{'stage':'人工标注/检索','status':'ready'},
                           {'stage':'模型分析','status':'adapter_required'},{'stage':'渲染','status':'adapter_required'}]}
@@ -282,6 +282,17 @@ def create_app(storage_root=None, db_path=None):
     def timelines():
         return store.list('timeline')
 
+    def timeline_digest(t):
+        return hashlib.sha256(json.dumps(t,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+
+    def record_timeline_review(t, reviewers, candidates=None):
+        from .store import now
+        roles={r.get('reviewer_type') for r in reviewers}
+        record={'timeline_sha256':timeline_digest(t),'reviewer_type':next(iter(roles)) if len(roles)==1 else 'mixed',
+                'reviewers':reviewers,'reviewed_at':now(),'candidates':candidates or [],
+                'event_revisions':{eid:store.event(eid)['revision'] for s in t['segments'] for eid in s['event_ids']}}
+        return store.put('timeline_review',t['timeline_id'],record)
+
     def save_timeline(body):
         t=Timeline.model_validate(body).model_dump(mode='json')
         for s in t['segments']:
@@ -296,35 +307,52 @@ def create_app(storage_root=None, db_path=None):
 
     @app.post('/api/v1/timelines')
     def put_timeline(body:dict):
-        return save_timeline(body)
+        if 'timeline' in body:
+            if not body.get('reviewer') or body.get('reviewer_type') not in ('human','agent'):
+                raise ValueError('保存剪辑审核须填写审阅者及 human/agent 类型')
+        t=save_timeline(body.get('timeline',body))
+        if 'timeline' in body:
+            record_timeline_review(t,[{'reviewer':body['reviewer'],'reviewer_type':body['reviewer_type']}])
+        return t
 
     @app.post('/api/v1/timelines/from-candidates')
     def from_candidates(body:dict):
-        segments=[]
+        segments=[]; selected=[]
         for id in body['candidate_ids']:
             c=resource('candidate',id)
             if c['review_status']!='confirmed':
                 raise Conflict('先人工确认候选，再加入时间线')
             a=asset_or_404(c['asset_id'])
+            selected.append(c)
             segments.append({'segment_id':uid('clip'),'asset_id':c['asset_id'],'in_ms':max(0,c['start_ms']-int(body.get('pre_ms',1000))),
               'out_ms':min(a['duration_ms'],c['end_ms']+int(body.get('post_ms',1000))),'speed':1.0,'event_ids':c['event_ids'],
               'fit':'contain','title':a['title'],'audio':'source','review_status':'confirmed'})
         merged=merge_segments(segments)
-        return save_timeline({'schema_version':'1.0','timeline_id':uid('timeline'),'title':body.get('title','羽毛球集锦'),
+        t=save_timeline({'schema_version':'1.0','timeline_id':uid('timeline'),'title':body.get('title','羽毛球集锦'),
             'segments':merged,'output':{'width':1080,'height':1920,'fps':30,'video_codec':'h264','audio_codec':'aac'}})
+        record_timeline_review(t,[{'reviewer':c.get('reviewer'),'reviewer_type':c.get('reviewer_type')} for c in selected],selected)
+        return t
 
     @app.post('/api/v1/timelines/{id}/render',status_code=202)
     def render(id:str,body:dict):
         t=resource('timeline',id)
         research=body.get('research_preview',False) is True
+        selection=store.get('timeline_review',id)
+        selection_valid=bool(selection and selection['timeline_sha256']==timeline_digest(t))
         if not research and any(s['review_status']!='confirmed' for s in t['segments']):
             raise Conflict('导出前须确认所有片段')
         if not research:
             reviewed=[store.event(eid) for s in t['segments'] for eid in s['event_ids']]
             if not reviewed or any(not e or e['review_status']!='confirmed' or e.get('reviewer_type')!='human' for e in reviewed):
                 raise Conflict('正式导出需要人工确认记录；可勾选待人工确认的本地研究样片')
+            if not selection_valid or selection.get('reviewer_type')!='human' or any(selection['event_revisions'].get(e['event_id'])!=e['revision'] for e in reviewed):
+                raise Conflict('剪辑或事件已变化，请由人类重新保存审核当前时间线')
+            if any(resource('candidate',c['candidate_id'])!=c for c in selection.get('candidates',[])):
+                raise Conflict('候选审核已变化，请重新确认当前剪辑')
         assets=[asset_or_404(aid) for aid in dict.fromkeys(s['asset_id'] for s in t['segments'])]
-        return enqueue('render',{'assets':assets,'parameters':{'timeline':t,'research_preview':research}},idempotency_key=body.get('idempotency_key'))
+        editorial=selection if selection_valid else {'reviewer_type':'unknown','reason':'当前时间线没有对应审核记录'}
+        return enqueue('render',{'assets':assets,'parameters':{'timeline':t,'research_preview':research,
+            'segment_options':{s['segment_id']:{'editorial_review':editorial} for s in t['segments']}}},idempotency_key=body.get('idempotency_key'))
 
     @app.get('/api/v1/models')
     def models():
@@ -341,7 +369,7 @@ def create_app(storage_root=None, db_path=None):
                 return bool(json.loads(mapping).get(model_id))
             except (ValueError,AttributeError):
                 return False
-        return bool(os.getenv('BTV_MODEL_COMMAND_JSON'))
+        return False
 
     @app.post('/api/v1/models/import')
     def import_model(body:dict):
@@ -414,7 +442,13 @@ def create_app(storage_root=None, db_path=None):
             asset=result.get('asset') or (result.get('assets') or [None])[0]
             if not asset:
                 raise ValueError('探测结果没有Asset')
-            imported=import_manifest({'library_id':j['payload']['library_id'],'manifest':{'schema_version':'1.0','assets':[asset]}})
+            asset=AssetManifest.model_validate({'assets':[asset]}).model_dump(mode='json')['assets'][0]
+            # Probe already hashes the complete source in the independent worker.
+            # Do not route a large successful result back into asynchronous import.
+            source=resolve_relative_path(root,asset['relative_path'],must_exist=True)
+            if not source.is_file() or source.stat().st_size!=asset['size_bytes']:
+                raise Conflict('探测后源文件缺失或大小变化，请重新探测')
+            imported={'imported':store.import_assets([asset],j['payload']['library_id']),'integrity':'worker_sha256_verified'}
             target=imported['imported'][0]['asset']
             store.update_asset_probe(target['asset_id'],asset.get('probe',{}))
             return imported
@@ -490,7 +524,7 @@ def create_app(storage_root=None, db_path=None):
 
     @app.post('/api/v1/annotation/label-studio/import')
     def labelstudio_import(body:dict):
-        from .labelstudio import FrameMap, import_annotation
+        from .labelstudio import FrameMap, annotation_hash, import_annotation
         tasks=body['export'] if isinstance(body['export'],list) else [body['export']]
         raw=json.dumps(tasks,ensure_ascii=False).encode('utf-8')
         if len(raw)>32_000_000:
@@ -507,7 +541,7 @@ def create_app(storage_root=None, db_path=None):
                 temp.write_bytes(raw); os.replace(temp,path)
         finally:
             ledger.release(reservation)
-        imported,tracks,warnings=[],[],[]
+        batches=[]
         for task in tasks:
             a=asset_or_404(task['data']['asset_id'])
             trusted=resource('ls_task',a['asset_id'])
@@ -516,18 +550,12 @@ def create_app(storage_root=None, db_path=None):
             for annotation in task.get('annotations',[]):
                 converted=import_annotation(safe_task,annotation,frame_map=fm,
                   tool_version=str(body.get('tool_version','1.23.1')),raw_export_relative_path=relative)
-                for e in converted['events']:
-                    previous=store.event(e['event_id'])
-                    if previous and previous['provenance'].get('annotation_sha256')==e['provenance']['annotation_sha256']:
-                        continue
-                    expected=converted['expected_revisions'].get(e['event_id']) or 0
-                    # Imported annotations never overwrite a confirmed local revision implicitly.
-                    imported.append(store.save_event(validate_event(e),expected,body.get('reviewer','label-studio-import'),body.get('reviewer_type','human')))
-                for track in converted['tracks']:
-                    store.put('track',track['track_id'],track)
-                    tracks.append(track)
-                warnings.extend(converted['warnings'])
-        return {'events':imported,'tracks':tracks,'warnings':warnings,'raw_export_relative_path':relative}
+                converted['events']=[validate_event(e) for e in converted['events']]
+                batches.append({'asset_id':a['asset_id'],'task_id':task['id'],'annotation_id':annotation['id'],
+                                'annotation_sha256':annotation_hash(annotation),'updated_at':annotation.get('updated_at'),
+                                'converted':converted})
+        imported=store.import_label_studio(batches,body.get('reviewer','label-studio-import'),body.get('reviewer_type','human'))
+        return {**imported,'raw_export_relative_path':relative}
 
     return app
 
