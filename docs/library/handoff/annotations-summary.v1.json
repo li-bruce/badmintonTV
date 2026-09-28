@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "annotations": [
+    {
+      "relative_path": "data/annotations/finebadmintonbenchmark/benchmark_action_classification.json",
+      "records": 200,
+      "license": {
+        "license": "Apache-2.0",
+        "scope": "Dataset card declaration for released annotations; keep underlying video rights separate."
+      },
+      "conversion": "Original QA retained. No timestamps/player identity/fine-technique Events invented.",
+      "matched_video_uids": [
+        "video_000001",
+        "video_000002",
+        "video_000003"
+      ]
+    },
+    {
+      "relative_path": "data/annotations/finebadmintonbenchmark/benchmark_round_comment_updated.json",
+      "records": 250,
+      "license": {
+        "license": "Apache-2.0",
+        "scope": "Dataset card declaration for released annotations; keep underlying video rights separate."
+      },
+      "conversion": "Original QA retained. No timestamps/player identity/fine-technique Events invented.",
+      "matched_video_uids": [
+        "video_001951"
+      ]
+    },
+    {
+      "relative_path": "data/annotations/shuttleset/ShuttleSet/set/Anders_Antonsen_Viktor_Axelsen_HSBC_BWF_WORLD_TOUR_FINALS_2020_Finals/set1.csv",
+      "records": 366,
+      "columns": [
+        "rally",
+        "ball_round",
+        "time",
+        "frame_num",
+        "roundscore_A",
+        "roundscore_B",
+        "player",
+        "server",
+        "type",
+        "aroundhead",
+        "backhand",
+        "hit_height",
+        "hit_area",
+        "hit_x",
+        "hit_y",
+        "landing_height",
+        "landing_area",
+        "landing_x",
+        "landing_y",
+        "lose_reason",
+        "win_reason",
+        "getpoint_player",
+        "flaw",
+        "player_location_area",
+        "player_location_x",
+        "player_location_y",
+        "opponent_location_area",
+        "opponent_location_x",
+        "opponent_location_y",
+        "db"
+      ],
+      "license": {
+        "license": "MIT",
+        "scope": "Root repository LICENSE; no separate annotation-specific notice found. Preserve original LICENSE and attribution, do not infer broadcast footage rights."
+      },
+      "paired_video_asset_id": null,
+      "conversion": "Original CSV retained; referenced match video absent, so no Event conversion.",
+      "matched_video_uids": []
+    }
+  ]
+}

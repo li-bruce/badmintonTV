@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "downloads": [
+    {
+      "relative_path": "data/sources/finebadmintonbenchmark/README.md",
+      "size_bytes": 2922,
+      "sha256": "95283325f1be0597ac712c6afde479763a80c484969c293807db87e0e0642dbc",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/README.md",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/annotations/finebadmintonbenchmark/benchmark_action_classification.json",
+      "size_bytes": 333686,
+      "sha256": "f603a8732fb6437d07bffa6f1732fd6145c2dbbb2d5453c5b7460b51df284876",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/finebadmintonbenchmark/benchmark_action_classification.json",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/annotations/finebadmintonbenchmark/benchmark_round_comment_updated.json",
+      "size_bytes": 869192,
+      "sha256": "e73b54f53775d0e898131f0c7d5dc2a8b513f311285705a6831b338acc30377b",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/finebadmintonbenchmark/benchmark_round_comment_updated.json",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/annotations/shuttleset/ShuttleSet/set/Anders_Antonsen_Viktor_Axelsen_HSBC_BWF_WORLD_TOUR_FINALS_2020_Finals/set1.csv",
+      "size_bytes": 42546,
+      "sha256": "8e70c9b2a2e4344666c61b94852032228fbe664000b2ba0e080745eeb4a62c85",
+      "source_url": "https://raw.githubusercontent.com/wywyWang/CoachAI-Projects/45517f7d4cb936b03f3eabf939cc7959d39226fe/ShuttleSet/set/Anders_Antonsen_Viktor_Axelsen_HSBC_BWF_WORLD_TOUR_FINALS_2020_Finals/set1.csv",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/annotations/shuttleset/ShuttleSet/README.md",
+      "size_bytes": 4009,
+      "sha256": "ffe99387e8955c682472a9123ba61a6e3982eca5054d3bc5208b7240a655f3c6",
+      "source_url": "https://raw.githubusercontent.com/wywyWang/CoachAI-Projects/45517f7d4cb936b03f3eabf939cc7959d39226fe/ShuttleSet/README.md",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/annotations/shuttleset/LICENSE",
+      "size_bytes": 1069,
+      "sha256": "2ff939aee5c1dbce2051c009933dc0ca17f75e75b26c844b73780f2498b33164",
+      "source_url": "https://raw.githubusercontent.com/wywyWang/CoachAI-Projects/45517f7d4cb936b03f3eabf939cc7959d39226fe/LICENSE",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/raw/finebadmintonbenchmark/video_000001.mp4",
+      "size_bytes": 642017,
+      "sha256": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_000001.mp4",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/raw/finebadmintonbenchmark/video_000002.mp4",
+      "size_bytes": 591764,
+      "sha256": "9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_000002.mp4",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/raw/finebadmintonbenchmark/video_000003.mp4",
+      "size_bytes": 499766,
+      "sha256": "58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_000003.mp4",
+      "download_status": "verified_existing"
+    },
+    {
+      "relative_path": "data/raw/finebadmintonbenchmark/video_001951.mp4",
+      "size_bytes": 669106,
+      "sha256": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_001951.mp4",
+      "download_status": "verified_existing"
+    }
+  ],
+  "errors": []
+}

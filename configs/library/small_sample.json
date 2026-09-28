@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-09-28",
+  "purpose": "Local research acquisition, decode and import smoke test. No fine-technique ground truth or public-release clearance.",
+  "batch_peak_bytes": 50000000,
+  "hf_revision": "ff86093a51efdf9a243a0635704952d404e99e52",
+  "coachai_revision": "45517f7d4cb936b03f3eabf939cc7959d39226fe",
+  "videos": [
+    {"video_uid": "video_000001", "size_bytes": 642017, "sha256": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0", "visual_observation": {"camera_type": "rear", "discipline": "singles", "scoreboard_names": ["CHOU T.C.", "CHRISTIE"], "still_relative_path": "data/qa/stills/video_000001.jpg", "sample_time_ms": 1000}},
+    {"video_uid": "video_000002", "size_bytes": 591764, "sha256": "9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956", "visual_observation": {"camera_type": "rear", "discipline": "singles", "scoreboard_names": ["CHOU T.C.", "CHRISTIE"], "still_relative_path": "data/qa/stills/video_000002.jpg", "sample_time_ms": 1000}},
+    {"video_uid": "video_000003", "size_bytes": 499766, "sha256": "58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13", "visual_observation": {"camera_type": "rear", "discipline": "singles", "scoreboard_names": ["CHOU T.C.", "CHRISTIE"], "still_relative_path": "data/qa/stills/video_000003.jpg", "sample_time_ms": 1000}},
+    {"video_uid": "video_001951", "size_bytes": 669106, "sha256": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90", "visual_observation": {"camera_type": "rear", "discipline": "singles", "scoreboard_names": ["LEI L.X.", "AXELSEN"], "still_relative_path": "data/qa/stills/video_001951.jpg", "sample_time_ms": 1000}}
+  ],
+  "qa_files": ["benchmark_action_classification.json", "benchmark_round_comment_updated.json"],
+  "shuttleset_files": [
+    "ShuttleSet/set/Anders_Antonsen_Viktor_Axelsen_HSBC_BWF_WORLD_TOUR_FINALS_2020_Finals/set1.csv",
+    "ShuttleSet/README.md", "LICENSE"
+  ],
+  "video_rights": {
+    "status": "unknown",
+    "license_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/blob/ff86093a51efdf9a243a0635704952d404e99e52/README.md",
+    "evidence": "Publisher hosts an ungated dataset with Apache-2.0 card. Original broadcaster footage ownership/redistribution clearance is not separately supplied; do not infer commercial/public video rights from dataset or code licensing.",
+    "allowed_uses": []
+  },
+  "annotation_rights": {
+    "finebadminton": {"license": "Apache-2.0", "scope": "Dataset card declaration for released annotations; keep underlying video rights separate."},
+    "shuttleset": {"license": "MIT", "scope": "Root repository LICENSE; no separate annotation-specific notice found. Preserve original LICENSE and attribution, do not infer broadcast footage rights."}
+  },
+  "grouping": {
+    "match_id": "unknown",
+    "split": "unassigned",
+    "quarantine_group": "finebadmintonbenchmark-source-matches-unresolved",
+    "reason": "QA video_uid does not expose canonical full-match ID or source offset. Never random-split these clips or claim independent matches. Quarantine all until provenance is resolved."
+  }
+}
