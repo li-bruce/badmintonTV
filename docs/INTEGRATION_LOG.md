@@ -1,5 +1,19 @@
 # 集成记录
 
+## 2026-09-29：主分支交付检查点
+
+以下为最终检查点；后文保留各阶段原始记录，其中“待修复/待集成”描述的是当时状态。
+
+- 四任务全部源码与审查修复已合入 main。library ZIP 压缩格式白名单修复 `18de8a6`；platform 初版 `0263c48`、业务修复 `3569096`、LS 不可变快照修复 `b89fbf4`；models 实验交付 `1df5f14` 与环境预检修复 `15b909b`；platform 最终运行边界修复 `69b3e17`。root 启动/统一检查脚本提交 `a851dcb`。
+- 独立 reviewer 已复核：大文件导入、全局检索排序、LS 重导入/CAS/旧快照隔离、完整时间线审核来源、容量扫描与 SQLite 写锁解耦、owner 物理路径检查、等待锁后重新读时间、WSL 子进程停止确认和 orphan 状态、GPU 租约释放、环境安装前容量检查。对应回归通过；未把测试数量当模型质量。
+- root 在 main 运行 `scripts/integration/check-all.ps1`，478 passed、5 skipped，exit 0。条件跳过及分模块数量见 `INTEGRATION_VALIDATION.json`；另核验五条真实 Asset/PTS/哈希、六份模型清单及五份真实 JobResult。
+- 数据和环境容量快照 18,311,292,486 bytes；`D:/video` 由有界 GNU du 完整核算成功，原生 Conda base/cache 使用此前未改变的快照。root 慢速 Python 扫描在核实本任务 PID 后停止，不计为成功；源码测试目录 ACL 限制未通过修改权限绕过。详见 `INTEGRATION_CAPACITY.json`。
+- platform 确认 GPU 与任务空闲后停止其旧 API/worker，保留 Label Studio。root 从 main 于北京时间 00:23 启动 API 与 worker，源码版本 `a851dcbb239f8789e1566aea8031c2ee277692ae`，本地收据 `.runtime/main-services.json`。同一业务数据库继续使用，后续文档提交不改变运行代码。
+- root 浏览器在 main 提交规则任务 `job-b7e1f50b1fd247449e9a34ff67a0f0bf` 与渲染任务 `job-e0ddb7aa02ec46c4874131b2ced7b372`，均 attempt-1 succeeded。请求/结果合同、全部六项 artifact 大小/SHA、QuerySpec、Timeline 与九项视频技术 QA 通过，HTTP Range 返回 206/1024 bytes；浏览器实际播放至末尾，无媒体错误。
+- 新成片 `D:/video/render/jobs/job-e0ddb7aa02ec46c4874131b2ced7b372/attempt-1/export.mp4`，14.833333 秒、445 帧、1080×1920、938,753 bytes，SHA `8fb63e7587494f7d679db9f331966e06c711a9229b04fe109fe5f65d76dbf8ae`。与先前研究样片视频字节相同，但本次由 main 新任务产生并记录源映射/审核来源。agent 审核、research_preview=true、人类确认 false。
+- 平台工作树此前真实 GPU 任务 `job-3dc9ece15e914eecb9616ac306ece6b8` 的两项产物与 compute_stopped=true 已由 root 核验。main 合入最终代码但没有重复 GPU 实验。models 已明确停止独立实验且不自动恢复；主分支网页试用窗口限姿态、有效至北京时间 01:28:37，授予后 HTTP 账本确认无租约，不自动提交任务。
+- 细手法模型、稳定跟踪和可靠本地 LLM 解析仍未验收；分别有独立问题/实验记录。现有下载为四段 FBBench 小样与一段大学社团双打，不是完整职业比赛资料库。第一版交付不宣称完整训练目标已达到。
+
 ## 2026-09-28：统一合同与首条真实研究样片
 
 - platform合同原提交：`6a3e3deb4ff34bf4eb22f18d20e995f9e8d28e1d`；main集成提交：`8900958`。

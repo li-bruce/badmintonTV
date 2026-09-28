@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "recorded_local_date": "2026-09-29",
+  "source_revision": "a851dcbb239f8789e1566aea8031c2ee277692ae",
+  "tests": {
+    "contracts_platform": {
+      "passed": 236,
+      "skipped": 2
+    },
+    "library": {
+      "passed": 77,
+      "skipped": 0
+    },
+    "models": {
+      "passed": 104,
+      "skipped": 2
+    },
+    "render": {
+      "passed": 61,
+      "skipped": 1
+    },
+    "total_passed": 478,
+    "total_skipped": 5
+  },
+  "jobs": [
+    {
+      "job_id": "job-b7e1f50b1fd247449e9a34ff67a0f0bf",
+      "status": "succeeded",
+      "operation": "model",
+      "attempt_id": "attempt-1",
+      "artifacts_verified": 2,
+      "events_count": 0
+    },
+    {
+      "job_id": "job-e0ddb7aa02ec46c4874131b2ced7b372",
+      "status": "succeeded",
+      "operation": "render",
+      "attempt_id": "attempt-1",
+      "artifacts_verified": 4,
+      "events_count": 0,
+      "video_relative_path": "render/jobs/job-e0ddb7aa02ec46c4874131b2ced7b372/attempt-1/export.mp4",
+      "video_sha256": "8fb63e7587494f7d679db9f331966e06c711a9229b04fe109fe5f65d76dbf8ae",
+      "video_bytes": 938753,
+      "human_confirmed_segments": false,
+      "research_preview": true,
+      "technical_checks": {
+        "dimensions": true,
+        "codecs": true,
+        "pixel_format": true,
+        "audio": true,
+        "duration": true,
+        "frame_count": true,
+        "zero_start_pts": true,
+        "av_end_alignment": true,
+        "full_decode": true
+      },
+      "http_range_206": true
+    }
+  ],
+  "browser_verification": {
+    "submitted_rule_job": true,
+    "submitted_render_job": true,
+    "reviewer_type": "agent",
+    "video_duration_seconds": 14.833333,
+    "video_ready_state": 4,
+    "video_error": null,
+    "playback_started": true,
+    "playback_reached_end": true,
+    "human_technique_validation": false
+  },
+  "prior_gpu_job": {
+    "job_id": "job-3dc9ece15e914eecb9616ac306ece6b8",
+    "verified_by_root": [
+      "canonical request/result",
+      "two artifact sizes and SHA256",
+      "events empty",
+      "bridge compute_stopped=true"
+    ],
+    "source_scope": "platform worktree before main integration; no repeated GPU run"
+  }
+}
