@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "kind": "real_doubles_input_compatibility",
+  "handoff": "D:\\video\\render\\handoff\\doubles-preview-c47d5492",
+  "preview_path": "D:\\video\\render\\jobs\\doubles-preview-c47d5492\\attempt-01\\preview.mp4",
+  "source_sha256": "52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+  "source_dimensions": [
+    3840,
+    2160
+  ],
+  "source_avg_fps": "41100/1367",
+  "source_vfr_status": "unknown",
+  "actual_duration_ms": 4400.0,
+  "output_frames": "132",
+  "checks": {
+    "dimensions": true,
+    "codecs": true,
+    "pixel_format": true,
+    "audio": true,
+    "duration": true,
+    "frame_count": true,
+    "zero_start_pts": true,
+    "av_end_alignment": true,
+    "full_decode": true
+  },
+  "human_confirmed_segments": false,
+  "audio_strategy": "source_atempo",
+  "review": "agent contact-sheet reviewed: all four players and whole original view retained; human viewing and perceptual A/V sync pending",
+  "rights": "unknown; no publication",
+  "annotation_usage": "none; top-view CSV not applied to rear video",
+  "canonical_contract": "request/result/exported Timeline/all progress passed against main contracts; saved project 1080x1920"
+}
