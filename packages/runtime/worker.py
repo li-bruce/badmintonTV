@@ -21,7 +21,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from .queue import Queue
-from .storage import CapacityLedger, resolve_relative_path
+from .storage import CapacityLedger, resolve_owner_path, resolve_relative_path
 
 
 class JobCancelled(Exception):
@@ -81,12 +81,21 @@ class WorkerContext:
         self.log_budget_bytes = 8_000_000
         self.log_bytes_written = 0
         self.log_omission_reported = False
+        self.gpu_coordinator = None
+        self.gpu_lease = None
+        self.registered_command = None
+        self.bridge_done_path = None
+        self.compute_started = False
+        self.compute_stopped = True
         self.thread = threading.Thread(target=self._keepalive, daemon=True)
 
     def _keepalive(self):
         while not self.stopped.wait(max(0.02, min(5, self.lease_seconds / 3))):
             try:
                 if not self.queue.heartbeat(self.job["job_id"], self.worker_id, self.lease_seconds, expected_attempt=self.job["attempt"]):
+                    self.lost_lease.set()
+                    return
+                if self.gpu_lease and not self.gpu_coordinator.heartbeat(self.gpu_lease["lease_id"], self.worker_id, self.lease_seconds):
                     self.lost_lease.set()
                     return
             except Exception:
@@ -158,6 +167,8 @@ class WorkerContext:
                 except BaseException:
                     _kill_tree(process, windows_job)
                     raise
+            self.compute_started = True
+            self.compute_stopped = False
         except FileNotFoundError as exc:
             if windows_job:
                 windows_job.close()
@@ -240,6 +251,7 @@ class WorkerContext:
         finally:
             if windows_job:
                 windows_job.close()
+            self.compute_stopped = process.poll() is not None
 
 
 def _binary(env_name, fallback):
@@ -384,8 +396,12 @@ def probe(context, exchange_dir):
 
 
 def registered_command(operation, payload):
-    encoded = os.environ.get("BTV_RENDER_COMMAND_JSON" if operation == "render" else "BTV_MODEL_COMMAND_JSON")
-    if operation == "model" and os.environ.get("BTV_MODEL_COMMANDS_JSON"):
+    encoded = os.environ.get("BTV_RENDER_COMMAND_JSON") if operation == "render" else None
+    if operation == "model":
+        if not isinstance(payload.get("model_id"), str) or not payload["model_id"].strip():
+            raise ValueError("model payload requires a nonempty model_id snapshot")
+        if not os.environ.get("BTV_MODEL_COMMANDS_JSON"):
+            raise JobBlocked("not_installed", "model_id 尚未在管理员 BTV_MODEL_COMMANDS_JSON 精确登记")
         commands = json.loads(os.environ["BTV_MODEL_COMMANDS_JSON"])
         if not isinstance(commands, dict):
             raise JobBlocked("invalid_configuration", "管理员模型命令表必须是 JSON 对象")
@@ -412,7 +428,9 @@ def registered_command(operation, payload):
 def adapter(context, exchange_dir):
     from packages.contracts import JobRequest, JobResult
     job, payload = context.job, context.job["payload"]
-    command = registered_command(job["operation"], payload)
+    command = context.registered_command or registered_command(job["operation"], payload)
+    if "packages.runtime.wsl_bridge" in command:
+        context.bridge_done_path = exchange_dir / "bridge.done.json"
     adapter_operation = job["operation"]
     parameters = payload.get("parameters", {})
     if not isinstance(parameters, dict):
@@ -436,7 +454,7 @@ def adapter(context, exchange_dir):
         resolve_relative_path(context.storage_root, asset["relative_path"], must_exist=True)
     owner = "render" if job["operation"] == "render" else "models"
     relative_output = f"{owner}/jobs/{job['job_id']}/attempt-{job['attempt']}"
-    resolve_relative_path(context.storage_root, relative_output)
+    resolve_owner_path(context.storage_root, relative_output, owner)
     attempt_id = f"attempt-{job['attempt']}"
     request = {"schema_version": "1.0", "job_id": job["job_id"], "attempt_id": attempt_id, "operation": adapter_operation, "assets": assets,
                "parameters": parameters, "output_dir": relative_output}
@@ -466,8 +484,8 @@ def adapter(context, exchange_dir):
         required = {"artifact_id", "kind", "relative_path", "sha256", "size_bytes", "created_at", "producer"}
         if not isinstance(artifact, dict) or not required.issubset(artifact):
             raise ValueError("CLI Artifact is incomplete")
-        path = resolve_relative_path(context.storage_root, artifact["relative_path"], must_exist=True)
-        output = resolve_relative_path(context.storage_root, relative_output)
+        path = resolve_owner_path(context.storage_root, artifact["relative_path"], owner, must_exist=True)
+        output = resolve_owner_path(context.storage_root, relative_output, owner)
         if not path.is_relative_to(output) or not path.is_file():
             raise ValueError("CLI Artifact is outside its controlled job output")
         if path.stat().st_size != artifact["size_bytes"] or _sha256(path, context) != artifact["sha256"]:
@@ -484,21 +502,33 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
         return None
     context = WorkerContext(queue, job, worker_id, storage_root, lease_seconds)
     context.thread.start()
-    ledger = CapacityLedger(queue.db_path, storage_root)
+    ledger = None
     reservation = None
     try:
+        ledger = CapacityLedger(queue.db_path, storage_root)
         context.check()
         if job["operation"] not in {"probe", "verify_manifest", "render", "model"}:
             raise JobBlocked("unsupported_operation", "该 operation 没有固定处理器")
         gpu_required = job["payload"].get("gpu_required", False)
         if not isinstance(gpu_required, bool):
             raise ValueError("gpu_required must be a boolean derived by the platform from trusted model requirements")
+        if job["operation"] == "model":
+            context.registered_command = registered_command(job["operation"], job["payload"])
+            gpu_required = gpu_required or "packages.runtime.wsl_bridge" in context.registered_command
         if gpu_required:
-            raise JobBlocked("GPU_LEASE_REQUIRED", "当前尚未实现共享 GPU 排期租约；任务保持阻塞，未启动 GPU 进程")
+            from .gpu import GPUCoordinator, GPUUnavailable
+            coordinator = GPUCoordinator(queue.db_path)
+            try:
+                lease = coordinator.claim(job["payload"].get("model_id"), job["job_id"], job["attempt"], worker_id, lease_seconds)
+            except GPUUnavailable as exc:
+                raise JobBlocked(exc.code, exc.message) from exc
+            context.gpu_coordinator, context.gpu_lease = coordinator, lease
+        if job["operation"] == "render":
+            context.registered_command = registered_command(job["operation"], job["payload"])
         # Covers protocol atomic-write overlap, SQLite/WAL, bounded logs and one thumbnail.
         # External modules own their media-output reservations.
         reservation = ledger.reserve("platform", 128_000_000, job["job_id"])
-        exchange_dir = resolve_relative_path(storage_root, f"platform/jobs/{job['job_id']}/attempt-{job['attempt']}")
+        exchange_dir = resolve_owner_path(storage_root, f"platform/jobs/{job['job_id']}/attempt-{job['attempt']}", "platform")
         exchange_dir.mkdir(parents=True, exist_ok=False)
         handler = {"probe": probe, "verify_manifest": verify_manifest}.get(job["operation"], adapter)
         result = handler(context, exchange_dir)
@@ -520,6 +550,16 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
         except RuntimeError:
             pass
     finally:
+        if context.gpu_lease:
+            compute_stopped = not context.compute_started or context.compute_stopped
+            if context.bridge_done_path and context.compute_started:
+                from .wsl_bridge import wait_for_bridge_done
+                compute_stopped = wait_for_bridge_done(context.bridge_done_path, job["job_id"], f"attempt-{job['attempt']}", timeout=15)
+            if compute_stopped:
+                context.gpu_coordinator.release(context.gpu_lease["lease_id"], worker_id, compute_stopped=True)
+            else:
+                context.gpu_coordinator.mark_orphaned(context.gpu_lease["lease_id"], worker_id, "Compute stop was not confirmed by matching bridge done evidence")
+                queue.append_log(job["job_id"], "error", stage="gpu_cleanup", message="未确认计算停止；GPU租约已保留为orphaned，需管理员核验")
         context.stopped.set()
         context.thread.join(timeout=6)
         if reservation:

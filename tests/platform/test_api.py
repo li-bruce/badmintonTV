@@ -178,6 +178,8 @@ def test_invalid_event_time_and_unknown_query(setup):
     assert c.post('/api/v1/queries/parse',json={'text':'不要网前击球，只要杀球'}).status_code==422
     assert c.post('/api/v1/queries/parse',json={'text':'后退起跳杀球'}).status_code==422
     assert c.get('/api/v1/health').json()['torch_loaded'] is False
+    gpu=c.get('/api/v1/resources/gpu').json()
+    assert gpu['code']=='GPU_LEASE_REQUIRED' and not gpu['available']
     assert c.get('/api/v1/models').json()[0]['status']=='not_installed'
     assert c.get('/').status_code==200
 

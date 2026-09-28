@@ -10,7 +10,7 @@ API 将固定 operation 与 JSON payload 入队 → 独立 worker 事务领取 �
 
 状态：queued → running → succeeded/failed/blocked/cancelled。排队取消可直接完成；运行取消先置 cancel_requested，worker 确认停止子进程树后才写 cancelled。租约失效留下 WORKER_INTERRUPTED 错误并进入 failed，不自动重新执行。显式 retry 保留日志与最大尝试次数；旧 worker 无法心跳或完成失效租约。worker 自身传 expected_attempt，防止同名 worker 的旧尝试更新新尝试。
 
-容量按固定 owner 分区统计文件实际 bytes；同 owner 所有写入使用同一 runtime DB 预留峰值。目录扫描不跟随符号链接，输出路径禁止绝对路径、反斜线、点段、盘符、ADS 和根外符号链接。预留在 SQLite 写事务内完成，检查 owner 限额、总700GB和可用磁盘；reservation 必须覆盖临时与最终产物同时存在的峰值。固定 owner 配额不得借用50GB余量。
+容量按固定 owner 分区统计文件实际 bytes；同 owner 所有写入使用同一预留账本。慢目录计量由独立capacity-lock SQLite串行，不占用job DB写事务；主runtime DB只在短事务内重读活动预留并登记峰值，以免阻断heartbeat。目录扫描不跟随符号链接，写路径经resolve_owner_path拒绝任何symlink/junction/reparse祖先，且词法与物理路径均属于指定owner。检查owner限额、总700GB和可用磁盘；reservation必须覆盖临时与最终产物同时存在的峰值。固定owner配额不得借用50GB余量。
 
 目录遍历显式传播权限错误，不能静默漏算。reserve时本owner无法读取即失败；其他固定owner无法测量时在全局700GB逻辑核验中按其完整配额计一次（不再加同owner实际bytes或活动预留），usage返回measured=false。已分区目录之外的占用另外测量，不可读则失败，避免漏算未登记文件。物理free检查只包含实际活动预留与本次峰值，不把其他owner完整配额当成本次磁盘写入需求。
 
@@ -43,11 +43,11 @@ job 字段：job_id、operation、payload、status、attempt、max_attempts、ca
 
 `verify_manifest` payload 为 `{assets: Asset[], library_id}`，1–1000 条Asset且序列化元数据≤16MB。先按统一 AssetManifest 校验，再逐文件从安全路径读取实际字节，严格比较声明size_bytes与SHA-256；每次读4MiB，记录累计真实字节进度，读取前后检查文件身份、大小及mtime。任意文件失败使整job失败，不返回部分资产。成功返回 `{schema_version,job_id,attempt_id,status,assets:[verified],artifacts:[],events:[],error:null}`，不解码、不复制媒体、不写业务DB。控制面可将大于8MB媒体总量的清单交给本handler，成功apply时直接一次性导入已核验数组，避免重复排队；较小清单仍需有限同步hash后入库。该handler使用当前128MB platform峰值预留，不需要ffmpeg。
 
-管理员可通过 `BTV_FFPROBE`、`BTV_FFMPEG` 指定可执行文件。`BTV_RENDER_COMMAND_JSON` / `BTV_MODEL_COMMAND_JSON` 为 JSON 字符串数组，例如 `["python", "-m", "packages.render"]`；worker 追加 `run --request ... --result ...`。`BTV_MODEL_COMMANDS_JSON` 可为 model_id → 命令数组的 JSON 对象。render 未设置环境变量时使用当前 Python 的 `packages.render`（缺少模块则 blocked/not_installed）。浏览器 payload 的 command/entrypoint 不参与命令构造。模型命令未登记时返回 blocked/not_installed。
+管理员可通过 `BTV_FFPROBE`、`BTV_FFMPEG` 指定可执行文件。`BTV_RENDER_COMMAND_JSON` 为JSON argv数组，例如 `["python", "-m", "packages.render"]`；worker追加 `run --request ... --result ...`。模型只接受 `BTV_MODEL_COMMANDS_JSON` 的 model_id → 命令数组精确映射，已移除通用BTV_MODEL_COMMAND_JSON fallback，不能借其他模型卡启动未登记模型。render未设置环境变量时使用当前Python的packages.render（缺少模块则blocked/not_installed）。浏览器payload的command/entrypoint不参与命令构造。
 
 模型任务在队列内 operation 固定为 model；CLI request.operation 使用 payload.adapter_operation（main 依据模型卡 capabilities 验证后持久化，例如 query_parse/pose/video_embedding/movement_classification）。模型 payload 必须保存非空 model_id/model_version 快照，worker 注入 request.parameters，并覆盖用户 parameters 内冲突的同名字段。缺少已验证 capability 或版本快照时明确失败，不猜测默认模型。指定模型不在管理员命令表内时 blocked/not_installed。
 
-平台根据可信模型资源要求和受控device参数设置 payload.gpu_required。为 true 时 worker 在容量预留和任何子进程启动前返回 blocked/GPU_LEASE_REQUIRED；客户端提供的 token 不视为租约。**共享 GPU 租约尚未实现**，不提供虚构的GPU排期能力；CPU模型仍可通过登记CLI运行。
+后续GPU租约已实现，接口与管理见[GPU.md](GPU.md)。payload.gpu_required为true，或管理员登记argv含packages.runtime.wsl_bridge时，worker必须在启动前取得同runtime DB中的管理员授权窗口与独占租约；没有窗口则blocked/GPU_LEASE_REQUIRED。bridge无论浏览器模型卡声称何种device都需要租约，客户端token无授权效力。worker持续心跳，失效停止计算；Windows本机CLI确认进程树已停才release，WSL桥接须确认匹配attempt的bridge.done.json并compute_stopped=true，否则orphaned保留锁，不自动因过期变为可用。桥接设计与真实边界验证见[WSL_BRIDGE.md](WSL_BRIDGE.md)。
 
 跨环境 CLI 输出目录固定为 render/jobs/<job_id>/attempt-N 或 models/jobs/<job_id>/attempt-N；请求/结果交换文件写 platform/jobs/<job_id>/attempt-N，request/result 含 attempt_id 并拒绝迟到旧结果。assets 为完整 Asset 数组，output_dir 为 POSIX 相对路径。worker 传 `BTV_STORAGE_ROOT`，Windows/WSL 转换仍由管理员注册 launcher 负责，未完成的跨系统配置不得声称可用。
 
@@ -72,4 +72,6 @@ Windows 子进程先启动等待指令的轻量 launcher，加入 worker 独占�
 - 探测器：render任务安装的 FFmpeg/ffprobe 9.0.2，`D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin`，仅CPU。
 - 最终预检platform已用2,397,693 bytes / 60,000,000,000；实际媒体衍生只有单张缩略图及小型DB/JSON，32MB峰值预留已释放。D盘之前实测剩余963,927,945,216 bytes，运行时另有动态复测。
 
-未测/限制：本runtime测试不替代真实render CLI集成、模型跨WSL launcher、API/browser完整工作流验收；这些由platform主任务继续对接。CLI退出仍存留后台进程将被终止，适配器不可把计算脱离任务。崩溃留下的容量预留保守保留，需确认没有在途写入后由管理员release；不自动删除中间产物。当前无GPU资源租约，声明需要GPU的任务明确阻塞；main必须从可信模型卡及受控device配置正确设置gpu_required，管理员不能把GPU命令伪登记成CPU。
+后续真实GPU验证（本地2026-09-29）：Web触发job `job-3dc9ece15e914eecb9616ac306ece6b8` / attempt-1，通过本机runtime DB的管理员GPU窗口、Windows独立worker及Ubuntu受控bridge执行torchvision-keypointrcnn成功。真实源视频6秒、24采样帧，冷运行28.702605725秒，峰值allocated489,201,152 / reserved792,723,456 bytes；features620,202 bytes、report849 bytes均经worker核验哈希。匹配bridge.done确认compute_stopped=true、exit_code=0后，主协调核验GPU租约released。完整源asset、产物路径和误用限制见[WSL_BRIDGE.md](WSL_BRIDGE.md)。events为空且accuracy/recall为null，不从姿态产物推断细动作识别成绩。
+
+未测/限制：原runtime媒体报告不替代真实render CLI与API/browser完整工作流验收，主任务另有集成报告。跨WSL正常GPU推理已实测；失联清理实测使用CPU进程树，未声称完成GPU推理中的强制中断测试。CLI退出仍存留后台进程将被终止，适配器不可把计算脱离任务。崩溃留下的容量预留保守保留，需确认没有在途写入后由管理员release；不自动删除中间产物。GPU独占只覆盖管理员纳入同一账本的受控任务，不是四模块所有独立CLI的全局调度器；未经协调的外部GPU进程不能被本平台终止。

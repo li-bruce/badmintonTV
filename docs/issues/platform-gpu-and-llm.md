@@ -2,7 +2,7 @@
 
 状态：platform人工链路已验证；这些能力没有冒充已完成。
 
-GPU共享资源租约未实现，models持有实验排期。平台服务对gpu_required任务在启动任何子进程前返回blocked/GPU_LEASE_REQUIRED；没有通过环境隔离之外的方式抢占GPU，也不结束用户进程。后续由主协调集成统一租约和WSL launcher再开放。
+GPU窗口/租约与受控WSL launcher已于2026-09-29补齐并完成网页触发真实6秒24帧pose。空窗由models明确让出，完成后核验compute_stopped、释放租约并提前撤销窗口归还排期。默认无授权仍blocked/GPU_LEASE_REQUIRED；这不是四模块所有独立实验的统一scheduler。见VALIDATION/GPU/WSL_BRIDGE。GPU中途中断尚未实测；Windows死亡守护用真实WSL CPU进程树独立验证。
 
 真实LLM端点与密钥未提供。本地受限规则QuerySpec和编辑/查询可用；连接测试的成功路径尚无真实远程服务可验证，错误与密钥屏蔽已有自动化测试。配置页仅接环境变量名。
 

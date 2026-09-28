@@ -371,6 +371,11 @@ def create_app(storage_root=None, db_path=None):
                 return False
         return False
 
+    @app.get('/api/v1/resources/gpu')
+    def gpu_status():
+        from packages.runtime.gpu import GPUCoordinator
+        return GPUCoordinator(state.with_name('runtime.sqlite3')).status()
+
     @app.post('/api/v1/models/import')
     def import_model(body:dict):
         from packages.contracts import ModelManifest
