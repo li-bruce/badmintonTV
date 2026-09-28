@@ -26,3 +26,4 @@
 - 真实>8MB probe修复：job-d1e09c26b26e449193b209871a9e7d5b处理50,049,933bytes无损派生，worker成功→apply HTTP200入库；报告platform-wsl-pose-real-flow.json。
 - 存储修复：慢容量扫描由独立SQLite容量锁串行，不持queue写事务，心跳不被扫描阻断；写目录每级拒绝symlink/junction/reparse，platform/models/render物理owner不可借链接绕过。
 - 集成启动：新增configure-platform-adapters.ps1默认使用其所在集成仓库构造argv/PYTHONPATH；旧工作树仅本轮临时联调。服务交接前API父26020/子52252，worker父772/子34568；LS18081保持。主任务接管前由本任务核对精确命令并停止这组进程。
+- 后续已提交：923bb76（业务审查修复）；0a60a83e38f90fdadc6025cbad1fa56f4abda41c（不可变LS快照，旧任务不能借新seed/CAS权限，无snapshot旧导出409须重导）；e4c2749ed9bc3c5fbd55b73790ce63f3e0c8d2c2（GPU/WSL/容量扫描/物理owner/启动配置）。主任务负责cherry-pick审查与最终服务切换，本任务未推送。

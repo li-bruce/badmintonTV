@@ -1,4 +1,4 @@
-"""Persistent, CPU-only execution services for the platform."""
+"""Native persistent queue and controlled external execution for the platform."""
 
 from .queue import Queue
 from .storage import CapacityLedger, resolve_relative_path
