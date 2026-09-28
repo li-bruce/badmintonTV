@@ -38,3 +38,13 @@ NVENC、目标跟随、OTIO往返、VFR真实输入、非Windows字体、旋转�
 - 预览导出的Timeline错误保存360×640，无法重新加载。项目保留正式1080×1920，实际规格单独effective_output；导出项目重新做预览/正式规范校验均通过。
 
 更新后 `python -m unittest discover -s tests/render`：62项，61通过、1symlink权限skip。另做1秒定向CPU预览，验证实际360×640、保存工程1080×1920、合并审核unreviewed/human_confirmed=false、两种回载均成功；见`REVIEW_FIX_VALIDATION.json`。该回归中的human字段明确标记regression-fixture，属测试元数据，不是现实人类审片声明。未重跑全部成片；旧业务样片不涉及合并且hash保持不变。
+
+## 追加真实双打输入（不升级动作识别范围）
+
+只读消费library独立清单`D:/video/data/handoff/assets.doubles.v1.json`：Drone_BD_ControlArea的BD12/Rally-1 rear视频，源SHA256 `52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118`，3840×2160、平均fps=41100/1367、time_base=1/600、132帧、duration_ms=4404。PTS增量20/21 tick，library vfr_status=unknown；非整数平均帧率不能单独证明VFR，保留unknown。
+
+研究预览`D:/video/render/jobs/doubles-preview-c47d5492/attempt-01/preview.mp4`：360×640、30fps、132帧、4.400秒，H264/AAC双流、零起点、时长/全解码全部通过，工程保留1080×1920。request/result/保存Timeline/全部JSONL均通过统一合同。原音轨通过source_atempo处理；没有据此宣称真实听感同步通过。联系表`D:/video/render/handoff/doubles-preview-c47d5492/contact.png`已代理查看：四人和完整原画面均保留，标题与待人工确认标记可见。数据与摘要见`DOUBLES_VALIDATION.json`。
+
+这是新增真实4K双打输入兼容验证，未确认身份/细手法/发布权。作者俯视CSV不套用到rear视频，未生成Event。仍不替代长连续素材、双打自动身份/动作识别或人工业务验收。未改变既有单打成片或源码。
+
+独立PTS复核：132行frame_index=0..131，索引hash吻合manifest且与独立ffprobe解码PTS逐帧一致；首PTS0、末2623 ticks=4371.666667ms。增量20 tick共128个、21 tick共3个（目的帧20/70/120），全部符合`floor(frame_index*1001/50+3/5)`，可由30000/1001在1/600时间基量化解释。容器nb_frames=137含开头5个负PTS/discard包，可见解码帧为132；不能按容器计数或avg_fps恢复帧时钟。末帧包duration11 ticks，呈现尾端4390ms；视频流时长4403.333ms、容器4403.810ms、Asset取整4404ms。输出以30fps量化为4400ms，末端可能复用最后可见帧；source_map保留实际probe与PTS索引，回查应使用索引，不把未提供的完整场次偏移补成0。
