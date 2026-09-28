@@ -28,4 +28,6 @@
 
 GPU环境检查点：WSL独立环境中RTX5090实际matmul/conv2d/BF16 SDPA/torchvision NMS/ROIAlign通过；真实视频模型推理仍单列待验。详见[环境交接](ENVIRONMENT_HANDOFF.md)。
 
+真实GPU检查点：6秒真实单打小片段已离线完成24帧COCO17姿态和24帧CLIP特征，主协调核验JobResult及全部产物哈希通过。没有动作Event、身份或准确率结论；Qwen诊断/overlay/main代码记录及平台WSL启动链路仍在继续。
+
 模块持续报告：`docs/status/platform.md`、`library.md`、`models.md`、`render.md`。

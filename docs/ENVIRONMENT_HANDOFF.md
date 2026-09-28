@@ -32,3 +32,14 @@ models任务已实际运行，主协调读取了其记录；完整记录待ML提
 - 这些数值只描述合成算子测试，不能代表视频处理吞吐、模型显存需求或识别准确率。
 - Qwen与姿态权重已下载校验，真实模型前向另行报告；底座仍以逐模型health/实测状态决定可用能力，不因GPU算子通过将所有模型标为ready。
 - PyAV14.4源码安装失败（pkg-config/FFmpeg开发依赖不足）已记录，models改用官方15.0.0 Linux wheel，未往全局环境安装编译链。
+
+## 首批真实GPU特征提取
+
+同一6秒FineBadmintonBenchmark `video_001951`，rear/singles，离线权重，各采样24帧。主协调已用main JobResult合同校验结果并逐项核对产物大小/SHA-256。
+
+| 模型 | handoff目录（D:/video下） | 含冷加载/解码耗时 | 峰值allocated / reserved |
+|---|---|---:|---:|
+| torchvision-keypointrcnn | models/handoff/real-pose-002/attempt-01 | 26.399s | 489,201,152 / 792,723,456 bytes |
+| clip-frame-mean | models/handoff/real-video_embedding-002/attempt-01 | 44.853s | 616,739,840 / 664,797,184 bytes |
+
+均result=succeeded、events=[]，每个输出features/report两项artifact。姿态关键点和向量是特征，不是细动作真值；没有球员身份、击球接触时刻、时序动作分类或准确率结论。单短片的冷启动时间不用于声称整场稳态吞吐。Qwen诊断与姿态overlay检查另行交付。平台尚需验证经Windows worker受控启动WSL模型的完整路径。
