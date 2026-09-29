@@ -261,6 +261,14 @@ def _binary(env_name, fallback):
     return value
 
 
+def render_backend():
+    """Trusted process configuration; never read from the request parameters."""
+    backend=os.environ.get('BTV_RENDER_BACKEND','cpu')
+    if backend not in {'cpu','nvenc','auto'}:
+        raise JobBlocked('invalid_configuration','BTV_RENDER_BACKEND must be cpu, nvenc or auto')
+    return backend
+
+
 def _artifact(path, context, kind):
     return {"artifact_id": "artifact-" + uuid.uuid4().hex, "kind": kind,
             "relative_path": Path(path).relative_to(context.storage_root).as_posix(),
@@ -464,7 +472,11 @@ def adapter(context, exchange_dir):
     request_file, result_file = exchange_dir / "request.json", exchange_dir / "result.json"
     _atomic_json(request_file, request)
     context.log("progress", stage="adapter", message=f"启动已登记的 {job['operation']} CLI")
-    code, _, error = context.execute([*command, "run", "--request", str(request_file), "--result", str(result_file)], job["operation"], parse_progress=True)
+    trusted_env = None
+    if job['operation']=='render':
+        trusted_env={'BTV_RENDER_BACKEND':render_backend(),'BTV_RUNTIME_DB':context.queue.db_path,
+                     'BTV_GPU_LEASE_ID':context.gpu_lease['lease_id'] if context.gpu_lease else ''}
+    code, _, error = context.execute([*command, "run", "--request", str(request_file), "--result", str(result_file)], job["operation"], parse_progress=True, extra_env=trusted_env)
     if not result_file.is_file() or result_file.stat().st_size > 16_000_000:
         raise ValueError(f"CLI result file missing or exceeds 16 MB (exit={code}): {error}")
     result = json.loads(result_file.read_text(encoding="utf-8"))
@@ -516,6 +528,14 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
         if job["operation"] == "model":
             context.registered_command = registered_command(job["operation"], job["payload"])
             gpu_required = gpu_required or "packages.runtime.wsl_bridge" in context.registered_command
+        if job['operation']=='render':
+            backend=render_backend()
+            if job['payload'].get('render_backend',backend)!=backend:
+                raise JobBlocked('RENDER_CONFIG_CHANGED','管理员渲染后端已变化，请按当前配置重新创建任务')
+            if backend in {'nvenc','auto'}:
+                if job['payload'].get('model_id')!='render-nvenc':
+                    raise JobBlocked('GPU_RESOURCE_MISMATCH','GPU渲染须由可信管理员登记render-nvenc资源身份')
+                gpu_required=True
         if gpu_required:
             from .gpu import GPUCoordinator, GPUUnavailable
             coordinator = GPUCoordinator(queue.db_path)
