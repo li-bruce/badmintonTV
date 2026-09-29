@@ -1,13 +1,16 @@
 """Acquire only the public BFMD annotation/source package after the main ZIP writer."""
 
 import argparse
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
 import json
 import os
 from pathlib import Path
+from queue import Empty, SimpleQueue
 import re
+import threading
 import time
 import uuid
 
@@ -95,18 +98,44 @@ def _strict_json(path, max_bytes=10_000_000):
 
 
 @contextmanager
-def _handoff_lock(quota):
+def _handoff_lock(quota, run_id):
     path = quota.resolve_path(HANDOFF_PATH + ".lock")
     path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
         with os.fdopen(fd, "w", encoding="ascii") as stream:
-            stream.write(str(os.getpid()))
+            json.dump({"pid": os.getpid(), "run_id": run_id, "stop_protocol": "finish_active_v1"}, stream)
             stream.flush()
             os.fsync(stream.fileno())
         yield
     finally:
         path.unlink()
+
+
+def _stop_path(quota, run_id):
+    if not isinstance(run_id, str) or not re.fullmatch(r"[0-9a-f]{32}", run_id):
+        raise ValueError("Invalid acquisition run id")
+    return quota.resolve_path(BASE + "/control/stop-" + run_id + ".json")
+
+
+def request_stop(quota):
+    """Signal only the current new-version owner; retain the marker as evidence."""
+    owner = _strict_json(quota.resolve_path(HANDOFF_PATH + ".lock"), 1024)
+    if (not isinstance(owner, dict) or owner.get("stop_protocol") != "finish_active_v1"
+            or type(owner.get("pid")) is not int or owner["pid"] <= 0):
+        raise ValueError("The current owner does not support graceful stop; no signal written")
+    path = _stop_path(quota, owner.get("run_id"))
+    payload = (json.dumps({"run_id": owner["run_id"], "owner_pid": owner["pid"],
+                           "requested_at": datetime.now(timezone.utc).isoformat(),
+                           "action": "finish active files, publish successes, stop dispatch"}) + "\n").encode("ascii")
+    with quota.reserve(65_536, purpose="BFMD run-scoped graceful stop marker"):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.exists():
+            with path.open("xb") as stream:
+                stream.write(payload)
+                stream.flush()
+                os.fsync(stream.fileno())
+    return path
 
 
 def _verified_receipt(path, item):
@@ -183,27 +212,34 @@ def _previous_verified(config, sources, quota):
     return records
 
 
-def acquire_annotations(config, quota, budget, *, response_opener):
+def acquire_annotations(config, quota, budget, *, response_opener, workers=1):
     """Acquire an already authorized package; main enforces the prior ZIP gate."""
+    if type(workers) is not int or workers not in (1, 2):
+        raise ValueError("workers must be 1 or 2")
     sources = validate_config(config)
-    with quota.reserve(PEAK_BYTES, purpose="BFMD annotations and five archive-only source files; no videos"), _handoff_lock(quota):
+    run_id = uuid.uuid4().hex
+    with quota.reserve(PEAK_BYTES, purpose="BFMD annotations and five archive-only source files; no videos"), _handoff_lock(quota, run_id):
         verified = _previous_verified(config, sources, quota)
         catalog = quota.resolve_path(BASE + "/source-catalog.v1.json")
         if not catalog.exists():
             write_json(catalog, config, quota=quota, budget=budget)
         catalog_sha = sha256_file(catalog)
         records = []
-        run_id = uuid.uuid4().hex
+        stop_path = _stop_path(quota, run_id)
         def progress(status, *, blocked_reason=None):
             value = {"schema_version": "1.0", "dataset_id": "bfmd", "usage_scope": "training_only",
                      "run_id": run_id, "updated_at": datetime.now(timezone.utc).isoformat(),
                      "source_catalog_sha256": catalog_sha, "acquisition_status": status, "blocked_reason": blocked_reason,
                      "files_attempted_this_run": records, "not_attempted_this_run": len(sources) - len(records),
-                     "verified_handoff_files": len(verified), "trusted_handoff_relative_path": "data/" + HANDOFF_PATH}
+                     "verified_handoff_files": len(verified), "trusted_handoff_relative_path": "data/" + HANDOFF_PATH,
+                     "workers": workers, "stop_protocol": "finish_active_v1",
+                     "stop_requested": stop_path.exists(),
+                     "stop_marker_relative_path": stop_path.relative_to(quota.project_root).as_posix()}
             write_json(quota.resolve_path(PROGRESS_PATH), value, quota=quota, budget=budget)
         progress("IN_PROGRESS")
         try:
-            result = _acquire_items(config, sources, quota, budget, response_opener, verified, records, catalog_sha, progress)
+            result = _acquire_items(config, sources, quota, budget, response_opener, verified, records,
+                                    catalog_sha, progress, workers=workers, stop_path=stop_path)
         except BaseException as error:
             # Best-effort reporting must not hide the original failure or interrupt.
             try:
@@ -216,58 +252,60 @@ def acquire_annotations(config, quota, budget, *, response_opener):
     return result
 
 
-def _acquire_items(config, sources, quota, budget, response_opener, verified, records, catalog_sha, progress):
-    blocked = None
-    for index, item in enumerate(sorted(sources, key=lambda value: (value["relative_path"].startswith("annotations/"), value["expected_bytes"], value["relative_path"])), 1):
-        relative = BASE + "/raw/" + item["relative_path"]
+def _acquire_one(config, item, quota, response_opener, *, prior=None, halt=None):
+    """Workers own only their unique file/receipt; never publish shared metadata."""
+    relative = BASE + "/raw/" + item["relative_path"]
+    entry = {**item, "relative_path": "data/" + relative,
+             "usage_scope": "training_only", "video_alignment": "unmatched",
+             "provenance": {"usage_scope": "training_only", "dataset_id": "bfmd",
+                            "repository_commit": config["repository_commit"]}}
+    try:
         path = quota.resolve_path(relative)
-        entry = {**item, "relative_path": path.relative_to(quota.project_root).as_posix(),
-                 "usage_scope": "training_only", "video_alignment": "unmatched",
-                 "provenance": {"usage_scope": "training_only", "dataset_id": "bfmd",
-                                "repository_commit": config["repository_commit"]}}
-        try:
-            if path.exists():
-                receipt = _verified_receipt(path, item)
-                reused = True
-            else:
-                if item["google_drive_id"] in verified:
-                    raise ValueError("Previously verified BFMD file disappeared after preflight")
-                reused = False
-                for attempt in range(1, 4):
-                    try:
-                        result = download(item["url"], relative, quota=quota, max_bytes=item["expected_bytes"],
-                                          timeout=60, response_opener=response_opener)
-                        receipt = _verified_receipt(result.path, item)
-                        break
-                    except DownloadError as error:
-                        if attempt == 3 or error.code not in {"download_failed", "incomplete", "drive_network_error"}:
-                            raise
+        if path.exists():
+            receipt = _verified_receipt(path, item)
+            reused = True
+        else:
+            if prior is not None:
+                raise ValueError("Previously verified BFMD file disappeared after preflight")
+            reused = False
+            for attempt in range(1, 4):
+                try:
+                    result = download(item["url"], relative, quota=quota, max_bytes=item["expected_bytes"],
+                                      timeout=60, response_opener=response_opener)
+                    receipt = _verified_receipt(result.path, item)
+                    break
+                except DownloadError as error:
+                    if (attempt == 3 or error.code not in {"download_failed", "incomplete", "drive_network_error"}
+                            or (halt is not None and halt.wait(attempt * 3))):
+                        raise
+                    if halt is None:
                         time.sleep(attempt * 3)
-                if path.stat().st_size != item["expected_bytes"]:
-                    raise ValueError("BFMD file size differs from publisher public metadata")
-            prior = verified.get(item["google_drive_id"])
-            if prior is not None and (receipt["sha256"] != prior["sha256"]
-                                      or receipt["size_bytes"] != prior["size_bytes"]
-                                      or receipt["completed_at"] != prior["acquired_at"]):
-                raise ValueError("Previously verified BFMD bytes/receipt changed after preflight")
-            entry.update({"download_status": "verified_existing" if reused else "downloaded",
-                          "sha256": receipt["sha256"], "size_bytes": path.stat().st_size,
-                          "acquired_at": receipt["completed_at"], "publisher_hash_available": False})
-        except (DownloadError, ValueError, OSError) as error:
-            entry.update({"download_status": "failed", "error": {"code": getattr(error, "code", type(error).__name__)}})
-            if item["google_drive_id"] in verified:
-                records.append(entry)
-                raise  # A previously trusted file changed after the preflight.
-            if entry["error"]["code"] in BLOCKING_CODES:
-                blocked = entry["error"]["code"]
-        except BaseException as error:
-            entry.update({"download_status": "interrupted" if isinstance(error, (KeyboardInterrupt, SystemExit)) else "failed",
-                          "error": {"code": type(error).__name__}})
-            records.append(entry)
-            raise
-        records.append(entry)
-        if entry["download_status"] != "failed":
-            verified.setdefault(item["google_drive_id"], entry)
+            if path.stat().st_size != item["expected_bytes"]:
+                raise ValueError("BFMD file size differs from publisher public metadata")
+        if prior is not None and (receipt["sha256"] != prior["sha256"]
+                                  or receipt["size_bytes"] != prior["size_bytes"]
+                                  or receipt["completed_at"] != prior["acquired_at"]):
+            raise ValueError("Previously verified BFMD bytes/receipt changed after preflight")
+        entry.update({"download_status": "verified_existing" if reused else "downloaded",
+                      "sha256": receipt["sha256"], "size_bytes": path.stat().st_size,
+                      "acquired_at": receipt["completed_at"], "publisher_hash_available": False})
+        return entry, None
+    except BaseException as error:
+        if halt is not None:
+            halt.set()  # Stop dispatch immediately, even before main consumes this future.
+        entry.update({"download_status": "interrupted" if isinstance(error, (KeyboardInterrupt, SystemExit)) else "failed",
+                      "error": {"code": getattr(error, "code", type(error).__name__)}})
+        return entry, error
+
+
+def _acquire_items(config, sources, quota, budget, response_opener, verified, records, catalog_sha, progress,
+                   *, workers, stop_path):
+    blocked, pending_error = None, None
+    halted = threading.Event()
+    ordered = sorted(sources, key=lambda value: (value["relative_path"].startswith("annotations/"), value["expected_bytes"], value["relative_path"]))
+
+    def publish():
+        # Called only by the owner thread. MetadataBudget deliberately stays here.
         summary = {"schema_version": "1.0", "dataset_id": "bfmd", "usage_scope": "training_only",
                    "complete": len(verified) == len(sources),
                    "files": sorted(verified.values(), key=lambda value: value["relative_path"]), "source_catalog_sha256": catalog_sha,
@@ -277,27 +315,182 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
         summary["acquisition_status"] = "PASS" if summary["complete"] else "IN_PROGRESS"
         summary["run_progress_relative_path"] = "data/" + PROGRESS_PATH
         write_json(quota.resolve_path(HANDOFF_PATH), summary, quota=quota, budget=budget)
-        progress("BLOCKED" if blocked else "PASS" if index == len(sources) and not any(row["download_status"] == "failed" for row in records)
-                 else "FAIL" if index == len(sources) else "IN_PROGRESS", blocked_reason=blocked)
-        print(json.dumps({"event": "bfmd_file_finished", "index": index, "total": len(sources),
+
+    # Recheck prior receipts without rewriting the entire handoff for each cached
+    # entry. A 115-file resume must not consume its metadata budget on old files.
+    pending = []
+    for item in ordered:
+        prior = verified.get(item["google_drive_id"])
+        if prior is None:
+            pending.append(item)
+            continue
+        entry, error = _acquire_one(config, item, quota, response_opener, prior=prior)
+        records.append(entry)
+        if error is not None:
+            raise error
+    progress("IN_PROGRESS")
+
+    queue = iter(pending)
+    inflight = {}
+    completed = SimpleQueue()
+    active_condition = threading.Condition()
+    active_tasks = 0
+
+    def run_item(item):
+        nonlocal active_tasks
+        # The dispatcher may race a peer's failure between its halt check and
+        # submit(). Admission happens here; unstarted work is not an attempt.
+        with active_condition:
+            if halted.is_set() or stop_path.exists():
+                halted.set()
+                return None
+            active_tasks += 1
+        try:
+            result = _acquire_one(config, item, quota, response_opener, halt=halted)
+            # Independent of the owner's submit/assignment window. Even an
+            # admitted future lost to Ctrl-C is recovered during final draining.
+            completed.put((item, *result))
+            return result
+        finally:
+            with active_condition:
+                active_tasks -= 1
+                active_condition.notify_all()
+
+    def record_outcome(item, entry, error):
+        nonlocal blocked, pending_error
+        is_new = not any(row["google_drive_id"] == item["google_drive_id"] for row in records)
+        if is_new:
+            records.append(entry)
+        if error is None:
+            verified.setdefault(item["google_drive_id"], entry)
+        else:
+            halted.set()
+            code = entry["error"]["code"]
+            if code in BLOCKING_CODES:
+                blocked = blocked or code
+            if not isinstance(error, (DownloadError, ValueError, OSError)):
+                pending_error = pending_error or error
+        return is_new
+
+    pool = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="bfmd-file")
+    try:
+        exhausted = False
+        while inflight or not exhausted:
+            try:
+                if stop_path.exists():
+                    halted.set()
+                while not halted.is_set() and not exhausted and len(inflight) < workers:
+                    item = next(queue, None)
+                    if item is None:
+                        exhausted = True
+                        break
+                    future = pool.submit(run_item, item)
+                    inflight[future] = item
+                if not inflight:
+                    break
+                done, _ = wait(inflight, timeout=0.25, return_when=FIRST_COMPLETED)
+            except BaseException as error:
+                # A Ctrl-C stops dispatch, then drains owned threads before the
+                # shared handoff lock/reservation can be released.
+                halted.set()
+                pending_error = pending_error or error
+                continue
+            for future in done:
+                item = inflight.pop(future)
+                try:
+                    outcome = future.result()
+                    if outcome is None:
+                        continue
+                    entry, error = outcome
+                    record_outcome(item, entry, error)
+                    publish()
+                    progress("BLOCKED" if blocked else "IN_PROGRESS", blocked_reason=blocked)
+                    print(json.dumps({"event": "bfmd_file_finished", "index": len(records), "total": len(sources),
                           "relative_path": entry["relative_path"], "status": entry["download_status"],
                           "error": entry.get("error")}, ensure_ascii=True), flush=True)
-        if blocked:
-            print(json.dumps({"event": "bfmd_blocked", "code": blocked,
-                              "remaining_not_attempted": len(sources) - index}), flush=True)
+                except BaseException as error:
+                    halted.set()
+                    pending_error = pending_error or error
+    except BaseException as error:
+        halted.set()
+        pending_error = pending_error or error
+    finally:
+        # CPython 3.12 Thread.join can mark a still-running thread stopped after
+        # KeyboardInterrupt. An independent task counter, not join's state, is
+        # the evidence that all file writers and completion producers ended.
+        while True:
+            try:
+                with active_condition:
+                    halted.set()
+                break
+            except (KeyboardInterrupt, SystemExit) as error:
+                pending_error = pending_error or error
+        while True:
+            try:
+                pool.shutdown(wait=False)
+                break
+            except (KeyboardInterrupt, SystemExit) as error:
+                pending_error = pending_error or error
+        while True:
+            try:
+                with active_condition:
+                    if active_tasks == 0:
+                        break
+                    active_condition.wait(timeout=0.25)
+            except (KeyboardInterrupt, SystemExit) as error:
+                pending_error = pending_error or error
+        while True:
+            try:
+                pool.shutdown(wait=True)
+                break
+            except (KeyboardInterrupt, SystemExit) as error:
+                halted.set()
+                pending_error = pending_error or error
+    # All file writers/completion producers have ended while this owner still
+    # holds its handoff lock and batch reservation. Recover results even if
+    # submit raised after admitting a task, or an owner interrupt landed while
+    # consuming a future.
+    completion_seen = False
+    while True:
+        try:
+            item, entry, error = completed.get_nowait()
+        except Empty:
             break
-    failures = sum(record["download_status"] == "failed" for record in records)
+        completion_seen = True
+        record_outcome(item, entry, error)
+    if completion_seen and pending_error is not None:
+        try:
+            publish()
+        except BaseException as publish_error:
+            pending_error.add_note("BFMD final completion publication failed: " + type(publish_error).__name__)
+    if pending_error is not None:
+        raise pending_error
+    failures = sum(record["download_status"] in {"failed", "interrupted"} for record in records)
+    stopped = stop_path.exists() and len(verified) < len(sources)
+    # Also publish a fully cached rerun or a stop before the first new file.
+    publish()
+    status = "BLOCKED" if blocked else "FAIL" if failures else "STOPPED" if stopped else "PASS"
+    progress(status, blocked_reason=blocked)
     print(json.dumps({"event": "bfmd_completed", "files": len(records), "failures": failures,
                       "blocked_reason": blocked, "not_attempted": len(sources) - len(records),
                       "verified_bytes": sum(record.get("size_bytes", 0) for record in records),
-                      "capacity_during_writer": quota.snapshot(), "writer_reservation_bytes": PEAK_BYTES}), flush=True)
-    return 2 if blocked else (1 if failures else 0)
+                      "capacity_during_writer": quota.snapshot(), "writer_reservation_bytes": PEAK_BYTES,
+                      "workers": workers, "status": status}), flush=True)
+    return 2 if blocked else 1 if failures else 3 if stopped else 0
 
 
 def main():
     from packages.library.drive import open_drive_response
 
-    argparse.ArgumentParser(description=__doc__).parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workers", type=int, choices=(1, 2), default=1,
+                        help="One owner, at most two independent bounded file downloads")
+    parser.add_argument("--request-stop", action="store_true",
+                        help="Signal the current supported owner to finish active files and stop dispatch")
+    args = parser.parse_args()
+    if args.request_stop:
+        print(json.dumps({"event": "bfmd_stop_requested", "path": str(request_stop(QuotaManager()))}), flush=True)
+        return 0
     config = _strict_json(Path("configs/library/bfmd_sources.json"), max_bytes=500_000)
     sources = validate_config(config)
     quota, budget = QuotaManager(), MetadataBudget(limit=50_000_000)
@@ -306,7 +499,7 @@ def main():
     verified_acquisition(quota)
     print(json.dumps({"event": "bfmd_preflight", "files": len(sources), "expected_bytes": TOTAL_BYTES,
                       "peak_reserved_bytes": PEAK_BYTES, "capacity": quota.snapshot()}), flush=True)
-    return acquire_annotations(config, quota, budget, response_opener=open_drive_response)
+    return acquire_annotations(config, quota, budget, response_opener=open_drive_response, workers=args.workers)
 
 
 if __name__ == "__main__":

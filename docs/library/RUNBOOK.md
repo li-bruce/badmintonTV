@@ -89,3 +89,18 @@ C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotatio
 BFMD配置固定到已核对的121项（115活动JSON、1备份、5根源文件），1,825,439,459 bytes，预留2.5GB。文件ID、路径、大小、类型及URL组合的固定SHA验证选择不变；下载只用正常公开Drive入口，遇标准Download anyway页最多读64KiB并正常提交一次。登录、验证码、403/429、异常确认停止批次，保留已验证成果及未尝试数；动态确认UUID不写入收据。作者脚本仅归档，不执行；无视频，不创建Asset、不转换Event。结果为`data/training/handoff/bfmd.annotations.v1.json`。
 
 BFMD稳定清单在中断或重跑时保留已验证文件，启动前校验旧原件、收据及固定源目录；本轮失败、未尝试和中断状态单列于`data/training/handoff/bfmd.acquisition-progress.v1.json`。批次锁阻止两个重跑覆盖同一旧快照。复核修复后完整library回归155/155通过（15.226秒、0跳过），真实数据完成状态仍须读取实际交接记录。
+
+## BFMD 单一协调器的可选双连接
+
+```powershell
+C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotations --workers 2
+C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotations --request-stop
+```
+
+默认workers=1，只允许1或2。一个owner持有整批独占锁和2.5GB预留；每个流仍独立精确字节限额/配额/receipt，主线程统一发布稳定清单和进度，不同时启动第二个协调器。复用旧文件先全量验证再逐项复核，缓存结果成批登记以节省元数据预算。
+
+`--request-stop`仅支持新版本owner的run-id标记，停止新派发、完成在途文件后退出；原PID-only锁拒绝此命令。停止不完整批次返回3/STOPPED，完整为0/PASS，普通失败1，访问或限流BLOCKED为2。此处STOPPED是运行进度，不是数据验收状态。marker保留用于追溯，不自动删除原数据或猜测锁过期。
+
+worker完成结果通过独立队列回到主线程，即使Ctrl-C发生在submit和future登记之间也不丢失；Condition下活动任务数归零之后才能释放批次锁/预留，不依赖Python线程join被重复中断后的内部状态。任一失败或停止请求拒绝后续任务进入文件/网络操作，已在途成功仍正常发布。标准下载器的Range、If-Range、206、Content-Range、validator和实际字节硬限均保持，服务不支持续传就保留partial并失败，不降级为盲目追加。
+
+2026-09-29实际121文件由原单连接自然完成，无进程切换、续传或实际双流。本可选功能的测试是临时小文件/受控transport/真实线程竞态回归；真实公开服务双流和Range恢复仍NOT_RUN。
