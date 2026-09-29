@@ -1,10 +1,17 @@
 """BFMD selection boundaries, using only the checked-in catalog and deep copies."""
 
 import copy
+from contextlib import ExitStack
+import hashlib
 import json
 from pathlib import Path
+import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 
+from packages.library.manifest import sha256_file
+from packages.library.storage import QuotaManager
 from scripts.library import acquire_bfmd_annotations as acquisition
 
 
@@ -80,6 +87,171 @@ class BfmdAcquisitionTests(unittest.TestCase):
         config["files"].pop()
         with self.assertRaises(ValueError):
             acquisition.validate_config(config)
+
+
+class BfmdResumeTests(unittest.TestCase):
+    """Small real files/receipts/atomic writes; no Drive traffic or media."""
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.quota = QuotaManager(self.root / "data", allow_test_root=True, min_free_bytes=0)
+        root = Path(__file__).resolve().parents[2]
+        self.config = json.loads((root / "configs/library/bfmd_sources.json").read_text(encoding="utf-8-sig"))
+        self.config["files"] = self.config["files"][:2]
+        for index, item in enumerate(self.config["files"]):
+            item.update(relative_path=f"annotations/sample-{index}.json", expected_bytes=len(self.payload(item)))
+        selected = sorted([{key: item[key] for key in ("relative_path", "google_drive_id", "expected_bytes", "kind", "mime_type", "url")}
+                           for item in self.config["files"]], key=lambda item: item["relative_path"])
+        self.digest = hashlib.sha256(json.dumps(selected, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+        self.handoff = self.quota.resolve_path(acquisition.HANDOFF_PATH)
+        self.catalog = self.quota.resolve_path(acquisition.BASE + "/source-catalog.v1.json")
+        self.progress = self.quota.resolve_path(acquisition.PROGRESS_PATH)
+
+    def payload(self, item):
+        return json.dumps({"fixture": item["google_drive_id"]}).encode()
+
+    def fake_download(self, url, relative, **kwargs):
+        item = next(item for item in self.config["files"] if item["url"] == url)
+        path = self.quota.resolve_path(relative)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(self.payload(item))
+        receipt = path.with_name(path.name + ".download.json")
+        receipt.write_text(json.dumps({"state": "succeeded", "url": url, "sha256": sha256_file(path),
+                                       "size_bytes": path.stat().st_size, "completed_at": "2026-09-29T00:00:00Z"}), encoding="utf-8")
+        return SimpleNamespace(path=path, metadata_path=receipt)
+
+    def run_acquisition(self, *, config=None, writer=None, downloader=None):
+        with ExitStack() as stack:
+            stack.enter_context(mock.patch.object(acquisition, "TOTAL_FILES", 2))
+            stack.enter_context(mock.patch.object(acquisition, "TOTAL_BYTES", sum(item["expected_bytes"] for item in self.config["files"])))
+            stack.enter_context(mock.patch.object(acquisition, "REVIEWED_SELECTION_SHA256", self.digest))
+            stack.enter_context(mock.patch.object(acquisition, "PEAK_BYTES", 5_000_000))
+            stack.enter_context(mock.patch("builtins.print"))
+            download = stack.enter_context(mock.patch.object(acquisition, "download", side_effect=downloader or self.fake_download))
+            if writer:
+                stack.enter_context(mock.patch.object(acquisition, "write_json", side_effect=writer))
+            try:
+                return acquisition.acquire_annotations(config or self.config, self.quota,
+                                                       acquisition.MetadataBudget(limit=50_000_000), response_opener=object())
+            finally:
+                self.download_calls = download.call_count
+
+    def test_complete_handoff_keeps_both_records_when_rerun_interrupts_after_first(self):
+        self.assertEqual(0, self.run_acquisition())
+        prior = json.loads(self.handoff.read_text())
+        real_write = acquisition.write_json
+        def interrupt_after_first(path, *args, **kwargs):
+            real_write(path, *args, **kwargs)
+            if path == self.handoff:
+                raise KeyboardInterrupt("unit-test interruption after first cached item")
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_acquisition(writer=interrupt_after_first)
+        final = json.loads(self.handoff.read_text())
+        self.assertEqual(prior["files"], final["files"])
+        self.assertTrue(final["complete"])
+        progress = json.loads(self.progress.read_text())
+        self.assertEqual("INTERRUPTED", progress["acquisition_status"])
+        self.assertEqual(1, len(progress["files_attempted_this_run"]))
+        self.assertEqual(1, progress["not_attempted_this_run"])
+        self.assertEqual(0, self.download_calls)
+        self.assertEqual([], self.quota.active_reservations())
+        self.assertFalse(self.quota.resolve_path(acquisition.HANDOFF_PATH + ".lock").exists())
+
+    def test_partial_handoff_preserves_success_while_blocked_attempt_stays_in_progress_file(self):
+        first = self.config["files"][0]["url"]
+        def block_second(url, *args, **kwargs):
+            if url == first:
+                return self.fake_download(url, *args, **kwargs)
+            raise acquisition.DownloadError("drive_access_denied", "test access denial")
+        self.assertEqual(2, self.run_acquisition(downloader=block_second))
+        final = json.loads(self.handoff.read_text())
+        self.assertEqual(1, len(final["files"]))
+        self.assertFalse(final["complete"])
+        self.assertTrue(all(row["download_status"] != "failed" for row in final["files"]))
+        progress = json.loads(self.progress.read_text())
+        self.assertEqual("BLOCKED", progress["acquisition_status"])
+        self.assertEqual("drive_access_denied", progress["blocked_reason"])
+        self.assertEqual(2, len(progress["files_attempted_this_run"]))
+        self.assertEqual(0, self.run_acquisition())
+        self.assertEqual(2, len(json.loads(self.handoff.read_text())["files"]))
+
+    def test_interrupted_active_download_is_counted_as_attempted_without_trusting_it(self):
+        first = self.config["files"][0]["url"]
+        def interrupt_second(url, *args, **kwargs):
+            if url == first:
+                return self.fake_download(url, *args, **kwargs)
+            raise KeyboardInterrupt("simulated active download interruption")
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_acquisition(downloader=interrupt_second)
+        self.assertEqual(1, len(json.loads(self.handoff.read_text())["files"]))
+        progress = json.loads(self.progress.read_text())
+        self.assertEqual("INTERRUPTED", progress["acquisition_status"])
+        self.assertEqual(0, progress["not_attempted_this_run"])
+        self.assertEqual("interrupted", progress["files_attempted_this_run"][-1]["download_status"])
+        self.assertEqual([], self.quota.active_reservations())
+
+    def test_missing_or_changed_trusted_file_rejects_before_rewrite(self):
+        self.run_acquisition()
+        prior, catalog = self.handoff.read_bytes(), self.catalog.read_bytes()
+        item = self.config["files"][0]
+        path = self.quota.resolve_path(acquisition.BASE + "/raw/" + item["relative_path"])
+        for changed in (False, True):
+            if changed:
+                path.write_bytes(b"x" * item["expected_bytes"])
+            else:
+                path.unlink()
+            with self.subTest(changed=changed), self.assertRaises(ValueError):
+                self.run_acquisition()
+            self.assertEqual(prior, self.handoff.read_bytes())
+            self.assertEqual(catalog, self.catalog.read_bytes())
+            self.assertEqual(0, self.download_calls)
+            self.assertEqual([], self.quota.active_reservations())
+
+    def test_config_or_old_source_identity_change_rejects_without_rewrite(self):
+        self.run_acquisition()
+        prior, catalog = self.handoff.read_bytes(), self.catalog.read_bytes()
+        changed = copy.deepcopy(self.config)
+        changed["source_page"] = "https://example.invalid/changed-evidence"
+        with self.assertRaisesRegex(ValueError, "catalog differs"):
+            self.run_acquisition(config=changed)
+        self.assertEqual(prior, self.handoff.read_bytes())
+        self.assertEqual(catalog, self.catalog.read_bytes())
+        malformed = json.loads(prior)
+        malformed["files"][1]["url"] = self.config["files"][0]["url"]
+        self.handoff.write_text(json.dumps(malformed), encoding="utf-8")
+        before = self.handoff.read_bytes()
+        with self.assertRaisesRegex(ValueError, "fixed source/scope"):
+            self.run_acquisition()
+        self.assertEqual(before, self.handoff.read_bytes())
+        self.assertEqual(0, self.download_calls)
+
+    def test_trusted_file_cannot_be_redownloaded_or_rebound_after_preflight(self):
+        self.run_acquisition()
+        before = self.handoff.read_bytes()
+        item = self.config["files"][0]
+        relative = acquisition.BASE + "/raw/" + item["relative_path"]
+        path = self.quota.resolve_path(relative)
+        real_previous = acquisition._previous_verified
+        for changed in (False, True):
+            self.fake_download(item["url"], relative)
+            def change_after_validation(*args):
+                verified = real_previous(*args)
+                if changed:
+                    path.write_bytes(b"x" * item["expected_bytes"])
+                    receipt_path = path.with_name(path.name + ".download.json")
+                    receipt = json.loads(receipt_path.read_text())
+                    receipt["sha256"] = sha256_file(path)
+                    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+                else:
+                    path.unlink()
+                return verified
+            with self.subTest(changed=changed), mock.patch.object(acquisition, "_previous_verified", side_effect=change_after_validation):
+                with self.assertRaisesRegex(ValueError, "after preflight"):
+                    self.run_acquisition()
+            self.assertEqual(before, self.handoff.read_bytes())
+            self.assertEqual(0, self.download_calls)
+            self.assertEqual([], self.quota.active_reservations())
 
 
 if __name__ == "__main__":
