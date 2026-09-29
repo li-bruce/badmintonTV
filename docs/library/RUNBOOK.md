@@ -87,3 +87,5 @@ C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotatio
 `--contracts-root`仅只读复用main新合同；使用既有platform Python提供Pydantic，不安装依赖，不在合同目录写字节码。实际合同提交SHA在验收中记录。
 
 BFMD配置固定到已核对的121项（115活动JSON、1备份、5根源文件），1,825,439,459 bytes，预留2.5GB。文件ID、路径、大小、类型及URL组合的固定SHA验证选择不变；下载只用正常公开Drive入口，遇标准Download anyway页最多读64KiB并正常提交一次。登录、验证码、403/429、异常确认停止批次，保留已验证成果及未尝试数；动态确认UUID不写入收据。作者脚本仅归档，不执行；无视频，不创建Asset、不转换Event。结果为`data/training/handoff/bfmd.annotations.v1.json`。
+
+BFMD稳定清单在中断或重跑时保留已验证文件，启动前校验旧原件、收据及固定源目录；本轮失败、未尝试和中断状态单列于`data/training/handoff/bfmd.acquisition-progress.v1.json`。批次锁阻止两个重跑覆盖同一旧快照。复核修复后完整library回归155/155通过（15.226秒、0跳过），真实数据完成状态仍须读取实际交接记录。

@@ -77,6 +77,18 @@ JSON默认单文件上限10,000,000 bytes，调用方只能降低；每次发布
 
 崩溃锁不自动猜测过期，恢复前须人工确认没有存活writer。两个并发library发布者串行读取/合并/发布，不能最后写入者覆盖旧记录。媒体不会复制或写入。
 
+## BFMD 标注交接的重跑与中断
+
+`data/training/handoff/bfmd.annotations.v1.json`是已验证文件的稳定清单，按固定Drive ID保留记录；`complete`表示所选121项是否全部校验通过。重新运行时，不会因本轮只完成第一项就把旧完整清单缩减成单项，也不会把旧已验证条目改为本轮failed。
+
+任何重写前，整份旧清单和原`data/training/bfmd/source-catalog.v1.json`进行有界严格JSON读取，拒绝重复键和非有限数。核对固定配置、catalog SHA、每个Drive ID与完整目标路径、URL、expected_bytes、kind/MIME及双training_only；已验证文件还须实际存在，并与原download receipt的成功状态、源URL、SHA、大小、原获取时间一致。旧文件消失、同大小字节变化、源配置或任何旧行不匹配均停止，保留旧清单及catalog原字节。旧增量格式中的failed行也校验来源及错误结构，但不计入可信文件。
+
+本轮状态单独原子写入`data/training/handoff/bfmd.acquisition-progress.v1.json`，含run_id、本轮已尝试记录、尚未尝试数量、稳定清单已验证数量及IN_PROGRESS/PASS/FAIL/BLOCKED/INTERRUPTED。运行中的下载中断会明确计为interrupted，不能冒充未尝试或成功。稳定清单的PASS/IN_PROGRESS只表示可信文件的覆盖程度，实际本轮失败或中断须读进度文件。两种文件均保留training_only；稳定清单维持media/assets/events为0、scripts_executed=false，不执行来源脚本或转换事件。
+
+整个BFMD批次持有`data/training/handoff/bfmd.annotations.v1.json.lock`，防止两个发布者读取同一旧快照后互相覆盖；崩溃锁不自动删除。替换沿用训练审计目录和单JSON 10 MB上限，累计生成元数据仍限50 MB。按当前121项配置在内存估算完整重跑：稳定清单累计21,301,808 bytes，独立进度累计10,710,486 bytes，合计32,012,294 bytes（未含小型审计），在预算内；超限则停止，不放宽预算。
+
+已运行`python -B -m unittest discover -s tests/library -p test_bfmd_acquisition.py -v`：**14/14 PASS，0跳过**。回归使用临时真实小文件、receipt和原子发布，模拟完整两项重跑第一项后中断、活动下载中断、增量访问阻塞后恢复、旧文件消失/变化、catalog或旧来源变化；8项原配置边界检查继续通过。独立只读审查另发现预检后旧文件消失可能触发重新下载、旧SHA绑定新字节，已修为立即拒绝；同大小字节与receipt一并变化也须与旧SHA/大小/获取时间重新比较，新增回归通过。未联网、未写D盘，也不将这些夹具结果当作121项实际获取成功。
+
 ## 运行与验收边界
 
 已运行：`python -B -m unittest discover -s tests/library -p test_training.py -v`，**25/25 PASS，0跳过，2.009秒**。本模块和单元测试仅标准库、CPU、临时目录，无网络、无共享媒体写入。新增文件为training.py、test_training.py和本文，未改manifest.py、shared contracts或其他模块。
