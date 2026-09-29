@@ -294,3 +294,176 @@ def test_native_windows_persistent_reader_fails_within_budget_preserving_old_tic
         assert diagnostics(capsys.readouterr().err)
     finally:
         kernel.CloseHandle(handle)
+
+
+def heartbeat_publisher(tmp_path):
+    publisher = bridge._HeartbeatPublisher(tmp_path / "bridge-heartbeat.json", {
+        "schema_version": "1.0", "job_id": "job-test", "attempt_id": "attempt-1", "token": "token-123"})
+    publisher.publish(-1)
+    return publisher
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires actual Windows DELETE access probes")
+def test_prior_publisher_win5_with_available_delete_access_recovers(tmp_path, monkeypatch, capsys):
+    publisher = heartbeat_publisher(tmp_path)
+    original = bridge.os.replace
+    calls = []
+    def transient(source, destination):
+        calls.append(1)
+        if len(calls) == 1:
+            raise io_error(5)
+        return original(source, destination)
+    monkeypatch.setattr(bridge.os, "replace", transient)
+    publisher.publish(0)
+    assert len(calls) == 2
+    assert json.loads(publisher.path.read_text())["tick"] == 0
+    records = diagnostics(capsys.readouterr().err)
+    assert records[0]["stage"] == "heartbeat.replace.delete_probe.allowed"
+    assert records[0]["winerror"] == 0
+    assert records[-1]["stage"] == "heartbeat.replace.recovered"
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires actual Windows DELETE access probes")
+def test_prior_publisher_persistent_win5_fails_at_existing_deadline(tmp_path, monkeypatch, capsys):
+    publisher = heartbeat_publisher(tmp_path)
+    clock = [0.0]
+    monkeypatch.setattr(bridge, "time", SimpleNamespace(time=lambda: 1, monotonic=lambda: clock[0],
+                       sleep=lambda delay: clock.__setitem__(0, clock[0] + delay)))
+    monkeypatch.setattr(bridge.os, "replace", lambda *args: (_ for _ in ()).throw(io_error(5)))
+    with pytest.raises(bridge.HeartbeatWriteError) as caught:
+        publisher.publish(0)
+    assert clock[0] == pytest.approx(0.7)
+    assert 1 < caught.value.diagnostic["attempts"] <= 15
+    assert caught.value.diagnostic["winerror"] == 5
+    assert json.loads(publisher.path.read_text())["tick"] == -1
+    assert list(tmp_path.glob("*.tmp")) == []
+    diagnostics(capsys.readouterr().err)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires actual Windows file identities")
+@pytest.mark.parametrize("change", ["target_replaced", "target_readonly", "source_readonly", "delete_denied", "parent_changed"])
+def test_prior_publisher_win5_rejects_invalid_proof_and_permissions(tmp_path, monkeypatch, capsys, change):
+    publisher = heartbeat_publisher(tmp_path)
+    if change == "target_replaced":
+        replacement = tmp_path / "different.json"
+        replacement.write_text(publisher.path.read_text(), encoding="utf-8")
+        replacement.replace(publisher.path)
+    if change == "target_readonly":
+        publisher.path.chmod(stat.S_IREAD)
+    if change == "delete_denied":
+        monkeypatch.setattr(bridge, "_delete_access_error", lambda path: 5)
+    if change == "parent_changed":
+        monkeypatch.setattr(bridge, "_directory_identity", lambda path: (0, 0))
+    calls = []
+    def denied(source, destination):
+        calls.append(1)
+        if change == "source_readonly":
+            Path(source).chmod(stat.S_IREAD)
+        raise io_error(5)
+    monkeypatch.setattr(bridge.os, "replace", denied)
+    try:
+        with pytest.raises(bridge.HeartbeatWriteError) as caught:
+            publisher.publish(0)
+        assert len(calls) == caught.value.diagnostic["attempts"] == 1
+        assert caught.value.diagnostic["stage"] == "heartbeat.replace.failed"
+        assert json.loads(publisher.path.read_text())["tick"] == -1
+        records = diagnostics(capsys.readouterr().err)
+        assert not any(row["stage"] == "heartbeat.replace.retry" for row in records)
+        if change == "delete_denied":
+            assert records[0]["stage"] == "heartbeat.replace.delete_probe.denied"
+            assert records[0]["winerror"] == 5
+    finally:
+        for path in tmp_path.iterdir():
+            path.chmod(stat.S_IREAD | stat.S_IWRITE)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires actual Windows sharing modes")
+def test_native_win5_reader_released_between_replace_and_probe_recovers(tmp_path, monkeypatch, capsys):
+    publisher = heartbeat_publisher(tmp_path)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateFileW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p]
+    kernel.CreateFileW.restype = ctypes.c_void_p
+    kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+    handle = kernel.CreateFileW(str(publisher.path), 0x80000000, 0x1 | 0x2, None, 3, 0, None)
+    assert handle not in (None, ctypes.c_void_p(-1).value), ctypes.get_last_error()
+    original = bridge.os.replace
+    errors = []
+    def real_conflict_then_release(source, destination):
+        nonlocal handle
+        try:
+            return original(source, destination)
+        except OSError as exc:
+            errors.append(exc.winerror)
+            if handle is not None:
+                assert kernel.CloseHandle(handle)
+                handle = None
+            raise
+    monkeypatch.setattr(bridge.os, "replace", real_conflict_then_release)
+    start = time.monotonic()
+    try:
+        publisher.publish(0)
+    finally:
+        if handle is not None:
+            kernel.CloseHandle(handle)
+    assert errors == [5], "the real Windows rename, not injection, must reproduce error 5"
+    assert time.monotonic() - start < 0.7
+    records = diagnostics(capsys.readouterr().err)
+    assert records[0]["stage"] == "heartbeat.replace.delete_probe.allowed"
+    assert records[0]["winerror"] == 0
+    assert records[-1]["stage"] == "heartbeat.replace.recovered"
+    assert json.loads(publisher.path.read_text())["tick"] == 0
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires actual Windows ACLs")
+def test_native_delete_acl_denial_is_not_retried_for_prior_publisher(tmp_path, monkeypatch, capsys):
+    publisher = heartbeat_publisher(tmp_path)
+    advapi = ctypes.WinDLL("advapi32", use_last_error=True)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    advapi.GetFileSecurityW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong, ctypes.POINTER(ctypes.c_ulong)]
+    advapi.SetFileSecurityW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.c_void_p]
+    advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.POINTER(ctypes.c_void_p), ctypes.c_void_p]
+    kernel.LocalFree.argtypes = [ctypes.c_void_p]
+    size = ctypes.c_ulong()
+    advapi.GetFileSecurityW(str(publisher.path), 4, None, 0, ctypes.byref(size))
+    assert size.value > 0
+    saved = ctypes.create_string_buffer(size.value)
+    assert advapi.GetFileSecurityW(str(publisher.path), 4, saved, size.value, ctypes.byref(size))
+    advapi.GetFileSecurityW(str(tmp_path), 4, None, 0, ctypes.byref(size))
+    saved_parent = ctypes.create_string_buffer(size.value)
+    assert advapi.GetFileSecurityW(str(tmp_path), 4, saved_parent, size.value, ctypes.byref(size))
+    denied = ctypes.c_void_p()
+    denied_parent = ctypes.c_void_p()
+    # Only this new temporary file: deny Everyone DELETE, retain other access so
+    # the test can restore its original DACL even after the denied probe.
+    assert advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+        "D:(D;;SD;;;WD)(A;;FA;;;WD)", 1, ctypes.byref(denied), None)
+    # Windows can also grant DELETE through the parent's DELETE_CHILD right.
+    # Deny that fallback only on this dedicated pytest directory.
+    assert advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+        "D:(D;;0x00000040;;;WD)(A;;FA;;;WD)", 1, ctypes.byref(denied_parent), None)
+    try:
+        assert advapi.SetFileSecurityW(str(tmp_path), 4, denied_parent)
+        assert advapi.SetFileSecurityW(str(publisher.path), 4, denied)
+        assert bridge._delete_access_error(publisher.path) == 5
+        # ACL changes alter ctime. Retain the current identity only for this test
+        # so it reaches the actual DELETE probe, not the earlier identity guard.
+        publisher.prior = (publisher.prior[0], bridge._regular_identity(publisher.path), publisher.prior[2])
+        calls = []
+        def win5(source, destination):
+            calls.append(1)
+            raise io_error(5)
+        monkeypatch.setattr(bridge.os, "replace", win5)
+        with pytest.raises(bridge.HeartbeatWriteError) as caught:
+            publisher.publish(0)
+        assert calls == [1]
+        assert caught.value.diagnostic["attempts"] == 1
+        records = diagnostics(capsys.readouterr().err)
+        assert records[0]["stage"] == "heartbeat.replace.delete_probe.denied"
+        assert records[0]["winerror"] == 5
+    finally:
+        restored_file = advapi.SetFileSecurityW(str(publisher.path), 4, saved)
+        restored_parent = advapi.SetFileSecurityW(str(tmp_path), 4, saved_parent)
+        kernel.LocalFree(denied)
+        kernel.LocalFree(denied_parent)
+        assert restored_file and restored_parent
+    assert bridge._delete_access_error(publisher.path) == 0
