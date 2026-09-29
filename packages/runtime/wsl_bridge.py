@@ -200,7 +200,7 @@ def build_wsl_command(args, linux_request, linux_result, token):
         "CONDA_PKGS_DIRS": "/mnt/d/video/runtime/shared/pkgs", "CONDA_ENVS_PATH": "/mnt/d/video/runtime/models",
         "HF_HOME": "/mnt/d/video/models/cache/huggingface", "TORCH_HOME": "/mnt/d/video/models/cache/torch",
         "TMPDIR": "/mnt/d/video/runtime/models/tmp", "PIP_CACHE_DIR": "/mnt/d/video/runtime/models/pip-cache",
-        "PYTHONDONTWRITEBYTECODE": "1", "HF_HUB_DISABLE_TELEMETRY": "1", "HF_HUB_OFFLINE": "1",
+        "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1", "HF_HUB_DISABLE_TELEMETRY": "1", "HF_HUB_OFFLINE": "1",
         "TRANSFORMERS_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false", "PYTHONUNBUFFERED": "1",
     }
     return ["wsl.exe", "--distribution", "Ubuntu", "--exec", "/usr/bin/env",
@@ -378,7 +378,7 @@ def supervise_model(args):
         else:
             env = dict(os.environ)
             env.update({"BTV_STORAGE_ROOT": str(LINUX_STORAGE), "PYTHONUNBUFFERED": "1", "PYTHONIOENCODING": "utf-8",
-                        "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_HUB_DISABLE_TELEMETRY": "1"})
+                        "PYTHONNOUSERSITE": "1", "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "HF_HUB_DISABLE_TELEMETRY": "1"})
             prefix = validate_env_prefix(args.env_prefix)
             process = subprocess.Popen([prefix + "/bin/python", "-m", "packages.models", "run", "--request", args.request, "--result", args.result],
                                        cwd=args.repo, env=env, stdin=subprocess.DEVNULL, start_new_session=True, shell=False)
@@ -433,7 +433,8 @@ def linux_entry(args):
     command = [sys.executable, str(Path(__file__).resolve()), "_supervise", "--env-prefix", args.env_prefix,
                "--repo", args.repo, "--request", args.request, "--result", args.result,
                "--token", args.token, "--heartbeat-timeout", str(args.heartbeat_timeout)]
-    guardian = subprocess.Popen(command, stdin=subprocess.DEVNULL, start_new_session=True, shell=False)
+    env = {**os.environ, "PYTHONNOUSERSITE": "1"}
+    guardian = subprocess.Popen(command, env=env, stdin=subprocess.DEVNULL, start_new_session=True, shell=False)
     return guardian.wait()
 
 
