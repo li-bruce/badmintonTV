@@ -15,6 +15,7 @@
 - 失败/限制/下一步：FFmpeg9 API不兼容原失败保留；可显式使用compat8，默认CPU不变。原生60fps源、NVDEC、长片吞吐、连续播放听感和平台上传未测；细技法、人类内容审核和权利未知。后续由主任务集成本轮工具/报告、platform完成设置持久化与取消补丁集成，不把本模块技术通过宣布整个产品验收通过。
 - 核心实现SHA：`4ecaf6dfcf0536fe95e720a612c7bfd3a9a54206`，来源闭包修复`db587aa179ea100a199fe1c67c758b74810f9307`；主任务已集成等价6518a09/281c137。平台独立render_options与Timeline ID/CAS绑定保存，重开恢复预设/安全区/profile；canonical Timeline根合同不私自增加字段。
 - 本轮验证交付SHA：`f2bd7bbb0bd929ad7ebce7cf57a8a0663a17f648`，包括兼容环境/安装器、固定输入双后端基准、质量脚本与报告、8个固化异常回归、只读开销诊断。最终测试150 passed/1 skipped/378subtests，Git差异检查和脚本AST/JSON通过；未推送、未合并main、未发布媒体。
+- 真实训练Asset补证：17:59使用代码`0f0c7f9887a365fcb41d50b51168f70e61cf00a9`，library实际Asset b210dc39…在standalone/preview/research-preview/测试confirmed四种独立CLI入口均exit2/TRAINING_ONLY，审计0媒体启动尝试、无job输出。证据`render/handoff/training-denial-5f1e29d2eab9/validation.json`，仅33,747bytes元数据，预留已释放；未读原片内容或制作训练资料成片。详见`docs/render/REAL_TRAINING_DENIAL_2026-09-29.md`。
 
 更新：2026-09-28。任务 `01a0e88b-5005-7991-9fb0-d2dec3af8b4f`；分支 `work/render`；cwd `C:\Users\USER\.codex\worktrees\3e52\badmintonTV`。
 
