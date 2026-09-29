@@ -98,6 +98,8 @@
     "real_public_dual_connection": "NOT_RUN",
     "real_public_range_resume": "NOT_RUN",
     "real_stop_control": "NOT_RUN",
-    "actual_dataset_download_mode": "original single sequential writer;121 successful attempts;0 resume bytes;no process interrupted"
+    "actual_dataset_download_mode": "original single sequential writer;121 successful attempts;0 resume bytes;no process interrupted",
+    "implementation_commit": "2b81ea4ee0882b712d315b27bbf945154464944f",
+    "source_file_sha256_basis": "Observed workspace file bytes; Git line-ending normalization may differ by checkout"
   }
 }
