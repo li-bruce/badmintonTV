@@ -81,11 +81,11 @@
 
 `#seek-diagnostics`提供30个固定均布窗口点，落到实际源帧PTS后逐点seek。`#seek-benchmark-results`是DOM可读取的真实JSON，导出按钮保存同一数据。每点以`performance.now()`计时，记录`seeked`和`requestVideoFrameCallback`提交目标帧的时刻、实际mediaTime、源帧/PTS偏差；有回调时须同时收到seeked和目标帧，超时如实失败。不支持回调的浏览器会标记`rvfc_supported=false,frame_observed=false`，不据此宣称画面帧精度通过。无实际位置变化的no-op不进入耗时分位数。30点短到落在同一源帧的情况也不会伪造30个不同seek。
 
-首次组`first_access`和复访组`repeat_access`只表达操作顺序。另有`cold_media_load`组：每个点给同一媒体接口增加唯一`_btv_cold_seek`参数，重新加载媒体元素，配合服务端`Cache-Control: no-store`绕开HTTP缓存；总计时包含媒体元数据加载、seek和目标帧呈现。每点单列`media_load_ms`、`seek_elapsed_ms`以及从加载开始计的seeked/呈现时间；30个`fixed_points_ms`与复访组完全相同。复访组保留当前媒体元素并不重载。
+首次组`first_access`和复访组`repeat_access`只表达操作顺序。另有`cold_media_load`组：每个点给同一媒体接口增加唯一`_btv_cold_seek`参数，重新加载媒体元素，配合服务端`Cache-Control: no-store`绕开HTTP缓存；总计时包含媒体元数据加载、seek和目标帧rVFC回调等待。每点单列`media_load_ms`、`seek_elapsed_ms`以及从加载开始计的seeked/rVFC回调时间；30个`fixed_points_ms`与复访组完全相同。复访组保留当前媒体元素并不重载。
 
 这里的“冷”只指媒体元素/HTTP媒体加载，OS文件缓存未清除，不能称为全系统冷缓存。run的`cache_control`和`timing_scope`记录实际条件。页面不能清除OS磁盘缓存；主任务在独立18082验收实例记录这些受控条件下的中位数/P95，此文件不预填性能值。测试辅助不会保存事件或修改数据库。
 
-主任务首次浏览器基线发现seeked常在3–14ms，而目标帧回调出现约1秒延迟；当时播放器滚出了视口，暂以可能的浏览器节流作为待验证解释，保留原始数据。后续测量开始将播放器滚到视口中央，每一run及row都记录`document_visibility`、播放器矩形、视口宽高与可见面积比例；不通过删减/替换原测量来隐藏条件差异。行内仍分开报告seeked与呈现耗时。
+主任务首次浏览器基线发现seeked常在3–14ms，而目标帧回调出现约1秒延迟；当时播放器滚出了视口，暂以可能的浏览器节流作为待验证解释，保留原始数据。后续测量开始将播放器滚到视口中央，每一run及row都记录`document_visibility`、播放器矩形、视口宽高与可见面积比例；不通过删减/替换原测量来隐藏条件差异。行内仍分开报告seeked与rVFC回调等待，后者不是实际屏幕呈现耗时。
 
 `requestVideoFrameCallback`是帧呈现观测而非精确seek保证，依据[Chromium官方说明](https://web.dev/articles/requestvideoframecallback-rvfc)；seek行为参照[HTML标准](https://html.spec.whatwg.org/multipage/media.html#seeking)。实际精确源帧核查使用服务端原分辨率提取的图片。
 
@@ -106,7 +106,7 @@ node -e "require('vm').runInThisContext(require('fs').readFileSync('tests/platfo
 
 平台主任务随后在真实Edge/独立18082完成取消与缓存闭环：三次普通step没有新增exact job；源#61的queued任务切帧后在attempt0取消；源#62由单次CPU worker成功提取1280×720原图；切离再返回后显示“复用本会话已校验结果”，exact任务总数没有增加。见[队列回执](browser-exact-request-proof.json)、[DOM](browser-exact-request-dom.json)与[截图](D:/video/platform/research-20260929/browser-ui-evidence/browser-exact-cache.png)。后台worker已经退出，无queued/running任务；该短片操作不证明长片快速解码或运行中任务已即时停止。
 
-本文维护者未操控验收浏览器；上述循环真实结果引用主任务独立操作与证据，不在此代填R-02a、R-02b整体状态或性能结论。独立验收状态见[平台状态](../status/platform.md)，后台真实代理验证见[MEDIA_PROXY.md](MEDIA_PROXY.md)。本轮前端开发及文档更新未启动18080、未改生产DB、未占GPU、未新增依赖或大文件。
+前端工程测试和平台主任务的真实Edge操作分别记录；上述循环与缓存结果引用实际操作证据，不在此代填R-02a、R-02b整体状态或性能结论。独立验收状态见[平台状态](../status/platform.md)，后台真实代理验证见[MEDIA_PROXY.md](MEDIA_PROXY.md)。本轮前端开发及文档更新未启动18080、未改生产DB、未占GPU、未新增依赖或大文件。
 
 ## 旧probe JSONL的有界分页
 
@@ -124,3 +124,7 @@ read_label_studio_frame_map(asset, storage_root)
 第二接口只允许经实际扫描证明≤1000帧的完整旧Label Studio映射；声明数量更大时读文件前拒绝，缺失或谎报数量仍在第1001帧拒绝并提示先生成小段代理映射。短片保持原`mapping_id=pts-{hash前20位}`、1起始LS帧号、整数floor边界和原始PTS字段。
 
 2026-09-29执行`D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform/test_frame_index.py -q`：31 PASS；包括10,000行索引有限页的峰值<512KB、lookahead/VFR/EOF、hash/数量不一致、坏PTS/序号、路径逃逸、超长行、LS完整导出上限。不替代真实源视频的验收。
+
+## 标注切源的迟到响应隔离补强
+
+后续工程回归为38/38 PASS（原32项及新增6组），`loadEvents`、旧列表按钮、保存成功/失败回执和等待metadata的定位操作均绑定发起时asset/epoch；编辑器generation另防止旧保存覆盖同素材新草稿。发出的旧素材保存仍可在后端完成，只丢弃已过期UI回执。同一新增集合绑定7e8a9bd旧源码为32 PASS/6 FAIL，当前全部通过，具体边界与首次夹具失败见[事件切源问题](../issues/platform-event-selection-race.md)。这些是异步假DOM/API回归，不冒充真实慢网络浏览器验证。

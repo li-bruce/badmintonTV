@@ -1,0 +1,523 @@
+{
+  "job": {
+    "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+    "operation": "render",
+    "payload": {
+      "assets": [
+        {
+          "schema_version": "1.0",
+          "asset_id": "asset-media-test-derived_60_to_30",
+          "relative_path": "platform/media-proxy-test-20260929-r1/derived_60_to_30/explicit-60fps-derivative.mp4",
+          "sha256": "d26b53123b54395037454219fcf3356c218ca9e15adcb5cba6c2f871bf58f76d",
+          "size_bytes": 514828,
+          "duration_ms": 4633,
+          "width": 1280,
+          "height": 720,
+          "fps_num": 30,
+          "fps_den": 1,
+          "time_base": "1/15360",
+          "title": "R-02 derived_60_to_30 · FineBadmintonBenchmark video_000001",
+          "match_id": "unknown",
+          "source_type": "dataset",
+          "usage_scope": "general",
+          "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_000001.mp4",
+          "source_page": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark",
+          "acquired_at": "2026-09-28T15:15:40.237137Z",
+          "camera_type": "rear",
+          "discipline": "singles",
+          "players": [],
+          "rights": {
+            "status": "unknown",
+            "license_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/blob/ff86093a51efdf9a243a0635704952d404e99e52/README.md",
+            "evidence": "Publisher hosts an ungated dataset with Apache-2.0 card. Original broadcaster footage ownership/redistribution clearance is not separately supplied; do not infer commercial/public video rights from dataset or code licensing.",
+            "allowed_uses": []
+          },
+          "split": "unassigned",
+          "probe": {
+            "ffprobe_version": "ffprobe version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+            "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+            "probed_at": "2026-09-28T15:15:40.429291+00:00",
+            "codec_name": "h264",
+            "stream_index": 0,
+            "fps_source": "avg_frame_rate",
+            "duration_source": "stream.duration",
+            "start_time": "0.000000",
+            "start_pts": 0,
+            "avg_frame_rate": "30/1",
+            "r_frame_rate": "30/1",
+            "vfr_status": "cfr_observed",
+            "pts_index": {
+              "relative_path": "data/probes/video_000001.pts.jsonl",
+              "sha256": "2efc88f68713cc18725148d10ba8f290fd1434c7f174c6669f24d076979f8268",
+              "size_bytes": 4314,
+              "format": "jsonl",
+              "frame_count": 139,
+              "time_base": "1/15360",
+              "pts_field": "best_effort_timestamp",
+              "complete": true,
+              "vfr_status": "cfr_observed",
+              "min_delta_ticks": 512,
+              "max_delta_ticks": 512
+            },
+            "timing_note": "Container rates alone do not prove CFR; original timestamps retained when indexed.",
+            "decode": {
+              "status": "passed",
+              "scope": "full_video_stream",
+              "device": "cpu",
+              "frames": 139,
+              "exit_code": 0
+            },
+            "source_sha256": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+            "source_size_bytes": 642017
+          },
+          "provenance": {
+            "dataset": "FineBadmintonBenchmark",
+            "dataset_revision": "ff86093a51efdf9a243a0635704952d404e99e52",
+            "video_uid": "video_000001",
+            "publisher_sha256": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+            "annotation_rights": {
+              "license": "Apache-2.0",
+              "scope": "Dataset card declaration for released annotations; keep underlying video rights separate."
+            },
+            "source_match_offset_ms": null,
+            "grouping": {
+              "match_id": "unknown",
+              "split": "unassigned",
+              "quarantine_group": "finebadmintonbenchmark-source-matches-unresolved",
+              "reason": "QA video_uid does not expose canonical full-match ID or source offset. Never random-split these clips or claim independent matches. Quarantine all until provenance is resolved."
+            },
+            "identity_status": "unconfirmed",
+            "visual_observation": {
+              "camera_type": "rear",
+              "discipline": "singles",
+              "scoreboard_names": [
+                "CHOU T.C.",
+                "CHRISTIE"
+              ],
+              "still_relative_path": "data/qa/stills/video_000001.jpg",
+              "sample_time_ms": 1000,
+              "identity_status": "unconfirmed",
+              "identity_note": "Scoreboard text observation only; player identity and canonical match are unconfirmed."
+            },
+            "label_constraints": {
+              "hand_technique": "unknown",
+              "footwork": "unknown"
+            },
+            "intended_use": "local research smoke test; public footage rights unresolved",
+            "test_derivative": "derived_60_to_30",
+            "source_asset_id": "asset-057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+            "source_sha256": "057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+            "derivation": "Explicit timestamp/frame-rate test derivative, not native VFR capture"
+          }
+        }
+      ],
+      "render_backend": "cpu",
+      "gpu_required": false,
+      "model_id": "render-cpu",
+      "render_options_revision": 3,
+      "parameters": {
+        "export_preset": "portrait_1080p60",
+        "safe_area": {
+          "x": 0.08,
+          "y": 0.12,
+          "width": 0.8,
+          "height": 0.76
+        },
+        "platform_profile": "youtube_shorts",
+        "timeline": {
+          "schema_version": "1.0",
+          "timeline_id": "timeline-platform-r02-browser",
+          "title": "R02浏览器导出设置验证",
+          "segments": [
+            {
+              "segment_id": "clip-ui-1",
+              "asset_id": "asset-media-test-derived_60_to_30",
+              "in_ms": 1000,
+              "out_ms": 2000,
+              "speed": 1,
+              "event_ids": [],
+              "fit": "contain",
+              "crop": null,
+              "title": "Agent流程验证",
+              "audio": "mute",
+              "review_status": "unreviewed"
+            }
+          ],
+          "output": {
+            "width": 1080,
+            "height": 1920,
+            "fps": 60,
+            "video_codec": "h264",
+            "audio_codec": "aac"
+          }
+        },
+        "research_preview": true,
+        "segment_options": {
+          "clip-ui-1": {
+            "editorial_review": {
+              "timeline_sha256": "072c519bf5d9e724297821fbb6d0a1fd06aafbca06fb7830093404c5f75ba8c7",
+              "reviewer_type": "agent",
+              "reviewers": [
+                {
+                  "reviewer": "platform-r02-browser",
+                  "reviewer_type": "agent"
+                }
+              ],
+              "reviewed_at": "2026-09-29T09:43:05.964719+00:00",
+              "candidates": [],
+              "event_revisions": {}
+            }
+          }
+        }
+      },
+      "platform_snapshot": {
+        "platform_version": "0.1.0",
+        "git_revision": "unknown",
+        "source_sha256": {
+          "main.py": "e5ba6bdb19c85e1a34b23e03d776388f1a9b366ed05116e09867155446346d4f",
+          "store.py": "49df3d83381146cd01223586b078e31a4b97b8b1a6cb21539ce319a43b103a3b",
+          "retrieval.py": "9e962053d8cb3e634dc7b0017e30f244ab3402274252c6090be2fafb32dba103"
+        }
+      }
+    },
+    "idempotency_key": null,
+    "status": "succeeded",
+    "attempt": 1,
+    "max_attempts": 3,
+    "cancel_requested": false,
+    "worker_id": "platform-r02-ui-render-once",
+    "lease_expires_at": null,
+    "created_at": 1790674986.0028088,
+    "updated_at": 1790675253.8670125,
+    "result": {
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "artifacts": [
+        {
+          "schema_version": "1.0",
+          "artifact_id": "render-c0d911b5cd8f44d3bc6bc1c2de41ffae",
+          "kind": "video/mp4",
+          "relative_path": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/export.mp4",
+          "sha256": "be377469da2b4b55f0c5d7af1368338d65d703adc661c624b31220512d6ea59f",
+          "size_bytes": 109708,
+          "created_at": "2026-09-29T09:47:33.764264Z",
+          "producer": "badmintonTV.render/0.1.0"
+        },
+        {
+          "schema_version": "1.0",
+          "artifact_id": "render-6dda7e4b9d79468bbd7915512f4b4f91",
+          "kind": "timeline",
+          "relative_path": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/timeline.json",
+          "sha256": "756ce18911abcc94df1baa4c71c97ce0550cf32723ee187b87c7510328efd2de",
+          "size_bytes": 596,
+          "created_at": "2026-09-29T09:47:33.767781Z",
+          "producer": "badmintonTV.render/0.1.0"
+        },
+        {
+          "schema_version": "1.0",
+          "artifact_id": "render-cb3e0f9d7869402e9c955b57c134ab27",
+          "kind": "source_map",
+          "relative_path": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/source_map.json",
+          "sha256": "e0a3184b9265637f7b38e02a0843411161dec0965193c832a02c0a6a2b7b86ea",
+          "size_bytes": 9524,
+          "created_at": "2026-09-29T09:47:33.774690Z",
+          "producer": "badmintonTV.render/0.1.0"
+        },
+        {
+          "schema_version": "1.0",
+          "artifact_id": "render-d15eb814cfc8468dbadd71751cec9203",
+          "kind": "qa_report",
+          "relative_path": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/qa.json",
+          "sha256": "95cbb709a3ba451d8e46b9cf93f58af7976cb665fa2b60aed8023542e7f0d761",
+          "size_bytes": 13338,
+          "created_at": "2026-09-29T09:47:33.779986Z",
+          "producer": "badmintonTV.render/0.1.0"
+        }
+      ],
+      "events": [],
+      "error": null,
+      "exit_code": 0
+    },
+    "error": null,
+    "progress": {
+      "event": "progress",
+      "stage": "usage_verification",
+      "current": 0,
+      "total": 514828,
+      "unit": "bytes",
+      "message": "验证制作源文件及可追溯父资产实际字节",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 21,
+      "created_at": 1790675253.8407733
+    }
+  },
+  "logs": [
+    {
+      "event": "state",
+      "stage": "queued",
+      "message": "任务已持久入队",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 1,
+      "created_at": 1790674986.0028088
+    },
+    {
+      "event": "state",
+      "stage": "cancel_requested",
+      "message": "已请求取消",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 2,
+      "created_at": 1790675011.6453133
+    },
+    {
+      "event": "state",
+      "stage": "queued",
+      "message": "用户显式重试",
+      "previous_status": "cancelled",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 3,
+      "created_at": 1790675221.4121244
+    },
+    {
+      "event": "state",
+      "stage": "running",
+      "message": "worker 已领取",
+      "worker_id": "platform-r02-ui-render-once",
+      "attempt": 1,
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 4,
+      "created_at": 1790675244.2522418
+    },
+    {
+      "event": "progress",
+      "stage": "usage_verification",
+      "current": 0,
+      "total": 642017,
+      "unit": "bytes",
+      "message": "验证制作源文件及可追溯父资产实际字节",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 5,
+      "created_at": 1790675244.3990881
+    },
+    {
+      "event": "progress",
+      "stage": "usage_verification",
+      "current": 0,
+      "total": 514828,
+      "unit": "bytes",
+      "message": "验证制作源文件及可追溯父资产实际字节",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 6,
+      "created_at": 1790675244.4076982
+    },
+    {
+      "event": "progress",
+      "stage": "adapter",
+      "current": null,
+      "total": null,
+      "unit": null,
+      "message": "启动已登记的 render CLI",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 7,
+      "created_at": 1790675248.7690568
+    },
+    {
+      "source_seq": 1,
+      "event": "progress",
+      "stage": "preflight",
+      "current": 0,
+      "total": 1,
+      "unit": "assets",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 8,
+      "created_at": 1790675249.1500957
+    },
+    {
+      "source_seq": 2,
+      "event": "progress",
+      "stage": "preflight",
+      "current": 1,
+      "total": 1,
+      "unit": "assets",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 9,
+      "created_at": 1790675253.3193552
+    },
+    {
+      "source_seq": 3,
+      "event": "progress",
+      "stage": "segment:1",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 10,
+      "created_at": 1790675253.5798025
+    },
+    {
+      "source_seq": 4,
+      "event": "progress",
+      "stage": "segment:1",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 11,
+      "created_at": 1790675253.5969775
+    },
+    {
+      "source_seq": 5,
+      "event": "progress",
+      "stage": "assemble",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 12,
+      "created_at": 1790675253.6498687
+    },
+    {
+      "source_seq": 6,
+      "event": "progress",
+      "stage": "assemble",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 13,
+      "created_at": 1790675253.6536844
+    },
+    {
+      "source_seq": 7,
+      "event": "progress",
+      "stage": "decode_qa",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 14,
+      "created_at": 1790675253.7582076
+    },
+    {
+      "source_seq": 8,
+      "event": "progress",
+      "stage": "decode_qa",
+      "current": 1000,
+      "total": 1000,
+      "unit": "ms",
+      "message": "",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 15,
+      "created_at": 1790675253.7620835
+    },
+    {
+      "source_seq": 9,
+      "event": "artifact",
+      "stage": "complete",
+      "current": null,
+      "total": null,
+      "unit": null,
+      "message": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/export.mp4",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 16,
+      "created_at": 1790675253.7810216
+    },
+    {
+      "source_seq": 10,
+      "event": "artifact",
+      "stage": "complete",
+      "current": null,
+      "total": null,
+      "unit": null,
+      "message": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/timeline.json",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 17,
+      "created_at": 1790675253.7844775
+    },
+    {
+      "source_seq": 11,
+      "event": "artifact",
+      "stage": "complete",
+      "current": null,
+      "total": null,
+      "unit": null,
+      "message": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/source_map.json",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 18,
+      "created_at": 1790675253.789223
+    },
+    {
+      "source_seq": 12,
+      "event": "artifact",
+      "stage": "complete",
+      "current": null,
+      "total": null,
+      "unit": null,
+      "message": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/qa.json",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 19,
+      "created_at": 1790675253.7929013
+    },
+    {
+      "event": "progress",
+      "stage": "usage_verification",
+      "current": 0,
+      "total": 642017,
+      "unit": "bytes",
+      "message": "验证制作源文件及可追溯父资产实际字节",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 20,
+      "created_at": 1790675253.8322723
+    },
+    {
+      "event": "progress",
+      "stage": "usage_verification",
+      "current": 0,
+      "total": 514828,
+      "unit": "bytes",
+      "message": "验证制作源文件及可追溯父资产实际字节",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 21,
+      "created_at": 1790675253.8407733
+    },
+    {
+      "event": "state",
+      "stage": "succeeded",
+      "message": "succeeded",
+      "schema_version": "1.0",
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "seq": 22,
+      "created_at": 1790675253.868015
+    }
+  ]
+}
