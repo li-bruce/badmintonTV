@@ -1,5 +1,25 @@
 # models 状态
 
+## 2026-09-29 复用实验轮（进行中）
+
+- 分支codex/models-reuse-experiments，从主任务指定ff2c700创建；旧work/models全部提交保留，无未提交覆盖。范围R-03b/R-05/R-07，细手法真值门槛不变。
+- 已读本轮实施/调研与跨模块合同，三条线并行审阅TrackNetV3、Qwen3-VL-Embedding-2B、BST官方来源和固定版本。实际GPU顺序执行，render先获得短硬件基准窗口。
+- 已核对GPU：RTX5090约1891MiB桌面占用，无compute进程；平台同一runtime账本状态GPU_LEASE_REQUIRED、window=null、lease=null。模型不直接操作SQLite，后续通过受控Windows worker/WSL bridge与同账本租约执行。
+- 容量预检快照：models2,427,005,391bytes，runtime/models7,282,598,927bytes，runtime/shared1,081,355,680bytes；D free955,429,896,192bytes。新VL env安装额外峰值预留24GB+shared2GB，安装前GNU du检查35/15/70GB边界；不改旧torch2.7.1环境。Qwen官方固定revision全仓18文件4,271,068,726bytes，models单写者预留4.6GB，逐文件大小/hash校验下载进行中。
+- 已落盘：TrackNet官方ZIP131,653,952B、TrackNet_best.pt136,190,877B（SHA df867641a02712b021f04548ff4b1208ddfdb47f629ab2094ceb978667e83b1a）和单独Inpaint6,264,451B；BST7,514,133B（SHA997f43e52b20cb47517132c71d3e147d7d717a2d9651cfbe7651a5003bd66809）。代码固定commit、下载计算hash；发布者无权重hash，不虚构发布者认证。CPU受限weights_only读取：TrackNet seq_len8/bg_mode=concat，BST是OrderedDict。尚无本轮GPU前向。
+- 已实现TrackNet与VL标准execute适配并接lazy dispatcher/catalog，明确experimental/not_installed；TrackNet固定官方执行源码hash并使用同份bytes执行。CPU总回归176 tests，173通过、3项Windows symlink权限跳过。正在增加逐帧pose和BST输入链。训练专用输入只写models诊断产物，继承usage_scope/源关系，不进入制作库或成片。
+- 失败与恢复：Qwen全响应下载初读停在0byte，核对仅本任务PID54176后中止，partial及来源保留，writer锁归档为.models对应interrupted-qwen记录。经16项mock边界验证后采用正常HTTP Range严格206/Content-Range续传；2026-09-29 17:12本地时间已实际收到1,084,489,728B。不能把partial称安装成功。新VL隔离env仍在下载torch2.8依赖。
+- 仅补装旧模型env的opencv-python-headless4.11.0.86（CPU官方PyPI wheel，--no-deps、不改torch/vision/transformers）；pip check与cv2 import成功。预检runtime/models7,651,687,906B、shared1,244,822,546B、native base/pkg5,924,496,893B、D free952,402,558,976B；新VL24GB+OpenCV0.3GB及shared2GB保守预留仍通过35/15/70GB。pip-only旧env安装与新env独立tmp，未同时运行Conda安装。
+- GPU窗口：render首次NVENC因FFmpeg/驱动API版本不合失败后已明确释放/撤销；models仍无GPU运行。下载单writer期间允许render先重试兼容构建，不空占窗口。
+- 17:18–17:22已运行：TrackNet offline job16153…与causal paced job4081…成功；6秒180帧分别165/160 observed，missing15/20，无inpaint。离线pipeline4.42s；因果active稳态RTF0.606、回放p95到达完成36.04ms、12/180超过40ms期限、0主动drops，物理live端到端仍未测。第二job3757…bridge心跳写失败可靠取消/释放，证据保留交platform修；不能算模型失败率/算法精度。
+- 连续pose jobb8a4…成功：真实90源PTS帧，700–3700ms，raw COCO17且track/player=null。旧报告elapsed41.52s而阶段约6.29s，未计入的framework startup已在代码补计时及unattributed项，旧报告保留；下一实跑核对。BST真实2秒预备检查60帧精确join、55可用；2帧人脚点缺失/筛选不足、1帧关联跳变、2帧缺球，严格输入尚blocked，未伪造分类成功。
+- 17:22后GPU已全部停止、lease/window=null并明确归还render。Qwen第二次因调度主动暂停保留1,409,810,432B，归档旧锁；新下载支持每个已flush Range边界协作暂停，已继续下载。原始env/weights文件不覆盖。
+- BST小依赖positional-encodings6.0.3、torchinfo1.8.0按官方wheel SHA和--no-deps安装通过，pip check通过，freeze另存；没有变动框架。安装前models runtime8,242,384,320B+24.01GB保守剩余峰值仍<=35GB，shared总7,169,319,439B+2GB<=15GB、70GB全界通过。
+- 当前CPU验证240 tests：237通过、3个Windows symlink权限skip；git diff --check通过。BST源码same-bytes pin、worker model_version和stroke_classification兼容均补齐。真实实验详见models-004-reuse-forward.md及10时点Agent视觉QA（不是humanreview/accuracy）。稳定实现正提交；Qwen、新职业窗口和BST实际前向仍继续。
+- 下一步：完成官方文件/环境来源锁，接入统一CLI，旧真实短片有界前向；待library训练handoff后至少一个新职业窗口。分项时延/显存与因果限制单列；无真值不报准确率、召回或P@K。
+
+## 已完成首轮（历史记录）
+
 - 任务：01a0e88b-416f-7ca2-bfec-c09ec1462866；cwd `C:/Users/USER/.codex/worktrees/c5b1/badmintonTV`；branch `work/models`。
 - 设计：统一Asset/QuerySpec/Event/JobResult数据流、严格attempt边界、未知不等于阴性、专家冻结标签、整比赛留出和A/B/C公平比较；详见docs/models/DESIGN.md、annotation-and-evaluation.md、HANDOFF.md。
 - 已实现：纯stdlib CLI/attempt_id/JSONL/排他结果；有限中文规则、兼容端点、schema与条件语义校验；本地Qwen/COCO17姿态/CLIP抽帧适配器；有上限的官方权重下载、哈希校验与模型目录单写者容量预留；正式评测拒绝不合格真值；实验原文与源PTS可追溯。

@@ -26,7 +26,7 @@ import uuid
 
 
 SCHEMA_VERSION = "1.0"
-OPERATIONS = frozenset({"analyze", "query_parse", "pose", "video_embedding", "movement_classification"})
+OPERATIONS = frozenset({"analyze", "query_parse", "pose", "video_embedding", "movement_classification", "tracking", "stroke_classification"})
 REQUEST_FIELDS = frozenset({"schema_version", "job_id", "attempt_id", "operation", "assets", "parameters", "output_dir"})
 ASSET_FIELDS = frozenset({
     "schema_version", "asset_id", "relative_path", "sha256", "size_bytes",
@@ -143,6 +143,8 @@ def _validate_asset(asset: Any, root: Path, index: int) -> None:
     _choice(asset["camera_type"], f"{field}.camera_type", {"rear", "side", "overhead", "handheld", "mixed", "unknown"})
     _choice(asset["discipline"], f"{field}.discipline", {"singles", "doubles", "unknown"})
     _choice(asset["split"], f"{field}.split", {"unassigned", "train", "validation", "test"})
+    if "usage_scope" in asset:
+        _choice(asset["usage_scope"], f"{field}.usage_scope", {"general", "training_only"})
     for key in ("source_url", "source_page"):
         if asset[key] is not None:
             _string(asset[key], f"{field}.{key}")
@@ -151,6 +153,8 @@ def _validate_asset(asset: Any, root: Path, index: int) -> None:
     for key in ("probe", "provenance"):
         if not isinstance(asset[key], dict):
             raise InvalidRequest(f"{field}.{key} must be an object")
+    if "usage_scope" in asset["provenance"]:
+        _choice(asset["provenance"]["usage_scope"], f"{field}.provenance.usage_scope", {"general", "training_only"})
     if not isinstance(asset["players"], list):
         raise InvalidRequest(f"{field}.players must be an array")
     for player in asset["players"]:

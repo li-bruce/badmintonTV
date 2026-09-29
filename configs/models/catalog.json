@@ -516,6 +516,253 @@
         "max_clip_ms": 30000,
         "max_frames": 120
       }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "tracknetv3-reuse",
+      "version": "0.1.0",
+      "display_name": "TrackNetV3 连续球点实验",
+      "capabilities": [
+        "tracking"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/tracknetv3/6eda442ada1740573f200f836d93edc9a541ee86/model.py",
+          "sha256": "04fd51ff88e58189474677dbf11f81e52b78df00226fb97ea0678b31ef7284e3"
+        },
+        {
+          "relative_path": "models/weights/tracknetv3/TrackNet_best.pt",
+          "sha256": "df867641a02712b021f04548ff4b1208ddfdb47f629ab2094ceb978667e83b1a"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "tracknetv3-reuse"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/TRACKNET_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/TRACKNET_REUSE.md",
+      "license": {
+        "code": "project license not declared",
+        "upstream": "MIT",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "qwen3-vl-embedding-2b",
+      "version": "0.1.0",
+      "display_name": "Qwen3-VL 短视频中文检索实验",
+      "capabilities": [
+        "video_embedding"
+      ],
+      "status": "not_installed",
+      "reason": "当前Python缺少依赖: qwen_vl_utils",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/vl-env"
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "qwen3-vl-embedding-2b"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/VL_EMBEDDING_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/VL_EMBEDDING_REUSE.md",
+      "license": {
+        "code": "project license not declared",
+        "upstream": "Apache-2.0",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "torchvision-continuous-pose",
+      "version": "0.1.0",
+      "display_name": "COCO17 连续帧姿态实验",
+      "capabilities": [
+        "pose"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/torchvision-pose/keypointrcnn_resnet50_fpn_coco-fc266e95.pth",
+          "sha256": "fc266e953d2b302cdcbb9ae66f71f6b0d4649928bf02dc573961e361e4918926"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "torchvision-continuous-pose"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/CONTINUOUS_POSE_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/CONTINUOUS_POSE_REUSE.md",
+      "license": {
+        "code": "project license not declared",
+        "upstream": "BSD-3-Clause; COCO terms separate",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 3000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "bst-cg-ap-reuse",
+      "version": "0.1.0",
+      "display_name": "BST 单打离线粗球种实验",
+      "capabilities": [
+        "stroke_classification"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env"
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/bst/fb9b310bf4c8a8e3d89c75e61bc06a7ac3de62df/stroke_classification/model/bst.py",
+          "sha256": "4313f9f411a90da24bfeead81f88b83894363bfd5248a75132a8c60ec3905b74"
+        },
+        {
+          "relative_path": "models/upstream/bst/fb9b310bf4c8a8e3d89c75e61bc06a7ac3de62df/stroke_classification/model/tempose.py",
+          "sha256": "0f3274bb4c0ec1b3f4a068b066993b7f1c0d58349bb580b55d0e0919e3821bc6"
+        },
+        {
+          "relative_path": "models/weights/bst/bst_CG_AP_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_2.pt",
+          "sha256": "997f43e52b20cb47517132c71d3e147d7d717a2d9651cfbe7651a5003bd66809"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "bst-cg-ap-reuse"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/BST_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/BST_REUSE.md",
+      "license": {
+        "code": "project license not declared",
+        "upstream": "MIT code; weights not separately stated",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
     }
   ]
 }

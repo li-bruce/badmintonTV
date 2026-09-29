@@ -104,6 +104,20 @@ def execute(request, root, output_path, progress):
     p = request['parameters']
     model_id = p['model_id']
     operation = request['operation']
+    # These adapters validate their own parameters and own their bounded writer
+    # reservation. Dispatch before taking the legacy adapter's reservation.
+    if model_id == 'tracknetv3-reuse':
+        from .tracknet_reuse import execute as execute_tracknet
+        return execute_tracknet(request, root, output_path, progress)
+    if model_id == 'qwen3-vl-embedding-2b':
+        from .vl_embedding_reuse import execute as execute_vl
+        return execute_vl(request, root, output_path, progress)
+    if model_id == 'torchvision-continuous-pose':
+        from .continuous_pose_reuse import execute as execute_pose
+        return execute_pose(request, root, output_path, progress)
+    if model_id == 'bst-cg-ap-reuse':
+        from .bst_reuse import execute as execute_bst
+        return execute_bst(request, root, output_path, progress)
     allowed = {'query-rule-v1':'query_parse','query-endpoint-v1':'query_parse','qwen3-0.6b':'query_parse',
                'torchvision-keypointrcnn':'pose','clip-frame-mean':'video_embedding','skeleton-temporal-v1':'movement_classification'}
     if model_id not in allowed:
