@@ -21,6 +21,9 @@ try {
     $env:BTV_DB_PATH = Join-Path $testRoot 'import-state/platform/platform.sqlite3'
     & $pythonPath -m pytest -q -p no:cacheprovider tests/contracts tests/platform --basetemp (Join-Path $testRoot 'pytest')
     if ($LASTEXITCODE -ne 0) { throw 'Contract/platform tests failed.' }
+    if (!(Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js is required for the frontend regression tests; Python checks alone are incomplete.' }
+    & node -e "require('vm').runInThisContext(require('fs').readFileSync('tests/platform/preview_ui.test.cjs','utf8'))"
+    if ($LASTEXITCODE -ne 0) { throw 'Frontend preview and timeline tests failed.' }
     foreach ($moduleName in @('library', 'models', 'render')) {
         & $pythonPath -m unittest discover -s "tests/$moduleName" -q
         if ($LASTEXITCODE -ne 0) { throw "$moduleName tests failed." }

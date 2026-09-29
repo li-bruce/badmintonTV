@@ -4,14 +4,14 @@
 
 ## 本轮运行状态
 
-2026-09-29研究实施轮正在集成。主API/worker的00:23运行记录是历史检查点，不能据此判断端口/PID现在有效；主worker暂不常驻，models持有GPU实测排期。platform使用独立测试业务库和18082端口，仍共享受控GPU账本。恢复主服务前核对实际进程、账本及最新代码，见[本轮验收](ROUND_VALIDATION_2026-09-29.md)。
+2026-09-29研究实施轮：main API18080已重新启动，真实预览与CPU渲染通过；主worker两次`--once`后退出，models继续最后VL实验，GPU仍须统一协调。platform18082为独立测试API，无常驻worker；Label Studio18081本轮未运行。旧00:23记录及`.runtime/main-services.json`不能当作当前PID证据，新启动回执另记`.runtime/main-round-services.json`。见[本轮验收](ROUND_VALIDATION_2026-09-29.md)。
 
 | 运行环境 | 用途与当前事实 |
 |---|---|
 | Windows `runtime/platform/env` | Web、SQLite、原生worker和轻量回归，不安装训练框架 |
 | WSL `runtime/models/env` | 已有torch2.7.1+cu128，TrackNet与连续姿态真实小窗已运行 |
-| WSL `runtime/models/yolo-env` | YOLO11n-pose+ByteTrack小环境，只读复用旧torch；旧视频真实90帧已运行，AGPL许可单列 |
-| WSL `runtime/models/vl-env` | Qwen3-VL-Embedding-2B按官方torch2.8依赖单独安装，安装/权重仍在下载，不能视为ready |
+| WSL `runtime/models/yolo-env` | YOLO11n-pose+ByteTrack小环境，只读复用旧torch；旧视频90帧、新职业视频75帧已运行，AGPL许可单列 |
+| WSL `runtime/models/vl-env` | Qwen3-VL-Embedding-2B18权重文件与17核心wheel全部校验；按官方torch2.8依赖安装中，真实embedding待运行，不能仅凭下载视为ready |
 | Windows FFmpeg9.0.2 | 原CPU环境保留；当前驱动591.86与该版本NVENC API13.1不兼容，失败证据保留 |
 | Windows隔离FFmpeg8.0.1 | 兼容当前NVENC API13.0，同版本CPU/NVENC各8真实job已完成；管理员显式选择兼容配置，不覆盖原安装 |
 
