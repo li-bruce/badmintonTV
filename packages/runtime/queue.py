@@ -20,6 +20,7 @@ class Queue:
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
             db.executescript("""
+                CREATE TABLE IF NOT EXISTS runtime_metadata(key TEXT PRIMARY KEY,value TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS jobs (
                     job_id TEXT PRIMARY KEY, operation TEXT NOT NULL,
                     payload TEXT NOT NULL, idempotency_key TEXT UNIQUE,
@@ -42,6 +43,15 @@ class Queue:
                 );
                 PRAGMA user_version=1;
             """)
+
+    def bind_business_database(self, path):
+        """Administrator app configuration, never accepted from job payloads."""
+        value=str(Path(path).resolve())
+        with self.connection(write=True) as db:
+            existing=db.execute("SELECT value FROM runtime_metadata WHERE key='business_database'").fetchone()
+            if existing and existing[0]!=value:
+                raise ValueError('runtime queue is already bound to a different business database')
+            db.execute("INSERT OR IGNORE INTO runtime_metadata VALUES('business_database',?)",(value,))
 
     @contextmanager
     def connection(self, write=False):

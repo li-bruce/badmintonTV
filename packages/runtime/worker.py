@@ -34,6 +34,13 @@ class JobBlocked(Exception):
         self.code = code
 
 
+class RenderCleanupRequired(RuntimeError):
+    code = "RENDER_CLEANUP_REQUIRED"
+
+
+RENDER_CANCEL_GRACE_SECONDS = 10.0
+
+
 def _sha256(path, context=None):
     digest = hashlib.sha256()
     with Path(path).open("rb") as handle:
@@ -87,6 +94,8 @@ class WorkerContext:
         self.bridge_done_path = None
         self.compute_started = False
         self.compute_stopped = True
+        self.render_cancel_path = None
+        self.render_cancel_outcome = None
         self.thread = threading.Thread(target=self._keepalive, daemon=True)
 
     def _keepalive(self):
@@ -141,6 +150,34 @@ class WorkerContext:
         result = self.queue.append_log(self.job["job_id"], event, **data)
         self.log_bytes_written += len(json.dumps(result, ensure_ascii=False, allow_nan=False).encode("utf-8"))
         return result
+
+    def _cancel_render(self, process, output_queue, finished):
+        """Let the owned render CLI run its finally blocks before a forced stop.
+
+        Cancellation is already active: never use check/log in this loop. The
+        independent keepalive thread continues renewing the job and GPU lease.
+        No render-owned lock is inspected, overwritten, or removed here.
+        """
+        deadline = time.monotonic() + min(10.0, max(0.0, RENDER_CANCEL_GRACE_SECONDS))
+        try:
+            _atomic_json(self.render_cancel_path, {"job_id": self.job["job_id"],
+                         "attempt_id": f"attempt-{self.job['attempt']}", "cancel_requested": True})
+        except Exception as exc:
+            self.render_cancel_outcome = {"graceful": False, "message": "取消信号写入失败，将强制停止；渲染锁需人工核验：" + self.redact(exc)}
+            return False
+        while time.monotonic() < deadline:
+            if process.poll() is not None and len(finished) == 2:
+                self.render_cancel_outcome = {"graceful": True, "message": "渲染CLI收到取消信号并退出，输出管道已关闭"}
+                return True
+            try:
+                name, line = output_queue.get(timeout=min(0.1, max(0.0, deadline - time.monotonic())))
+            except streams.Empty:
+                continue
+            if line is None:
+                finished.add(name)
+            # Drain both streams without interpreting new progress after cancel.
+        self.render_cancel_outcome = {"graceful": False, "message": "渲染CLI未在取消宽限期退出，已要求强制停止；保留渲染锁，需人工核验计算停止及锁归属"}
+        return False
 
     def execute(self, argv, stage, parse_progress=False, timeout=3600, capture_limit=8_000_000, extra_env=None):
         self.check()
@@ -245,6 +282,14 @@ class WorkerContext:
                         self.log("warning", stage=stage, message=line.rstrip())
                         logged_lines += 1
             return process.wait(), "".join(stdout), "".join(stderr)
+        except (JobCancelled, TimeoutError) as exc:
+            if self.job["operation"] == "render" and self.render_cancel_path is not None:
+                if not self._cancel_render(process, output_queue, finished):
+                    _kill_tree(process, windows_job)
+                    raise RenderCleanupRequired(self.render_cancel_outcome["message"]) from exc
+            else:
+                _kill_tree(process, windows_job)
+            raise
         except BaseException:
             _kill_tree(process, windows_job)
             raise
@@ -301,16 +346,19 @@ def verify_manifest(context, exchange_dir):
         sources.append((asset, path, stat))
     total = sum(stat.st_size for _, _, stat in sources)
     verified_bytes = 0
+    source_identities = {}
     context.log("progress", stage="verify_manifest", current=0, total=total, unit="bytes", message=f"开始校验 {len(assets)} 个原文件")
     def identity(stat):
-        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
+        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
     for index, (asset, path, before) in enumerate(sources, 1):
         context.check()
         digest = hashlib.sha256()
         read = 0
         last_log = time.monotonic()
         with path.open("rb") as handle:
-            if identity(os.fstat(handle.fileno())) != identity(before):
+            # Windows path.stat/fstat ctime semantics can differ; compare the
+            # shared four fields here and all five path fields after reading.
+            if identity(os.fstat(handle.fileno()))[:4] != identity(before)[:4]:
                 raise ValueError(f"asset changed before verification: {asset['asset_id']}")
             for chunk in iter(lambda: handle.read(4 * 1024 * 1024), b""):
                 context.check()
@@ -322,17 +370,21 @@ def verify_manifest(context, exchange_dir):
                     context.log("progress", stage="verify_manifest", current=verified_bytes + read, total=total, unit="bytes",
                                 message=f"读取 {index}/{len(assets)}: {asset['asset_id']}")
                     last_log = time.monotonic()
-            if identity(os.fstat(handle.fileno())) != identity(before):
+            if identity(os.fstat(handle.fileno()))[:4] != identity(before)[:4]:
                 raise ValueError(f"asset changed during verification: {asset['asset_id']}")
         if identity(path.stat()) != identity(before) or read != asset["size_bytes"]:
             raise ValueError(f"asset changed during verification: {asset['asset_id']}")
         if digest.hexdigest() != asset["sha256"]:
             raise ValueError(f"asset sha256 mismatch: {asset['asset_id']}")
+        from .production import check_sources
+        check_sources(context,[{**asset,'sha256':digest.hexdigest()}])
+        source_identities[asset['asset_id']] = list(identity(before))
         verified_bytes += read
         context.log("progress", stage="verify_manifest", current=verified_bytes, total=total, unit="bytes",
                     message=f"已核验 {index}/{len(assets)}: {asset['asset_id']}")
     return {"schema_version": "1.0", "job_id": context.job["job_id"], "attempt_id": f"attempt-{context.job['attempt']}",
-            "status": "succeeded", "assets": assets, "artifacts": [], "events": [], "error": None}
+            "status": "succeeded", "assets": assets, "artifacts": [], "events": [], "error": None,
+            "source_identities": source_identities}
 
 
 def probe(context, exchange_dir):
@@ -341,12 +393,16 @@ def probe(context, exchange_dir):
     if not source.is_file():
         raise ValueError("source must be a regular file")
     ffprobe, ffmpeg = _binary("BTV_FFPROBE", "ffprobe"), _binary("BTV_FFMPEG", "ffmpeg")
+    def identity(stat):
+        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
     before = source.stat()
     digest = hashlib.sha256()
     read = 0
     context.log("progress", stage="hash", current=0, total=before.st_size, unit="bytes", message="读取原片 SHA-256")
     last_log = time.monotonic()
     with source.open("rb") as handle:
+        if identity(os.fstat(handle.fileno()))[:4] != identity(before)[:4]:
+            raise ValueError("source changed before hashing; retry after writer completes")
         for chunk in iter(lambda: handle.read(4 * 1024 * 1024), b""):
             context.check()
             digest.update(chunk)
@@ -354,9 +410,13 @@ def probe(context, exchange_dir):
             if time.monotonic() - last_log >= 0.5:
                 context.log("progress", stage="hash", current=read, total=before.st_size, unit="bytes")
                 last_log = time.monotonic()
+        if identity(os.fstat(handle.fileno()))[:4] != identity(before)[:4]:
+            raise ValueError("source changed while hashing; retry after writer completes")
     after = source.stat()
-    if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+    if identity(before) != identity(after) or read != before.st_size:
         raise ValueError("source changed while hashing; retry after writer completes")
+    from .production import check_sources
+    check_sources(context,[{**payload.get('asset_metadata',{}),'relative_path':payload['relative_path'],'sha256':digest.hexdigest()}])
     context.log("progress", stage="hash", current=read, total=before.st_size, unit="bytes", message="SHA-256 已完成")
     context.log("progress", stage="probe", message="ffprobe 正在读取媒体流信息")
     code, output, error = context.execute([ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(source)], "ffprobe", timeout=300)
@@ -398,9 +458,12 @@ def probe(context, exchange_dir):
     }
     from packages.contracts import Asset
     asset = Asset.model_validate(asset).model_dump(mode="json")
+    if identity(source.stat()) != identity(before):
+        raise ValueError("source changed after hashing; probe result was not published")
     # The platform validates this object again before inserting its business record.
     return {"schema_version": "1.0", "job_id": context.job["job_id"], "attempt_id": f"attempt-{context.job['attempt']}", "status": "succeeded", "asset": asset,
-            "artifacts": [_artifact(thumbnail, context, "thumbnail")], "events": [], "error": None}
+            "artifacts": [_artifact(thumbnail, context, "thumbnail")], "events": [], "error": None,
+            "source_identities": {asset['asset_id']: list(identity(before))}}
 
 
 def registered_command(operation, payload):
@@ -474,8 +537,11 @@ def adapter(context, exchange_dir):
     context.log("progress", stage="adapter", message=f"启动已登记的 {job['operation']} CLI")
     trusted_env = None
     if job['operation']=='render':
+        context.render_cancel_path = resolve_owner_path(context.storage_root,
+            (exchange_dir / 'cancel.request').relative_to(context.storage_root).as_posix(), 'platform')
         trusted_env={'BTV_RENDER_BACKEND':render_backend(),'BTV_RUNTIME_DB':context.queue.db_path,
-                     'BTV_GPU_LEASE_ID':context.gpu_lease['lease_id'] if context.gpu_lease else ''}
+                     'BTV_GPU_LEASE_ID':context.gpu_lease['lease_id'] if context.gpu_lease else '',
+                     'BTV_RENDER_CANCEL_FILE':str(context.render_cancel_path)}
     code, _, error = context.execute([*command, "run", "--request", str(request_file), "--result", str(result_file)], job["operation"], parse_progress=True, extra_env=trusted_env)
     if not result_file.is_file() or result_file.stat().st_size > 16_000_000:
         raise ValueError(f"CLI result file missing or exceeds 16 MB (exit={code}): {error}")
@@ -520,7 +586,11 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
     try:
         ledger = CapacityLedger(queue.db_path, storage_root)
         context.check()
-        if job["operation"] not in {"probe", "verify_manifest", "render", "model"}:
+        if job['operation']=='verify_manifest' and not 1<=len(job['payload'].get('assets',[]))<=1000:
+            raise ValueError('verify_manifest requires between 1 and 1000 assets')
+        from .production import check_job_sources
+        check_job_sources(context)
+        if job["operation"] not in {"probe", "verify_manifest", "render", "model", "media_proxy", "exact_frame"}:
             raise JobBlocked("unsupported_operation", "该 operation 没有固定处理器")
         gpu_required = job["payload"].get("gpu_required", False)
         if not isinstance(gpu_required, bool):
@@ -551,16 +621,23 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
         reservation = ledger.reserve("platform", 128_000_000, job["job_id"])
         exchange_dir = resolve_owner_path(storage_root, f"platform/jobs/{job['job_id']}/attempt-{job['attempt']}", "platform")
         exchange_dir.mkdir(parents=True, exist_ok=False)
-        handler = {"probe": probe, "verify_manifest": verify_manifest}.get(job["operation"], adapter)
+        from .media_proxy import create_proxy, exact_frame
+        handler = {"probe": probe, "verify_manifest": verify_manifest, "media_proxy": create_proxy, "exact_frame": exact_frame}.get(job["operation"], adapter)
         result = handler(context, exchange_dir)
         context.check()
+        # A registry publication during computation must not publish usable output.
+        check_job_sources(context)
+        if job['operation']!='model':
+            from .production import check_sources
+            check_sources(context,result.get('assets',[]) + ([result['asset']] if result.get('asset') else []))
         status, error = result["status"], result.get("error")
     except JobCancelled as exc:
         status, result, error = "cancelled", None, {"code": "cancelled", "message": context.redact(exc)}
     except JobBlocked as exc:
         status, result, error = "blocked", None, {"code": exc.code, "message": context.redact(exc)}
     except Exception as exc:
-        status, result, error = "failed", None, {"code": type(exc).__name__, "message": context.redact(exc)}
+        from packages.contracts import UsageScopeError
+        status, result, error = "blocked" if isinstance(exc,UsageScopeError) else "failed", None, {"code": getattr(exc,'code',type(exc).__name__), "message": context.redact(exc)}
     finally:
         # Keep the job running and both heartbeats alive until the external
         # compute tree is proven stopped. Terminal state is the last write.
@@ -582,6 +659,9 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
                 if context.gpu_lease:
                     context.gpu_coordinator.mark_orphaned(context.gpu_lease["lease_id"], worker_id, cleanup_error)
                 queue.append_log(job["job_id"], "error", stage="compute_cleanup", message=cleanup_error)
+            if context.render_cancel_outcome:
+                queue.append_log(job["job_id"], "state" if context.render_cancel_outcome['graceful'] else "error",
+                                 stage="render_cancel_cleanup", **context.render_cancel_outcome)
             try:
                 queue.finish(job["job_id"], worker_id, status, result=result, error=error, expected_attempt=job["attempt"])
             except RuntimeError:

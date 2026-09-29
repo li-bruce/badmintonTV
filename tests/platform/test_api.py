@@ -124,7 +124,7 @@ def test_probe_apply_large_source_uses_worker_digest_without_rehash(setup,monkey
     large={**a,'asset_id':'large','relative_path':'data/large.mp4','size_bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
     job=app.state.queue.enqueue('probe',{'library_id':l['library_id'],'relative_path':large['relative_path']})
     app.state.queue.claim('worker')
-    app.state.queue.finish(job['job_id'],'worker','succeeded',result={'asset':large})
+    app.state.queue.finish(job['job_id'],'worker','succeeded',result={'asset':large,'source_identities':{'large':app.state.store._file_identity(root/'data/large.mp4')}})
     def rehash_forbidden(*args,**kwargs):
         raise AssertionError('probe apply must not hash large media in web process')
     monkeypatch.setattr(hashlib,'file_digest',rehash_forbidden)
