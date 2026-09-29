@@ -260,3 +260,87 @@ def test_usage_scope_canonical_fixtures_are_valid_and_restricted(root):
     publish(root, registry.model_dump(mode="json")["assets"])
     deny(root, training)
     deny(root, derived, source_assets=[training], research_preview=True)
+
+
+def count_physical_checks(monkeypatch):
+    calls = []
+    original = UsageScopeGuard._physical
+    def counted(self, record):
+        calls.append(record.relative_path)
+        return original(self, record)
+    monkeypatch.setattr(UsageScopeGuard, "_physical", counted)
+    return calls
+
+
+def test_batch_registry_and_asset_paths_are_resolved_once_per_call(root, monkeypatch):
+    publish(root, [entry(asset_id=f"training-{i}", relative_path=f"data/training/set/{i}.mp4",
+                         sha256=f"{i + 10000:064x}") for i in range(500)])
+    incoming = [source(asset_id=f"incoming-{i}", relative_path=f"data/raw/{i}.mp4", sha256=f"{i + 1000:064x}") for i in range(20)]
+    calls = count_physical_checks(monkeypatch)
+    guard = UsageScopeGuard(root)
+    guard.assert_allowed(incoming)
+    assert len(calls) == 520
+    calls.clear()
+    assert all(decision.allowed for decision in guard.check_many(incoming))
+    assert len(calls) == 520  # No memo or resolved-path cache survives the call.
+
+
+def layered_aliases(levels, *, restricted=False):
+    records = []
+    for level in range(levels):
+        for alias in ("a", "b"):
+            records.append(source(asset_id=f"node-{level}-{alias}", sha256=f"{level + 1:064x}",
+                relative_path=f"data/raw/{level}-{alias}.mp4",
+                usage_scope="training_only" if restricted and level == 0 and alias == "a" else "general",
+                provenance={"source_sha256": f"{level:064x}"} if level else {}))
+    return records, source(asset_id="derived", sha256="f" * 64, relative_path="render/derived.mp4",
+                           provenance={"source_sha256": f"{levels:064x}"})
+
+
+@pytest.mark.parametrize("restricted", [False, True])
+def test_shared_alias_dag_visits_each_node_once_and_bounds_reasons(root, monkeypatch, restricted):
+    records, derived = layered_aliases(24, restricted=restricted)
+    calls = count_physical_checks(monkeypatch)
+    decision = UsageScopeGuard(root).check(derived, source_assets=records)
+    assert len(calls) == len(records) + 1  # Previous traversal had >2**24 paths.
+    assert decision.allowed is not restricted
+    assert len(decision.reasons) <= 1
+    assert sum(map(len, decision.reasons)) < 128
+
+
+def test_batch_memo_cannot_mask_restrictive_metadata_with_same_identity(root):
+    allowed = source()
+    restricted = {**allowed, "usage_scope": "training_only"}
+    decisions = UsageScopeGuard(root).check_many([allowed, restricted])
+    assert [item.allowed for item in decisions] == [True, False]
+
+
+def test_batch_checks_empty_registry_and_refreshes_after_same_size_update(root):
+    guard = UsageScopeGuard(root)
+    assert guard.check_many([]) == ()
+    path = publish(root, [entry(sha256="c" * 64)])
+    asset = source(sha256="b" * 64)
+    assert guard.check_many([asset])[0].allowed
+    metadata = path.stat()
+    path.write_text(path.read_text(encoding="utf-8").replace("c" * 64, "b" * 64), encoding="utf-8")
+    os.utime(path, ns=(metadata.st_atime_ns, metadata.st_mtime_ns))
+    assert not guard.check_many([asset])[0].allowed
+    path.write_text("{", encoding="utf-8")
+    with pytest.raises(UsageScopeError, match="TRAINING_REGISTRY_INVALID"):
+        guard.check_many([])
+
+
+@pytest.mark.parametrize("budget", ["MAX_SOURCE_NODES", "MAX_SOURCE_EDGES"])
+def test_source_graph_node_and_edge_budgets_fail_closed(root, monkeypatch, budget):
+    import packages.contracts.usage as usage
+    records, derived = layered_aliases(4)
+    monkeypatch.setattr(usage, budget, 5)
+    deny(root, derived, "USAGE_SOURCE_CONFLICT", source_assets=records)
+
+
+def test_memoized_subtree_still_enforces_longest_source_depth(root):
+    # Compute shorter chains first so every subsequent parent is already memoized.
+    records = [source(asset_id=f"depth-{i}", sha256=f"{i + 1:064x}", relative_path=f"data/raw/depth-{i}.mp4",
+                      provenance={"source_asset_id": f"depth-{i - 1}"} if i else {}) for i in range(130)]
+    with pytest.raises(UsageScopeError, match="USAGE_SOURCE_CONFLICT"):
+        UsageScopeGuard(root).check_many(records)

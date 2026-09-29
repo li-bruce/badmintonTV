@@ -23,6 +23,9 @@ from .validation import resolve_relative_path
 
 TRAINING_REGISTRY_PATH = "data/training/handoff/training-registry.v1.json"
 MAX_REGISTRY_BYTES = 32_000_000
+MAX_SOURCE_NODES = 100_000
+MAX_SOURCE_EDGES = 500_000
+MAX_SOURCE_DEPTH = 128
 UsageScope = Literal["general", "training_only"]
 
 
@@ -131,6 +134,103 @@ def _invalid_constant(value):
     raise ValueError("non-finite JSON number")
 
 
+def _record_key(item):
+    """Include all usage inputs: an unrestricted alias must not mask a strict one."""
+    provenance = item.provenance
+    return (item.asset_id, item.sha256.lower() if item.sha256 else None, item.relative_path,
+            item.usage_scope, provenance.get("usage_scope"), provenance.get("source_asset_id"),
+            (provenance.get("source_sha256") or "").lower())
+
+
+class _UsageEvaluation:
+    """Indexes and traversal memo live for exactly one public guard call."""
+
+    def __init__(self, guard, available, registry, registry_hash, physical):
+        if len(available) > MAX_SOURCE_NODES:
+            raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source graph exceeds the supported node budget")
+        self.guard, self.registry_hash = guard, registry_hash
+        self.physical = physical
+        self.registry_ids = {item.asset_id for item in registry}
+        self.registry_hashes = {item.sha256.lower() for item in registry}
+        self.registry_paths = {_path_key(item.relative_path) for item in registry}
+        self.registry_physical = {_path_key(physical[item.relative_path]) for item in registry}
+        self.nodes, self.by_id, self.by_hash = {}, {}, {}
+        for item in available:
+            key = _record_key(item)
+            if key in self.nodes:
+                continue
+            self.nodes[key] = item
+            if item.asset_id:
+                self.by_id.setdefault(item.asset_id, []).append(key)
+            if item.sha256:
+                self.by_hash.setdefault(item.sha256.lower(), []).append(key)
+        self.completed, self.active, self.edges = {}, set(), 0
+
+    def _walk(self, key, depth=0):
+        item = self.nodes[key]
+        if depth > MAX_SOURCE_DEPTH:
+            raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source chain exceeds 128 supported relationships", asset_id=item.asset_id)
+        if key in self.active:
+            raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source_asset_id/source_sha256 chain contains a cycle", asset_id=item.asset_id)
+        if key in self.completed:
+            blocked, notes, height = self.completed[key]
+            if depth + height > MAX_SOURCE_DEPTH:
+                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source chain exceeds 128 supported relationships", asset_id=item.asset_id)
+            return blocked, notes, height
+        if item.relative_path not in self.physical:
+            self.physical[item.relative_path] = self.guard._physical(item)
+        physical = self.physical[item.relative_path]
+        restrictions = set()
+        if item.usage_scope == "training_only":
+            restrictions.add("typed usage_scope=training_only")
+        if item.provenance.get("usage_scope") == "training_only":
+            restrictions.add("provenance.usage_scope=training_only")
+        if _training_path(item.relative_path):
+            restrictions.add("logical path is under data/training")
+        if _training_path(physical):
+            restrictions.add("physical path is under data/training")
+        if item.asset_id and item.asset_id in self.registry_ids:
+            restrictions.add("asset_id is in the trusted training registry")
+        if item.sha256 and item.sha256.lower() in self.registry_hashes:
+            restrictions.add("sha256 is in the trusted training registry")
+        if _path_key(item.relative_path) in self.registry_paths or _path_key(physical) in self.registry_physical:
+            restrictions.add("path is in the trusted training registry")
+        if restrictions:
+            result = frozenset(restrictions), frozenset(), 0
+        else:
+            source_id = item.provenance.get("source_asset_id")
+            source_sha = (item.provenance.get("source_sha256") or "").lower()
+            id_matches = self.by_id.get(source_id, []) if source_id else []
+            hash_matches = self.by_hash.get(source_sha, []) if source_sha else []
+            self.edges += len(id_matches) + len(hash_matches)
+            if self.edges > MAX_SOURCE_EDGES:
+                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source graph exceeds the supported edge budget", asset_id=item.asset_id)
+            if source_sha and any(self.nodes[parent].sha256 and self.nodes[parent].sha256.lower() != source_sha for parent in id_matches):
+                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "declared source_asset_id and source_sha256 contradict available source metadata", asset_id=item.asset_id)
+            parents = dict.fromkeys([*id_matches, *hash_matches])
+            notes, blocked, height = set(), set(), 0
+            if not parents and (source_id or source_sha):
+                notes.add("source reference is unresolved in available metadata; external erased lineage cannot be detected")
+            self.active.add(key)
+            try:
+                for parent in parents:
+                    parent_blocked, parent_notes, parent_height = self._walk(parent, depth + 1)
+                    # A bounded reason vocabulary avoids path-count/chain-length strings.
+                    blocked.update(reason if reason.startswith("source chain: ") else "source chain: " + reason for reason in parent_blocked)
+                    notes.update(parent_notes)
+                    height = max(height, parent_height + 1)
+            finally:
+                self.active.remove(key)
+            result = frozenset(blocked), frozenset(notes), height
+        self.completed[key] = result
+        return result
+
+    def evaluate(self, item):
+        blocked, notes, _ = self._walk(_record_key(item))
+        return UsageDecision(not blocked, "training_only" if blocked else "general",
+                             tuple(sorted(blocked | notes)), self.registry_hash)
+
+
 class UsageScopeGuard:
     def __init__(self, storage_root):
         try:
@@ -166,7 +266,7 @@ class UsageScopeGuard:
             except FileNotFoundError:
                 if training_present:
                     raise UsageScopeError("TRAINING_REGISTRY_PENDING", "data/training exists but the trusted registry has not been published")
-                return [], None
+                return [], None, {}
         except UsageScopeError:
             raise
         except OSError as exc:
@@ -178,89 +278,42 @@ class UsageScopeGuard:
             registry = TrainingRegistry.model_validate(payload)
             records = _records(registry.assets)
             # Path failures in trusted data are a global registry error.
+            physical = {}
             for record in records:
-                self._physical(record)
+                if record.relative_path not in physical:
+                    physical[record.relative_path] = self._physical(record)
         except (ValueError, UnicodeError, TypeError) as exc:
             raise UsageScopeError("TRAINING_REGISTRY_INVALID", "training registry JSON/schema/paths/source metadata are invalid") from exc
-        return records, hashlib.sha256(raw).hexdigest()
-
-    def _evaluate(self, record, available, registry, registry_hash):
-        registry_ids = {item.asset_id for item in registry}
-        registry_hashes = {item.sha256.lower() for item in registry}
-        registry_paths = {_path_key(item.relative_path) for item in registry}
-        registry_physical = {_path_key(self._physical(item)) for item in registry}
-        by_id, by_hash = {}, {}
-        for item in available:
-            if item.asset_id:
-                by_id.setdefault(item.asset_id, []).append(item)
-            if item.sha256:
-                by_hash.setdefault(item.sha256.lower(), []).append(item)
-
-        def walk(item, active):
-            if len(active) > 128:
-                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source chain exceeds 128 supported relationships", asset_id=record.asset_id)
-            physical = self._physical(item)
-            restrictions = []
-            if item.usage_scope == "training_only":
-                restrictions.append("typed usage_scope=training_only")
-            if item.provenance.get("usage_scope") == "training_only":
-                restrictions.append("provenance.usage_scope=training_only")
-            if _training_path(item.relative_path):
-                restrictions.append("logical path is under data/training")
-            if _training_path(physical):
-                restrictions.append("physical path is under data/training")
-            if item.asset_id and item.asset_id in registry_ids:
-                restrictions.append("asset_id is in the trusted training registry")
-            if item.sha256 and item.sha256.lower() in registry_hashes:
-                restrictions.append("sha256 is in the trusted training registry")
-            if _path_key(item.relative_path) in registry_paths or _path_key(physical) in registry_physical:
-                restrictions.append("path is in the trusted training registry")
-            if restrictions:
-                return restrictions, []
-
-            identity = (item.asset_id, item.sha256.lower() if item.sha256 else None, _path_key(item.relative_path))
-            if identity in active:
-                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "source_asset_id/source_sha256 chain contains a cycle", asset_id=record.asset_id)
-            source_id = item.provenance.get("source_asset_id")
-            source_sha = item.provenance.get("source_sha256")
-            source_sha = source_sha.lower() if source_sha else None
-            if not source_id and not source_sha:
-                return [], []
-            id_matches = by_id.get(source_id, []) if source_id else []
-            if source_sha and any(parent.sha256 and parent.sha256.lower() != source_sha for parent in id_matches):
-                raise UsageScopeError("USAGE_SOURCE_CONFLICT", "declared source_asset_id and source_sha256 contradict available source metadata", asset_id=record.asset_id)
-            parents = id_matches + (by_hash.get(source_sha, []) if source_sha else [])
-            if not parents:
-                return [], ["source reference is unresolved in available metadata; external erased lineage cannot be detected"]
-            notes, blocked, seen = [], [], set()
-            for parent in parents:
-                key = (parent.asset_id, parent.sha256, parent.relative_path)
-                if key in seen:
-                    continue
-                seen.add(key)
-                parent_restrictions, parent_notes = walk(parent, active | {identity})
-                blocked.extend("source chain: " + reason for reason in parent_restrictions)
-                notes.extend(parent_notes)
-            return blocked, notes
-
-        blocked, notes = walk(record, set())
-        return UsageDecision(not blocked, "training_only" if blocked else "general", tuple(dict.fromkeys(blocked + notes)), registry_hash)
+        return records, hashlib.sha256(raw).hexdigest(), physical
 
     def check(self, asset, *, source_assets=()):
-        registry, digest = self._registry()
+        registry, digest, physical = self._registry()
         records = _records(asset)
         if len(records) != 1:
             raise UsageScopeError("USAGE_METADATA_INVALID", "check requires exactly one asset")
         available = records + _records(source_assets) + registry
-        return self._evaluate(records[0], available, registry, digest)
+        return _UsageEvaluation(self, available, registry, digest, physical).evaluate(records[0])
+
+    def check_many(self, assets, *, source_assets=()) -> tuple[UsageDecision, ...]:
+        """Check a batch with one fresh registry snapshot, including empty batches.
+
+        Restricted records return allowed=False. Registry/path/source failures
+        raise instead of becoming an apparently empty production asset list.
+        """
+        registry, digest, physical = self._registry()
+        records = _records(assets)
+        available = records + _records(source_assets) + registry
+        evaluation = _UsageEvaluation(self, available, registry, digest, physical)
+        return tuple(evaluation.evaluate(record) for record in records)
 
     def assert_allowed(self, assets, *, source_assets=(), research_preview=False):
         # research_preview is accepted for call-site clarity and never bypasses use restrictions.
-        registry, digest = self._registry()
+        registry, digest, physical = self._registry()
         records = _records(assets)
         available = records + _records(source_assets) + registry
+        evaluation = _UsageEvaluation(self, available, registry, digest, physical)
         for record in records:
-            decision = self._evaluate(record, available, registry, digest)
+            decision = evaluation.evaluate(record)
             if not decision.allowed:
                 raise UsageScopeError("TRAINING_ONLY", decision.reasons, asset_id=record.asset_id)
 
