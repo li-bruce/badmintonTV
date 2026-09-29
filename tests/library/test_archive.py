@@ -14,6 +14,7 @@ import unittest
 from unittest import mock
 import warnings
 import zipfile
+import zlib
 
 from packages.library.archive import ArchiveError, extract_member, inspect_zip
 from packages.library.storage import QuotaExceeded, QuotaManager, UnsafePath
@@ -59,6 +60,41 @@ class ArchiveTests(unittest.TestCase):
             struct.pack_into("<2H2I", raw, end + 8, 0xFFFF, 0xFFFF, 0xFFFFFFFF, 0xFFFFFFFF)
             self.archive.write_bytes(raw)
         return raw, record, locator, end
+
+    def unicode_extra(self, raw, name, *, version=1, crc=None):
+        encoded = name.encode("utf-8") if isinstance(name, str) else name
+        data = struct.pack("<BI", version, zlib.crc32(raw) if crc is None else crc) + encoded
+        return struct.pack("<2H", 0x7075, len(data)) + data
+
+    def make_raw_zip(self, entries):
+        """Tiny stored fixtures retain exact legacy bytes in both ZIP headers."""
+        local_parts, central_parts, offset = [], [], 0
+        for entry in entries:
+            raw = entry["raw"]
+            payload = entry.get("payload", self.payload)
+            extra = entry.get("extra", b"")
+            local_extra = entry.get("local_extra", extra)
+            local_raw = entry.get("local_raw", raw)
+            flags = entry.get("flags", 0)
+            local_flags = entry.get("local_flags", flags)
+            crc = zlib.crc32(payload)
+            header = bytearray(30)
+            header[:4] = b"PK\x03\x04"
+            struct.pack_into("<2H", header, 4, 20, local_flags)
+            struct.pack_into("<3I2H", header, 14, crc, len(payload), len(payload), len(local_raw), len(local_extra))
+            local = bytes(header) + local_raw + local_extra + payload
+            central = bytearray(46)
+            central[:4] = b"PK\x01\x02"
+            struct.pack_into("<3H", central, 4, (3 << 8) | 20, 20, flags)
+            struct.pack_into("<3I2H", central, 16, crc, len(payload), len(payload), len(raw), len(extra))
+            struct.pack_into("<2I", central, 38, (stat.S_IFREG | 0o644) << 16, offset)
+            local_parts.append(local)
+            central_parts.append(bytes(central) + raw + extra)
+            offset += len(local)
+        directory = b"".join(central_parts)
+        end = struct.pack("<4s4H2IH", b"PK\x05\x06", 0, 0, len(entries), len(entries), len(directory), offset, 0)
+        self.archive.write_bytes(b"".join(local_parts) + directory + end)
+        return hashlib.sha256(self.archive.read_bytes()).hexdigest()
 
     def assert_rejected_before_zipfile(self, code):
         with mock.patch("packages.library.archive.zipfile.ZipFile", side_effect=AssertionError("preflight must reject before allocation")) as constructor:
@@ -117,6 +153,105 @@ class ArchiveTests(unittest.TestCase):
         self.assertEqual(self.metadata()["archive_relative_path"], "data/source.zip")
         self.assertEqual(self.quota.active_reservations(), [])
         self.assertGreaterEqual(self.quota.snapshot()["owner_used_bytes"], self.archive.stat().st_size + len(self.payload))
+
+    def test_valid_unicode_path_maps_legacy_bytes_and_extracts_canonical_member(self):
+        raw, name = b"match/one\xa3\xa1.bin", "match/one\uff01.bin"
+        extra = self.unicode_extra(raw, name)
+        archive_hash = self.make_raw_zip([{"raw": raw, "extra": extra}])
+        with mock.patch("packages.library.archive.zipfile.ZipFile.open", side_effect=AssertionError("inspection must not open payload")):
+            item = inspect_zip(self.archive)[0]
+        self.assertEqual(item["name"], name)
+        self.assertEqual(item["raw_name"], raw.decode("cp437"))
+        self.assertTrue(item["unicode_path_extra"])
+        result = self.extract(member=name, expected_archive_sha256=archive_hash)
+        self.assertEqual(result.member_name, name)
+        self.assertEqual(self.output.read_bytes(), self.payload)
+        self.assertTrue(self.metadata()["crc_verified"])
+        self.assertEqual(self.metadata()["member"], item)
+        self.assertEqual(hashlib.sha256(self.archive.read_bytes()).hexdigest(), archive_hash)
+
+    def test_central_unicode_mapping_allows_absent_local_mapping(self):
+        raw, name = b"match/one\xa3\xa1.bin", "match/one\uff01.bin"
+        self.make_raw_zip([{"raw": raw, "extra": self.unicode_extra(raw, name), "local_extra": b""}])
+        self.assertEqual(self.extract(member=name).path.read_bytes(), self.payload)
+
+    def test_ordinary_utf8_and_decomposed_unicode_are_not_normalized(self):
+        name = "match/one\u0065\u0301.bin"
+        raw = name.encode("utf-8")
+        self.make_raw_zip([{"raw": raw, "flags": 0x800}])
+        item = inspect_zip(self.archive)[0]
+        self.assertEqual(item["name"], name)
+        self.assertEqual(item["raw_name"], name)
+        self.assertFalse(item["unicode_path_extra"])
+        self.assertEqual(self.extract(member=name).path.read_bytes(), self.payload)
+
+    def test_bad_unicode_crc_version_utf8_and_truncation_fail_before_zipfile(self):
+        raw = b"match/one.bin"
+        extras = [self.unicode_extra(raw, "match/one\uff01.bin", crc=zlib.crc32(raw) ^ 1),
+                  self.unicode_extra(raw, "match/one\uff01.bin", version=2),
+                  self.unicode_extra(raw, b"\xff"), self.unicode_extra(raw, b""),
+                  struct.pack("<2H", 0x7075, 1) + b"\x01"]
+        for where in ("extra", "local_extra"):
+            for extra in extras:
+                with self.subTest(where=where, extra=extra):
+                    self.make_raw_zip([{"raw": raw, where: extra}])
+                    self.assert_rejected_before_zipfile("invalid_unicode_path")
+
+    def test_duplicate_unicode_extra_is_rejected_in_either_header(self):
+        raw = b"match/one.bin"
+        valid = self.unicode_extra(raw, "match/one\uff01.bin")
+        for where in ("extra", "local_extra"):
+            for duplicate in (valid, self.unicode_extra(raw, "match/other.bin")):
+                with self.subTest(where=where, duplicate=duplicate):
+                    self.make_raw_zip([{"raw": raw, where: valid + duplicate}])
+                    self.assert_rejected_before_zipfile("invalid_unicode_path")
+
+    def test_malicious_unicode_names_cannot_be_sanitized_or_override_safe_raw_name(self):
+        raw = b"match/one.bin"
+        names = ("../escape.bin", "/absolute.bin", "a/../b.bin", "a//b.bin", "a/./b.bin",
+                 "a\\b.bin", "C:/escape.bin", "file.bin\x00hidden", "file:stream", "folder//")
+        for where in ("extra", "local_extra"):
+            for name in names:
+                with self.subTest(where=where, name=name):
+                    self.make_raw_zip([{"raw": raw, where: self.unicode_extra(raw, name)}])
+                    self.assert_rejected_before_zipfile("unsafe_member_name")
+
+    def test_unicode_mapping_cannot_launder_unsafe_raw_header_name(self):
+        for raw in (b"../escape.bin", b"a\\b.bin", b"file.bin\x00hidden", b"a//b.bin"):
+            with self.subTest(raw=raw):
+                self.make_raw_zip([{"raw": raw, "extra": self.unicode_extra(raw, "match/safe.bin")}])
+                self.assert_rejected_before_zipfile("unsafe_member_name")
+
+    def test_local_unicode_mapping_must_agree_with_central(self):
+        raw = b"match/one.bin"
+        cases = [{"raw": raw, "extra": self.unicode_extra(raw, "match/one\uff01.bin"),
+                  "local_extra": self.unicode_extra(raw, "match/other.bin")},
+                 {"raw": raw, "local_extra": self.unicode_extra(raw, "match/one\uff01.bin")},
+                 {"raw": raw, "extra": self.unicode_extra(raw, "match/directory/")}]
+        for entry in cases:
+            with self.subTest(entry=entry):
+                self.make_raw_zip([entry])
+                self.assert_rejected_before_zipfile("invalid_unicode_path")
+
+    def test_local_raw_name_and_encoding_must_still_match(self):
+        raw = b"match/one.bin"
+        for changes in ({"local_raw": b"match/two.bin"}, {"local_flags": 0x800}):
+            with self.subTest(changes=changes):
+                self.make_raw_zip([{"raw": raw, **changes}])
+                self.assert_rejected_before_zipfile("invalid_zip")
+
+    def test_duplicate_canonical_unicode_members_and_raw_alias_selection_are_rejected(self):
+        raw, name = b"match/one\xa3\xa1.bin", "match/one\uff01.bin"
+        first = {"raw": raw, "extra": self.unicode_extra(raw, name)}
+        second = {"raw": b"match/alias.bin", "extra": self.unicode_extra(b"match/alias.bin", name)}
+        self.make_raw_zip([first, second])
+        self.assert_rejected_before_zipfile("member_not_unique")
+        self.make_raw_zip([first])
+        with self.assertRaises(ArchiveError) as caught:
+            self.extract(member=raw.decode("cp437"))
+        self.assertEqual(caught.exception.code, "member_not_unique")
+        self.assertFalse(self.partial.exists())
+        self.assertFalse(self.output.exists())
 
     def test_expected_archive_hash_failure_is_recorded_before_decompression(self):
         archive_hash = self.make_zip()
