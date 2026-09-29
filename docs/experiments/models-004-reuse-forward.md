@@ -112,3 +112,9 @@ decode0.2204、pose1.6207、tracking0.0544、D2H/list0.01735、
 新YOLO远端人物还存在独立漏检，匿名ID2实际为场外人员，不能把任意两个ID当场上两人。
 BST真实完整输入仍BLOCKED。额外仅核对已下载官方InpaintNet规则，若适用才单独实验；
 imputed也不会自动升级为observed或通过BST可靠性门槛。
+
+最终补充：官方Inpaint mask对目标3020–3044全为0（邻点y=5，未过36px门槛），
+因此未新增该GPU实验，见models-inpaint-applicability-001。旧FBBench两个固定3秒窗的
+Qwen3-VL及同帧CLIP已在job604bf54336ae449a88e004622efd6d1f成功，首次配置加载失败
+保留；实际PTS、向量、排名、计时及全部局限详见models-vl-real-001。本轮GPU实验结束，
+共享queue与租约明确归还main；准确率和完整live验收并未因此通过。

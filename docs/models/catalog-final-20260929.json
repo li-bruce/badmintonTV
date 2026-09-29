@@ -1,0 +1,2252 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "schema_version": "1.0",
+      "model_id": "query-rule-v1",
+      "version": "0.1.0",
+      "display_name": "受限中文规则解析",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "ready",
+      "reason": null,
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "query-rule-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": null,
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "query-endpoint-v1",
+      "version": "0.1.0",
+      "display_name": "管理员配置的兼容LLM端点",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "unavailable",
+      "reason": "未设置管理员 BTV_LLM_CONFIG",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "query-endpoint-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": null,
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "qwen3-0.6b",
+      "version": "0.1.0",
+      "display_name": "Qwen3 0.6B 中文条件实验",
+      "capabilities": [
+        "query_parse"
+      ],
+      "status": "experimental",
+      "reason": null,
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/qwen3-0.6b/config.json",
+          "sha256": "660db3b73d788119c04535e48cf9be5f55bc3100841a718637ae695b442f27dd",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/generation_config.json",
+          "sha256": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/tokenizer.json",
+          "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/tokenizer_config.json",
+          "sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/vocab.json",
+          "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/merges.txt",
+          "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        },
+        {
+          "relative_path": "models/weights/qwen3-0.6b/model.safetensors",
+          "sha256": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+          "license_url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/README.md"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "qwen3-0.6b"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": null,
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "torchvision-keypointrcnn",
+      "version": "0.1.0",
+      "display_name": "COCO17 姿态预标注",
+      "capabilities": [
+        "pose"
+      ],
+      "status": "experimental",
+      "reason": null,
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/torchvision-pose/keypointrcnn_resnet50_fpn_coco-fc266e95.pth",
+          "sha256": "fc266e953d2b302cdcbb9ae66f71f6b0d4649928bf02dc573961e361e4918926",
+          "license_url": "https://github.com/pytorch/vision/blob/v0.22.1/LICENSE"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "torchvision-keypointrcnn"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": {
+          "job_id": "job-3dc9ece15e914eecb9616ac306ece6b8",
+          "attempt_id": "attempt-1",
+          "status": "succeeded",
+          "exit_code": 0,
+          "compute_stopped": true,
+          "checked_artifact_hashes": true,
+          "files": {
+            "request.json": {
+              "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/request.json",
+              "sha256": "bc72e36974a2f7c98d50000754f62ff9ed9a05bdd8ac0aa130fdfd87bcc54c8d",
+              "size_bytes": 3830
+            },
+            "result.json": {
+              "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/result.json",
+              "sha256": "0c94b48b83bb3c356e85b80b332df105883a53f2ec0218a0b6fd76b5dc37f50b",
+              "size_bytes": 1391
+            },
+            "bridge.done.json": {
+              "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/bridge.done.json",
+              "sha256": "cdcc2ac0d58a38e2f995d13c7be55890f8aeb35f801cd8d70224da6346802dfe",
+              "size_bytes": 292
+            }
+          },
+          "artifacts": [
+            {
+              "kind": "pose_features",
+              "relative_path": "models/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/features.json",
+              "sha256": "1705d8d6ae316aaa5c1f7602f070fe8bd1e2fc8d1af5448eeeaae0cf20147799",
+              "size_bytes": 620202
+            },
+            {
+              "kind": "evaluation_report",
+              "relative_path": "models/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/report.json",
+              "sha256": "497322115b9eed748cf91ec49a749f35823c1ab14c1c0d862f3026fda5bffa99",
+              "size_bytes": 849
+            }
+          ],
+          "accuracy_validated": false
+        },
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "clip-frame-mean",
+      "version": "0.1.0",
+      "display_name": "CLIP 短窗抽帧均值基线",
+      "capabilities": [
+        "video_embedding"
+      ],
+      "status": "experimental",
+      "reason": null,
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/config.json",
+          "sha256": "b575ef3c36f2a057fa19e221650105052d61cc9c1a972ec15019c6261ec98770",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/preprocessor_config.json",
+          "sha256": "910e70b3956ac9879ebc90b22fb3bc8a75b6a0677814500101a4c072bd7857bd",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/tokenizer_config.json",
+          "sha256": "34b7336e4bee12e0a9730eaf5189f582ef3c3eea5027f65730e5717256755aad",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/special_tokens_map.json",
+          "sha256": "f8c0d6c39aee3f8431078ef6646567b0aba7f2246e9c54b8b99d55c22b707cbf",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/vocab.json",
+          "sha256": "5047b556ce86ccaf6aa22b3ffccfc52d391ea4accdab9c2f2407da5b742d4363",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/merges.txt",
+          "sha256": "f526393189112391ce6f9795d4695f704121ce452c3aad1f5335cc41337eba85",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        },
+        {
+          "relative_path": "models/weights/clip-vit-base-patch32/pytorch_model.bin",
+          "sha256": "a63082132ba4f97a80bea76823f544493bffa8082296d62d71581a4feff1576f",
+          "license_url": "https://huggingface.co/openai/clip-vit-base-patch32/blob/3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268/README.md"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "clip-frame-mean"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": null,
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "skeleton-temporal-v1",
+      "version": "0.1.0",
+      "display_name": "骨骼细动作分类（未训练）",
+      "capabilities": [
+        "movement_classification"
+      ],
+      "status": "unavailable",
+      "reason": "缺少专家冻结细标签、跨比赛真值和训练checkpoint；不产生预测",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "skeleton-temporal-v1"
+          },
+          "text": {
+            "type": "string"
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sample_fps": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 30
+          },
+          "max_frames": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          }
+        }
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/HANDOFF.md",
+        "execution_evidence": null,
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not yet declared; upstream licenses recorded separately",
+        "upstream": "see weight manifests and docs/models/SOURCES.md"
+      },
+      "resource_requirements": {
+        "device": "cpu",
+        "gpu_exclusive": false,
+        "max_clip_ms": 30000,
+        "max_frames": 120
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "tracknetv3-reuse",
+      "version": "0.1.0",
+      "display_name": "TrackNetV3 连续球点实验",
+      "capabilities": [
+        "tracking"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/tracknetv3/6eda442ada1740573f200f836d93edc9a541ee86/model.py",
+          "sha256": "04fd51ff88e58189474677dbf11f81e52b78df00226fb97ea0678b31ef7284e3"
+        },
+        {
+          "relative_path": "models/weights/tracknetv3/TrackNet_best.pt",
+          "sha256": "df867641a02712b021f04548ff4b1208ddfdb47f629ab2094ceb978667e83b1a"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "tracknetv3-reuse"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/TRACKNET_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/TRACKNET_REUSE.md",
+        "execution_evidence": {
+          "job_id": "job-d9c832fd94384ee3950918badc767b15",
+          "attempt_id": "attempt-1",
+          "status": "succeeded",
+          "exit_code": 0,
+          "compute_stopped": true,
+          "checked_artifact_hashes": true,
+          "files": {
+            "request.json": {
+              "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/request.json",
+              "sha256": "86d1bcc84eadfd166d1c257c97427ebf3b4ae0134ea743bcad58c6c1c3fcbc1f",
+              "size_bytes": 4014
+            },
+            "result.json": {
+              "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/result.json",
+              "sha256": "f4f9582b62fea6859208efe155f2dd886e4d99daa8ca5e73fd70ac465031c83d",
+              "size_bytes": 1616
+            },
+            "bridge.done.json": {
+              "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/bridge.done.json",
+              "sha256": "bfd44098ed8613d443e596cbe75ec423479c4afef30691a6296df81b78c416f0",
+              "size_bytes": 292
+            }
+          },
+          "artifacts": [
+            {
+              "kind": "shuttle_observations",
+              "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-points.json",
+              "sha256": "1984f48c7ef961b83f4d8296b5fc5eaca610d83993febe9aec93868833343db6",
+              "size_bytes": 34127
+            },
+            {
+              "kind": "evaluation_report",
+              "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-report.json",
+              "sha256": "c907fdf4a846fc4b13df55f3f08439ffec5e1e4acd32f1eb3555d4cd0b54c76c",
+              "size_bytes": 4170
+            }
+          ],
+          "accuracy_validated": false
+        },
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not declared",
+        "upstream": "MIT",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "torchvision-continuous-pose",
+      "version": "0.1.0",
+      "display_name": "COCO17 连续帧姿态实验",
+      "capabilities": [
+        "pose"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/torchvision-pose/keypointrcnn_resnet50_fpn_coco-fc266e95.pth",
+          "sha256": "fc266e953d2b302cdcbb9ae66f71f6b0d4649928bf02dc573961e361e4918926"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "torchvision-continuous-pose"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/CONTINUOUS_POSE_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/CONTINUOUS_POSE_REUSE.md",
+        "execution_evidence": {
+          "job_id": "job-b8a4ac96da6543f8b4f6afc5ae3c4220",
+          "attempt_id": "attempt-1",
+          "status": "succeeded",
+          "exit_code": 0,
+          "compute_stopped": true,
+          "checked_artifact_hashes": true,
+          "files": {
+            "request.json": {
+              "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/request.json",
+              "sha256": "f034f5770d0f0bd3ac1f445892636006b0eb6fa09e5a15eb6432669ae4e8b329",
+              "size_bytes": 4165
+            },
+            "result.json": {
+              "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/result.json",
+              "sha256": "7a366b334ba231fc3e28a9addb77bb83997497c746efeb02cb2952f42a31280a",
+              "size_bytes": 1533
+            },
+            "bridge.done.json": {
+              "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/bridge.done.json",
+              "sha256": "35ff7ed7dde3b2c8ac3ed1bf57273bce3157826a5932e402cecb9ffd0834b1ea",
+              "size_bytes": 292
+            }
+          },
+          "artifacts": [
+            {
+              "kind": "pose_features",
+              "relative_path": "models/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/features.json",
+              "sha256": "1980da632d679dcec7fb1193b81ebce73bda7d2f7d877e29140bd25f58a5771a",
+              "size_bytes": 2396704
+            },
+            {
+              "kind": "evaluation_report",
+              "relative_path": "models/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/report.json",
+              "sha256": "dd205edd84307c0a53999803fb8f90c35e03e95be79fa599e94e2dcd8f05c72b",
+              "size_bytes": 2226
+            }
+          ],
+          "accuracy_validated": false
+        },
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not declared",
+        "upstream": "BSD-3-Clause; COCO terms separate",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 3000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "bst-cg-ap-reuse",
+      "version": "0.1.0",
+      "display_name": "BST 单打离线粗球种实验",
+      "capabilities": [
+        "stroke_classification"
+      ],
+      "status": "unavailable",
+      "reason": "严格输入未满足：固定真实源窗口 [3016,3068) 的52帧中25帧连续缺球，远端人体/匿名轨迹不完整；需真实连续双人COCO17、球观测、明确审阅的场地H与前/当前/后击球边界。未生成pack或执行BST；禁止补零、删失败帧、把匿名ID当姓名。",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/env",
+        "environment_id": "base",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:42.977767+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": null,
+          "cv2": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "registry_status_before_input_gate": "experimental",
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/bst/fb9b310bf4c8a8e3d89c75e61bc06a7ac3de62df/stroke_classification/model/bst.py",
+          "sha256": "4313f9f411a90da24bfeead81f88b83894363bfd5248a75132a8c60ec3905b74"
+        },
+        {
+          "relative_path": "models/upstream/bst/fb9b310bf4c8a8e3d89c75e61bc06a7ac3de62df/stroke_classification/model/tempose.py",
+          "sha256": "0f3274bb4c0ec1b3f4a068b066993b7f1c0d58349bb580b55d0e0919e3821bc6"
+        },
+        {
+          "relative_path": "models/weights/bst/bst_CG_AP_JnB_bone_between_2_hits_with_max_limits_seq_100_merged_2.pt",
+          "sha256": "997f43e52b20cb47517132c71d3e147d7d717a2d9651cfbe7651a5003bd66809"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "bst-cg-ap-reuse"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/BST_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/BST_REUSE.md",
+        "execution_evidence": null,
+        "accuracy_validated": false,
+        "input_review": "docs/experiments/models-bst-new-source-review-001.md"
+      },
+      "license": {
+        "code": "project license not declared",
+        "upstream": "MIT code; weights not separately stated",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "yolo11n-pose-bytetrack",
+      "version": "0.1.0",
+      "display_name": "YOLO11n姿态与ByteTrack匿名跟踪实验",
+      "capabilities": [
+        "tracking"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-venv",
+        "prefix": "/mnt/d/video/runtime/models/yolo-env",
+        "environment_id": "yolo",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/yolo-env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:44.412508+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": {
+            "version": "8.3.203",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "opencv-python": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": {
+            "version": "0.5.12",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "scipy": {
+            "version": "1.16.3",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/ultralytics/__init__.py",
+          "cv2": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/lap/__init__.py",
+          "scipy": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/scipy/__init__.py",
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/ultralytics/8.3.203/ultralytics-8.3.203-py3-none-any.whl",
+          "sha256": "7103994cfb14f8779fa0a6b7e7908708137309645a3723dbe2ceb73ea7afc63c"
+        },
+        {
+          "relative_path": "models/weights/yolo11n-pose/yolo11n-pose.pt",
+          "sha256": "869e83fcdffdc7371fa4e34cd8e51c838cc729571d1635e5141e3075e9319dc0"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "yolo11n-pose-bytetrack"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/YOLO_POSE_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/YOLO_POSE_REUSE.md",
+        "execution_evidence": {
+          "job_id": "job-57c6354813b94ad1ba12d42b24e5968e",
+          "attempt_id": "attempt-1",
+          "status": "succeeded",
+          "exit_code": 0,
+          "compute_stopped": true,
+          "checked_artifact_hashes": true,
+          "files": {
+            "request.json": {
+              "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/request.json",
+              "sha256": "c6c4565261b92b5ff45998815ecdc00eece049cc3ffe79baf21bff3c62598e29",
+              "size_bytes": 4472
+            },
+            "result.json": {
+              "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/result.json",
+              "sha256": "fa2b994bf9d15e99837b1e462475918ba4a50085a822608624dbfc89175c168d",
+              "size_bytes": 1469
+            },
+            "bridge.done.json": {
+              "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/bridge.done.json",
+              "sha256": "9df7cad2a5ac70b501b236140e4fe6ec8f5958bbaa5cd60621c862d173d6d2e4",
+              "size_bytes": 292
+            }
+          },
+          "artifacts": [
+            {
+              "kind": "pose_features",
+              "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/features.json",
+              "sha256": "26f6b936682b18a64e6fd50e4cebed7bf0a3f95e23a725175a234d44271c532e",
+              "size_bytes": 1793762
+            },
+            {
+              "kind": "evaluation_report",
+              "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/report.json",
+              "sha256": "cd32782e14b72b46029411cb6303c94ea437894f829686569faa2f2308bbcd82",
+              "size_bytes": 8412
+            }
+          ],
+          "accuracy_validated": false
+        },
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not declared",
+        "upstream": "AGPL-3.0; enterprise license separate",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 3000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "model_id": "qwen3-vl-embedding-2b",
+      "version": "0.1.0",
+      "display_name": "Qwen3-VL 短视频中文检索实验",
+      "capabilities": [
+        "video_embedding"
+      ],
+      "status": "experimental",
+      "reason": "真实vl-env及有界视频前向证据已核验；中文排序/细动作准确率与完整比赛吞吐未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-conda",
+        "prefix": "/mnt/d/video/runtime/models/vl-env",
+        "environment_id": "vl",
+        "base_prefix": "/mnt/d/video/runtime/models/vl-env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/vl-env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T11:04:55.796639+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.8.0+cu128",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.23.0+cu128",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.57.3",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": null,
+          "torchinfo": null,
+          "ultralytics": null,
+          "opencv-python": null,
+          "opencv-python-headless": null,
+          "lap": null,
+          "scipy": null,
+          "qwen-vl-utils": {
+            "version": "0.0.14",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          },
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": null,
+          "torchinfo": null,
+          "ultralytics": null,
+          "cv2": null,
+          "lap": null,
+          "scipy": null,
+          "qwen_vl_utils": "/mnt/d/video/runtime/models/vl-env/lib/python3.11/site-packages/qwen_vl_utils/__init__.py"
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ],
+        "validation_contract": {
+          "checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+          "relative_path": "packages/contracts/models.py",
+          "sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+          "size_bytes": 18047
+        }
+      },
+      "weights": [
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/.gitattributes",
+          "sha256": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/1_Pooling/config.json",
+          "sha256": "de764e01a063fc5f2e96100099bf745695edaaf904107fb3d24fbf4b106f488b"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/README.md",
+          "sha256": "0c01437645b55e91c0145f7f3d9d414d0091cefe53c5f17938949f4c4baad0f2"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/added_tokens.json",
+          "sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/chat_template.jinja",
+          "sha256": "a47e6afb389f86f45be7810f17d2686fd42b2bec7ba6e6958abf85845af258c5"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/config.json",
+          "sha256": "9172f55b0b9cce70b7f67b10c58a408ccf3ec15c587e6efd4d5f41631237fded"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/config_sentence_transformers.json",
+          "sha256": "ab0d95430e4a88750bf613c7bea69cf878818a77c4047150599e1b586a7e8ab0"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/merges.txt",
+          "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/model.safetensors",
+          "sha256": "c73fa9caeddeb3ff831d46c085a7a5708343248ca777e90f2d486964464509c1"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/modules.json",
+          "sha256": "fa7d796a215e1b2416773062891923b191fc5a4849bc44e322997433c90f459c"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/preprocessor_config.json",
+          "sha256": "d75c1f9f474add87cb0188d43c4fbf5c232d2af64f156fcefc5311089049100d"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/scripts/qwen3_vl_embedding.py",
+          "sha256": "8ffa74a1a6bb759610c57865ea416fd4daf9936cb787520e1112a3e1d547f36a"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/sentence_bert_config.json",
+          "sha256": "2c9dac0bf11e4282254502891eb84082debd7a68a775564c75303392f63787f8"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/special_tokens_map.json",
+          "sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/tokenizer.json",
+          "sha256": "def76fb086971c7867b829c23a26261e38d9d74e02139253b38aeb9df8b4b50a"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/tokenizer_config.json",
+          "sha256": "355f2b4e5bad7b01f11ef6cb68ebc176f61b95c3276092ea225b1bea0e01e95c"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/video_preprocessor_config.json",
+          "sha256": "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1"
+        },
+        {
+          "relative_path": "models/weights/qwen3-vl-embedding-2b/vocab.json",
+          "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "qwen3-vl-embedding-2b"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/VL_EMBEDDING_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": {
+        "documentation": "docs/models/VL_EMBEDDING_REUSE.md",
+        "execution_evidence": {
+          "job_id": "job-604bf54336ae449a88e004622efd6d1f",
+          "attempt_id": "attempt-1",
+          "status": "succeeded",
+          "exit_code": 0,
+          "compute_stopped": true,
+          "checked_artifact_hashes": true,
+          "files": {
+            "request.json": {
+              "relative_path": "platform/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/request.json",
+              "sha256": "ec063977646e426d683a027af92544ef4d4fe6510a3bce9454b66fcbacc818eb",
+              "size_bytes": 5042
+            },
+            "result.json": {
+              "relative_path": "platform/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/result.json",
+              "sha256": "0d539a9b405bc82eef9785b496f3f50174aa1dcbc0451418d8a626cc62b527df",
+              "size_bytes": 1523
+            },
+            "bridge.done.json": {
+              "relative_path": "platform/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/bridge.done.json",
+              "sha256": "4012a29282b2e1e5b9b0a6ccebcd4cd016535b9296321be5966e2c5ce58a407f",
+              "size_bytes": 291
+            }
+          },
+          "artifacts": [
+            {
+              "kind": "video_embedding",
+              "relative_path": "models/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/features.json",
+              "sha256": "3c449c04a746c5cdddf6d2b1959726bcf5331db0cf7b644c6c66b26988483fb3",
+              "size_bytes": 602179
+            },
+            {
+              "kind": "evaluation_report",
+              "relative_path": "models/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/report.json",
+              "sha256": "95bb77c52cb286258ddd9f4ef54bec74c5a8e734f6e944e339e69bbbb1ab0a98",
+              "size_bytes": 10593
+            }
+          ],
+          "accuracy_validated": false,
+          "reported_versions": {
+            "torch": "2.8.0+cu128",
+            "torchvision": "0.23.0+cu128",
+            "transformers": "4.57.3",
+            "qwen-vl-utils": "0.0.14",
+            "av": "15.0.0",
+            "Pillow": "11.2.1",
+            "numpy": "2.4.6",
+            "safetensors": "0.5.3"
+          },
+          "real_video_window_count": 2
+        },
+        "accuracy_validated": false
+      },
+      "license": {
+        "code": "project license not declared",
+        "upstream": "Apache-2.0",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 30000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    }
+  ]
+}

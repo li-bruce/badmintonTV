@@ -1,6 +1,10 @@
 # 三环境统一 ModelManifest 清单
 
-2026-09-29：新增 `scripts/models/compose_catalog.py`，只读采集与合并；**尚未更新 `configs/models/catalog.json`**。VL 环境未安装完成，未采集 VL 快照、未构造其成功状态。最终发布须等待根任务确认安装与真实前向结果。
+2026-09-29：已用 `scripts/models/compose_catalog.py` 的三份实际WSL环境探针与5个真实成功作业证据，生成并更新 `configs/models/catalog.json`。恰好11张卡：1 ready、7 experimental、3 unavailable。VL真实视频与CLIP对照已成功，仍为experimental；BST保留真实输入缺口的unavailable原因。
+
+最终清单与 `docs/models/catalog-final-20260929.json` 字节相同，91,275 B，SHA256 `dfda3195040afba3b67a71d1acb8aeb3c288403322767749af4d57a7a02e4a1c`。三份probe代码签名一致，所有卡通过实际主checkout合同；不是Windows或单一旧环境生成的代用状态。VL作业 `job-604bf54336ae449a88e004622efd6d1f/attempt-1` 的request/result/独立exit0回执、两个产物hash及真实PTS/2048维向量均由merge核验。
+
+发布文件统一UTF-8/LF；Windows stdout的CRLF在发布前只规范换行，不改JSON字段或数值，上述hash对应可提交的LF版本。
 
 ## 11 张卡的固定归属
 
@@ -49,9 +53,9 @@
 
 执行证据位于合同允许的 `evaluation_report` 字典，环境检查证据位于 `environment`；不增加 ModelManifest 顶层字段。merge 用指定主 checkout 的实际合同验证每张卡，并记录合同哈希。清单 entrypoint 是模型协议描述，不会自动创建平台 launcher 注册或 GPU 授权。
 
-## 最终发布流程（尚未执行）
+## 可复现发布流程（本次已执行）
 
-在 VL 安装与真实作业完成后，从同一源码版本重新采集三个环境。下面为 WSL 命令；文件写到仓库 docs，脚本本身只输出 stdout。`FINAL` 替换为新的观察编号，不覆盖前面的真实快照。
+本次使用 `catalog-probe-base-20260929.json`、`catalog-probe-yolo-20260929.json` 与 `catalog-probe-vl-20260929.json`；base/yolo采集后其环境及3个探针源码签名未变，因此沿用原真实快照，VL安装完成后在对应解释器采集。未来重现从同一源码版本采集三个环境；文件写到仓库docs，脚本本身只输出stdout。`FINAL`替换为新的观察编号，不覆盖前面的真实快照。
 
 ```bash
 repo=/mnt/c/Users/Li/.codex/worktrees/c5b1/badmintonTV

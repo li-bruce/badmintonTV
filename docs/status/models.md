@@ -1,23 +1,22 @@
 # models 状态
 
-## 2026-09-29 复用实验轮：当前状态（进行中）
+## 2026-09-29 复用实验轮：实验完成，最终交接
 
-- 已运行：真实旧FBBench单打6秒TrackNet离线与因果回放成功，连续pose3秒90帧成功；三项均经过平台worker/WSL bridge/GPU租约，计算已停止、窗口已归还。报告和job见models-004-reuse-forward.md；10时点Agent球点视觉QA已完成，非人工真值。
-- 已实现：TrackNet、Qwen3-VL、连续pose、BST四个标准适配器，固定源/权重校验、usage_scope传播、严格预算和真实分项计时。稳定提交3d018eb435624e4d6d7b20d34cc860d68dc32d41已交main；240项CPU回归237通过/3个Windows权限skip。
-- Qwen下载及隔离环境已完成：18文件4,271,068,726B与17个核心wheels3,916,256,631B全SHA校验通过；同一vl-env安装torch2.8.0+cu128/vision.23.0/transformers4.57.3，pip check、CPU实际类导入、安装后容量复核通过。models runtime19.165GB、shared7.169GB（含native base/pkgs），配额均满足。安装/源/hash记录在environments/models-vl-installed-20260929.json；旧完整/partial保留。
-- VL首真实job-a258df27cc5d4598896dd1d6495c955a在cold_load失败，done compute_stopped=true/exit1，GPU已归还。原因是适配器compile继承future annotations使官方config_class变字符串；正修dont_inherit=True并显式本地Qwen3VLConfig，26项定向CPU测试通过。独立真实processor两窗CPU验证通过（各800tokens/原PTS保留），还不是embedding成功；固定同payload新job重试一次。详见models-vl-real-001。
-- 新实跑：YOLO11n-pose+ByteTrack job-98cb65954fab42408f3b6fd1082d6330成功，同旧片700–3700ms完整90帧；cold load32.2095s、pose1.7377s、ByteTrack0.0608s、allocator151,847,424/176,160,768B。原报告尚缺D2H/序列化等计时，不能把阶段和当总端到端；后续已补计时和首尾完整覆盖守卫（16定向CPU tests通过）。无命名身份、细标签或准确率；独立视觉QA和同PTS比较进行中。bridge compute_stopped=true/exit0，GPU lease/window均null。
-- YOLO对照已核对：同PTS/同Agent场地H下旧pose87/90通过输入守卫，YOLO81/90；31/32远端漏人未解决、54关联跳变改善，41/66重复候选新失败。9帧原图Agent QA另发现65帧脚踝高分错位与场外ID13；不能称整体改善或稳定身份。适配器+比较器19项CPU守卫通过，报告在models-yolo-input-comparison-001与models-yolo-visual-review-001。
-- 当前阻塞/未测：BST旧60帧仅55帧满足输入检查，新职业独立52帧窗口还有25帧连续缺球和远端人体缺失；实际分类尚未执行，不补零或删除失败帧。Qwen实际embedding、物理live端到端、正式P@K/动作准确率仍未测；新职业Asset两项真实诊断已完成，不能与这些未验收项混同。
-- 失败保留：TrackNet首次causal job3757因bridge心跳写失败可靠取消，随后新job4081成功；原始底层原因未证实。平台已在main修有界心跳重试，后续runner自动用新main，但不改写旧失败。
-- 新训练首次TrackNet jobd1ef与YOLO job440e均被bridge取消，日志明确heartbeat.replace PermissionError/errno13/winerror5/attempts1。两份done都compute_stopped=true，GPU已释放，未得到模型产物；平台在其边界处理，models不绕watchdog直跑。
-- 新训练重试已完成：main fd6155b后TrackNet jobd9c832与YOLO job57c635都succeeded，固定b210dc39的120000–123000ms/75帧，全部training_only；done exit0/compute_stopped=true、GPU已归还。TrackNet44observed/31missing；YOLO execute到features发布35.0752s（cold31.9151s），新计时及首尾覆盖实测。独立52帧击球窗口有25帧连续缺球和远端人体缺失，BST仍blocked；不能因前向成功报精度。详见models-004新节。
-- 分提交：YOLO代码与旧片真实比较579da7e已由main集成3a8aa35；当前新增下载恢复工具有55项传输/获取CPU测试通过、恢复脚本WSL17项通过（Windows16通过1权限skip）。官方VL核心wheels按固定SHA在Windows续传，七个完整包及182MB中断文件已保留；Qwen暂停时3,104,309,248B，GPU试验结束后继续。尚未把下载/安装称为VL推理成功。
-- 当前完整CPU回归310项，306通过/4个Windows权限skip；VL adapter另修failure.json与协议的blocked/cancelled状态一致及CLIP聚合/D2H计时，25项定向通过。官方Inpaint mask静态诊断拒绝目标25帧缺口（前后y=5，未过36px门槛），仅3068/3069两帧可补且在冻结BST窗之外；不改变规则强行GPU试跑。
-- GPU/端口：目前models无计算进程，无服务端口。render完成兼容NVENC后明确归还GPU；下一模型启动前仍检查同账本。当前只网络和轻CPU准备。
-- 环境/容量：旧WSL models/env保持torch2.7.1/vision.22.1；VL独立vl-env；YOLO为yolo-env小venv只读共享旧框架、不修改父环境。安装前runtime/models8.581GB，追加VL24GB+YOLO0.6GB、shared2GB保守峰值均通过35/15/70GB；数据/缓存/权重只在D:/video。来源/版本/锁见environments/models-*和各模型文档。
-- 恢复安装审查修复：active_environment_pip读取/proc的exe及必要的cwd，识别激活后的裸python、相对解释器和pip脚本；区分其他环境，PID消失跳过、存活PID身份不可读则拒绝。23项定向测试22通过/1个Windows symlink权限skip；没有读取进程environ或发信号。修复提交前不运行安装。
-- 下一步：完成Qwen同一固定请求的适配修复重试，随后按旧env/YOLO/VL各自实机状态生成11个模型卡。组合工具425dd3a及16项CPU测试已提交，实际base/yolo的9+1张卡已采集，最终catalog尚未更新。Inpaint目标缺口不可按作者mask补点，BST仍blocked。真实失败全部保留，主任务负责集成，不推送。
+- 已实现：TrackNetV3、连续COCO17 pose、YOLO11n-pose+ByteTrack、Qwen3-VL、严格BST输入适配，统一协议、usage_scope、源/权重完整校验、分项计时与失败保留。没有伪造模型进度、细标签或身份。
+- 实际已运行：旧FBBench 6秒TrackNet离线/因果回放、90帧连续pose/YOLO；新职业training_only源b210dc39的120000–123000ms共75帧TrackNet/YOLO；最后旧FBBench两个3秒窗Qwen视频嵌入及同帧CLIP对照。均经统一worker/WSL bridge/GPU租约，详细job/hash见models-004-reuse-forward与models-vl-real-001。
+- VL最终job-604bf54336ae449a88e004622efd6d1f/attempt-1 succeeded：2视频+6中英查询、2048维finite/unit向量，CLIP对照也成功，events=[]。总elapsed73.481262s含权重校验/框架/冷加载/CLIP，Qwen峰值allocated4,421,021,184B；不把单窗forward0.054s当完整比赛吞吐。原PTS保留；官方时间token仅0.1s精度。
+- VL首次job-a258df27cc5d4598896dd1d6495c955a cold_load失败保留：本适配器compile隐式继承future annotations，造成官方config_class字符串化。修复c609b53用dont_inherit=True及显式本地Qwen3VLConfig，26项定向CPU通过、实际环境复现/修复验证通过；同payload仅重试一次后成功。失败done exit1/compute_stopped=true，成功done exit0/compute_stopped=true。
+- 模型目录已完成：configs/models/catalog.json与docs/models/catalog-final-20260929.json相同，11卡（1 ready/7 experimental/3 unavailable），91,275B，SHAdfda3195040afba3b67a71d1acb8aeb3c288403322767749af4d57a7a02e4a1c。旧env9卡、YOLO1卡、VL1卡分别实机probe；源码签名一致，主ModelManifest全部通过；5个真实成功job及产物/独立退出证据核验。BST unavailable说明真实缺口，VL experimental不等于准确率通过。
+- YOLO真实比较：旧片同PTS/场地H下旧pose87/90、YOLO81/90满足输入守卫，远端漏人未解决、54帧关联改善但41/66出现重复候选。9帧Agent原图QA发现65脚踝高分错位及场外ID13，不能称整体改善/稳定身份。新片YOLO75帧完整覆盖，execute至features发布35.0752s，D2H/序列化等有实测计时。
+- BST阻塞保持：旧60帧55可用；新职业独立冻结[3016,3068)52帧仅27 observed/25连续missing，还有34帧双人不足。场地H/击球边界为Agent提案，不是人类真值。未生成pack或分类前向，不补零、不删帧、不把场外ID当球员。
+- Inpaint静态诊断已完成：目标25帧两端y=5未过作者36px门槛，mask全0；仅窗外3068/3069可补。没有作者max_gap规则，未为得到结果强改mask或新增GPU实验。报告models-inpaint-applicability-001及纯stdlib复现脚本保留。
+- 失败保留：早期causal3757及新源TrackNetd1ef/YOLO440e被bridge可靠取消，后两次明确WinError5心跳写失败；主线fd6155b后新jobd9c/57c成功。新源TrackNet44observed/31missing，training_only完整继承。不得将bridge失败计为识别准确率或覆盖旧attempt。
+- 环境/下载完成：Qwen18文件4,271,068,726B及17官方核心wheels3,916,256,631B全SHA通过。同一vl-env为Python3.11.16/torch2.8.0+cu128/vision.23.0/transformers4.57.3，pip check、CPU真实导入通过且探针未初始化CUDA；44安装包来源/hash/冻结版本见environments/models-vl-installed-20260929.json及freeze。旧models/env保持torch2.7.1/vision.22.1；yolo-env为只读共享父框架的小venv。旧下载/182MB partial归档保留，无用户文件删除。
+- 环境/容量：安装后models runtime19,164,852,807B<35GB，shared7,169,319,439B（含native base/pkgs）<15GB；加其他runtime20GB预留共46,334,172,246B<70GB，D可用922,903,875,584B。模型/数据总量最终由main按五分区汇总，小型结果新增约0.62MB；大文件只在D:/video，原片只读。
+- 运行/端口：本模块无服务端口。最后job结束时GPU lease/window均null，已明确归还main共享queue/GPU；无models GPU/下载/安装/常驻worker进程，不再排新实验。main后续用户手动窗口由main管理。
+- 验证/提交：稳定适配3d018eb、YOLO579da7e、下载工具7d56df9、恢复P2 31f116a、BST/Inpaint证据b8c999b、三环境目录工具425dd3a、VL语义修复c609b53均交main。已报告完整CPU回归310项306通过4权限skip；后续恢复23项22通过1权限skip（WSL7路径专项全通过）、catalog16全通过、VL修复26全通过。main另行全套集成验证；本轮只改models边界文件，不推送、不自行合main。
+- 启动：native D:/video/runtime/platform/env/Scripts/python.exe运行scripts/models/run_registered_experiment.py，--runtime-repo C:/Users/USER/Desktop/Program/badmintonTV，按payload选择--env-prefix（VL为/mnt/d/video/runtime/models/vl-env），必须先协调唯一worker/queue/GPU。复现请求见configs/models/reuse-payloads；源码/包/权重/原片许可分开记录。
+- 未测/下一步：本轮受控复用实验已收尾。准确率/P@K、细手法、稳定实名轨迹、完整比赛吞吐与物理live端到端仍未验收；BST待真实输入与人类校准/击球/标签审阅，不能靠合成成功关闭。最终证据提交主任务后，由main集成UI与验收，不继续扩展训练或数据实验。
 
 ### 本轮阶段记录（以下是当时状态，不代表当前尚未运行）
 
