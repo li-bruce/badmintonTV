@@ -111,25 +111,62 @@ def verify_wheels(entries, directory):
 
 
 def active_environment_pip(environment=None, proc=Path("/proc")):
-    """Includes stopped processes; never sends a signal or reads their env."""
-    prefix = str((environment or ENVIRONMENT) / "bin") + os.sep
+    """Identify pip using executable/cwd links, including stopped processes.
+
+    argv[0] can be just ``python`` after activation. /proc/PID/exe supplies
+    its actual interpreter; cwd is read only for explicit relative paths.
+    Console scripts are checked too, even with a different interpreter.
+    Never read environ or signal a process. Unreadable live PIDs fail closed.
+    """
+    binary_directory = (Path(environment or ENVIRONMENT) / "bin").resolve()
+    pip_names = {"pip", "pip3", "pip3.11"}
     found = []
     for directory in proc.iterdir():
         if not directory.name.isdigit() or int(directory.name) == os.getpid():
             continue
         try:
-            argv = (directory / "cmdline").read_bytes().decode("utf-8", errors="replace").split("\0")
-        except FileNotFoundError:
-            continue
-        except PermissionError as exc:
-            raise RuntimeError("Cannot establish whether another installer is active") from exc
-        if argv:
-            module_pip = argv[0].startswith(prefix) and any(
-                argv[i:i+2] == ["-m", "pip"] for i in range(len(argv)-1))
-            direct_pip = any(arg.startswith(prefix) and Path(arg).name in {"pip", "pip3", "pip3.11"}
-                             for arg in argv[:2])
-            if module_pip or direct_pip:
+            argv = (directory / "cmdline").read_bytes().decode("utf-8", errors="replace").rstrip("\0").split("\0")
+            if not argv or not argv[0]:
+                continue  # Kernel threads/zombies have no installer command.
+            module_pip = any(argv[i:i+2] == ["-m", "pip"] for i in range(len(argv)-1))
+            script_args = [arg for arg in argv[:2] if Path(arg).name in pip_names]
+            if not module_pip and not script_args:
+                continue
+            executable = (directory / "exe").readlink()
+            if not executable.is_absolute():
+                raise RuntimeError("Cannot establish installer executable identity")
+            # Linux retains this suffix while an unlinked executable is running.
+            executable = Path(str(executable).removesuffix(" (deleted)")).resolve()
+            same_environment = executable.is_relative_to(binary_directory)
+            if same_environment:
                 found.append(int(directory.name))
+                continue
+            for arg in ([argv[0]] if module_pip else []) + script_args:
+                candidate = Path(arg)
+                if not candidate.is_absolute():
+                    if os.sep not in arg and (os.altsep is None or os.altsep not in arg):
+                        continue  # Bare PATH lookup is established by exe, not cwd.
+                    cwd = (directory / "cwd").readlink()
+                    if not cwd.is_absolute() or str(cwd).endswith(" (deleted)"):
+                        raise RuntimeError("Cannot establish installer working directory")
+                    candidate = cwd / candidate
+                # Keep the invoked env path as well as its symlink target;
+                # virtualenv interpreter links can resolve into a shared base.
+                invoked = Path(os.path.abspath(candidate))
+                if invoked.is_relative_to(binary_directory) or candidate.resolve().is_relative_to(binary_directory):
+                    same_environment = True
+            if same_environment:
+                found.append(int(directory.name))
+        except (FileNotFoundError, ProcessLookupError) as exc:
+            try:
+                directory.stat()
+            except (FileNotFoundError, ProcessLookupError):
+                continue  # The PID disappeared during this read-only snapshot.
+            except OSError as status_error:
+                raise RuntimeError("Cannot establish whether another installer is active") from status_error
+            raise RuntimeError("Cannot establish live installer process identity") from exc
+        except OSError as exc:
+            raise RuntimeError("Cannot establish whether another installer is active") from exc
     return sorted(found)
 
 
