@@ -11,6 +11,8 @@
 | R-04b | 直接CLI/preview/research_preview/confirmed、typed/provenance、物理/逻辑路径、可信registry、去重前引用及多跳来源实际字节 | render侧PASS；整个产品导入/选片门禁由主任务汇总 |
 | 原生60fps / NVDEC | 当前源均30fps；本轮CPU解码及CPU滤镜 | 原生60fps源缺口；NVDEC NOT_RUN |
 
+library真实训练Asset到位后的补证：固定ID `asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913`在standalone、preview、research-preview、测试confirmed四个独立CLI模式中均exit2/TRAINING_ONLY，0媒体子进程启动尝试、无渲染job输出。见`REAL_TRAINING_DENIAL_2026-09-29.md`及`render/handoff/training-denial-5f1e29d2eab9/validation.json`；不是把旧general小样改flag冒充本轮实际训练Asset。
+
 最终单元回归为150 passed、1旧timeline symlink权限skip、378 subtests（3.12秒）；包含新固化的8个benchmark异常回归。训练门禁与基准目录边界的真实Windows junction均运行PASS。新来源闭包验证覆盖共同伪造hash、仅hash来源、多跳、缺失/篡改祖先文件。依赖公共合同helper；未宣称能识别完全抹去且无法追溯的来源信息。
 
 ## 固定输入和设置
