@@ -1,0 +1,283 @@
+{
+  "schema_version": "1.0",
+  "environment_id": "yolo",
+  "observation": {
+    "environment_id": "yolo",
+    "prefix": "/mnt/d/video/runtime/models/yolo-env",
+    "base_prefix": "/mnt/d/video/runtime/models/env",
+    "storage_root": "/mnt/d/video",
+    "executable": "/mnt/d/video/runtime/models/yolo-env/bin/python",
+    "python": "3.11.16",
+    "platform": "linux",
+    "no_user_site": true,
+    "checked_at": "2026-09-29T10:46:44.412508+00:00",
+    "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+    "distributions": {
+      "torch": {
+        "version": "2.7.1+cu128",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "torchvision": {
+        "version": "0.22.1+cu128",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "transformers": {
+        "version": "4.51.3",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "av": {
+        "version": "15.0.0",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "numpy": {
+        "version": "2.4.6",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "Pillow": {
+        "version": "11.2.1",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "safetensors": {
+        "version": "0.5.3",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "positional-encodings": {
+        "version": "6.0.3",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "torchinfo": {
+        "version": "1.8.0",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "ultralytics": {
+        "version": "8.3.203",
+        "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+      },
+      "opencv-python": {
+        "version": "4.11.0.86",
+        "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+      },
+      "opencv-python-headless": {
+        "version": "4.11.0.86",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      },
+      "lap": {
+        "version": "0.5.12",
+        "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+      },
+      "scipy": {
+        "version": "1.16.3",
+        "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+      },
+      "qwen-vl-utils": null,
+      "accelerate": {
+        "version": "1.6.0",
+        "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+      }
+    },
+    "module_origins": {
+      "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+      "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+      "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+      "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+      "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+      "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+      "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+      "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+      "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+      "ultralytics": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/ultralytics/__init__.py",
+      "cv2": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/cv2/__init__.py",
+      "lap": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/lap/__init__.py",
+      "scipy": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/scipy/__init__.py",
+      "qwen_vl_utils": null
+    },
+    "source_files": [
+      {
+        "relative_path": "packages/models/registry.py",
+        "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+        "size_bytes": 5129
+      },
+      {
+        "relative_path": "packages/models/reuse_catalog.py",
+        "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+        "size_bytes": 5691
+      },
+      {
+        "relative_path": "scripts/models/compose_catalog.py",
+        "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+        "size_bytes": 19904
+      }
+    ]
+  },
+  "models": [
+    {
+      "schema_version": "1.0",
+      "model_id": "yolo11n-pose-bytetrack",
+      "version": "0.1.0",
+      "display_name": "YOLO11n姿态与ByteTrack匿名跟踪实验",
+      "capabilities": [
+        "tracking"
+      ],
+      "status": "experimental",
+      "reason": "本地文件存在；执行时重验hash/版本，识别质量未经真值验证",
+      "entrypoint": [
+        "python",
+        "-m",
+        "packages.models",
+        "run",
+        "--request",
+        "{request}",
+        "--result",
+        "{result}"
+      ],
+      "environment": {
+        "kind": "wsl-venv",
+        "prefix": "/mnt/d/video/runtime/models/yolo-env",
+        "environment_id": "yolo",
+        "base_prefix": "/mnt/d/video/runtime/models/env",
+        "storage_root": "/mnt/d/video",
+        "executable": "/mnt/d/video/runtime/models/yolo-env/bin/python",
+        "python": "3.11.16",
+        "platform": "linux",
+        "no_user_site": true,
+        "checked_at": "2026-09-29T10:46:44.412508+00:00",
+        "check_method": "importlib.metadata + top-level find_spec + registry manifest presence/size; no ML imports/GPU/weight hash recheck",
+        "distributions": {
+          "torch": {
+            "version": "2.7.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchvision": {
+            "version": "0.22.1+cu128",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "transformers": {
+            "version": "4.51.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "av": {
+            "version": "15.0.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "numpy": {
+            "version": "2.4.6",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "Pillow": {
+            "version": "11.2.1",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "safetensors": {
+            "version": "0.5.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "positional-encodings": {
+            "version": "6.0.3",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "torchinfo": {
+            "version": "1.8.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "ultralytics": {
+            "version": "8.3.203",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "opencv-python": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "opencv-python-headless": {
+            "version": "4.11.0.86",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          },
+          "lap": {
+            "version": "0.5.12",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "scipy": {
+            "version": "1.16.3",
+            "location": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages"
+          },
+          "qwen-vl-utils": null,
+          "accelerate": {
+            "version": "1.6.0",
+            "location": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages"
+          }
+        },
+        "module_origins": {
+          "torch": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torch/__init__.py",
+          "torchvision": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchvision/__init__.py",
+          "transformers": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/transformers/__init__.py",
+          "av": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/av/__init__.py",
+          "numpy": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/numpy/__init__.py",
+          "PIL": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/PIL/__init__.py",
+          "safetensors": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/safetensors/__init__.py",
+          "positional_encodings": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/positional_encodings/__init__.py",
+          "torchinfo": "/mnt/d/video/runtime/models/env/lib/python3.11/site-packages/torchinfo/__init__.py",
+          "ultralytics": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/ultralytics/__init__.py",
+          "cv2": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/cv2/__init__.py",
+          "lap": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/lap/__init__.py",
+          "scipy": "/mnt/d/video/runtime/models/yolo-env/lib/python3.11/site-packages/scipy/__init__.py",
+          "qwen_vl_utils": null
+        },
+        "source_files": [
+          {
+            "relative_path": "packages/models/registry.py",
+            "sha256": "d96c0cb4975d8478fb51f783544d4974c2b9f9468f70bccdb89d5ee012206d1e",
+            "size_bytes": 5129
+          },
+          {
+            "relative_path": "packages/models/reuse_catalog.py",
+            "sha256": "feec6573916f3d48a041e16a2a762702cd1a4e35f9f886faa682c3115ef210ae",
+            "size_bytes": 5691
+          },
+          {
+            "relative_path": "scripts/models/compose_catalog.py",
+            "sha256": "45b1552de0fb9b19e81b81af1c67d83d795f359f64b80d7212797a365d61680c",
+            "size_bytes": 19904
+          }
+        ]
+      },
+      "weights": [
+        {
+          "relative_path": "models/upstream/ultralytics/8.3.203/ultralytics-8.3.203-py3-none-any.whl",
+          "sha256": "7103994cfb14f8779fa0a6b7e7908708137309645a3723dbe2ceb73ea7afc63c"
+        },
+        {
+          "relative_path": "models/weights/yolo11n-pose/yolo11n-pose.pt",
+          "sha256": "869e83fcdffdc7371fa4e34cd8e51c838cc729571d1635e5141e3075e9319dc0"
+        }
+      ],
+      "parameters_schema": {
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "const": "yolo11n-pose-bytetrack"
+          }
+        },
+        "description": "See bounded adapter parameters in docs/models/YOLO_POSE_REUSE.md"
+      },
+      "input_schema": "JobRequest@1.0",
+      "output_schema": "JobResult@1.0",
+      "supported_labels": [],
+      "supported_camera_types": [],
+      "evaluation_report": "docs/models/YOLO_POSE_REUSE.md",
+      "license": {
+        "code": "project license not declared",
+        "upstream": "AGPL-3.0; enterprise license separate",
+        "media": "Source Asset rights remain separate"
+      },
+      "resource_requirements": {
+        "device": "cuda",
+        "gpu_exclusive": true,
+        "max_clip_ms": 3000,
+        "diagnostic_only": true,
+        "accuracy_validated": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "verification_scope": "read-only request/result/independent exit receipt/artifact hashes; no GPU or accuracy verification",
+  "contracts_file": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV\\packages\\contracts\\__init__.py",
+  "contracts_models_sha256": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+  "validated_probe_model_ids": [
+    "query-rule-v1",
+    "query-endpoint-v1",
+    "qwen3-0.6b",
+    "torchvision-keypointrcnn",
+    "clip-frame-mean",
+    "skeleton-temporal-v1",
+    "tracknetv3-reuse",
+    "torchvision-continuous-pose",
+    "bst-cg-ap-reuse",
+    "yolo11n-pose-bytetrack"
+  ],
+  "evidence": {
+    "yolo11n-pose-bytetrack": {
+      "job_id": "job-57c6354813b94ad1ba12d42b24e5968e",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "exit_code": 0,
+      "compute_stopped": true,
+      "checked_artifact_hashes": true,
+      "files": {
+        "request.json": {
+          "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/request.json",
+          "sha256": "c6c4565261b92b5ff45998815ecdc00eece049cc3ffe79baf21bff3c62598e29",
+          "size_bytes": 4472
+        },
+        "result.json": {
+          "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/result.json",
+          "sha256": "fa2b994bf9d15e99837b1e462475918ba4a50085a822608624dbfc89175c168d",
+          "size_bytes": 1469
+        },
+        "bridge.done.json": {
+          "relative_path": "platform/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/bridge.done.json",
+          "sha256": "9df7cad2a5ac70b501b236140e4fe6ec8f5958bbaa5cd60621c862d173d6d2e4",
+          "size_bytes": 292
+        }
+      },
+      "artifacts": [
+        {
+          "kind": "pose_features",
+          "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/features.json",
+          "sha256": "26f6b936682b18a64e6fd50e4cebed7bf0a3f95e23a725175a234d44271c532e",
+          "size_bytes": 1793762
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/report.json",
+          "sha256": "cd32782e14b72b46029411cb6303c94ea437894f829686569faa2f2308bbcd82",
+          "size_bytes": 8412
+        }
+      ],
+      "accuracy_validated": false
+    },
+    "tracknetv3-reuse": {
+      "job_id": "job-d9c832fd94384ee3950918badc767b15",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "exit_code": 0,
+      "compute_stopped": true,
+      "checked_artifact_hashes": true,
+      "files": {
+        "request.json": {
+          "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/request.json",
+          "sha256": "86d1bcc84eadfd166d1c257c97427ebf3b4ae0134ea743bcad58c6c1c3fcbc1f",
+          "size_bytes": 4014
+        },
+        "result.json": {
+          "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/result.json",
+          "sha256": "f4f9582b62fea6859208efe155f2dd886e4d99daa8ca5e73fd70ac465031c83d",
+          "size_bytes": 1616
+        },
+        "bridge.done.json": {
+          "relative_path": "platform/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/bridge.done.json",
+          "sha256": "bfd44098ed8613d443e596cbe75ec423479c4afef30691a6296df81b78c416f0",
+          "size_bytes": 292
+        }
+      },
+      "artifacts": [
+        {
+          "kind": "shuttle_observations",
+          "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-points.json",
+          "sha256": "1984f48c7ef961b83f4d8296b5fc5eaca610d83993febe9aec93868833343db6",
+          "size_bytes": 34127
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-report.json",
+          "sha256": "c907fdf4a846fc4b13df55f3f08439ffec5e1e4acd32f1eb3555d4cd0b54c76c",
+          "size_bytes": 4170
+        }
+      ],
+      "accuracy_validated": false
+    },
+    "torchvision-continuous-pose": {
+      "job_id": "job-b8a4ac96da6543f8b4f6afc5ae3c4220",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "exit_code": 0,
+      "compute_stopped": true,
+      "checked_artifact_hashes": true,
+      "files": {
+        "request.json": {
+          "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/request.json",
+          "sha256": "f034f5770d0f0bd3ac1f445892636006b0eb6fa09e5a15eb6432669ae4e8b329",
+          "size_bytes": 4165
+        },
+        "result.json": {
+          "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/result.json",
+          "sha256": "7a366b334ba231fc3e28a9addb77bb83997497c746efeb02cb2952f42a31280a",
+          "size_bytes": 1533
+        },
+        "bridge.done.json": {
+          "relative_path": "platform/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/bridge.done.json",
+          "sha256": "35ff7ed7dde3b2c8ac3ed1bf57273bce3157826a5932e402cecb9ffd0834b1ea",
+          "size_bytes": 292
+        }
+      },
+      "artifacts": [
+        {
+          "kind": "pose_features",
+          "relative_path": "models/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/features.json",
+          "sha256": "1980da632d679dcec7fb1193b81ebce73bda7d2f7d877e29140bd25f58a5771a",
+          "size_bytes": 2396704
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-b8a4ac96da6543f8b4f6afc5ae3c4220/attempt-1/report.json",
+          "sha256": "dd205edd84307c0a53999803fb8f90c35e03e95be79fa599e94e2dcd8f05c72b",
+          "size_bytes": 2226
+        }
+      ],
+      "accuracy_validated": false
+    },
+    "torchvision-keypointrcnn": {
+      "job_id": "job-3dc9ece15e914eecb9616ac306ece6b8",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "exit_code": 0,
+      "compute_stopped": true,
+      "checked_artifact_hashes": true,
+      "files": {
+        "request.json": {
+          "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/request.json",
+          "sha256": "bc72e36974a2f7c98d50000754f62ff9ed9a05bdd8ac0aa130fdfd87bcc54c8d",
+          "size_bytes": 3830
+        },
+        "result.json": {
+          "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/result.json",
+          "sha256": "0c94b48b83bb3c356e85b80b332df105883a53f2ec0218a0b6fd76b5dc37f50b",
+          "size_bytes": 1391
+        },
+        "bridge.done.json": {
+          "relative_path": "platform/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/bridge.done.json",
+          "sha256": "cdcc2ac0d58a38e2f995d13c7be55890f8aeb35f801cd8d70224da6346802dfe",
+          "size_bytes": 292
+        }
+      },
+      "artifacts": [
+        {
+          "kind": "pose_features",
+          "relative_path": "models/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/features.json",
+          "sha256": "1705d8d6ae316aaa5c1f7602f070fe8bd1e2fc8d1af5448eeeaae0cf20147799",
+          "size_bytes": 620202
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-3dc9ece15e914eecb9616ac306ece6b8/attempt-1/report.json",
+          "sha256": "497322115b9eed748cf91ec49a749f35823c1ab14c1c0d862f3026fda5bffa99",
+          "size_bytes": 849
+        }
+      ],
+      "accuracy_validated": false
+    }
+  }
+}
