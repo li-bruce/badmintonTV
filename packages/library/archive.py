@@ -18,6 +18,7 @@ import stat
 import struct
 import uuid
 import zipfile
+import zlib
 
 from .storage import QuotaManager, UnsafePath
 
@@ -77,6 +78,68 @@ def _strict_member_name(name: str) -> None:
         raise ArchiveError("unsafe_member_name", "Empty, dot, parent, and alternate-stream member components are forbidden")
 
 
+def _zip_name(raw: bytes, extra: bytes, flags: int) -> tuple[str, str, bool]:
+    """Resolve only a single CRC-bound Info-ZIP Unicode Path (0x7075).
+
+    The raw header name and the Unicode name must independently be safe. Never
+    trust zipfile's sanitization (NUL truncation/backslash replacement), guess a
+    legacy encoding, or normalize Unicode. A trailing slash is directory syntax.
+    """
+    try:
+        raw_name = raw.decode("utf-8" if flags & 0x800 else "cp437")
+    except UnicodeError:
+        raise ArchiveError("unsafe_member_name", "ZIP header name is not valid in its declared encoding") from None
+    _strict_member_name(raw_name[:-1] if raw_name.endswith("/") else raw_name)
+    name, found, position = raw_name, False, 0
+    while position < len(extra):
+        if len(extra) - position < 4:
+            raise ArchiveError("invalid_zip", "Truncated ZIP extra-field header")
+        kind, length = struct.unpack_from("<2H", extra, position)
+        position += 4
+        if position + length > len(extra):
+            raise ArchiveError("invalid_zip", "ZIP extra-field length exceeds its declared boundary")
+        if kind == 0x7075:
+            if found:
+                raise ArchiveError("invalid_unicode_path", "Duplicate Unicode Path extra fields are ambiguous")
+            found = True
+            data = extra[position:position + length]
+            if (length < 6 or data[0] != 1
+                    or struct.unpack_from("<I", data, 1)[0] != zlib.crc32(raw)):
+                raise ArchiveError("invalid_unicode_path", "Unicode Path requires version 1 and the exact raw-name CRC32")
+            try:
+                name = data[5:].decode("utf-8")
+            except UnicodeError:
+                raise ArchiveError("invalid_unicode_path", "Unicode Path extra field contains invalid UTF-8") from None
+            _strict_member_name(name[:-1] if name.endswith("/") else name)
+            if name.endswith("/") != raw_name.endswith("/"):
+                raise ArchiveError("invalid_unicode_path", "Unicode Path changes the header's file/directory syntax")
+        position += length
+    return raw_name, name, found
+
+
+def _local_name(stream, offset: int, compressed: int, directory_offset: int,
+                raw: bytes, flags: int, canonical: str) -> None:
+    """Check local name metadata without reading or decompressing its payload."""
+    stream.seek(offset)
+    header = stream.read(30)
+    if len(header) != 30 or header[:4] != b"PK\x03\x04":
+        raise ArchiveError("invalid_zip", "ZIP local file header is missing or truncated")
+    local_flags = struct.unpack_from("<H", header, 6)[0]
+    name_size, extra_size = struct.unpack_from("<2H", header, 26)
+    if offset + 30 + name_size + extra_size + compressed > directory_offset:
+        raise ArchiveError("invalid_zip", "ZIP local name/extra/data exceeds the file-data region")
+    local_raw, extra = stream.read(name_size), stream.read(extra_size)
+    if len(local_raw) != name_size or len(extra) != extra_size:
+        raise ArchiveError("invalid_zip", "ZIP local name/extra metadata is truncated")
+    if local_raw != raw or (local_flags & 0x800) != (flags & 0x800):
+        raise ArchiveError("invalid_zip", "Local and central ZIP raw names or name encodings disagree")
+    _, local_canonical, has_unicode = _zip_name(local_raw, extra, local_flags)
+    # Unicode Path is optional in a local header. If present, it must agree
+    # with the central name; zipfile itself otherwise ignores the local extra.
+    if has_unicode and local_canonical != canonical:
+        raise ArchiveError("invalid_unicode_path", "Local and central Unicode Path names disagree")
+
+
 def _zip64_directory(stream, end_offset: int, classic: tuple) -> tuple[int, int, int, int]:
     """Resolve one fixed ZIP64 EOCD and verify its locator/classic agreement.
 
@@ -116,7 +179,7 @@ def _zip64_directory(stream, end_offset: int, classic: tuple) -> tuple[int, int,
     return entries, size, offset, record_offset
 
 
-def _member_bounds(header: bytes, extra: bytes, directory_offset: int) -> None:
+def _member_bounds(header: bytes, extra: bytes, directory_offset: int) -> tuple[int, int]:
     """Validate per-member ZIP64 sizes/offset/disk before ZipInfo decodes extras."""
     compressed, size = struct.unpack_from("<2I", header, 20)
     disk = struct.unpack_from("<H", header, 34)[0]
@@ -153,6 +216,7 @@ def _member_bounds(header: bytes, extra: bytes, directory_offset: int) -> None:
         raise ArchiveError("unsupported_multivolume", "A ZIP member refers to another disk")
     if offset + 30 + compressed > directory_offset:
         raise ArchiveError("invalid_zip", "ZIP member offset or compressed data exceeds the file-data region")
+    return offset, compressed
 
 
 def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> None:
@@ -193,7 +257,7 @@ def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> 
     if directory_offset + directory_size != directory_end:
         raise ArchiveError("invalid_zip", "ZIP central-directory offset/length does not match the end record")
     stream.seek(directory_offset)
-    consumed, seen = 0, 0
+    consumed, seen, names = 0, 0, set()
     while consumed < directory_size:
         header = stream.read(46)
         if len(header) != 46 or header[:4] != b"PK\x01\x02":
@@ -203,12 +267,20 @@ def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> 
         seen += 1
         if consumed > directory_size or seen > max_members or seen > entries:
             raise ArchiveError("inventory_limit", "ZIP directory count or entry lengths exceed their declared bounds")
-        stream.seek(name_size, os.SEEK_CUR)
+        raw_name = stream.read(name_size)
         extra = stream.read(extra_size)
-        if len(extra) != extra_size:
+        if len(raw_name) != name_size or len(extra) != extra_size:
             raise ArchiveError("invalid_zip", "ZIP member extra fields are truncated")
-        _member_bounds(header, extra, directory_offset)
+        offset, compressed = _member_bounds(header, extra, directory_offset)
+        flags = struct.unpack_from("<H", header, 8)[0]
+        _, canonical, _ = _zip_name(raw_name, extra, flags)
+        if canonical in names:
+            raise ArchiveError("member_not_unique", "ZIP members must have unique canonical names")
+        names.add(canonical)
         stream.seek(comment_size, os.SEEK_CUR)
+        next_entry = stream.tell()
+        _local_name(stream, offset, compressed, directory_offset, raw_name, flags, canonical)
+        stream.seek(next_entry)
     if seen != entries:
         raise ArchiveError("invalid_zip", "ZIP directory entry count does not match its end record")
     stream.seek(0)
@@ -216,8 +288,20 @@ def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> 
 
 def _inventory_item(info: zipfile.ZipInfo) -> dict:
     mode = info.external_attr >> 16
+    try:
+        raw = info.orig_filename.encode("utf-8" if info.flag_bits & 0x800 else "cp437")
+    except UnicodeError:
+        raise ArchiveError("unsafe_member_name", "ZIP original name cannot round-trip its declared encoding") from None
+    raw_name, canonical, unicode_path = _zip_name(raw, info.extra, info.flag_bits)
+    # Older stdlib versions leave filename as the untouched legacy name. Both
+    # exact representations are safe after our own extra-field validation.
+    allowed_names = {canonical, raw_name} if unicode_path else {raw_name}
+    if info.filename not in allowed_names:
+        raise ArchiveError("unsafe_member_name", "ZIP member name was normalized or truncated")
     return {
-        "name": info.orig_filename,
+        "name": canonical,
+        "raw_name": raw_name,
+        "unicode_path_extra": unicode_path,
         "size_bytes": info.file_size,
         "compressed_bytes": info.compress_size,
         "compression": info.compress_type,
@@ -232,7 +316,12 @@ def inspect_zip(
     path: Path | str, *, max_members: int = MAX_MEMBERS,
     max_directory_bytes: int = MAX_DIRECTORY_BYTES,
 ) -> list[dict]:
-    """Return bounded metadata only; does not decompress any archive member."""
+    """Return bounded metadata, including local names; never read member data.
+
+    ``name`` is the validated canonical name accepted by ``extract_member``.
+    ``raw_name`` retains the header's UTF-8/CP437 decoding; a true
+    ``unicode_path_extra`` identifies an explicitly CRC-bound Unicode mapping.
+    """
     if type(max_members) is not int or not 0 < max_members <= MAX_MEMBERS:
         raise ValueError(f"max_members must be in 1..{MAX_MEMBERS}")
     if type(max_directory_bytes) is not int or not 0 < max_directory_bytes <= MAX_DIRECTORY_BYTES:
@@ -334,14 +423,12 @@ def extract_member(
                 raise ArchiveError("archive_checksum_mismatch", "Source ZIP SHA256 differs from the expected hash")
             _preflight_directory(source, MAX_MEMBERS, MAX_DIRECTORY_BYTES)
             container = contexts.enter_context(zipfile.ZipFile(source))
-            matches = [info for info in container.infolist() if info.orig_filename == member_name or info.filename == member_name]
+            inventory = [(info, _inventory_item(info)) for info in container.infolist()]
+            matches = [(info, item) for info, item in inventory if item["name"] == member_name]
             if len(matches) != 1:
                 raise ArchiveError("member_not_unique", "Selected ZIP member must exist exactly once")
-            info = matches[0]
-            _strict_member_name(info.orig_filename)
-            if info.orig_filename != info.filename:
-                raise ArchiveError("unsafe_member_name", "ZIP member name was normalized or truncated")
-            member = _inventory_item(info)
+            info, member = matches[0]
+            _strict_member_name(member["name"])
             metadata["member"] = member
             if member["is_directory"] or member["is_symlink"] or stat.S_IFMT(info.external_attr >> 16) not in (0, stat.S_IFREG):
                 raise ArchiveError("unsafe_member_type", "Selected ZIP member must be a regular file")
