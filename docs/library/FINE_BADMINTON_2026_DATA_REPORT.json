@@ -1,0 +1,3332 @@
+{
+  "schema_version": "1.0",
+  "case_id": "R-04a",
+  "dataset_id": "fine-badminton-2026-zenodo-20292976-v1.0",
+  "usage_scope": "training_only",
+  "split": "unassigned",
+  "generated_at": "2026-09-29T10:25:57.156621+00:00",
+  "converted_events": 0,
+  "extraction_complete": true,
+  "snapshot_counts": {
+    "extracted_members": 22,
+    "csv_files": 10,
+    "video_files": 10,
+    "exact_stem_pairs": 10,
+    "full_probes_audited": 10
+  },
+  "input_evidence": {
+    "extraction_inventory_sha256": "e0e4d7e20b4ce4c1cd9700662debf84e8d2d96584fa0fb816be69e0b70db02cd",
+    "acquisition_report_sha256": "7fd599e743090b19ea97b3b2577a1c54855416edd504bba5d8fc45a3af9bfbff",
+    "archive_sha256": "a3518f52d66dd6c5d2b01ce1347de8e589516ccc24a72aae818fea64e0b04439",
+    "publisher_md5": "cb3fcaca0ae9b08c564ac2a19ae4e7a0",
+    "archive_rehashed_by_audit": false,
+    "training_manifest_sha256": "2725970f4485732e67ba249b72262c51dbba24ee17e5e97d901b18ec8a29e286",
+    "documents": {
+      "README.md": {
+        "sha256": "279cb9e3caac45f346be05bd97affd757a458be0de9d281d8d6580e3db435d4d",
+        "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/b335630551682c19a781afeb.md"
+      },
+      "LICENSE": {
+        "sha256": "c67bd931ccadd3b65e7e9ee484df763a1bc53806aa66d86c88b7ea8fbed9f9fd",
+        "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/c693279643b8cd5d248172d9.bin"
+      }
+    }
+  },
+  "author_semantics": {
+    "unit": "frames",
+    "start": "First frame initiating the complete stroke motion",
+    "end": "Frame completing racket-shuttle interaction and immediate follow-through",
+    "frame_index_base": "unverified",
+    "end_inclusive_or_exclusive": "unverified",
+    "location_meaning": "unverified",
+    "distributed_video_form": "processed video clips",
+    "original_broadcast_time_offset": "unverified",
+    "source_match_count_claim": 10,
+    "uncut_full_matches_confirmed": false,
+    "readme_categories_in_document_order": [
+      "Short Serve",
+      "Overhead Cross-court Net Shot",
+      "Lift",
+      "Drive",
+      "Drop Shot",
+      "Flat Clear",
+      "Cross-court Net Return of Serve",
+      "Smash(Full-length)",
+      "Soft Net Shot Return of Serve",
+      "Net Shot",
+      "Jump Smash",
+      "Lift Return of Smash",
+      "Lift Return of Serve",
+      "Defensive Lift",
+      "Underhead Cross-court Net Shot",
+      "Drop Shot Return of Smash",
+      "Net Kill",
+      "High Clear",
+      "Soft Net Shot",
+      "Flat Serve",
+      "Clear Return of Serve",
+      "Short Smash",
+      "Cross-court Net Return of Smash",
+      "Net Shot Return of Serve",
+      "High Serve",
+      "Drive Return of Smash",
+      "Smash Return of Serve",
+      "Push Shot",
+      "Drop Shot Return of Serve"
+    ]
+  },
+  "rights_evidence": {
+    "package_license": "CC BY-NC 4.0",
+    "readme_restrictions": "Noncommercial research/education; no substantial redistribution without written permission; no identifying/contacting individuals",
+    "api_license": {
+      "id": "cc-by-4.0"
+    },
+    "third_party_video_rights": "Remain with original owners",
+    "unresolved_conflicts": [
+      "API CC BY 4.0 versus package CC BY-NC 4.0",
+      "LICENSE sharing permission versus README redistribution restriction"
+    ],
+    "policy": "Keep separate evidence; no new permission inferred; training_only"
+  },
+  "aggregate": {
+    "data_rows": 9817,
+    "blank_records": 0,
+    "exact_duplicate_rows": 5,
+    "unique_exact_rows": 9812,
+    "integer_interval_rows": 9817,
+    "conflicting_interval_location_groups": 0,
+    "out_of_order_start_rows": 3,
+    "issue_counts": {
+      "equal_start_end_semantics_unverified": 3,
+      "label_not_in_readme": 1301
+    },
+    "unique_raw_label_strings": 60,
+    "label_counts": {
+      "Clear Return of Serve": 23,
+      "Cross-court Net Return of Serve": 81,
+      "Cross-court Net Return of Smash": 45,
+      "Defensive Lift": 78,
+      "Drive": 711,
+      "Drive Return of Smash": 16,
+      "Drop Shot": 902,
+      "Drop Shot Return of Serve": 13,
+      "Drop Shot Return of Smash": 206,
+      "Flat Clear": 259,
+      "Flat Serve": 26,
+      "High Clear": 459,
+      "High Serve": 21,
+      "Jump Smash": 78,
+      "Lift": 1789,
+      "Lift Return of Serve": 274,
+      "Lift Return of Smash": 236,
+      "Net Kill": 93,
+      "Net Shot": 671,
+      "Net Shot Return of Serve": 26,
+      "Overhead Cross-court Net Shot": 331,
+      "Push Shot": 107,
+      "Short Serve": 449,
+      "Short Smash": 293,
+      "Smash Return of Serve": 8,
+      "Smash(Full-length)": 376,
+      "Soft Net Shot": 637,
+      "Soft Net Shot Return of Serve": 101,
+      "Underhead Cross-court Net Shot": 207,
+      "中场腾空抽杀球": 13,
+      "低手位勾球": 22,
+      "劈球": 2,
+      "发小球": 67,
+      "发平高球": 8,
+      "发高远球": 2,
+      "吊球": 140,
+      "平推球": 26,
+      "平高球": 54,
+      "扑球": 9,
+      "抽球": 157,
+      "挑高球": 299,
+      "接发球击吊球": 2,
+      "接发球击杀球": 1,
+      "接发球击高远球": 1,
+      "接发球勾球": 7,
+      "接发球挑球": 22,
+      "接发球推球": 1,
+      "接发球搓小球": 10,
+      "接发球放小球": 6,
+      "接杀勾球": 6,
+      "接杀挑高球": 23,
+      "接杀放小球": 16,
+      "搓球": 142,
+      "放小球": 74,
+      "短杀": 27,
+      "长杀": 30,
+      "防守回抽": 2,
+      "防守回挑": 4,
+      "高手位勾球": 57,
+      "高远球": 71
+    },
+    "location_counts": {
+      "Lower Half": 4249,
+      "Upper Half": 4267,
+      "上半区": 652,
+      "下半区": 649
+    }
+  },
+  "comparisons": {
+    "exact_original_stem_pairs": {
+      "author_claim": 10,
+      "actual": 10,
+      "status": "PASS"
+    },
+    "annotation_rows": {
+      "author_claim": 9817,
+      "actual": 9817,
+      "status": "PASS"
+    },
+    "category_mapping": {
+      "author_claim": 29,
+      "actual": null,
+      "observed_raw_label_strings": 60,
+      "readme_names_observed": 29,
+      "unmapped_raw_label_strings": [
+        "中场腾空抽杀球",
+        "低手位勾球",
+        "劈球",
+        "发小球",
+        "发平高球",
+        "发高远球",
+        "吊球",
+        "平推球",
+        "平高球",
+        "扑球",
+        "抽球",
+        "挑高球",
+        "接发球击吊球",
+        "接发球击杀球",
+        "接发球击高远球",
+        "接发球勾球",
+        "接发球挑球",
+        "接发球推球",
+        "接发球搓小球",
+        "接发球放小球",
+        "接杀勾球",
+        "接杀挑高球",
+        "接杀放小球",
+        "搓球",
+        "放小球",
+        "短杀",
+        "长杀",
+        "防守回抽",
+        "防守回挑",
+        "高手位勾球",
+        "高远球"
+      ],
+      "status": "BLOCKED",
+      "reason": "Distinct label strings are not semantic category count; untranslated/unmapped originals must not be silently merged."
+    },
+    "decoded_frames": {
+      "author_claim": 980703,
+      "actual": 980703,
+      "status": "PASS"
+    },
+    "duration_hours": {
+      "author_claim_approximate": 10.72,
+      "actual_from_probed_duration": 10.720154444444445,
+      "difference_hours": 0.00015444444444412397,
+      "status": "BLOCKED",
+      "reason": "Measured duration is evidence only; the author's approximate claim has no stated comparison tolerance."
+    }
+  },
+  "files": [
+    {
+      "member_name": "annotations/2011 OSIM BWF World Superseries Finals-MS-MS - Group A-Chong Wei Lee vs. Peter Hoeg Gade_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/a351fd9901d8e1e4191ed0ef.csv",
+      "sha256": "6443f337cb30b27e26851b5c18d23a49a41cd31c0cb5a25f246757cd2563ef10",
+      "size_bytes": 20198,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 549,
+      "blank_records": 0,
+      "integer_interval_rows": 549,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 549,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 4,
+        "Cross-court Net Return of Serve": 7,
+        "Cross-court Net Return of Smash": 2,
+        "Defensive Lift": 5,
+        "Drive": 50,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 63,
+        "Drop Shot Return of Serve": 2,
+        "Drop Shot Return of Smash": 7,
+        "Flat Clear": 33,
+        "Flat Serve": 1,
+        "High Clear": 21,
+        "High Serve": 1,
+        "Jump Smash": 8,
+        "Lift": 106,
+        "Lift Return of Serve": 37,
+        "Lift Return of Smash": 20,
+        "Net Kill": 5,
+        "Net Shot": 28,
+        "Net Shot Return of Serve": 3,
+        "Overhead Cross-court Net Shot": 13,
+        "Push Shot": 10,
+        "Short Serve": 16,
+        "Short Smash": 18,
+        "Smash Return of Serve": 4,
+        "Smash(Full-length)": 24,
+        "Soft Net Shot": 39,
+        "Soft Net Shot Return of Serve": 12,
+        "Underhead Cross-court Net Shot": 9
+      },
+      "location_counts": {
+        "Lower Half": 274,
+        "Upper Half": 275
+      },
+      "numeric_range": {
+        "min_start": 7423,
+        "max_end": 58291
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {},
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 1,
+        "example_line_pairs": [
+          [
+            134,
+            135
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 7423,
+          "end": 7441,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 276,
+          "start": 29100,
+          "end": 29116,
+          "label": "Soft Net Shot",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 550,
+          "start": 58251,
+          "end": 58291,
+          "label": "Clear Return of Serve",
+          "location": "Lower Half"
+        }
+      ],
+      "canonical_original_stem": "2011 OSIM BWF World Superseries Finals-MS-MS - Group A-Chong Wei Lee vs. Peter Hoeg Gade",
+      "video_member_name": "videos/2011 OSIM BWF World Superseries Finals-MS-MS - Group A-Chong Wei Lee vs. Peter Hoeg Gade.mp4",
+      "video_sha256": "2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 62401,
+        "duration_ms": 2496040,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff.318bf1fd112549b0bc18c936839a80d7.pts.jsonl",
+        "pts_sha256": "6703d27a119fc0ab0749b68b26d2cc1c77c805d62c9e890c193af8f8269eec8c",
+        "pts_count": 62401,
+        "first_pts": 0,
+        "last_pts": 31948800,
+        "pts_delta_ticks": {
+          "count": 62400,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7423,
+                "candidate_last_included_index": 7441,
+                "candidate_start_pts": 3800576,
+                "candidate_last_included_pts": 3809792
+              },
+              {
+                "csv_line": 276,
+                "candidate_start_index": 29100,
+                "candidate_last_included_index": 29116,
+                "candidate_start_pts": 14899200,
+                "candidate_last_included_pts": 14907392
+              },
+              {
+                "csv_line": 550,
+                "candidate_start_index": 58251,
+                "candidate_last_included_index": 58291,
+                "candidate_start_pts": 29824512,
+                "candidate_last_included_pts": 29844992
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7423,
+                "candidate_last_included_index": 7440,
+                "candidate_start_pts": 3800576,
+                "candidate_last_included_pts": 3809280
+              },
+              {
+                "csv_line": 276,
+                "candidate_start_index": 29100,
+                "candidate_last_included_index": 29115,
+                "candidate_start_pts": 14899200,
+                "candidate_last_included_pts": 14906880
+              },
+              {
+                "csv_line": 550,
+                "candidate_start_index": 58251,
+                "candidate_last_included_index": 58290,
+                "candidate_start_pts": 29824512,
+                "candidate_last_included_pts": 29844480
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7422,
+                "candidate_last_included_index": 7440,
+                "candidate_start_pts": 3800064,
+                "candidate_last_included_pts": 3809280
+              },
+              {
+                "csv_line": 276,
+                "candidate_start_index": 29099,
+                "candidate_last_included_index": 29115,
+                "candidate_start_pts": 14898688,
+                "candidate_last_included_pts": 14906880
+              },
+              {
+                "csv_line": 550,
+                "candidate_start_index": 58250,
+                "candidate_last_included_index": 58290,
+                "candidate_start_pts": 29824000,
+                "candidate_last_included_pts": 29844480
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7422,
+                "candidate_last_included_index": 7439,
+                "candidate_start_pts": 3800064,
+                "candidate_last_included_pts": 3808768
+              },
+              {
+                "csv_line": 276,
+                "candidate_start_index": 29099,
+                "candidate_last_included_index": 29114,
+                "candidate_start_pts": 14898688,
+                "candidate_last_included_pts": 14906368
+              },
+              {
+                "csv_line": 550,
+                "candidate_start_index": 58250,
+                "candidate_last_included_index": 58289,
+                "candidate_start_pts": 29824000,
+                "candidate_last_included_pts": 29843968
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/2011 OSIM BWF World Superseries Finals-MS-MS - Group B-Dan Lin vs. Kenichi Tago_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/df3130c818089aba9f0bdba8.csv",
+      "sha256": "2978e69318acf61621a9b9d5c6a4e738b4d47e519f496e40ddb35a6bb6b5b956",
+      "size_bytes": 28859,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 795,
+      "blank_records": 0,
+      "integer_interval_rows": 795,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 795,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 1,
+        "Cross-court Net Return of Serve": 6,
+        "Cross-court Net Return of Smash": 5,
+        "Drive": 43,
+        "Drive Return of Smash": 6,
+        "Drop Shot": 96,
+        "Drop Shot Return of Serve": 2,
+        "Drop Shot Return of Smash": 39,
+        "Flat Serve": 1,
+        "High Clear": 115,
+        "High Serve": 3,
+        "Jump Smash": 2,
+        "Lift": 158,
+        "Lift Return of Serve": 36,
+        "Lift Return of Smash": 5,
+        "Net Kill": 3,
+        "Net Shot": 81,
+        "Overhead Cross-court Net Shot": 6,
+        "Short Serve": 61,
+        "Short Smash": 22,
+        "Smash(Full-length)": 54,
+        "Soft Net Shot": 25,
+        "Soft Net Shot Return of Serve": 14,
+        "Underhead Cross-court Net Shot": 11
+      },
+      "location_counts": {
+        "Lower Half": 398,
+        "Upper Half": 397
+      },
+      "numeric_range": {
+        "min_start": 7239,
+        "max_end": 70251
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {},
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 238,
+        "example_line_pairs": [
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            7
+          ],
+          [
+            7,
+            8
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            12,
+            13
+          ],
+          [
+            13,
+            14
+          ],
+          [
+            14,
+            15
+          ],
+          [
+            17,
+            18
+          ],
+          [
+            22,
+            23
+          ],
+          [
+            27,
+            28
+          ],
+          [
+            31,
+            32
+          ],
+          [
+            40,
+            41
+          ],
+          [
+            41,
+            42
+          ],
+          [
+            51,
+            52
+          ],
+          [
+            52,
+            53
+          ],
+          [
+            66,
+            67
+          ],
+          [
+            68,
+            69
+          ],
+          [
+            69,
+            70
+          ],
+          [
+            74,
+            75
+          ],
+          [
+            77,
+            78
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 3,
+          "example_line_pairs": [
+            [
+              109,
+              110
+            ],
+            [
+              282,
+              284
+            ],
+            [
+              446,
+              447
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 2,
+          "example_line_pairs": [
+            [
+              111,
+              112
+            ],
+            [
+              444,
+              445
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 7239,
+          "end": 7257,
+          "label": "Short Serve",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 399,
+          "start": 35674,
+          "end": 35694,
+          "label": "High Clear",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 796,
+          "start": 70231,
+          "end": 70251,
+          "label": "Net Kill",
+          "location": "Upper Half"
+        }
+      ],
+      "canonical_original_stem": "2011 OSIM BWF World Superseries Finals-MS-MS - Group B-Dan Lin vs. Kenichi Tago",
+      "video_member_name": "videos/2011 OSIM BWF World Superseries Finals-MS-MS - Group B-Dan Lin vs. Kenichi Tago.mp4",
+      "video_sha256": "8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 73262,
+        "duration_ms": 2930480,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81.ff0bb84a1e074f5fa140740763bca99a.pts.jsonl",
+        "pts_sha256": "7ba4f587471485766c0fce324871bf425f7c2aaefc9e0ca1d5726d2c34bec0e2",
+        "pts_count": 73262,
+        "first_pts": 0,
+        "last_pts": 37509632,
+        "pts_delta_ticks": {
+          "count": 73261,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7239,
+                "candidate_last_included_index": 7257,
+                "candidate_start_pts": 3706368,
+                "candidate_last_included_pts": 3715584
+              },
+              {
+                "csv_line": 399,
+                "candidate_start_index": 35674,
+                "candidate_last_included_index": 35694,
+                "candidate_start_pts": 18265088,
+                "candidate_last_included_pts": 18275328
+              },
+              {
+                "csv_line": 796,
+                "candidate_start_index": 70231,
+                "candidate_last_included_index": 70251,
+                "candidate_start_pts": 35958272,
+                "candidate_last_included_pts": 35968512
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7239,
+                "candidate_last_included_index": 7256,
+                "candidate_start_pts": 3706368,
+                "candidate_last_included_pts": 3715072
+              },
+              {
+                "csv_line": 399,
+                "candidate_start_index": 35674,
+                "candidate_last_included_index": 35693,
+                "candidate_start_pts": 18265088,
+                "candidate_last_included_pts": 18274816
+              },
+              {
+                "csv_line": 796,
+                "candidate_start_index": 70231,
+                "candidate_last_included_index": 70250,
+                "candidate_start_pts": 35958272,
+                "candidate_last_included_pts": 35968000
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7238,
+                "candidate_last_included_index": 7256,
+                "candidate_start_pts": 3705856,
+                "candidate_last_included_pts": 3715072
+              },
+              {
+                "csv_line": 399,
+                "candidate_start_index": 35673,
+                "candidate_last_included_index": 35693,
+                "candidate_start_pts": 18264576,
+                "candidate_last_included_pts": 18274816
+              },
+              {
+                "csv_line": 796,
+                "candidate_start_index": 70230,
+                "candidate_last_included_index": 70250,
+                "candidate_start_pts": 35957760,
+                "candidate_last_included_pts": 35968000
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7238,
+                "candidate_last_included_index": 7255,
+                "candidate_start_pts": 3705856,
+                "candidate_last_included_pts": 3714560
+              },
+              {
+                "csv_line": 399,
+                "candidate_start_index": 35673,
+                "candidate_last_included_index": 35692,
+                "candidate_start_pts": 18264576,
+                "candidate_last_included_pts": 18274304
+              },
+              {
+                "csv_line": 796,
+                "candidate_start_index": 70230,
+                "candidate_last_included_index": 70249,
+                "candidate_start_pts": 35957760,
+                "candidate_last_included_pts": 35967488
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/2014 THE STAR AUSTRALIAN BADMINTON OPEN-F-MS-Lin Dan (CHN) VS Simon Santoso (INA)_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/cf696dac122308258292f12c.csv",
+      "sha256": "0b4b108ce9d12c338655fb2bffaf62f1d5f7cdd122191ddf5343ab240d100f02",
+      "size_bytes": 48967,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 1333,
+      "blank_records": 0,
+      "integer_interval_rows": 1333,
+      "exact_duplicate_rows": 1,
+      "unique_exact_rows": 1332,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 4,
+        "Cross-court Net Return of Serve": 10,
+        "Cross-court Net Return of Smash": 4,
+        "Defensive Lift": 9,
+        "Drive": 118,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 146,
+        "Drop Shot Return of Serve": 4,
+        "Drop Shot Return of Smash": 10,
+        "Flat Clear": 51,
+        "Flat Serve": 5,
+        "High Clear": 78,
+        "High Serve": 3,
+        "Jump Smash": 15,
+        "Lift": 287,
+        "Lift Return of Serve": 49,
+        "Lift Return of Smash": 55,
+        "Net Kill": 10,
+        "Net Shot": 87,
+        "Net Shot Return of Serve": 7,
+        "Overhead Cross-court Net Shot": 44,
+        "Push Shot": 26,
+        "Short Serve": 73,
+        "Short Smash": 38,
+        "Smash(Full-length)": 59,
+        "Soft Net Shot": 95,
+        "Soft Net Shot Return of Serve": 19,
+        "Underhead Cross-court Net Shot": 26
+      },
+      "location_counts": {
+        "Lower Half": 665,
+        "Upper Half": 668
+      },
+      "numeric_range": {
+        "min_start": 12244,
+        "max_end": 125198
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {
+        "exact_duplicate_lines": [
+          [
+            702,
+            703
+          ]
+        ]
+      },
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 2,
+        "example_line_pairs": [
+          [
+            337,
+            338
+          ],
+          [
+            702,
+            703
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 1,
+          "example_line_pairs": [
+            [
+              702,
+              703
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 12244,
+          "end": 12262,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 668,
+          "start": 69896,
+          "end": 69916,
+          "label": "Drop Shot",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 1334,
+          "start": 125182,
+          "end": 125198,
+          "label": "Smash(Full-length)",
+          "location": "Lower Half"
+        }
+      ],
+      "canonical_original_stem": "2014 THE STAR AUSTRALIAN BADMINTON OPEN-F-MS-Lin Dan (CHN) VS Simon Santoso (INA)",
+      "video_member_name": "videos/2014 THE STAR AUSTRALIAN BADMINTON OPEN-F-MS-Lin Dan (CHN) VS Simon Santoso (INA).mp4",
+      "video_sha256": "8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 142222,
+        "duration_ms": 5688880,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed.28abc8099ab442838c1c10a8ada8bacd.pts.jsonl",
+        "pts_sha256": "ec4276f3c72e9ac7c959b040ad281827e4d75629388aaedbae6dce4077c1a2c6",
+        "pts_count": 142222,
+        "first_pts": 0,
+        "last_pts": 72817152,
+        "pts_delta_ticks": {
+          "count": 142221,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 12244,
+                "candidate_last_included_index": 12262,
+                "candidate_start_pts": 6268928,
+                "candidate_last_included_pts": 6278144
+              },
+              {
+                "csv_line": 668,
+                "candidate_start_index": 69896,
+                "candidate_last_included_index": 69916,
+                "candidate_start_pts": 35786752,
+                "candidate_last_included_pts": 35796992
+              },
+              {
+                "csv_line": 1334,
+                "candidate_start_index": 125182,
+                "candidate_last_included_index": 125198,
+                "candidate_start_pts": 64093184,
+                "candidate_last_included_pts": 64101376
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 12244,
+                "candidate_last_included_index": 12261,
+                "candidate_start_pts": 6268928,
+                "candidate_last_included_pts": 6277632
+              },
+              {
+                "csv_line": 668,
+                "candidate_start_index": 69896,
+                "candidate_last_included_index": 69915,
+                "candidate_start_pts": 35786752,
+                "candidate_last_included_pts": 35796480
+              },
+              {
+                "csv_line": 1334,
+                "candidate_start_index": 125182,
+                "candidate_last_included_index": 125197,
+                "candidate_start_pts": 64093184,
+                "candidate_last_included_pts": 64100864
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 12243,
+                "candidate_last_included_index": 12261,
+                "candidate_start_pts": 6268416,
+                "candidate_last_included_pts": 6277632
+              },
+              {
+                "csv_line": 668,
+                "candidate_start_index": 69895,
+                "candidate_last_included_index": 69915,
+                "candidate_start_pts": 35786240,
+                "candidate_last_included_pts": 35796480
+              },
+              {
+                "csv_line": 1334,
+                "candidate_start_index": 125181,
+                "candidate_last_included_index": 125197,
+                "candidate_start_pts": 64092672,
+                "candidate_last_included_pts": 64100864
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 12243,
+                "candidate_last_included_index": 12260,
+                "candidate_start_pts": 6268416,
+                "candidate_last_included_pts": 6277120
+              },
+              {
+                "csv_line": 668,
+                "candidate_start_index": 69895,
+                "candidate_last_included_index": 69914,
+                "candidate_start_pts": 35786240,
+                "candidate_last_included_pts": 35795968
+              },
+              {
+                "csv_line": 1334,
+                "candidate_start_index": 125181,
+                "candidate_last_included_index": 125196,
+                "candidate_start_pts": 64092672,
+                "candidate_last_included_pts": 64100352
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/SF - 2014 China Open -  Lin Dan vs Chou Tien Chen_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/70fff2ae1252ef9a0d71ecc1.csv",
+      "sha256": "fb690a240cc85c4943c61dcdd618a29333d69e87367e3e1b23b5bc674dab6117",
+      "size_bytes": 33469,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 921,
+      "blank_records": 0,
+      "integer_interval_rows": 921,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 921,
+      "out_of_order_start_rows": 1,
+      "label_counts": {
+        "Clear Return of Serve": 3,
+        "Cross-court Net Return of Serve": 10,
+        "Cross-court Net Return of Smash": 4,
+        "Defensive Lift": 9,
+        "Drive": 66,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 120,
+        "Drop Shot Return of Smash": 22,
+        "Flat Clear": 65,
+        "Flat Serve": 2,
+        "High Clear": 31,
+        "High Serve": 3,
+        "Jump Smash": 14,
+        "Lift": 199,
+        "Lift Return of Serve": 31,
+        "Lift Return of Smash": 24,
+        "Net Kill": 19,
+        "Net Shot": 61,
+        "Net Shot Return of Serve": 4,
+        "Overhead Cross-court Net Shot": 30,
+        "Short Serve": 62,
+        "Short Smash": 10,
+        "Smash(Full-length)": 50,
+        "Soft Net Shot": 41,
+        "Soft Net Shot Return of Serve": 9,
+        "Underhead Cross-court Net Shot": 31
+      },
+      "location_counts": {
+        "Lower Half": 456,
+        "Upper Half": 465
+      },
+      "numeric_range": {
+        "min_start": 1934,
+        "max_end": 74837
+      },
+      "issue_counts": {
+        "equal_start_end_semantics_unverified": 1
+      },
+      "issue_examples_csv_lines": {
+        "out_of_order_start_line_pairs": [
+          [
+            788,
+            789
+          ]
+        ],
+        "equal_start_end_semantics_unverified": [
+          883
+        ]
+      },
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 14,
+        "example_line_pairs": [
+          [
+            50,
+            51
+          ],
+          [
+            151,
+            152
+          ],
+          [
+            163,
+            164
+          ],
+          [
+            305,
+            306
+          ],
+          [
+            323,
+            324
+          ],
+          [
+            364,
+            365
+          ],
+          [
+            454,
+            455
+          ],
+          [
+            631,
+            632
+          ],
+          [
+            694,
+            695
+          ],
+          [
+            770,
+            771
+          ],
+          [
+            789,
+            787
+          ],
+          [
+            787,
+            790
+          ],
+          [
+            790,
+            788
+          ],
+          [
+            788,
+            791
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 1,
+          "example_line_pairs": [
+            [
+              787,
+              790
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 1,
+          "example_line_pairs": [
+            [
+              788,
+              791
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 1934,
+          "end": 1950,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 462,
+          "start": 33944,
+          "end": 33958,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 922,
+          "start": 74807,
+          "end": 74837,
+          "label": "Net Shot",
+          "location": "Upper Half"
+        }
+      ],
+      "canonical_original_stem": "SF - 2014 China Open -  Lin Dan vs Chou Tien Chen",
+      "video_member_name": "videos/SF - 2014 China Open -  Lin Dan vs Chou Tien Chen.mp4",
+      "video_sha256": "33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 79469,
+        "duration_ms": 3178760,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211.b35a74ac0dd044d8b987a4b62fb2a31e.pts.jsonl",
+        "pts_sha256": "62865035ef95c4f4ca82db70707f09c7aa56eb1e24fc1cab1a50a4720b8d4341",
+        "pts_count": 79469,
+        "first_pts": 0,
+        "last_pts": 40687616,
+        "pts_delta_ticks": {
+          "count": 79468,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1934,
+                "candidate_last_included_index": 1950,
+                "candidate_start_pts": 990208,
+                "candidate_last_included_pts": 998400
+              },
+              {
+                "csv_line": 462,
+                "candidate_start_index": 33944,
+                "candidate_last_included_index": 33958,
+                "candidate_start_pts": 17379328,
+                "candidate_last_included_pts": 17386496
+              },
+              {
+                "csv_line": 922,
+                "candidate_start_index": 74807,
+                "candidate_last_included_index": 74837,
+                "candidate_start_pts": 38301184,
+                "candidate_last_included_pts": 38316544
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              883
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1934,
+                "candidate_last_included_index": 1949,
+                "candidate_start_pts": 990208,
+                "candidate_last_included_pts": 997888
+              },
+              {
+                "csv_line": 462,
+                "candidate_start_index": 33944,
+                "candidate_last_included_index": 33957,
+                "candidate_start_pts": 17379328,
+                "candidate_last_included_pts": 17385984
+              },
+              {
+                "csv_line": 922,
+                "candidate_start_index": 74807,
+                "candidate_last_included_index": 74836,
+                "candidate_start_pts": 38301184,
+                "candidate_last_included_pts": 38316032
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1933,
+                "candidate_last_included_index": 1949,
+                "candidate_start_pts": 989696,
+                "candidate_last_included_pts": 997888
+              },
+              {
+                "csv_line": 462,
+                "candidate_start_index": 33943,
+                "candidate_last_included_index": 33957,
+                "candidate_start_pts": 17378816,
+                "candidate_last_included_pts": 17385984
+              },
+              {
+                "csv_line": 922,
+                "candidate_start_index": 74806,
+                "candidate_last_included_index": 74836,
+                "candidate_start_pts": 38300672,
+                "candidate_last_included_pts": 38316032
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              883
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1933,
+                "candidate_last_included_index": 1948,
+                "candidate_start_pts": 989696,
+                "candidate_last_included_pts": 997376
+              },
+              {
+                "csv_line": 462,
+                "candidate_start_index": 33943,
+                "candidate_last_included_index": 33956,
+                "candidate_start_pts": 17378816,
+                "candidate_last_included_pts": 17385472
+              },
+              {
+                "csv_line": 922,
+                "candidate_start_index": 74806,
+                "candidate_last_included_index": 74835,
+                "candidate_start_pts": 38300672,
+                "candidate_last_included_pts": 38315520
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/TOTAL BWF World Championships 2017 _ Badminton F M3-MS _ Lin Dan vs Viktor Axelsen_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/622e950cff71cc8e58c286fc.csv",
+      "sha256": "6d0592ed262f7e37763102af1247ecd4f2e536889b26892b238c186199ae1335",
+      "size_bytes": 28434,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 763,
+      "blank_records": 0,
+      "integer_interval_rows": 763,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 763,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 3,
+        "Cross-court Net Return of Serve": 6,
+        "Cross-court Net Return of Smash": 9,
+        "Defensive Lift": 14,
+        "Drive": 40,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 84,
+        "Drop Shot Return of Serve": 1,
+        "Drop Shot Return of Smash": 41,
+        "Flat Clear": 24,
+        "Flat Serve": 3,
+        "High Clear": 17,
+        "High Serve": 2,
+        "Jump Smash": 15,
+        "Lift": 170,
+        "Lift Return of Serve": 24,
+        "Lift Return of Smash": 15,
+        "Net Kill": 9,
+        "Net Shot": 90,
+        "Net Shot Return of Serve": 2,
+        "Overhead Cross-court Net Shot": 30,
+        "Push Shot": 4,
+        "Short Serve": 29,
+        "Short Smash": 23,
+        "Smash(Full-length)": 49,
+        "Soft Net Shot": 25,
+        "Soft Net Shot Return of Serve": 3,
+        "Underhead Cross-court Net Shot": 30
+      },
+      "location_counts": {
+        "Lower Half": 383,
+        "Upper Half": 380
+      },
+      "numeric_range": {
+        "min_start": 11581,
+        "max_end": 92500
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {},
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 118,
+        "example_line_pairs": [
+          [
+            2,
+            3
+          ],
+          [
+            100,
+            101
+          ],
+          [
+            126,
+            127
+          ],
+          [
+            161,
+            162
+          ],
+          [
+            210,
+            211
+          ],
+          [
+            391,
+            392
+          ],
+          [
+            475,
+            476
+          ],
+          [
+            498,
+            499
+          ],
+          [
+            499,
+            500
+          ],
+          [
+            500,
+            501
+          ],
+          [
+            501,
+            502
+          ],
+          [
+            502,
+            503
+          ],
+          [
+            507,
+            508
+          ],
+          [
+            509,
+            510
+          ],
+          [
+            510,
+            511
+          ],
+          [
+            511,
+            512
+          ],
+          [
+            513,
+            514
+          ],
+          [
+            516,
+            517
+          ],
+          [
+            517,
+            518
+          ],
+          [
+            519,
+            520
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 11581,
+          "end": 11619,
+          "label": "High Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 383,
+          "start": 57840,
+          "end": 57862,
+          "label": "Soft Net Shot Return of Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 764,
+          "start": 92484,
+          "end": 92500,
+          "label": "Net Kill",
+          "location": "Lower Half"
+        }
+      ],
+      "canonical_original_stem": "TOTAL BWF World Championships 2017 _ Badminton F M3-MS _ Lin Dan vs Viktor Axelsen",
+      "video_member_name": "videos/TOTAL BWF World Championships 2017 _ Badminton F M3-MS _ Lin Dan vs Viktor Axelsen.mp4",
+      "video_sha256": "80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 120015,
+        "duration_ms": 4794280,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 3000375,
+        "fps_den": 119857,
+        "time_base": "1/90000",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7.10eec47b50c74a02aa6e23759f933e4b.pts.jsonl",
+        "pts_sha256": "d4c517227b310b47bff15bcc34e6c8686508755caaf92ef139d0fce157706b8c",
+        "pts_count": 120015,
+        "first_pts": 0,
+        "last_pts": 431481600,
+        "pts_delta_ticks": {
+          "count": 120014,
+          "min": 1800,
+          "max": 3600
+        },
+        "source_probe_vfr_status": "vfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 11581,
+                "candidate_last_included_index": 11619,
+                "candidate_start_pts": 41662800,
+                "candidate_last_included_pts": 41799600
+              },
+              {
+                "csv_line": 383,
+                "candidate_start_index": 57840,
+                "candidate_last_included_index": 57862,
+                "candidate_start_pts": 207936000,
+                "candidate_last_included_pts": 208015200
+              },
+              {
+                "csv_line": 764,
+                "candidate_start_index": 92484,
+                "candidate_last_included_index": 92500,
+                "candidate_start_pts": 332442000,
+                "candidate_last_included_pts": 332499600
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 11581,
+                "candidate_last_included_index": 11618,
+                "candidate_start_pts": 41662800,
+                "candidate_last_included_pts": 41796000
+              },
+              {
+                "csv_line": 383,
+                "candidate_start_index": 57840,
+                "candidate_last_included_index": 57861,
+                "candidate_start_pts": 207936000,
+                "candidate_last_included_pts": 208011600
+              },
+              {
+                "csv_line": 764,
+                "candidate_start_index": 92484,
+                "candidate_last_included_index": 92499,
+                "candidate_start_pts": 332442000,
+                "candidate_last_included_pts": 332496000
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 11580,
+                "candidate_last_included_index": 11618,
+                "candidate_start_pts": 41659200,
+                "candidate_last_included_pts": 41796000
+              },
+              {
+                "csv_line": 383,
+                "candidate_start_index": 57839,
+                "candidate_last_included_index": 57861,
+                "candidate_start_pts": 207932400,
+                "candidate_last_included_pts": 208011600
+              },
+              {
+                "csv_line": 764,
+                "candidate_start_index": 92483,
+                "candidate_last_included_index": 92499,
+                "candidate_start_pts": 332438400,
+                "candidate_last_included_pts": 332496000
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 11580,
+                "candidate_last_included_index": 11617,
+                "candidate_start_pts": 41659200,
+                "candidate_last_included_pts": 41792400
+              },
+              {
+                "csv_line": 383,
+                "candidate_start_index": 57839,
+                "candidate_last_included_index": 57860,
+                "candidate_start_pts": 207932400,
+                "candidate_last_included_pts": 208008000
+              },
+              {
+                "csv_line": 764,
+                "candidate_start_index": 92483,
+                "candidate_last_included_index": 92498,
+                "candidate_start_pts": 332438400,
+                "candidate_last_included_pts": 332492400
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/[1080P] Lee Chong Wei vs Kento Momota - 2018 Badminton Asian Championship Semi Final_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/dd5a7f658e2395081290b71d.csv",
+      "sha256": "8cde7fde96e63c93bbbee466b2f0154ae96b2c5ac724c330412936466ab1f091",
+      "size_bytes": 36140,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 995,
+      "blank_records": 0,
+      "integer_interval_rows": 995,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 995,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 2,
+        "Cross-court Net Return of Serve": 3,
+        "Cross-court Net Return of Smash": 6,
+        "Defensive Lift": 11,
+        "Drive": 84,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 79,
+        "Drop Shot Return of Serve": 1,
+        "Drop Shot Return of Smash": 24,
+        "Flat Clear": 21,
+        "Flat Serve": 5,
+        "High Clear": 58,
+        "High Serve": 1,
+        "Jump Smash": 1,
+        "Lift": 225,
+        "Lift Return of Serve": 20,
+        "Lift Return of Smash": 16,
+        "Net Kill": 7,
+        "Net Shot": 90,
+        "Overhead Cross-court Net Shot": 64,
+        "Push Shot": 15,
+        "Short Serve": 35,
+        "Short Smash": 39,
+        "Smash Return of Serve": 1,
+        "Smash(Full-length)": 28,
+        "Soft Net Shot": 123,
+        "Soft Net Shot Return of Serve": 13,
+        "Underhead Cross-court Net Shot": 22
+      },
+      "location_counts": {
+        "Lower Half": 499,
+        "Upper Half": 496
+      },
+      "numeric_range": {
+        "min_start": 849,
+        "max_end": 92925
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {},
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 7,
+        "example_line_pairs": [
+          [
+            133,
+            134
+          ],
+          [
+            320,
+            321
+          ],
+          [
+            357,
+            358
+          ],
+          [
+            518,
+            519
+          ],
+          [
+            729,
+            730
+          ],
+          [
+            800,
+            801
+          ],
+          [
+            814,
+            815
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 849,
+          "end": 869,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 499,
+          "start": 44899,
+          "end": 44921,
+          "label": "Soft Net Shot Return of Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 996,
+          "start": 92913,
+          "end": 92925,
+          "label": "Net Kill",
+          "location": "Upper Half"
+        }
+      ],
+      "canonical_original_stem": "[1080P] Lee Chong Wei vs Kento Momota - 2018 Badminton Asian Championship Semi Final",
+      "video_member_name": "videos/[1080P] Lee Chong Wei vs Kento Momota - 2018 Badminton Asian Championship Semi Final.mp4",
+      "video_sha256": "d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 94861,
+        "duration_ms": 3165196,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 30000,
+        "fps_den": 1001,
+        "time_base": "1/30000",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69.37a4658e483246d8b63760bc83ff75e9.pts.jsonl",
+        "pts_sha256": "fc6544f95233d82b392423765fbbab4edefd97db8d31f075f040a35f4ad26c92",
+        "pts_count": 94861,
+        "first_pts": 0,
+        "last_pts": 94954860,
+        "pts_delta_ticks": {
+          "count": 94860,
+          "min": 1001,
+          "max": 1001
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 849,
+                "candidate_last_included_index": 869,
+                "candidate_start_pts": 849849,
+                "candidate_last_included_pts": 869869
+              },
+              {
+                "csv_line": 499,
+                "candidate_start_index": 44899,
+                "candidate_last_included_index": 44921,
+                "candidate_start_pts": 44943899,
+                "candidate_last_included_pts": 44965921
+              },
+              {
+                "csv_line": 996,
+                "candidate_start_index": 92913,
+                "candidate_last_included_index": 92925,
+                "candidate_start_pts": 93005913,
+                "candidate_last_included_pts": 93017925
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 849,
+                "candidate_last_included_index": 868,
+                "candidate_start_pts": 849849,
+                "candidate_last_included_pts": 868868
+              },
+              {
+                "csv_line": 499,
+                "candidate_start_index": 44899,
+                "candidate_last_included_index": 44920,
+                "candidate_start_pts": 44943899,
+                "candidate_last_included_pts": 44964920
+              },
+              {
+                "csv_line": 996,
+                "candidate_start_index": 92913,
+                "candidate_last_included_index": 92924,
+                "candidate_start_pts": 93005913,
+                "candidate_last_included_pts": 93016924
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 848,
+                "candidate_last_included_index": 868,
+                "candidate_start_pts": 848848,
+                "candidate_last_included_pts": 868868
+              },
+              {
+                "csv_line": 499,
+                "candidate_start_index": 44898,
+                "candidate_last_included_index": 44920,
+                "candidate_start_pts": 44942898,
+                "candidate_last_included_pts": 44964920
+              },
+              {
+                "csv_line": 996,
+                "candidate_start_index": 92912,
+                "candidate_last_included_index": 92924,
+                "candidate_start_pts": 93004912,
+                "candidate_last_included_pts": 93016924
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 848,
+                "candidate_last_included_index": 867,
+                "candidate_start_pts": 848848,
+                "candidate_last_included_pts": 867867
+              },
+              {
+                "csv_line": 499,
+                "candidate_start_index": 44898,
+                "candidate_last_included_index": 44919,
+                "candidate_start_pts": 44942898,
+                "candidate_last_included_pts": 44963919
+              },
+              {
+                "csv_line": 996,
+                "candidate_start_index": 92912,
+                "candidate_last_included_index": 92923,
+                "candidate_start_pts": 93004912,
+                "candidate_last_included_pts": 93015923
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/a808c88c7327f88c048d15ab.csv",
+      "sha256": "1a509b87269c4a2083a4151c506cdab33f66bc9d8e0d4692c38785659da45eb1",
+      "size_bytes": 25010,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 690,
+      "blank_records": 0,
+      "integer_interval_rows": 690,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 690,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "Clear Return of Serve": 3,
+        "Cross-court Net Return of Serve": 1,
+        "Cross-court Net Return of Smash": 4,
+        "Defensive Lift": 8,
+        "Drive": 25,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 66,
+        "Drop Shot Return of Serve": 1,
+        "Drop Shot Return of Smash": 16,
+        "Flat Clear": 7,
+        "High Clear": 41,
+        "High Serve": 2,
+        "Jump Smash": 1,
+        "Lift": 176,
+        "Lift Return of Serve": 6,
+        "Lift Return of Smash": 23,
+        "Net Kill": 15,
+        "Net Shot": 30,
+        "Overhead Cross-court Net Shot": 33,
+        "Push Shot": 5,
+        "Short Serve": 18,
+        "Short Smash": 16,
+        "Smash Return of Serve": 1,
+        "Smash(Full-length)": 35,
+        "Soft Net Shot": 129,
+        "Soft Net Shot Return of Serve": 11,
+        "Underhead Cross-court Net Shot": 16
+      },
+      "location_counts": {
+        "Lower Half": 343,
+        "Upper Half": 347
+      },
+      "numeric_range": {
+        "min_start": 1048,
+        "max_end": 31821
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {},
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 20,
+        "example_line_pairs": [
+          [
+            25,
+            26
+          ],
+          [
+            91,
+            92
+          ],
+          [
+            93,
+            94
+          ],
+          [
+            115,
+            116
+          ],
+          [
+            146,
+            147
+          ],
+          [
+            164,
+            165
+          ],
+          [
+            166,
+            167
+          ],
+          [
+            221,
+            222
+          ],
+          [
+            246,
+            247
+          ],
+          [
+            247,
+            248
+          ],
+          [
+            264,
+            265
+          ],
+          [
+            280,
+            281
+          ],
+          [
+            286,
+            287
+          ],
+          [
+            296,
+            297
+          ],
+          [
+            334,
+            335
+          ],
+          [
+            378,
+            379
+          ],
+          [
+            444,
+            445
+          ],
+          [
+            456,
+            457
+          ],
+          [
+            469,
+            470
+          ],
+          [
+            689,
+            690
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 1048,
+          "end": 1067,
+          "label": "High Serve",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 347,
+          "start": 15845,
+          "end": 15853,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 691,
+          "start": 31807,
+          "end": 31821,
+          "label": "Soft Net Shot",
+          "location": "Upper Half"
+        }
+      ],
+      "canonical_original_stem": "[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships",
+      "video_member_name": "videos/[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships.mp4",
+      "video_sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 32651,
+        "duration_ms": 1306040,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913.5bdc8c2639e241309b21e15bbf9e87cb.pts.jsonl",
+        "pts_sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+        "pts_count": 32651,
+        "first_pts": 0,
+        "last_pts": 16716800,
+        "pts_delta_ticks": {
+          "count": 32650,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1048,
+                "candidate_last_included_index": 1067,
+                "candidate_start_pts": 536576,
+                "candidate_last_included_pts": 546304
+              },
+              {
+                "csv_line": 347,
+                "candidate_start_index": 15845,
+                "candidate_last_included_index": 15853,
+                "candidate_start_pts": 8112640,
+                "candidate_last_included_pts": 8116736
+              },
+              {
+                "csv_line": 691,
+                "candidate_start_index": 31807,
+                "candidate_last_included_index": 31821,
+                "candidate_start_pts": 16285184,
+                "candidate_last_included_pts": 16292352
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1048,
+                "candidate_last_included_index": 1066,
+                "candidate_start_pts": 536576,
+                "candidate_last_included_pts": 545792
+              },
+              {
+                "csv_line": 347,
+                "candidate_start_index": 15845,
+                "candidate_last_included_index": 15852,
+                "candidate_start_pts": 8112640,
+                "candidate_last_included_pts": 8116224
+              },
+              {
+                "csv_line": 691,
+                "candidate_start_index": 31807,
+                "candidate_last_included_index": 31820,
+                "candidate_start_pts": 16285184,
+                "candidate_last_included_pts": 16291840
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1047,
+                "candidate_last_included_index": 1066,
+                "candidate_start_pts": 536064,
+                "candidate_last_included_pts": 545792
+              },
+              {
+                "csv_line": 347,
+                "candidate_start_index": 15844,
+                "candidate_last_included_index": 15852,
+                "candidate_start_pts": 8112128,
+                "candidate_last_included_pts": 8116224
+              },
+              {
+                "csv_line": 691,
+                "candidate_start_index": 31806,
+                "candidate_last_included_index": 31820,
+                "candidate_start_pts": 16284672,
+                "candidate_last_included_pts": 16291840
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 1047,
+                "candidate_last_included_index": 1065,
+                "candidate_start_pts": 536064,
+                "candidate_last_included_pts": 545280
+              },
+              {
+                "csv_line": 347,
+                "candidate_start_index": 15844,
+                "candidate_last_included_index": 15851,
+                "candidate_start_pts": 8112128,
+                "candidate_last_included_pts": 8115712
+              },
+              {
+                "csv_line": 691,
+                "candidate_start_index": 31806,
+                "candidate_last_included_index": 31819,
+                "candidate_start_pts": 16284672,
+                "candidate_last_included_pts": 16291328
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/[Full] Badminton Lin Dan vs Lee Chong Wei 2010 Asian Games MS Final_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/7764f0d065b23425bf04a770.csv",
+      "sha256": "26a610d291c0c98a6134f646625ce07fb82a35d2b39759bef870089b342c1d2e",
+      "size_bytes": 52206,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 1301,
+      "blank_records": 0,
+      "integer_interval_rows": 1301,
+      "exact_duplicate_rows": 0,
+      "unique_exact_rows": 1301,
+      "out_of_order_start_rows": 0,
+      "label_counts": {
+        "中场腾空抽杀球": 13,
+        "低手位勾球": 22,
+        "劈球": 2,
+        "发小球": 67,
+        "发平高球": 8,
+        "发高远球": 2,
+        "吊球": 140,
+        "平推球": 26,
+        "平高球": 54,
+        "扑球": 9,
+        "抽球": 157,
+        "挑高球": 299,
+        "接发球击吊球": 2,
+        "接发球击杀球": 1,
+        "接发球击高远球": 1,
+        "接发球勾球": 7,
+        "接发球挑球": 22,
+        "接发球推球": 1,
+        "接发球搓小球": 10,
+        "接发球放小球": 6,
+        "接杀勾球": 6,
+        "接杀挑高球": 23,
+        "接杀放小球": 16,
+        "搓球": 142,
+        "放小球": 74,
+        "短杀": 27,
+        "长杀": 30,
+        "防守回抽": 2,
+        "防守回挑": 4,
+        "高手位勾球": 57,
+        "高远球": 71
+      },
+      "location_counts": {
+        "上半区": 652,
+        "下半区": 649
+      },
+      "numeric_range": {
+        "min_start": 3749,
+        "max_end": 126971
+      },
+      "issue_counts": {
+        "label_not_in_readme": 1301,
+        "equal_start_end_semantics_unverified": 1
+      },
+      "issue_examples_csv_lines": {
+        "label_not_in_readme": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21
+        ],
+        "equal_start_end_semantics_unverified": [
+          889
+        ]
+      },
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 6,
+        "example_line_pairs": [
+          [
+            657,
+            658
+          ],
+          [
+            712,
+            713
+          ],
+          [
+            793,
+            794
+          ],
+          [
+            895,
+            896
+          ],
+          [
+            1119,
+            1120
+          ],
+          [
+            1249,
+            1250
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "上半区": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "下半区": {
+          "strict_overlap_pairs": 0,
+          "example_line_pairs": [],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 3749,
+          "end": 3775,
+          "label": "发平高球",
+          "location": "下半区"
+        },
+        {
+          "csv_line": 652,
+          "start": 61870,
+          "end": 61890,
+          "label": "发小球",
+          "location": "上半区"
+        },
+        {
+          "csv_line": 1302,
+          "start": 126959,
+          "end": 126971,
+          "label": "吊球",
+          "location": "下半区"
+        }
+      ],
+      "canonical_original_stem": "[Full] Badminton Lin Dan vs Lee Chong Wei 2010 Asian Games MS Final",
+      "video_member_name": "videos/[Full] Badminton Lin Dan vs Lee Chong Wei 2010 Asian Games MS Final.mp4",
+      "video_sha256": "3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 130420,
+        "duration_ms": 5216800,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2.10faf0a3b6ee49269a8041fef46a19ec.pts.jsonl",
+        "pts_sha256": "de2cea36a48b00c3f93f8f0a8c7643b061e2d69bfff570611c9c45938072797d",
+        "pts_count": 130420,
+        "first_pts": 0,
+        "last_pts": 66774528,
+        "pts_delta_ticks": {
+          "count": 130419,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 3749,
+                "candidate_last_included_index": 3775,
+                "candidate_start_pts": 1919488,
+                "candidate_last_included_pts": 1932800
+              },
+              {
+                "csv_line": 652,
+                "candidate_start_index": 61870,
+                "candidate_last_included_index": 61890,
+                "candidate_start_pts": 31677440,
+                "candidate_last_included_pts": 31687680
+              },
+              {
+                "csv_line": 1302,
+                "candidate_start_index": 126959,
+                "candidate_last_included_index": 126971,
+                "candidate_start_pts": 65003008,
+                "candidate_last_included_pts": 65009152
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              889
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 3749,
+                "candidate_last_included_index": 3774,
+                "candidate_start_pts": 1919488,
+                "candidate_last_included_pts": 1932288
+              },
+              {
+                "csv_line": 652,
+                "candidate_start_index": 61870,
+                "candidate_last_included_index": 61889,
+                "candidate_start_pts": 31677440,
+                "candidate_last_included_pts": 31687168
+              },
+              {
+                "csv_line": 1302,
+                "candidate_start_index": 126959,
+                "candidate_last_included_index": 126970,
+                "candidate_start_pts": 65003008,
+                "candidate_last_included_pts": 65008640
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 3748,
+                "candidate_last_included_index": 3774,
+                "candidate_start_pts": 1918976,
+                "candidate_last_included_pts": 1932288
+              },
+              {
+                "csv_line": 652,
+                "candidate_start_index": 61869,
+                "candidate_last_included_index": 61889,
+                "candidate_start_pts": 31676928,
+                "candidate_last_included_pts": 31687168
+              },
+              {
+                "csv_line": 1302,
+                "candidate_start_index": 126958,
+                "candidate_last_included_index": 126970,
+                "candidate_start_pts": 65002496,
+                "candidate_last_included_pts": 65008640
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              889
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 3748,
+                "candidate_last_included_index": 3773,
+                "candidate_start_pts": 1918976,
+                "candidate_last_included_pts": 1931776
+              },
+              {
+                "csv_line": 652,
+                "candidate_start_index": 61869,
+                "candidate_last_included_index": 61888,
+                "candidate_start_pts": 31676928,
+                "candidate_last_included_pts": 31686656
+              },
+              {
+                "csv_line": 1302,
+                "candidate_start_index": 126958,
+                "candidate_last_included_index": 126969,
+                "candidate_start_pts": 65002496,
+                "candidate_last_included_pts": 65008128
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/[HD] SF - 2014 Asian Games - MS - LIN Dan vs LEE Chong Wei (1)_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/46f8d21ea88a513ee6f4d894.csv",
+      "sha256": "13fc104b2e5feee452e2ef42b0a6d171a825a84256e69364efa402d6195bb609",
+      "size_bytes": 44521,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 1217,
+      "blank_records": 0,
+      "integer_interval_rows": 1217,
+      "exact_duplicate_rows": 3,
+      "unique_exact_rows": 1214,
+      "out_of_order_start_rows": 1,
+      "label_counts": {
+        "Clear Return of Serve": 1,
+        "Cross-court Net Return of Serve": 7,
+        "Cross-court Net Return of Smash": 2,
+        "Defensive Lift": 4,
+        "Drive": 148,
+        "Drive Return of Smash": 3,
+        "Drop Shot": 113,
+        "Drop Shot Return of Serve": 2,
+        "Drop Shot Return of Smash": 26,
+        "Flat Clear": 29,
+        "Flat Serve": 6,
+        "High Clear": 63,
+        "High Serve": 4,
+        "Jump Smash": 11,
+        "Lift": 244,
+        "Lift Return of Serve": 31,
+        "Lift Return of Smash": 31,
+        "Net Kill": 11,
+        "Net Shot": 63,
+        "Net Shot Return of Serve": 3,
+        "Overhead Cross-court Net Shot": 60,
+        "Push Shot": 31,
+        "Short Serve": 82,
+        "Short Smash": 42,
+        "Smash Return of Serve": 2,
+        "Smash(Full-length)": 46,
+        "Soft Net Shot": 107,
+        "Soft Net Shot Return of Serve": 17,
+        "Underhead Cross-court Net Shot": 28
+      },
+      "location_counts": {
+        "Lower Half": 604,
+        "Upper Half": 613
+      },
+      "numeric_range": {
+        "min_start": 7465,
+        "max_end": 114473
+      },
+      "issue_counts": {
+        "equal_start_end_semantics_unverified": 1
+      },
+      "issue_examples_csv_lines": {
+        "equal_start_end_semantics_unverified": [
+          681
+        ],
+        "out_of_order_start_line_pairs": [
+          [
+            759,
+            760
+          ]
+        ],
+        "exact_duplicate_lines": [
+          [
+            1015,
+            1016
+          ],
+          [
+            1063,
+            1064
+          ],
+          [
+            1129,
+            1130
+          ]
+        ]
+      },
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 15,
+        "example_line_pairs": [
+          [
+            60,
+            61
+          ],
+          [
+            162,
+            163
+          ],
+          [
+            202,
+            203
+          ],
+          [
+            238,
+            239
+          ],
+          [
+            384,
+            385
+          ],
+          [
+            392,
+            393
+          ],
+          [
+            444,
+            445
+          ],
+          [
+            527,
+            528
+          ],
+          [
+            627,
+            628
+          ],
+          [
+            760,
+            759
+          ],
+          [
+            770,
+            771
+          ],
+          [
+            799,
+            800
+          ],
+          [
+            1015,
+            1016
+          ],
+          [
+            1063,
+            1064
+          ],
+          [
+            1129,
+            1130
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 1,
+          "example_line_pairs": [
+            [
+              1063,
+              1064
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 2,
+          "example_line_pairs": [
+            [
+              1015,
+              1016
+            ],
+            [
+              1129,
+              1130
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 7465,
+          "end": 7485,
+          "label": "Short Serve",
+          "location": "Upper Half"
+        },
+        {
+          "csv_line": 610,
+          "start": 55546,
+          "end": 55576,
+          "label": "Lift",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 1218,
+          "start": 114445,
+          "end": 114473,
+          "label": "Lift",
+          "location": "Lower Half"
+        }
+      ],
+      "canonical_original_stem": "[HD] SF - 2014 Asian Games - MS - LIN Dan vs LEE Chong Wei (1)",
+      "video_member_name": "videos/[HD] SF - 2014 Asian Games - MS - LIN Dan vs LEE Chong Wei (1).mp4",
+      "video_sha256": "a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 118201,
+        "duration_ms": 4728040,
+        "width": 1280,
+        "height": 720,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/90000",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1.070587279ffa4896acc54caa9b0b094c.pts.jsonl",
+        "pts_sha256": "317cc1e23dac84e7e1ec9d7289ba9b1c9a028272fcae63b6d62d99475f5fa81e",
+        "pts_count": 118201,
+        "first_pts": 0,
+        "last_pts": 425520000,
+        "pts_delta_ticks": {
+          "count": 118200,
+          "min": 3600,
+          "max": 3600
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7465,
+                "candidate_last_included_index": 7485,
+                "candidate_start_pts": 26874000,
+                "candidate_last_included_pts": 26946000
+              },
+              {
+                "csv_line": 610,
+                "candidate_start_index": 55546,
+                "candidate_last_included_index": 55576,
+                "candidate_start_pts": 199965600,
+                "candidate_last_included_pts": 200073600
+              },
+              {
+                "csv_line": 1218,
+                "candidate_start_index": 114445,
+                "candidate_last_included_index": 114473,
+                "candidate_start_pts": 412002000,
+                "candidate_last_included_pts": 412102800
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              681
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7465,
+                "candidate_last_included_index": 7484,
+                "candidate_start_pts": 26874000,
+                "candidate_last_included_pts": 26942400
+              },
+              {
+                "csv_line": 610,
+                "candidate_start_index": 55546,
+                "candidate_last_included_index": 55575,
+                "candidate_start_pts": 199965600,
+                "candidate_last_included_pts": 200070000
+              },
+              {
+                "csv_line": 1218,
+                "candidate_start_index": 114445,
+                "candidate_last_included_index": 114472,
+                "candidate_start_pts": 412002000,
+                "candidate_last_included_pts": 412099200
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7464,
+                "candidate_last_included_index": 7484,
+                "candidate_start_pts": 26870400,
+                "candidate_last_included_pts": 26942400
+              },
+              {
+                "csv_line": 610,
+                "candidate_start_index": 55545,
+                "candidate_last_included_index": 55575,
+                "candidate_start_pts": 199962000,
+                "candidate_last_included_pts": 200070000
+              },
+              {
+                "csv_line": 1218,
+                "candidate_start_index": 114444,
+                "candidate_last_included_index": 114472,
+                "candidate_start_pts": 411998400,
+                "candidate_last_included_pts": 412099200
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 1,
+            "example_csv_lines": [
+              681
+            ],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 7464,
+                "candidate_last_included_index": 7483,
+                "candidate_start_pts": 26870400,
+                "candidate_last_included_pts": 26938800
+              },
+              {
+                "csv_line": 610,
+                "candidate_start_index": 55545,
+                "candidate_last_included_index": 55574,
+                "candidate_start_pts": 199962000,
+                "candidate_last_included_pts": 200066400
+              },
+              {
+                "csv_line": 1218,
+                "candidate_start_index": 114444,
+                "candidate_last_included_index": 114471,
+                "candidate_start_pts": 411998400,
+                "candidate_last_included_pts": 412095600
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    },
+    {
+      "member_name": "annotations/videoplayback (1) copy_dataframe.csv",
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/99f511428e92c565acb169ce.csv",
+      "sha256": "6d91f1f56acc8d95ce9aea209a819cf600ca208259c4df0935201a801b8caf1c",
+      "size_bytes": 46357,
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "header": [
+        "start",
+        "end",
+        "label",
+        "location"
+      ],
+      "data_rows": 1253,
+      "blank_records": 0,
+      "integer_interval_rows": 1253,
+      "exact_duplicate_rows": 1,
+      "unique_exact_rows": 1252,
+      "out_of_order_start_rows": 1,
+      "label_counts": {
+        "Clear Return of Serve": 2,
+        "Cross-court Net Return of Serve": 31,
+        "Cross-court Net Return of Smash": 9,
+        "Defensive Lift": 18,
+        "Drive": 137,
+        "Drive Return of Smash": 1,
+        "Drop Shot": 135,
+        "Drop Shot Return of Smash": 21,
+        "Flat Clear": 29,
+        "Flat Serve": 3,
+        "High Clear": 35,
+        "High Serve": 2,
+        "Jump Smash": 11,
+        "Lift": 224,
+        "Lift Return of Serve": 40,
+        "Lift Return of Smash": 47,
+        "Net Kill": 14,
+        "Net Shot": 141,
+        "Net Shot Return of Serve": 7,
+        "Overhead Cross-court Net Shot": 51,
+        "Push Shot": 16,
+        "Short Serve": 73,
+        "Short Smash": 85,
+        "Smash(Full-length)": 31,
+        "Soft Net Shot": 53,
+        "Soft Net Shot Return of Serve": 3,
+        "Underhead Cross-court Net Shot": 34
+      },
+      "location_counts": {
+        "Lower Half": 627,
+        "Upper Half": 626
+      },
+      "numeric_range": {
+        "min_start": 9273,
+        "max_end": 121834
+      },
+      "issue_counts": {},
+      "issue_examples_csv_lines": {
+        "out_of_order_start_line_pairs": [
+          [
+            711,
+            712
+          ]
+        ],
+        "exact_duplicate_lines": [
+          [
+            985,
+            986
+          ]
+        ]
+      },
+      "max_examples_per_kind": 20,
+      "conflicting_interval_location_groups": 0,
+      "conflict_examples": [],
+      "overlap_all_locations": {
+        "strict_overlap_pairs": 136,
+        "example_line_pairs": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            8,
+            9
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            26,
+            27
+          ],
+          [
+            28,
+            29
+          ],
+          [
+            32,
+            33
+          ],
+          [
+            33,
+            34
+          ],
+          [
+            40,
+            41
+          ],
+          [
+            51,
+            52
+          ],
+          [
+            55,
+            56
+          ],
+          [
+            62,
+            63
+          ],
+          [
+            72,
+            73
+          ],
+          [
+            81,
+            82
+          ],
+          [
+            87,
+            88
+          ],
+          [
+            88,
+            89
+          ],
+          [
+            91,
+            92
+          ],
+          [
+            96,
+            97
+          ]
+        ],
+        "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+      },
+      "overlap_by_location": {
+        "Lower Half": {
+          "strict_overlap_pairs": 3,
+          "example_line_pairs": [
+            [
+              712,
+              709
+            ],
+            [
+              714,
+              711
+            ],
+            [
+              985,
+              986
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        },
+        "Upper Half": {
+          "strict_overlap_pairs": 1,
+          "example_line_pairs": [
+            [
+              713,
+              710
+            ]
+          ],
+          "interpretation": "Diagnostic only; touching endpoints excluded, no automatic merge or error label."
+        }
+      },
+      "sample_rows": [
+        {
+          "csv_line": 2,
+          "start": 9273,
+          "end": 9291,
+          "label": "Short Serve",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 628,
+          "start": 63103,
+          "end": 63127,
+          "label": "Lift",
+          "location": "Lower Half"
+        },
+        {
+          "csv_line": 1254,
+          "start": 121817,
+          "end": 121834,
+          "label": "Lift",
+          "location": "Lower Half"
+        }
+      ],
+      "canonical_original_stem": "videoplayback (1) copy",
+      "video_member_name": "videos/videoplayback (1) copy.mp4",
+      "video_sha256": "e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "probe": {
+        "status": "PASS",
+        "status_scope": "full_decode_and_pts_integrity_only",
+        "decoded_frames": 127201,
+        "duration_ms": 5088040,
+        "width": 636,
+        "height": 360,
+        "fps_num": 25,
+        "fps_den": 1,
+        "time_base": "1/12800",
+        "pts_index_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f.d757b16e11bf4907bce0ecdc728e9380.pts.jsonl",
+        "pts_sha256": "0c6317e9a0cf6c73ff341056f543db74ad33213d6b5e39c79b0fcce46508f83c",
+        "pts_count": 127201,
+        "first_pts": 0,
+        "last_pts": 65126400,
+        "pts_delta_ticks": {
+          "count": 127200,
+          "min": 512,
+          "max": 512
+        },
+        "source_probe_vfr_status": "cfr_observed",
+        "boundary_conventions": {
+          "zero_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 9273,
+                "candidate_last_included_index": 9291,
+                "candidate_start_pts": 4747776,
+                "candidate_last_included_pts": 4756992
+              },
+              {
+                "csv_line": 628,
+                "candidate_start_index": 63103,
+                "candidate_last_included_index": 63127,
+                "candidate_start_pts": 32308736,
+                "candidate_last_included_pts": 32321024
+              },
+              {
+                "csv_line": 1254,
+                "candidate_start_index": 121817,
+                "candidate_last_included_index": 121834,
+                "candidate_start_pts": 62370304,
+                "candidate_last_included_pts": 62379008
+              }
+            ]
+          },
+          "zero_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 9273,
+                "candidate_last_included_index": 9290,
+                "candidate_start_pts": 4747776,
+                "candidate_last_included_pts": 4756480
+              },
+              {
+                "csv_line": 628,
+                "candidate_start_index": 63103,
+                "candidate_last_included_index": 63126,
+                "candidate_start_pts": 32308736,
+                "candidate_last_included_pts": 32320512
+              },
+              {
+                "csv_line": 1254,
+                "candidate_start_index": 121817,
+                "candidate_last_included_index": 121833,
+                "candidate_start_pts": 62370304,
+                "candidate_last_included_pts": 62378496
+              }
+            ]
+          },
+          "one_based_inclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 9272,
+                "candidate_last_included_index": 9290,
+                "candidate_start_pts": 4747264,
+                "candidate_last_included_pts": 4756480
+              },
+              {
+                "csv_line": 628,
+                "candidate_start_index": 63102,
+                "candidate_last_included_index": 63126,
+                "candidate_start_pts": 32308224,
+                "candidate_last_included_pts": 32320512
+              },
+              {
+                "csv_line": 1254,
+                "candidate_start_index": 121816,
+                "candidate_last_included_index": 121833,
+                "candidate_start_pts": 62369792,
+                "candidate_last_included_pts": 62378496
+              }
+            ]
+          },
+          "one_based_exclusive": {
+            "out_of_bounds_or_empty_rows": 0,
+            "example_csv_lines": [],
+            "sample_candidates": [
+              {
+                "csv_line": 2,
+                "candidate_start_index": 9272,
+                "candidate_last_included_index": 9289,
+                "candidate_start_pts": 4747264,
+                "candidate_last_included_pts": 4755968
+              },
+              {
+                "csv_line": 628,
+                "candidate_start_index": 63102,
+                "candidate_last_included_index": 63125,
+                "candidate_start_pts": 32308224,
+                "candidate_last_included_pts": 32320000
+              },
+              {
+                "csv_line": 1254,
+                "candidate_start_index": 121816,
+                "candidate_last_included_index": 121832,
+                "candidate_start_pts": 62369792,
+                "candidate_last_included_pts": 62377984
+              }
+            ]
+          }
+        },
+        "selected_convention": null,
+        "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."
+      }
+    }
+  ],
+  "failures": [],
+  "unpaired_csv_stems": [],
+  "unpaired_video_stems": [],
+  "semantic_conversion": {
+    "status": "BLOCKED",
+    "reasons": [
+      "0/1 frame basis unverified",
+      "Endpoint inclusion unverified",
+      "Processed-clip to original-broadcast mapping unavailable",
+      "Location semantics not documented",
+      "Non-README raw label strings lack authoritative category mapping"
+    ],
+    "fine_hand_technique": "unknown",
+    "fine_footwork": "unknown"
+  },
+  "visual_boundary_review": "NOT_RUN",
+  "claim_scope": "File/annotation/probe audit only; not human-label validation or proof of ten uncut matches."
+}

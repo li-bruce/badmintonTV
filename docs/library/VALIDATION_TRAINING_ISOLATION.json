@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-29T10:30:02.695055+00:00",
+  "scope": "real final manifest and registry + metadata-only aliases; no physical copying, no platform DB/render invocation",
+  "contract_checkout": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV",
+  "contract_commit": "4dc912533145ad277d5b713b3cd380faa0a5595e",
+  "contract_file_sha256": {
+    "packages/contracts/models.py": "7de5d370741d2d26b02cfd2c7caaa8bf2cbec8da1044ea13f8c6328d3d80aeed",
+    "packages/contracts/usage.py": "df6638b27dda82d1a0a007ee40c88889570cebf9fc258313dbc875aa65334326",
+    "packages/contracts/validation.py": "90b5c62278c5cc765a06c466e2a8398c304a21001fd45d2868eb76ba7a2e3205",
+    "packages/contracts/__init__.py": "97bd3e19077b35ecf4e66b3ae00000c999577bba5811ee835d4df73ab5b42d35",
+    "packages/contracts/__main__.py": "2b19934278ff1bf84b8a6716ea9b5c62907d532546b4f5b71913ad5fce501f06"
+  },
+  "manifests": [
+    {
+      "relative_path": "data/training/handoff/fine-badminton-2026-zenodo-20292976-v1.0.assets.v1.json",
+      "sha256": "2725970f4485732e67ba249b72262c51dbba24ee17e5e97d901b18ec8a29e286",
+      "assets": 10,
+      "typed_validation": "PASS"
+    },
+    {
+      "relative_path": "data/handoff/assets.v1.json",
+      "sha256": "f6a646668ec688ecbbe85386f64db9d81b4c6b951a8284a1a581195cd57563aa",
+      "assets": 4,
+      "typed_validation": "PASS"
+    },
+    {
+      "relative_path": "data/handoff/assets.doubles.v1.json",
+      "sha256": "3b8b76738bc8a5ca1197fec71cd7a5d48efea22d6977bd614ff6f1ffa001815f",
+      "assets": 1,
+      "typed_validation": "PASS"
+    }
+  ],
+  "registry_sha256": "63eb86de88e6c760be8ff3464318d8fd55a923e7bfa1d1c177dc2bdd643e52aa",
+  "registry_entries": 10,
+  "new_training_denied": 10,
+  "existing_production_allowed": 5,
+  "source_sha256_intersection": [],
+  "same_match_content_overlap_status": "BLOCKED: exact source-byte nonintersection does not establish different-match/content independence",
+  "metadata_alias_denials": [
+    {
+      "source_asset_id": "asset-2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "sha256": "2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "sha256": "2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "sha256": "33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "sha256": "33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "sha256": "3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "sha256": "3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "sha256": "80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "sha256": "80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "sha256": "8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "sha256": "8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "sha256": "8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "sha256": "8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "sha256": "a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "sha256": "a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "sha256": "d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "sha256": "d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "sha256": "e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "research_preview": false,
+      "result": "TRAINING_ONLY"
+    },
+    {
+      "source_asset_id": "asset-e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "sha256": "e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "research_preview": true,
+      "result": "TRAINING_ONLY"
+    }
+  ],
+  "status": "PASS",
+  "media_or_database_writes": 0
+}

@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "recorded_at": "2026-09-29T10:32:18.121534+00:00",
+  "usage_scope": "training_only",
+  "source": "actual QuotaManager snapshot and filesystem sizes; runtime opaque allocation is an upper bound",
+  "capacity": {
+    "owner_used_bytes": 14802356059,
+    "project_used_bytes": 92251700126,
+    "active_reserved_bytes": 0,
+    "free_bytes": 931035762688,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 14802356059
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6604079331
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 198194916
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647069820
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "active_reservations": [],
+  "directories": {
+    "fine_dataset": {
+      "files": 97,
+      "bytes": 12965074147
+    },
+    "bfmd": {
+      "files": 243,
+      "bytes": 1825691214
+    },
+    "training_handoff": {
+      "files": 593,
+      "bytes": 761542
+    }
+  },
+  "new_library_runtime_bytes": 0,
+  "new_dependencies_installed": false,
+  "gpu_used": false,
+  "server_ports": [],
+  "after_capacity_record_write": {
+    "owner_used_bytes": 14802357491,
+    "project_used_bytes": 92251701558,
+    "active_reserved_bytes": 0,
+    "free_bytes": 931035758592,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 14802357491
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6604079331
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 198194916
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647069820
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "active_reservations_after_write": []
+}
