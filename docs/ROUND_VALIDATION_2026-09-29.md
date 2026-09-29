@@ -2,13 +2,13 @@
 
 本轮目标由 [实施计划](IMPLEMENTATION_ROUND_2026-09-29.md) 定义。本表区分工程实现、真实运行与模型效果，旧轮次的 `INTEGRATION_VALIDATION.json` 不作为本轮通过证据。状态仅使用 PASS / FAIL / BLOCKED / NOT_RUN；阶段中部分断言通过不代表整阶段达标。
 
-## 当前检查点：2026-09-29 18:56（北京时间）
+## 当前检查点：2026-09-29 19:25（北京时间）
 
 | 检查 | 目标 / 预期 | 实际 / 证据 | 状态 |
 |---|---|---|---|
 | 公共合同 | 旧清单兼容；训练用途不能降级；登记来源字段有效；大来源图有界 | 主线 `aae0c99`，root 独立 `pytest tests/contracts`：186 passed；先前独立性能反例修复已复核 | PASS |
 | 完整职业数据 R-04a | 作者完整ZIP下载，大小/MD5/SHA及媒体/标注清单核实 | ZIP6,455,837,331B、作者MD5一致；10/10视频全解码/PTS、980703帧、38592556ms（约10.72小时）、9817标注行。BFMD121/121、1,825,439,459B。root独立重hash全部Fine原视频/PTS及BFMD121文件通过；作者声明差异已逐项记录 | PASS（完整公开包；不是十场未经剪辑转播；标注语义另为BLOCKED） |
-| 制作用途隔离 R-04b | 入库、检索到时间线、保存、执行、独立CLI及研究预览均拒绝训练数据 | 最终10资产真实清单的14个API负例及2个worker负例通过；独立render四模式均拒绝；原5份制作素材hash与2份manifest不变 | PASS（列明入口与来源闭包；不声称识别外部去来源转码） |
+| 制作用途隔离 R-04b | 入库、检索到时间线、保存、执行、独立CLI及研究预览均拒绝训练数据 | 最终10资产做清单/registry关联核验，逐入口负例使用同一b210真实资产：14个API及2个worker负例通过；独立render四模式均拒绝；原5份制作素材hash与2份manifest不变 | PASS（列明入口与来源闭包；不声称每资产各跑16入口或识别外部去来源转码） |
 | 播放代理 R-02a | CFR、VFR、浏览器不支持格式有代理，回写源PTS误差≤一源帧 | 4种实际输入（VFR/FFV1/60fps为明确派生），代理、分页原PTS与原尺寸JPEG通过；main新3秒预览和Range206再次通过 | PASS（有界短片；非整场吞吐） |
 | 网页交互 R-02b | 定位、逐帧、循环、缩略图和标注保存；30点冷/热统计 | 4输入×30点×2条件=240点，212零误差、28为−1源帧；修订回载与23次循环通过。seeked与rVFC回调分别记录，后者约1秒 | PASS（操作/误差/测量断言）；流畅性尚未达标，见独立issue |
 | 竖屏输出 R-01a | 1080×1920，30/60fps，H.264/AAC，安全区及工程设置可复用 | 真实三片时间线两档技术QA通过；平台Web持久化/60fps播放通过；main已集成，旧工程回载和新增2秒CPU导出通过 | PASS（技术与agent流程；人类内容确认未测） |
@@ -16,7 +16,7 @@
 | 分项计时/NVDEC R-03b | 解码、预处理、模型、后处理与冷启动分开；硬件解码需实际路径证据 | 轨迹已有阶段计时；旧pose报告不含完整墙钟分解，已改代码待新输出。PyAV实际软件解码，未使用NVDEC，不声称解码加速 | NOT_RUN（部分计时已实测，NVDEC未测） |
 | 轨迹 R-07a | 官方权重、真实输入、源PTS球点/缺失及时间记录 | 旧片180帧两模式与新职业片75帧均跑通，root核验合同/产物/bridge；新片44点/31缺失、0补轨；首轮心跳失败保留 | PASS（真实提取链和缺失报告；精度/召回未测） |
 | 姿态/位置 R-07b | 坐标可回查，校准和跟踪含义明确 | 连续Keypoint R-CNN与YOLO旧片各90帧、新职业YOLO75帧跑通；原图坐标及匿名ID保留。自动可靠场地标定未完成，已有人工/agent校准只作实验且注明适用窗 | BLOCKED（原图姿态子项PASS，完整场地位置链未达标） |
-| 视频向量 R-05a | 隔离WSL对真实短窗及中文查询产生有限向量/排序 | Qwen3-VL-Embedding-2B18文件4,271,068,726B全部hash校验；17核心安装wheel3,916,256,631B全部SHA通过。WSL独立环境安装中，真实embedding待运行 | NOT_RUN |
+| 视频向量 R-05a | 隔离WSL对真实短窗及中文查询产生有限向量/排序 | 官方2B权重和独立torch2.8环境已验证；旧general真实6秒片分成两个3秒窗、各6帧，3中文/3英文查询与CLIP对照成功。root独立核验8个2048维有限归一向量、12项排序点积、12源PTS及两产物SHA/停止回执 | PASS（真实前向/排序；root另补4秒和6秒单窗，见下方独立实验）；无真值准确率结论 |
 | 实时 R-07c | 因果输入，稳态RTF≤1，延迟/积压/丢帧有测量 | 因果6秒文件回放active steady RTF=0.606，模拟到达完成P95=36.04ms/max=150.46ms，12/180帧超40ms，0主动丢帧；非物理直播，持续整链未验收 | NOT_RUN（短窗paced子项PASS，直播未测） |
 | 粗动作 R-07e | 作者权重以真实双人姿态、场地与球轨迹运行 | 新职业视频按预先agent审阅的作者窗[3016,3068)固定52帧，27有球/25缺失；不能因缺球改窗或补零冒充观测。checkpoint已取得，真实完整输入尚不满足 | BLOCKED（缺连续真实特征；不等于硬件不足） |
 | 战术方向 R-07d | 路线与可运行组件分开，缺模型/事实日志保持unavailable | 已核对MADR/CoachAI等一手路线；MADR代码未发布，依赖已标注逐拍日志。规则统计为建议未实现，自动意图识别unavailable；没有输出无证据战术判断 | PASS（研究与能力边界登记）；战术识别效果BLOCKED |
@@ -71,10 +71,18 @@ New-Item -ItemType Directory -Path $verifyDir | Out-Null
 & D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/contracts -q -p no:cacheprovider --basetemp $verifyDir
 ```
 
-主API18080已从main启动，root新预览 `job-93c4658e2a0644a5b74903568465d3b5` 与CPU研究渲染 `job-8a03b4ab5ff94074ac94bb84021088d9` 共24.41475s完成，7份产物bytes/SHA一致，Range206及源帧分页通过。浏览器再次加载旧工程，源帧#0→#1对应PTS512×1/15360；只复用既有general小样。主worker仅运行两次`--once`后退出，queue已归还models，API不自动计算GPU任务。
+主API18080已从main启动，root新预览 `job-93c4658e2a0644a5b74903568465d3b5` 与CPU研究渲染 `job-8a03b4ab5ff94074ac94bb84021088d9` 共24.41475s完成，7份产物bytes/SHA一致，Range206及源帧分页通过。浏览器再次加载旧工程，源帧#0→#1对应PTS512×1/15360，2秒导出播放至ended=true；只复用既有general小样。初次两次`--once`结束后归还queue完成VL；models明确结束所有实验并释放lease/window后，19:08重新启动main API与常驻worker，显式映射VL/Yolo隔离环境。渲染默认CPU；root随后经该API与常驻worker提交一项4秒/6秒单窗补充验收并成功，现已释放GPU租约，队列空闲，无持续自动模型作业。
 
 首次root验收脚本错误地给worker传入业务库`platform.sqlite3`，未领取队列任务；已修正为同目录`runtime.sqlite3`，原queued任务成功完成。没有删除或重写业务数据；错误建入的空queue表保留，见[验收脚本路径问题](issues/integration-worker-database-path.md)。模块失败与root验收失败均不隐去。
 
 主线`bb22c67`统一检查已通过：contracts/platform607通过7跳过，前端38通过，library186通过，models318通过14跳过，render165通过1跳过，共**1314通过、22条件跳过**。models的10个NumPy/OpenCV用例已另在既有WSL环境独立通过，不在Windows数字重复相加；余为Windows符号链接权限、真实媒体/WSL显式opt-in。旧5素材合同和实际原片/PTS重hash通过。结果见[机器可读汇总](ROUND_INTEGRATION_VALIDATION_2026-09-29.json)，不覆盖第一版JSON。
 
-library最终中断修复已合`763b369`：成功完成结果集合可幂等回放，重复Ctrl-C不会漏掉完成交接；独立原反例和32定向用例通过，真实121项仍是原单流完成，没有宣称真实双流/Range验证。VL真实首attempt在官方类加载时报config_class兼容错误，失败和停止记录保留；仅调整显式本地config实例后将重试同一冻结输入。
+library最终中断修复已合`763b369`：成功完成结果集合可幂等回放，重复Ctrl-C不会漏掉完成交接；独立原反例和32定向用例通过，真实121项仍是原单流完成，没有宣称真实双流/Range验证。
+
+VL首作业`job-a258df27cc5d4598896dd1d6495c955a`失败于配置类加载，根因是本地动态compile继承future annotations，改变固定官方代码的注解语义。修复`c609b53`→main`a9bdc42`设置dont_inherit并显式传本地config，独立与root各26项定向通过（不在1314中重复相加）。同输入新job`job-604bf54336ae449a88e004622efd6d1f`成功，events=[]、accuracy/P@K=null；不是对新Fine2026职业视频做VL，也不等于新训练或正式检索效果。
+
+该VL运行耗时73.48126s（含校验、冷加载、两窗/六查询和CLIP对照，不含结果JSON发布），Qwen冷加载31.97793s、分配峰值4,421,021,184B、预留峰值4,519,362,560B。两窗模型前向分别1.53180s与0.05444s，首窗含初次运行开销；不能仅据第二窗声称整场吞吐/实时性。PyAV为CPU解码，模型提示时间按官方格式约0.1秒，而精确原PTS单独保留。
+
+最终模型目录`42fba1e`→main`5f1577c`，11张卡及三个隔离环境组合已独立复核。源码目录为1 ready/7 experimental/3 unavailable；主工作台因独立Qwen0.6B与CLIP未映射，实际显示1 ready/5 experimental/5 unavailable，不把目录候选状态当服务已启用。
+
+root补充job `job-eda75da8ce02476ebbdcbbf3f25bad27` 通过主API→常驻worker→WSL，对同一旧真实片的[0,4000)和[0,6000)各采6帧，补齐原4–6秒单窗要求。耗时73.53280s、Qwen冷加载31.90490s、分配峰值4,421,021,184B；8个2048维向量、12排序点积、12源PTS及两产物SHA/退出停止证据通过，CLIP对照成功。窗口重叠，不是独立测试集，accuracy/P@K保持null。详见[单窗补充实验](experiments/integration-vl-window-acceptance-20260929.md)。

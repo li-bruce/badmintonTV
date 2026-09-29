@@ -7,3 +7,5 @@ root 的临时 `.runtime/verify-main-round.py` 首次把 `--db` 写成 `D:/video
 修正为 `runtime.sqlite3` 后执行原 queued 任务，预览成功；再完成研究渲染 `job-8a03b4ab5ff94074ac94bb84021088d9`。两任务7份真实产物大小/SHA、Range206与原帧分页均通过。没有新建重复预览，没有运行GPU，也没有修改既有素材/事件。业务库新增空表不删除，避免未经备份进行额外结构清理；生产启动脚本 `start-worker.ps1` 从始至终使用正确路径。
 
 复现入口：`start-worker.ps1`；结果回执 `.runtime/root-main-round-flow.json`。本问题属于本机验收脚本配置错误，不把“worker进程退出0”当作任务成功。
+
+另一次独立VL数值检查的临时脚本首次使用Windows默认GBK读取UTF-8产物，发生UnicodeDecodeError，未读入或修改产物。显式`encoding='utf8'`后，8个2048维有限归一向量、12项点积排序和12个源PTS核验通过；回执`.runtime/root-vl-numeric-verification.json`。这是验证脚本编码修正，不是模型再次失败。

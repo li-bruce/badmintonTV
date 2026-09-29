@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "recorded_at": "2026-09-29T10:59:13Z",
+  "recorded_at": "2026-09-29T19:25:12.452935+08:00",
   "source_revision": "bb22c6793a444078a7dbfa2c4fbc837c7787e403",
   "status": "PASS",
   "scope": "Software integration and listed bounded real executions; not product-stage or recognition-accuracy acceptance",
@@ -201,11 +201,208 @@
     "job-156a3f2a23fd4e3d8e73279bcdcfae33",
     "job-5a42f6e90c004698b49af6a2e600caee"
   ],
-  "vl_final_execution": "PENDING; downloaded/installed is not forward success",
+  "vl_final_execution": {
+    "job_id": "job-604bf54336ae449a88e004622efd6d1f",
+    "attempt_id": "attempt-1",
+    "status": "PASS",
+    "model_id": "qwen3-vl-embedding-2b",
+    "events_count": 0,
+    "bridge_completion_verified": true,
+    "artifacts": [
+      {
+        "kind": "video_embedding",
+        "relative_path": "models/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/features.json",
+        "size_bytes": 602179,
+        "sha256": "3c449c04a746c5cdddf6d2b1959726bcf5331db0cf7b644c6c66b26988483fb3"
+      },
+      {
+        "kind": "evaluation_report",
+        "relative_path": "models/jobs/job-604bf54336ae449a88e004622efd6d1f/attempt-1/report.json",
+        "size_bytes": 10593,
+        "sha256": "95bb77c52cb286258ddd9f4ef54bec74c5a8e734f6e944e339e69bbbb1ab0a98"
+      }
+    ],
+    "model_accuracy_verified": false
+  },
   "limitations": [
     "No human-confirmed fine labels or independent held-out matches; no recognition accuracy claim.",
     "Browser target-frame callback waits approximately one second; smooth long-video interaction has not passed.",
     "BST frozen input has 25 missing ball frames; official Inpaint mask has zero eligible positions in that window.",
     "Physical live input, sustained end-to-end real-time analysis and automatic tactical intent remain unvalidated."
-  ]
+  ],
+  "vl_numeric_verification": {
+    "status": "PASS",
+    "job_id": "job-604bf54336ae449a88e004622efd6d1f",
+    "windows": 2,
+    "queries": 6,
+    "dimension": 2048,
+    "finite_normalized_vectors": 8,
+    "norm_range": [
+      0.9999999978112193,
+      1.0000000349911604
+    ],
+    "ranking_dot_products_recomputed": 12,
+    "source_pts_points_verified": 12,
+    "clip_comparison_status": "succeeded",
+    "accuracy": null,
+    "scope": "Old real general sample, not new Fine2026 video or held-out truth; no semantic accuracy inference."
+  },
+  "post_baseline_checks": [
+    {
+      "source_revision": "a9bdc42",
+      "scope": "VL configuration loading regression",
+      "passed": 26,
+      "skipped": 0,
+      "seconds": 0.162,
+      "not_added_to_baseline_totals": true
+    }
+  ],
+  "services": {
+    "worker": "resident",
+    "prior_api_server": 38972,
+    "worker_parent": 12392,
+    "prior_api_parent": 22820,
+    "code_revision": "a9bdc42d0b98271027afd500e52cb0de3d031d37",
+    "started_at": "2026-09-29T11:08:07.5908693Z",
+    "model_flags": [
+      "EnableExperimentalYolo",
+      "EnableVlEmbedding"
+    ],
+    "gpu_window_id": "user-round-654a894c11bf4a96a997e68599dc35f3",
+    "storage_root": "D:/video",
+    "gpu_requested_seconds": 3600,
+    "api": "http://127.0.0.1:18080",
+    "render_backend": "cpu",
+    "api_parent": 31204,
+    "root_acceptance_gpu_jobs": 1,
+    "automatic_user_jobs": 0,
+    "last_acceptance_job_id": "job-eda75da8ce02476ebbdcbbf3f25bad27",
+    "last_verified_at": "2026-09-29T19:25:12.452935+08:00",
+    "last_gpu_lease": null,
+    "last_queue_active_count": 0,
+    "coordination_note": "One authorized root acceptance job supplemented the initially manual-only window; complete and idle, no scheduled or continuing GPU work.",
+    "verified_health": "ready",
+    "worker_parent_live": true,
+    "gpu_code": "GPU_WINDOW_READY"
+  },
+  "vl_measurements": {
+    "source": "old general sample asset-5ad7e41, two adjacent three-second windows; not new professional training asset",
+    "elapsed_seconds": 73.48126215103548,
+    "timing_scope": "Includes verification, cold loads, Qwen and CLIP comparison; excludes artifact JSON publication",
+    "qwen_cold_seconds": 31.97793263499625,
+    "qwen_peak_allocated_bytes": 4421021184,
+    "qwen_peak_reserved_bytes": 4519362560,
+    "device": "RTX 5090",
+    "decoder": "PyAV CPU",
+    "fine_label_accuracy": null
+  },
+  "final_integrated_revision": "5f1577c",
+  "vl_window_acceptance": {
+    "request_file": "docs/experiments/integration-vl-window-acceptance-20260929.request.json",
+    "artifact_verification": {
+      "job_id": "job-eda75da8ce02476ebbdcbbf3f25bad27",
+      "attempt_id": "attempt-1",
+      "status": "PASS",
+      "model_id": "qwen3-vl-embedding-2b",
+      "events_count": 0,
+      "bridge_completion_verified": true,
+      "artifacts": [
+        {
+          "kind": "video_embedding",
+          "relative_path": "models/jobs/job-eda75da8ce02476ebbdcbbf3f25bad27/attempt-1/features.json",
+          "size_bytes": 602149,
+          "sha256": "bef8c4f3587cc34d5fd79cb6ef7c576283b90904289d3265e3864ba5aadf407a"
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-eda75da8ce02476ebbdcbbf3f25bad27/attempt-1/report.json",
+          "size_bytes": 10705,
+          "sha256": "ca86660a120712416c2f4c518b1c05f7d780536972067f3264b277a0c0af329d"
+        }
+      ],
+      "model_accuracy_verified": false
+    },
+    "numeric_verification": {
+      "status": "PASS",
+      "job_id": "job-eda75da8ce02476ebbdcbbf3f25bad27",
+      "windows": 2,
+      "queries": 6,
+      "dimension": 2048,
+      "finite_normalized_vectors": 8,
+      "norm_range": [
+        0.9999999727050517,
+        1.000000027234056
+      ],
+      "ranking_dot_products_recomputed": 12,
+      "source_pts_points_verified": 12,
+      "clip_comparison_status": "succeeded",
+      "accuracy": null,
+      "scope": "Old real general sample, not new Fine2026 video or held-out truth; no semantic accuracy inference."
+    },
+    "windows_ms": [
+      [
+        0,
+        4000
+      ],
+      [
+        0,
+        6000
+      ]
+    ],
+    "frames_per_window": 6,
+    "elapsed_seconds": 73.53279563295655,
+    "timing_scope": "elapsed_seconds runs from before storage reservation to before artifact publication; includes verification, dependency checks, decode, cold loads, embeddings/ranking and requested CLIP comparison; excludes initial parameter/scope validation and artifact JSON I/O",
+    "qwen_cold_seconds": 31.904897211003117,
+    "qwen_peak_allocated_bytes": 4421021184,
+    "qwen_peak_reserved_bytes": 4519362560,
+    "overlapping_windows_not_independent_examples": true,
+    "source": "Existing general FBBench six-second sample; not new Fine2026 training videos",
+    "browser_verified": "Main model page showed 11 model options and this exact successful job; 1 ready, 5 experimental, 5 unavailable",
+    "accuracy": null,
+    "precision_at_k": null,
+    "independent_numeric_review": {
+      "job_id": "job-eda75da8ce02476ebbdcbbf3f25bad27",
+      "attempt_id": "attempt-1",
+      "result": "PASS",
+      "windows_ms": [
+        [
+          0,
+          4000
+        ],
+        [
+          0,
+          6000
+        ]
+      ],
+      "frames_per_window": 6,
+      "source_and_pts_index_hashes": "PASS",
+      "points_verified": 12,
+      "artifacts_checked": 2,
+      "models": {
+        "qwen": {
+          "dimension": 2048,
+          "vectors_checked": 8,
+          "norm_min": 0.9999999727050517,
+          "norm_max": 1.000000027234056,
+          "scores_checked": 12,
+          "maximum_dot_error": 1.1102230246251565E-15
+        },
+        "clip": {
+          "dimension": 512,
+          "vectors_checked": 8,
+          "norm_min": 0.9999999813320791,
+          "norm_max": 1.0000000450507274,
+          "scores_checked": 12,
+          "maximum_dot_error": 3.3306690738754696E-16
+        }
+      },
+      "queries_unchanged_from_prior_job": true,
+      "events": [],
+      "accuracy": null,
+      "precision_at_k": null,
+      "bridge_exit_code": 0,
+      "compute_stopped": true,
+      "scope": "Independent saved-file and math verification; no model run/GPU; API transport origin not inferred from artifact files"
+    }
+  }
 }

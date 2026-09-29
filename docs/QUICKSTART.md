@@ -8,7 +8,7 @@
 
 ```powershell
 $renderTools = Get-Content environments/render-runtime-compat.json -Raw | ConvertFrom-Json
-. ./configure-platform-adapters.ps1 -EnableExperimentalYolo -FfmpegPath $renderTools.checks.ffmpeg -FfprobePath $renderTools.checks.ffprobe
+. ./configure-platform-adapters.ps1 -EnableExperimentalYolo -EnableVlEmbedding -FfmpegPath $renderTools.checks.ffmpeg -FfprobePath $renderTools.checks.ffprobe
 # 第一个终端：
 ./start-platform.ps1
 # 第二个已执行上述配置的终端：
@@ -32,7 +32,7 @@ $renderTools = Get-Content environments/render-runtime-compat.json -Raw | Conver
 
 网页经 Windows worker 调用 WSL 环境，不让 WSL 打开 SQLite。默认登记规则解析、COCO17稀疏/连续姿态和TrackNet；`-EnableExperimentalYolo`显式映射独立`yolo-env`。VL使用`-EnableVlEmbedding`及独立`vl-env`，须以本轮最终模型卡与实测状态为准；未完成依赖时不启用。`-EnableExperimentalBst`只启用命令映射，当前缺少连续有效输入，不能当作粗球种已可用。没有GPU窗口时任务明确blocked。
 
-研究实施轮的模型实验正在进行，主worker暂不常驻，以便模块串行实测。后续每次先与models任务协调归还GPU，确认独立实验已停止且账本没有 active/orphaned 计算，再在仓库根为交互会话开启至多一小时窗口；下面命令仅在这些前提满足后使用：
+本轮模型实验已结束、GPU与队列已归还，main worker现已常驻。2026-09-29 19:08–20:08已开放pose/continuous-pose/TrackNet/YOLO/VL试用窗口；root补充一项4秒/6秒单窗验收后已归还，供手动使用，过期后如实blocked。后续每次先与models任务协调，确认独立实验已停止且账本没有 active/orphaned 计算，再为交互会话开启至多一小时窗口；下面命令示例只授权COCO17：
 
 ```powershell
 $gpuSession = 'interactive-' + [guid]::NewGuid().ToString('N')

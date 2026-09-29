@@ -4,23 +4,24 @@
   "measurement": "GNU du --summarize --bytes; no symlink dereference; all calls exit 0; hardlinked storage counted once by du",
   "owners_bytes": {
     "data": 14802357491,
-    "platform": 199146910,
-    "models": 6997392226,
+    "platform": 199224674,
+    "models": 6998627612,
     "render": 647917504,
-    "runtime": 22167805296
+    "runtime": 22167885110
   },
   "native_conda_base_and_pkgs_bytes": 5924496893,
   "native_conda_command": "du --summarize --bytes --exclude=envs /home/ubuntu/miniforge3",
   "hard_limit_bytes": 700000000000,
-  "shared_root_bytes": 44814619427,
-  "project_accounted_bytes": 50739116320,
-  "remaining_to_hard_limit_bytes": 649260883680,
-  "physical_D_free_bytes": 922903756800,
+  "shared_root_bytes": 44816012391,
+  "project_accounted_bytes": 50740509284,
+  "remaining_to_hard_limit_bytes": 649259490716,
+  "physical_D_free_bytes": 922902441984,
   "scope": "Measured shared project data/environments and reused native Conda base/cache; no old user environments. Not a reservation or atomic snapshot.",
   "notes": [
-    "Measured after VL dependency installation and before its final small inference output; later job deltas require owner preflight.",
+    "Full owner scan after all downloads/installations and previous VL job; changed models/platform directories remeasured after the final 4s/6s acceptance job (du exit 0). Data/render/runtime and separately remeasured native Conda unchanged. API/idle worker remain alive; non-atomic snapshot.",
     "Source worktrees and historical test scratch are not included; no cache/partial/archive deletion.",
     "Owner quotas continue to bound all concurrent writes. The library report runtime=70GB is a conservative allocation ceiling, not measured usage.",
     "Original ZIP plus extracted files, retained partial downloads, wheels, weights, environments, database and exports are retained within the measured owner trees."
-  ]
+  ],
+  "recorded_at": "2026-09-29T11:25:12.452935+00:00"
 }

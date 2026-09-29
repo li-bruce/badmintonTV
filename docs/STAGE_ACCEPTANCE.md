@@ -117,7 +117,7 @@ PASS 只适用于证据注明的范围：单元夹具、真实小样、完整比
 |---|---|---|---|---|
 | G-01 | 统一接口及关键失败边界有可复现回归，失败/跳过如实披露 | 本轮main bb22c67：Python1276+前端38，共1314通过、22条件跳过；另列WSL补测，不把跳过或历史478再次累加 | PASS | [本轮机器记录](ROUND_INTEGRATION_VALIDATION_2026-09-29.json)、`scripts/integration/check-all.ps1`；不代表模型准确率 |
 | G-02 | 源码入 Git，模型/媒体/凭据不入库；隔离环境、任务状态/错误及 GPU 协调有记录 | 四分支已集成 main，环境锁和真实任务结果可追溯。WSL CPU watchdog 已实测；真实 CUDA 中途取消未测，不包含在该 PASS 的覆盖范围 | PASS | [集成日志](INTEGRATION_LOG.md)、[环境交接](ENVIRONMENT_HANDOFF.md)、[平台验证](platform/VALIDATION.md) |
-| G-03 | 固定配额与写前预检可用，报告数据/环境实测及范围，不能把预算当已用量 | 本轮WSL只读GNU du实测约50.74十进制GB，含D盘5owner与原生Conda base/cache，低于700GB；源码/历史测试目录未计入。安装后、最后VL产物前的非原子快照，新写入仍需预检 | PASS | [本轮容量快照](ROUND_CAPACITY_2026-09-29.json)、[执行预算](EXECUTION_PLAN.md)；不把runtime70GB预算当实际占用 |
+| G-03 | 固定配额与写前预检可用，报告数据/环境实测及范围，不能把预算当已用量 | 本轮WSL只读GNU du实测50,740,509,284B（约50.74十进制GB），含D盘5owner与原生Conda base/cache，低于700GB；源码/历史测试目录未计入。所有下载/安装及最后VL产物完成后的非原子快照，新写入仍需预检 | PASS | [本轮容量快照](ROUND_CAPACITY_2026-09-29.json)、[执行预算](EXECUTION_PLAN.md)；不把runtime70GB预算当实际占用 |
 
 ## 后续每阶段的更新格式
 
