@@ -73,4 +73,5 @@ def catalog():
                        'upstream':'see weight manifests and docs/models/SOURCES.md'},
             'resource_requirements':{'device':'cpu' if not modules else 'cuda','gpu_exclusive':bool(modules),
                                      'max_clip_ms':30000,'max_frames':120}})
-    return {'schema_version':'1.0','models':models}
+    from .reuse_catalog import catalog_entries
+    return {'schema_version':'1.0','models':models+catalog_entries(root)}
