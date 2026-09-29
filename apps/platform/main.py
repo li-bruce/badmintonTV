@@ -20,6 +20,8 @@ from pydantic import ValidationError
 from packages.contracts import AssetManifest, Candidate, Event, EventManifest, QuerySpec, Timeline
 from packages.runtime import Queue, CapacityLedger, resolve_relative_path
 from packages.runtime.storage import resolve_owner_path
+from packages.runtime.artifact_identity import ArtifactIdentityError, hash_identity, check_proof
+from .artifact_response import VerifiedArtifactResponse
 from .retrieval import parse_rules, search, merge_segments
 from .store import Conflict, Store
 
@@ -55,6 +57,10 @@ def create_app(storage_root=None, db_path=None):
 
     @app.exception_handler(Conflict)
     async def conflict_handler(request, exc):
+        return JSONResponse({'detail':str(exc)},status_code=409)
+
+    @app.exception_handler(ArtifactIdentityError)
+    async def artifact_identity_handler(request, exc):
         return JSONResponse({'detail':str(exc)},status_code=409)
 
     @app.exception_handler(ValidationError)
@@ -189,6 +195,52 @@ def create_app(storage_root=None, db_path=None):
         a=asset_or_404(asset_id)
         return FileResponse(store.verified_source_path(a),media_type=mimetypes.guess_type(a['relative_path'])[0] or 'application/octet-stream',filename=Path(a['relative_path']).name,content_disposition_type='inline',headers={'Cache-Control':'no-store'})
 
+    def artifact_usage(j,a,digest):
+        # Separate each declaration so a general layer cannot overwrite a
+        # restriction. The own-hash gate uses proven bytes, never claimed SHA.
+        result=j.get('result') or {}
+        base={'relative_path':a['relative_path'],'sha256':digest}
+        declarations=[a,result]
+        for value in (a.get('producer'),result.get('producer'),result.get('preview'),result.get('frame')):
+            if isinstance(value,dict):
+                declarations.append(value)
+        records=[]
+        for declaration in declarations:
+            records.append({**base,**{key:declaration[key] for key in ('usage_scope','provenance') if key in declaration}})
+            source={key:declaration[key] for key in ('source_asset_id','source_sha256') if key in declaration}
+            if source:
+                records.append({**base,'provenance':source})
+        sources=[*store._raw_assets(),*j['payload'].get('assets',[]),*result.get('assets',[])]
+        sources.extend(value for value in (j['payload'].get('asset'),result.get('asset')) if value)
+        from packages.contracts import assert_production_allowed
+        assert_production_allowed(records,root,source_assets=sources)
+
+    def verified_artifact(j,a):
+        path=resolve_relative_path(root,a['relative_path'],must_exist=True)
+        proof=queue.artifact_identity(j['job_id'],j['attempt'],a['artifact_id'])
+        if proof is None:
+            # A legacy result's embedded proof/declared hash grants no trust.
+            # Only a bounded read may upgrade old small artifacts in the Web.
+            proof={**hash_identity(path,max_bytes=8_000_000),'relative_path':a['relative_path']}
+            artifact_usage(j,a,proof['sha256'])
+            if any(proof[key]!=a.get(key) for key in ('relative_path','sha256','size_bytes')):
+                raise ArtifactIdentityError('ARTIFACT_CHANGED: 产物实际内容与声明不一致')
+            check_proof(path,proof)
+            queue.remember_legacy_artifact_identity(j['job_id'],j['attempt'],a,proof)
+        else:
+            if any(proof[key]!=a.get(key) for key in ('relative_path','sha256','size_bytes')):
+                raise ArtifactIdentityError('ARTIFACT_CHANGED: 产物声明与可信记录不一致')
+            check_proof(path,proof)
+            artifact_usage(j,a,proof['sha256'])
+        check_proof(path,proof)
+        return path,proof
+
+    def preview_artifact(selected,relative):
+        matches=[a for a in (selected.get('result') or {}).get('artifacts',[]) if a.get('relative_path')==relative]
+        if len(matches)!=1:
+            raise ArtifactIdentityError('ARTIFACT_REVERIFY_REQUIRED: 预览路径没有唯一产物记录，请重新生成')
+        return verified_artifact(selected,matches[0])
+
     def preview_job(asset_id, job_id=None):
         asset=asset_or_404(asset_id)
         if job_id:
@@ -222,6 +274,7 @@ def create_app(storage_root=None, db_path=None):
                 raise ValueError('预览产物必须属于当前任务attempt目录')
             resolve_owner_path(root,relative,'platform',must_exist=True)
             production_assets([{'relative_path':relative,'usage_scope':p.get('usage_scope','general'),'provenance':{'source_asset_id':source['asset_id'],'source_sha256':source['sha256']}}])
+            preview_artifact(selected,relative)
         return selected,p
 
     @app.post('/api/v1/assets/{asset_id}/preview',status_code=202)
@@ -245,24 +298,34 @@ def create_app(storage_root=None, db_path=None):
     @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/frame-map')
     def preview_map(asset_id:str,job_id:str,offset_frame:int=0,limit:int=1000,at_ms:float|None=None):
         from packages.runtime.media_proxy import read_frame_map
-        _,p=ready_preview(asset_id,job_id)
-        return read_frame_map(resolve_relative_path(root,p['index_relative_path'],must_exist=True),offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+        selected,p=ready_preview(asset_id,job_id)
+        path,identity=preview_artifact(selected,p['index_relative_path'])
+        result=read_frame_map(path,offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+        check_proof(path,identity)
+        return result
 
     @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/source-frames')
     def preview_source_frames(asset_id:str,job_id:str,offset_frame:int=0,limit:int=128,at_ms:float|None=None):
         from packages.runtime.media_proxy import read_source_frames
-        _,p=ready_preview(asset_id,job_id)
-        return read_source_frames(resolve_relative_path(root,p['index_relative_path'],must_exist=True),offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+        selected,p=ready_preview(asset_id,job_id)
+        path,identity=preview_artifact(selected,p['index_relative_path'])
+        result=read_source_frames(path,offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+        check_proof(path,identity)
+        return result
 
+    @app.head('/api/v1/assets/{asset_id}/previews/{job_id}/media')
     @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/media')
     def preview_media(asset_id:str,job_id:str):
-        _,p=ready_preview(asset_id,job_id)
-        return FileResponse(resolve_relative_path(root,p['relative_path'],must_exist=True),media_type='video/mp4',headers={'Cache-Control':'no-store'})
+        selected,p=ready_preview(asset_id,job_id)
+        path,identity=preview_artifact(selected,p['relative_path'])
+        return VerifiedArtifactResponse(path,identity,media_type='video/mp4',headers={'Cache-Control':'no-store'})
 
+    @app.head('/api/v1/assets/{asset_id}/previews/{job_id}/thumbnails')
     @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/thumbnails')
     def preview_thumbnails(asset_id:str,job_id:str):
-        _,p=ready_preview(asset_id,job_id)
-        return FileResponse(resolve_relative_path(root,p['thumbnail_relative_path'],must_exist=True),media_type='image/jpeg')
+        selected,p=ready_preview(asset_id,job_id)
+        path,identity=preview_artifact(selected,p['thumbnail_relative_path'])
+        return VerifiedArtifactResponse(path,identity,media_type='image/jpeg',headers={'Cache-Control':'no-store'})
 
     @app.post('/api/v1/assets/{asset_id}/source-frame',status_code=202)
     def source_frame(asset_id:str,body:dict):
@@ -275,6 +338,7 @@ def create_app(storage_root=None, db_path=None):
         estimate_peak_bytes(payload,'exact_frame')
         return enqueue('exact_frame',payload)
 
+    @app.head('/api/v1/assets/{asset_id}/thumbnail')
     @app.get('/api/v1/assets/{asset_id}/thumbnail')
     def thumbnail(asset_id:str):
         a=asset_or_404(asset_id)
@@ -283,15 +347,11 @@ def create_app(storage_root=None, db_path=None):
             raise HTTPException(404,'尚无缩略图，请运行探测任务')
         linked={'relative_path':relative,'provenance':{'source_asset_id':a['asset_id'],'source_sha256':a['sha256']}}
         production_assets([linked])
-        path=resolve_relative_path(root,relative,must_exist=True);before=store._file_identity(path)
-        if before[2]>32_000_000:
-            raise ValueError('缩略图超过32MB上限')
-        with path.open('rb') as stream:
-            digest=hashlib.file_digest(stream,'sha256').hexdigest()
-        production_assets([{**linked,'sha256':digest}])
-        if before!=store._file_identity(path):
-            raise Conflict('缩略图校验期间变化')
-        return FileResponse(path,media_type='image/jpeg',headers={'Cache-Control':'no-store'})
+        path=resolve_relative_path(root,relative,must_exist=True)
+        proof=hash_identity(path,max_bytes=8_000_000)
+        production_assets([{**linked,'sha256':proof['sha256']}])
+        check_proof(path,proof)
+        return VerifiedArtifactResponse(path,proof,media_type='image/jpeg',headers={'Cache-Control':'no-store'})
 
     @app.get('/api/v1/assets/{asset_id}/frame-map')
     def frame_map(asset_id:str):
@@ -685,6 +745,7 @@ def create_app(storage_root=None, db_path=None):
             return {'events':store.save_events([(e,0,'model-import','agent') for e in model_events],actor='automatic')}
         return result
 
+    @app.head('/api/v1/jobs/{id}/artifacts/{artifact_id}')
     @app.get('/api/v1/jobs/{id}/artifacts/{artifact_id}')
     def artifact(id:str,artifact_id:str):
         j=job(id)
@@ -694,27 +755,10 @@ def create_app(storage_root=None, db_path=None):
         a=next((a for a in (j.get('result') or {}).get('artifacts',[]) if a['artifact_id']==artifact_id),None)
         if not a:
             raise HTTPException(404,'产物不存在')
-        # A general input does not grant production use to every output. Keep
-        # declarations separate so no general layer can overwrite a restriction.
-        result=j.get('result') or {}
-        base={'relative_path':a['relative_path'],'sha256':a['sha256']}
-        declarations=[a,result]
-        for value in (a.get('producer'),result.get('producer'),result.get('preview'),result.get('frame')):
-            if isinstance(value,dict):
-                declarations.append(value)
-        usage_records=[]
-        for declaration in declarations:
-            usage_records.append({**base,**{key:declaration[key] for key in ('usage_scope','provenance') if key in declaration}})
-            source={key:declaration[key] for key in ('source_asset_id','source_sha256') if key in declaration}
-            if source:
-                usage_records.append({**base,'provenance':source})
-        sources=[*store._raw_assets(),*j['payload'].get('assets',[]),*result.get('assets',[])]
-        sources.extend(value for value in (j['payload'].get('asset'),result.get('asset')) if value)
-        from packages.contracts import assert_production_allowed
-        assert_production_allowed(usage_records,root,source_assets=sources)
+        path,identity=verified_artifact(j,a)
         media_type=mimetypes.guess_type(a['relative_path'])[0] or 'application/octet-stream'
         inline=media_type.startswith(('video/','image/'))
-        return FileResponse(resolve_relative_path(root,a['relative_path']),filename=Path(a['relative_path']).name,
+        return VerifiedArtifactResponse(path,identity,filename=Path(a['relative_path']).name,
                             media_type=media_type,content_disposition_type='inline' if inline else 'attachment',headers={'Cache-Control':'no-store'})
 
     def llm_config():

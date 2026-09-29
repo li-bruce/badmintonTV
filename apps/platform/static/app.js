@@ -177,6 +177,7 @@ async function refreshPreview(sourceMs=null){
 async function selectAsset(id,ms=0){
   clearSourceImage();
   preview.epoch++;preview.intent++;preview.inspectRequest++;preview.seekRequest++;preview.data=null;preview.frames=[];preview.sourceFrames.clear();preview.selected=null;preview.presented=null;preview.internalSeek=false;preview.benchmark=false;
+  state.asset=null;newEvent();$('events').innerHTML='';
   $('loop-enabled').checked=false;resetLoopCounter();$('source-frame-image').hidden=true;$('source-frame-status').textContent='尚未核查源帧';$('source-frame-meta').textContent='';$('preview-thumbnails').replaceChildren();
   const epoch=preview.epoch;
   const asset=state.assets.find(a=>a.asset_id===id)||(await api('/assets')).find(a=>a.asset_id===id);
@@ -184,15 +185,17 @@ async function selectAsset(id,ms=0){
   $('player').pause();$('player').src='/api/v1/assets/'+encodeURIComponent(id)+'/media';$('player').onloadedmetadata=()=>{if(epoch===preview.epoch&&!preview.data)$('player').currentTime=ms/1000};
   $('asset-title').textContent=state.asset.title;$('asset-meta').textContent=`${state.asset.asset_id} · ${state.asset.width}×${state.asset.height} · ${state.asset.duration_ms}ms · ${state.asset.relative_path}`;
   $('preview-start').value=Math.floor(ms);$('preview-end').value=Math.min(state.asset.duration_ms,Math.floor(ms)+120000);$('source-seek-ms').value=ms;previewControls();updatePreviewReadout();
+  newEvent();
   $('ls-asset').value=id;
   try{const frameMap=await api('/assets/'+id+'/frame-map');if(epoch===preview.epoch)$('ls-map').value=json(frameMap)}catch(e){if(epoch===preview.epoch)$('ls-map').value=''}
-  if(epoch!==preview.epoch)return;newEvent();await loadEvents();
+  if(epoch!==preview.epoch)return;await loadEvents();if(epoch!==preview.epoch)return;
   try{await refreshPreview(ms)}catch(e){if(epoch===preview.epoch)$('preview-status').textContent='兼容预览尚不可用：'+e.message}
 }
 // Wait for both seeked and the frame actually submitted by the browser. A callback
 // is observation, not an exact-seek guarantee; mismatches/timeouts remain visible.
 async function seekMedia(mediaMs,{requestedSourceMs=null,measure=false}={}){
-  await waitForMedia();const player=$('player'),epoch=preview.epoch,request=++preview.seekRequest;
+  const epoch=preview.epoch;await waitForMedia();if(epoch!==preview.epoch)throw Error('寻帧所属素材已切换');
+  const player=$('player'),request=++preview.seekRequest;
   const expected=preview.data?PreviewMath.proxyAt(preview.frames,mediaMs):null;
   const start=performance.now();preview.internalSeek=true;preview.presented=null;
   const result={requested_source_ms:requestedSourceMs,target_media_ms:mediaMs,expected_proxy_frame:expected?.proxy_frame_index??null,rvfc_supported:typeof player.requestVideoFrameCallback==='function'};
@@ -408,11 +411,36 @@ async function benchmarkSeeks(group,reloadMedia=false){
 }
 action('seek-benchmark-cold',()=>benchmarkSeeks('cold_media_load',true));action('seek-benchmark-first',()=>benchmarkSeeks('first_access'));action('seek-benchmark-repeat',()=>benchmarkSeeks('repeat_access'));
 action('seek-benchmark-export',()=>download('preview-seek-measurements.json',preview.measurements));
-function newEvent(){state.event=null;$('edit-state').textContent='新标注 · revision 1';$('event-start').value=0;$('event-end').value=Math.min(1000,state.asset?.duration_ms||1000);$('event-contact').value='';resetLoopCounter()}
+let eventListRequest=0,eventEditorGeneration=0;
+function eventContext(){return {epoch:preview.epoch,assetId:state.asset?.asset_id}}
+function currentEventContext(context){return context.epoch===preview.epoch&&context.assetId===state.asset?.asset_id}
+function newEvent(){eventEditorGeneration++;state.event=null;$('edit-state').textContent='新标注 · revision 1';$('event-start').value=0;$('event-end').value=Math.min(1000,state.asset?.duration_ms||1000);$('event-contact').value='';resetLoopCounter()}
 action('new-event',async()=>newEvent());
 ['in','out','contact'].forEach((k,i)=>action('mark-'+k,async()=>{if(!state.asset)throw Error('请先选择素材');const marks=currentMarks();$(['event-start','event-end','event-contact'][i]).value=[marks.start,marks.end,marks.contact][i];if(i<2)resetLoopCounter()}));
-async function loadEvents(){const events=await api('/events?asset_id='+encodeURIComponent(state.asset.asset_id));$('events').innerHTML=events.map(e=>`<div class="card"><span class="tag">${esc(e.kind)}</span><span class="tag">${esc(e.review_status)}</span><b>${e.start_ms}–${e.end_ms}ms</b><p>${esc(e.player_id||'未知球员')} · ${esc(json(e.labels))} · v${e.revision}</p><button class="small secondary" data-event="${esc(e.event_id)}">定位 / 修改</button></div>`).join('');$('events').querySelectorAll('[data-event]').forEach(b=>b.onclick=()=>{const e=events.find(e=>e.event_id===b.dataset.event);state.event=e;$('event-start').value=e.start_ms;$('event-end').value=e.end_ms;$('event-contact').value=e.contact_ms??'';$('event-player').value=e.player_id??'';$('event-rally').value=e.rally_id??'';$('event-kind').value=e.kind;$('event-visibility').value=e.visibility;$('event-review').value=e.review_status;$('event-labels').value=json(e.labels);$('event-unknown').value=e.unknown_reason??'';$('edit-state').textContent=`编辑 ${e.event_id} · 基于 revision ${e.revision}`;seekSource(e.start_ms).catch(error=>notice(error.message,true))})}
-action('save-event',async()=>{if(!state.asset)throw Error('请先选择素材');const revision=state.event?.revision||0,start=Number($('event-start').value),end=Number($('event-end').value);const event={schema_version:'1.0',event_id:state.event?.event_id||id('event'),asset_id:state.asset.asset_id,match_id:state.asset.match_id,rally_id:$('event-rally').value||null,shot_id:null,player_id:$('event-player').value||null,track_id:null,kind:$('event-kind').value,start_ms:start,end_ms:end,contact_ms:$('event-contact').value===''?null:Number($('event-contact').value),labels:JSON.parse($('event-labels').value),visibility:$('event-visibility').value,confidence:null,review_status:$('event-review').value,revision:revision+1,provenance:{source:'manual',model_id:null,model_version:null,run_id:null},evidence:[{type:'source_interval',asset_id:state.asset.asset_id,start_ms:start,end_ms:end}],unknown_reason:$('event-unknown').value||null};state.event=await api('/events','POST',{event,expected_revision:revision,reviewer:$('reviewer').value,reviewer_type:$('reviewer-type').value});$('edit-state').textContent=`已保存 ${state.event.event_id} · revision ${state.event.revision}`;notice('标注已持久保存');await loadEvents();await overview()});
+async function loadEvents(){
+  const context=eventContext(),request=++eventListRequest;if(!context.assetId)return;
+  const current=()=>currentEventContext(context)&&request===eventListRequest;
+  let events;try{events=await api('/events?asset_id='+encodeURIComponent(context.assetId))}catch(error){if(current())throw error;return}
+  if(!current())return;
+  $('events').innerHTML=events.map(e=>`<div class="card"><span class="tag">${esc(e.kind)}</span><span class="tag">${esc(e.review_status)}</span><b>${e.start_ms}–${e.end_ms}ms</b><p>${esc(e.player_id||'未知球员')} · ${esc(json(e.labels))} · v${e.revision}</p><button class="small secondary" data-event="${esc(e.event_id)}">定位 / 修改</button></div>`).join('');
+  $('events').querySelectorAll('[data-event]').forEach(b=>b.onclick=()=>{
+    if(!current())return;const e=events.find(e=>e.event_id===b.dataset.event);if(!e||e.asset_id!==context.assetId)return;
+    eventEditorGeneration++;state.event=e;$('event-start').value=e.start_ms;$('event-end').value=e.end_ms;$('event-contact').value=e.contact_ms??'';$('event-player').value=e.player_id??'';$('event-rally').value=e.rally_id??'';$('event-kind').value=e.kind;$('event-visibility').value=e.visibility;$('event-review').value=e.review_status;$('event-labels').value=json(e.labels);$('event-unknown').value=e.unknown_reason??'';$('edit-state').textContent=`编辑 ${e.event_id} · 基于 revision ${e.revision}`;
+    seekSource(e.start_ms).catch(error=>{if(current())notice(error.message,true)});
+  });
+}
+action('save-event',async()=>{
+  if(!state.asset)throw Error('请先选择素材');
+  const asset=state.asset,context=eventContext(),generation=eventEditorGeneration;
+  const current=()=>currentEventContext(context)&&generation===eventEditorGeneration;
+  if(state.event&&state.event.asset_id!==asset.asset_id)throw Error('标注与当前素材不一致，请重新选择标注');
+  const revision=state.event?.revision||0,start=Number($('event-start').value),end=Number($('event-end').value);
+  const event={schema_version:'1.0',event_id:state.event?.event_id||id('event'),asset_id:asset.asset_id,match_id:asset.match_id,rally_id:$('event-rally').value||null,shot_id:null,player_id:$('event-player').value||null,track_id:null,kind:$('event-kind').value,start_ms:start,end_ms:end,contact_ms:$('event-contact').value===''?null:Number($('event-contact').value),labels:JSON.parse($('event-labels').value),visibility:$('event-visibility').value,confidence:null,review_status:$('event-review').value,revision:revision+1,provenance:{source:'manual',model_id:null,model_version:null,run_id:null},evidence:[{type:'source_interval',asset_id:asset.asset_id,start_ms:start,end_ms:end}],unknown_reason:$('event-unknown').value||null};
+  let saved;try{saved=await api('/events','POST',{event,expected_revision:revision,reviewer:$('reviewer').value,reviewer_type:$('reviewer-type').value})}catch(error){if(current())throw error;return}
+  if(!current())return;
+  if(saved.asset_id!==asset.asset_id||saved.event_id!==event.event_id)throw Error('标注保存回执与请求不一致');
+  state.event=saved;$('edit-state').textContent=`已保存 ${saved.event_id} · revision ${saved.revision}`;notice('标注已持久保存');await loadEvents();if(current())await overview();
+});
 action('export-events',async()=>download('events.v1.json',await api('/events/export'+(state.asset?'?asset_id='+state.asset.asset_id:''))));
 action('parse-query',async()=>{$('query-spec').value=json(await api('/queries/parse','POST',{text:$('query-text').value,player_id:$('query-player').value||null,use_llm:$('use-llm').checked}));notice('请检查解析条件，再执行检索')});
 action('search-query',async()=>{const x=await api('/queries/search','POST',JSON.parse($('query-spec').value));state.candidates=x.candidates;drawCandidates();notice(`找到 ${x.candidates.length} 条候选；排序分数不是准确率`)});

@@ -31,6 +31,12 @@ class Queue:
                     result TEXT, error TEXT, progress TEXT
                 );
                 CREATE INDEX IF NOT EXISTS jobs_claim ON jobs(status, created_at);
+                CREATE TABLE IF NOT EXISTS artifact_identities (
+                    job_id TEXT NOT NULL REFERENCES jobs(job_id), attempt INTEGER NOT NULL,
+                    artifact_id TEXT NOT NULL, relative_path TEXT NOT NULL,
+                    sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL, identity TEXT NOT NULL,
+                    PRIMARY KEY(job_id, attempt, artifact_id)
+                );
                 CREATE TABLE IF NOT EXISTS job_logs (
                     job_id TEXT NOT NULL REFERENCES jobs(job_id), seq INTEGER NOT NULL,
                     created_at REAL NOT NULL, body TEXT NOT NULL,
@@ -159,7 +165,7 @@ class Queue:
                 db.execute("UPDATE jobs SET progress=?,updated_at=? WHERE job_id=?", (json.dumps(result, ensure_ascii=False), time.time(), job_id))
             return result
 
-    def finish(self, job_id, worker_id, status, result=None, error=None, expected_attempt=None):
+    def finish(self, job_id, worker_id, status, result=None, error=None, expected_attempt=None, artifact_identities=None):
         if status not in TERMINAL:
             raise ValueError("finish requires a terminal status")
         with self.connection(write=True) as db:
@@ -170,9 +176,53 @@ class Queue:
             if row["cancel_requested"] and status == "succeeded":
                 status = "cancelled"
                 error = {"code": "cancelled", "message": "取消请求在任务完成前到达"}
+            if status == 'succeeded' and artifact_identities:
+                for artifact in (result or {}).get('artifacts', []):
+                    proof = artifact_identities.get(artifact['artifact_id'])
+                    if proof is None:
+                        raise ValueError('worker artifact identity is missing')
+                    self._record_artifact_identity(db, job_id, row['attempt'], artifact, proof)
             db.execute("UPDATE jobs SET status=?,result=?,error=?,lease_expires_at=NULL,updated_at=? WHERE job_id=?", (status, json.dumps(result, ensure_ascii=False) if result is not None else None, json.dumps(error, ensure_ascii=False) if error is not None else None, now, job_id))
             self._log(db, job_id, {"event": "state", "stage": status, "message": (error or {}).get("message", status)})
             return self._job(self._require(db, job_id))
+
+    @staticmethod
+    def _record_artifact_identity(db, job_id, attempt, artifact, proof):
+        from .artifact_identity import ArtifactIdentityError
+        identity = proof.get('identity')
+        descriptor = proof.get('descriptor_identity')
+        if (not isinstance(identity, list) or len(identity) != 5 or any(type(value) is not int for value in identity)
+                or not isinstance(descriptor, list) or len(descriptor) != 5 or any(type(value) is not int for value in descriptor)
+                or descriptor[:4] != identity[:4]
+                or any(proof.get(field) != artifact.get(field) for field in ('relative_path', 'sha256', 'size_bytes'))
+                or identity[2] != artifact.get('size_bytes')):
+            raise ArtifactIdentityError('ARTIFACT_CHANGED: 可信产物身份与声明不一致')
+        db.execute('INSERT OR REPLACE INTO artifact_identities VALUES(?,?,?,?,?,?,?)',
+                   (job_id, attempt, artifact['artifact_id'], proof['relative_path'], proof['sha256'], proof['size_bytes'],
+                    json.dumps({'path':identity,'descriptor':descriptor})))
+
+    def artifact_identity(self, job_id, attempt, artifact_id):
+        with self.connection() as db:
+            row = db.execute('SELECT * FROM artifact_identities WHERE job_id=? AND attempt=? AND artifact_id=?',
+                             (job_id, attempt, artifact_id)).fetchone()
+        if not row:
+            return None
+        result = dict(row)
+        identities = json.loads(result['identity'])
+        result['identity'] = identities['path']
+        result['descriptor_identity'] = identities['descriptor']
+        return result
+
+    def remember_legacy_artifact_identity(self, job_id, attempt, artifact, proof):
+        """Only the Web bounded hash path calls this; result JSON is not proof."""
+        from .artifact_identity import ArtifactIdentityError
+        with self.connection(write=True) as db:
+            row = self._require(db, job_id)
+            result = json.loads(row['result']) if row['result'] else {}
+            declared = next((value for value in result.get('artifacts', []) if value.get('artifact_id') == artifact['artifact_id']), None)
+            if row['status'] != 'succeeded' or row['attempt'] != attempt or declared != artifact:
+                raise ArtifactIdentityError('ARTIFACT_CHANGED: 产物任务或attempt已变化')
+            self._record_artifact_identity(db, job_id, attempt, artifact, proof)
 
     def request_cancel(self, job_id):
         with self.connection(write=True) as db:

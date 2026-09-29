@@ -199,10 +199,13 @@ def _output(context, exchange_dir, name):
 
 
 def _artifact(path, context, kind):
-    digest, size, _ = _hash(path, context)
-    return {"artifact_id": "media-" + digest[:24], "kind": kind,
-            "relative_path": path.relative_to(context.storage_root).as_posix(), "sha256": digest,
-            "size_bytes": size, "created_at": datetime.now(timezone.utc).isoformat(), "producer": "platform.media_proxy"}
+    from .artifact_identity import hash_identity, remember_worker_artifact
+    proof = hash_identity(path, check=context.check)
+    artifact = {"artifact_id": "media-" + proof['sha256'][:24], "kind": kind,
+            "relative_path": path.relative_to(context.storage_root).as_posix(), "sha256": proof['sha256'],
+            "size_bytes": proof['size_bytes'], "created_at": datetime.now(timezone.utc).isoformat(), "producer": "platform.media_proxy"}
+    remember_worker_artifact(context, artifact, proof)
+    return artifact
 
 
 def _result(context, name, value, artifacts):
