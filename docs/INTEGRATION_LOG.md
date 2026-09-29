@@ -10,6 +10,8 @@
 - root只读查验本机Python/PowerShell进程与18080/18081/18082监听，当前没有旧主服务或worker。未停止任何进程；render GPU基准期间不启动主worker，避免竞争领取任务。
 - library已开始作者完整6,455,837,331字节ZIP受限下载；有效空训练registry已原子发布（当前无完成校验的训练媒体），root读取核对。下载中文件不当完整素材；最终字节/哈希/场数/标注报告待完成。
 - render旧真实普通小样30/60fps各4次CPU技术检查通过（completion: render/benchmarks/presets-controlled-cpu-beb256d1c5fc）。GPU首次探测失败：FFmpeg9.0.2要求NVENC API13.1，本机驱动提供13.0；窗口与租约已归还。正在准备兼容构建重新公平对照，不改驱动、不把自动回退计成GPU通过。
+- 登记来源校验b7d7a85集成为aae0c99；root独立公共合同全套186 passed。library发布端同步修复待最终SHA复核。
+- render候选4ecaf6d独立审查发现来源父资产真实bytes漏验，以及取消文件协议尚未接入旧main worker的集成缺口；已交对应模块修复，暂不提前集成宣称全链通过。当前逐项状态见[本轮验收记录](ROUND_VALIDATION_2026-09-29.md)。
 
 本轮目标与断言见[实施计划](IMPLEMENTATION_ROUND_2026-09-29.md)，不以工程回归代替模型准确率、完整数据或浏览器验收。
 
