@@ -12,11 +12,15 @@ from .validation import (
     validate_event_assets, validate_event_revision, validate_output_dir,
     validate_timeline_assets, validate_job_result,
 )
+from .usage import (
+    TRAINING_REGISTRY_PATH, TrainingRegistry, TrainingRegistryEntry, UsageDecision,
+    UsageScopeError, UsageScopeGuard, assert_production_allowed, inherit_usage_scope,
+)
 
 CONTRACT_TYPES = {
     cls.__name__: cls for cls in (
         Asset, AssetManifest, Event, EventManifest, QuerySpec, Candidate,
-        ModelManifest, Artifact, Timeline, JobRequest, JobResult, ProgressEvent,
+        ModelManifest, Artifact, Timeline, JobRequest, JobResult, ProgressEvent, TrainingRegistry,
     )
 }
 
@@ -35,4 +39,6 @@ __all__ = [
     "Weight", "RESULT_EXIT_CODES", "RevisionConflict", "resolve_relative_path", "validate_candidate_assets",
     "validate_event_assets", "validate_event_revision", "validate_output_dir",
     "validate_timeline_assets", "validate_job_result", "validate_relative_path", "CONTRACT_TYPES", "schemas",
+    "TRAINING_REGISTRY_PATH", "TrainingRegistry", "TrainingRegistryEntry", "UsageDecision",
+    "UsageScopeError", "UsageScopeGuard", "assert_production_allowed", "inherit_usage_scope",
 ]
