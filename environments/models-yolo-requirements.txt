@@ -1,0 +1,16 @@
+# Isolated venv adds these wheels; torch/vision/numpy remain in read-only models/env.
+ultralytics==8.3.203
+opencv-python==4.11.0.86
+scipy==1.16.3
+matplotlib==3.10.7
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.60.1
+kiwisolver==1.4.9
+pyparsing==3.2.5
+python-dateutil==2.9.0.post0
+six==1.17.0
+ultralytics-thop==2.0.17
+polars==1.34.0
+polars-runtime-32==1.34.0
+lap==0.5.12

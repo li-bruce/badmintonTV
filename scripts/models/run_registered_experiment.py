@@ -29,7 +29,7 @@ def main():
     from packages.runtime.worker import run_once
     root=Path('D:/video'); queue=Queue(root/'platform/runtime.sqlite3')
     payload=json.loads(Path(args.payload).read_text(encoding='utf-8'))
-    allowed={'tracknetv3-reuse','qwen3-vl-embedding-2b','torchvision-continuous-pose','bst-cg-ap-reuse'}
+    allowed={'tracknetv3-reuse','qwen3-vl-embedding-2b','torchvision-continuous-pose','bst-cg-ap-reuse','yolo11n-pose-bytetrack'}
     mid=payload.get('model_id')
     if mid not in allowed or payload.get('model_version')!='0.1.0' or payload.get('gpu_required') is not True:
         raise ValueError('Expected explicitly registered research model/version/GPU payload')
