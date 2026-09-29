@@ -21,6 +21,51 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 MAX_JSON_BYTES = 16_000_000
 WINDOWS_STORAGE = PureWindowsPath("D:/video")
 LINUX_STORAGE = Path("/mnt/d/video")
+HEARTBEAT_REPLACE_RETRY_SECONDS = 0.7
+HEARTBEAT_SHARING_ERRORS = frozenset({32, 33})
+
+
+def _io_diagnostic(stage, exc, attempts):
+    """Never copy exception text/filename or heartbeat identity into diagnostics."""
+    return {"stage": stage, "type": type(exc).__name__,
+            "errno": getattr(exc, "errno", None), "winerror": getattr(exc, "winerror", None),
+            "attempts": attempts}
+
+
+def _emit_io_diagnostic(diagnostic):
+    print(json.dumps(diagnostic, ensure_ascii=True), file=sys.stderr, flush=True)
+
+
+class HeartbeatWriteError(RuntimeError):
+    def __init__(self, diagnostic):
+        self.diagnostic = diagnostic
+        super().__init__(json.dumps(diagnostic, ensure_ascii=True))
+
+
+def _target_has_delete_sharing_conflict(path):
+    """Distinguish Windows rename error 5 from a confirmed delete-share conflict.
+
+    This opens an existing file for DELETE access and immediately closes the
+    handle; it never deletes or writes it. ACL denial/read-only errors do not
+    establish a sharing conflict and must fail closed.
+    """
+    if os.name != "nt":
+        return False
+    import ctypes
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateFileW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p]
+    kernel.CreateFileW.restype = ctypes.c_void_p
+    kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+    handle = kernel.CreateFileW(str(path), 0x00010000, 0x1 | 0x2 | 0x4, None, 3, 0, None)
+    if handle in (None, ctypes.c_void_p(-1).value):
+        return ctypes.get_last_error() in HEARTBEAT_SHARING_ERRORS
+    kernel.CloseHandle(handle)
+    return False
+
+
+def _heartbeat_replace_retryable(exc, path):
+    winerror = getattr(exc, "winerror", None)
+    return winerror in HEARTBEAT_SHARING_ERRORS or (winerror == 5 and _target_has_delete_sharing_conflict(path))
 
 
 def windows_to_wsl(value, *, storage_only=False):
@@ -47,20 +92,66 @@ def windows_to_wsl(value, *, storage_only=False):
     return PurePosixPath("/mnt", path.drive[0].lower(), *parts).as_posix()
 
 
-def _atomic_json(path, body, *, replace=True):
+def _atomic_json(path, body, *, replace=True, heartbeat=False):
     path = Path(path)
     temporary = path.with_name("." + path.name + "." + uuid.uuid4().hex + ".tmp")
+    stage, attempts, failed = "open_temp", 1, False
+    deadline = time.monotonic() + HEARTBEAT_REPLACE_RETRY_SECONDS
     try:
         with temporary.open("x", encoding="utf-8") as handle:
+            stage = "write_temp"
             json.dump(body, handle, ensure_ascii=False, allow_nan=False)
+            stage = "flush_temp"
             handle.flush()
+            stage = "fsync_temp"
             os.fsync(handle.fileno())
         if replace:
-            os.replace(temporary, path)
+            stage = "replace"
+            delay, previous = 0.01, None
+            while True:
+                try:
+                    os.replace(temporary, path)
+                    if previous is not None:
+                        _emit_io_diagnostic(_io_diagnostic("heartbeat.replace.recovered", previous, attempts))
+                    break
+                except OSError as exc:
+                    remaining = deadline - time.monotonic()
+                    # Windows may report rename sharing conflicts as error 5;
+                    # retry it only after the nonmutating DELETE-access probe
+                    # positively returns a sharing violation (32/33).
+                    if not heartbeat or remaining <= 0 or not _heartbeat_replace_retryable(exc, path):
+                        raise
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise
+                    previous = exc
+                    _emit_io_diagnostic(_io_diagnostic("heartbeat.replace.retry", exc, attempts))
+                    time.sleep(min(delay, remaining))
+                    delay = min(delay * 2, 0.1)
+                    attempts += 1
         else:
+            stage = "link"
             os.link(temporary, path)
+    except OSError as exc:
+        failed = True
+        if heartbeat:
+            raise HeartbeatWriteError(_io_diagnostic("heartbeat." + stage + ".failed", exc, attempts)) from None
+        raise
+    except BaseException:
+        failed = True
+        raise
     finally:
-        temporary.unlink(missing_ok=True)
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError as exc:
+            if heartbeat:
+                diagnostic = _io_diagnostic("heartbeat.cleanup_temp.failed", exc, attempts)
+                if failed:
+                    _emit_io_diagnostic(diagnostic)  # Preserve the original I/O failure.
+                else:
+                    raise HeartbeatWriteError(diagnostic) from None
+            elif not failed:
+                raise
 
 
 def _read_json(path, max_bytes=MAX_JSON_BYTES):
@@ -158,28 +249,31 @@ def run_windows(args):
         tick = 0
         while not stop.is_set():
             try:
-                _atomic_json(heartbeat, {**record, "tick": tick, "updated_at": time.time(), "cancel_requested": False})
+                _atomic_json(heartbeat, {**record, "tick": tick, "updated_at": time.time(), "cancel_requested": False}, heartbeat=True)
             except BaseException as exc:
-                failure.append(type(exc).__name__)
+                failure.append(exc if isinstance(exc, HeartbeatWriteError) else
+                               HeartbeatWriteError(_io_diagnostic("heartbeat.publish.failed", exc, 1)))
                 return
             tick += 1
             stop.wait(0.5)
-    _atomic_json(heartbeat, {**record, "tick": -1, "updated_at": time.time(), "cancel_requested": False})
-    thread = threading.Thread(target=beat, daemon=True)
-    thread.start()
-    process = None
+    process, thread = None, None
     try:
+        _atomic_json(heartbeat, {**record, "tick": -1, "updated_at": time.time(), "cancel_requested": False}, heartbeat=True)
+        thread = threading.Thread(target=beat, daemon=True)
+        thread.start()
         process = subprocess.Popen(command, stdin=subprocess.DEVNULL, shell=False)
         while process.poll() is None:
             if failure:
-                raise RuntimeError("bridge could not maintain its heartbeat")
+                raise failure[0] from None
             time.sleep(0.1)
+        if failure:
+            raise failure[0] from None
         return process.returncode
     except BaseException:
         try:
             _atomic_json(directory / "bridge-cancel.json", {**record, "cancel_requested": True})
-        except OSError:
-            pass
+        except OSError as exc:
+            _emit_io_diagnostic(_io_diagnostic("cancel.publish.failed", exc, 1))
         if process is not None:
             try:
                 process.wait(timeout=args.heartbeat_timeout + 5)
@@ -188,9 +282,13 @@ def run_windows(args):
         raise
     finally:
         stop.set()
-        thread.join(timeout=2)
+        if thread is not None:
+            thread.join(timeout=2)
         if process is None:
-            _atomic_json(done, {**record, "compute_stopped": True, "reason": "launcher_not_started", "finished_at": time.time()}, replace=False)
+            try:
+                _atomic_json(done, {**record, "compute_stopped": True, "reason": "launcher_not_started", "finished_at": time.time()}, replace=False)
+            except OSError as exc:
+                _emit_io_diagnostic(_io_diagnostic("launcher_done.publish.failed", exc, 1))
 
 
 def _group_alive(pgid):
@@ -363,7 +461,11 @@ def main(argv=None):
     if not args.env_prefix or not args.repo:
         parser.error("administrator env-prefix and repo configuration are required")
     if args.command == "run":
-        return run_windows(args)
+        try:
+            return run_windows(args)
+        except HeartbeatWriteError as exc:
+            _emit_io_diagnostic(exc.diagnostic)
+            return 1
     if os.name == "nt":
         parser.error("Linux supervision entry points cannot run on Windows")
     return linux_entry(args) if args.command == "_linux_entry" else supervise_model(args)
