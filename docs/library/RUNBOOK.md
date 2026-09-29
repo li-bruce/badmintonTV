@@ -65,6 +65,25 @@ D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.check_con
 
 脚本只接受已核验Drone_BD单片URL与5,857,600 bytes上限，配套CSV固定28,707 bytes，README固定Git提交且最多100KB。批次预留50MB；幂等运行逐一验证原始收据和SHA，无新下载；独立`assets.doubles.v1.json`、`annotations.doubles.v1.json`、`splits.doubles.v1.json`及`doubles-acquisition.v1.json`都在data/handoff，修改留下审计。保留原四片与旧manifest。孤立的新小样PTS保留并显式报错，人工查明后选新的attempt路径，不盲目覆写。
 
-可选归档API：`packages.library.archive.inspect_zip(path)`只读有界中央目录（最多10,000项/16MiB）；`extract_member(archive, member_name, relative_path, quota=..., max_bytes=..., expected_archive_sha256=...)`只流式提取一个明确普通文件。原ZIP必须位于data owner并保留；禁路径穿越、链接/加密/重复成员，不覆盖目标；`.extract.part/.extract.json/.lock`保留失败与锁信息。首次实现不支持ZIP64中央目录、多卷或尾随数据，不提供无界extractall。本轮没有真实ZIP取回/解压，不能把本地ZIP测试算真实素材成功。
+可选归档API：`packages.library.archive.inspect_zip(path)`只读有界中央目录（最多10,000项/16MiB）；`extract_member(archive, member_name, relative_path, quota=..., max_bytes=..., expected_archive_sha256=...)`只流式提取一个明确普通文件。原ZIP必须位于data owner并保留；禁路径穿越、链接/加密/重复成员，不覆盖目标；`.extract.part/.extract.json/.lock`保留失败与锁信息。2026-09-29新增标准单卷ZIP64支持；多卷、扩展ZIP64扇区、前后附加数据仍拒绝，不提供无界extractall。实际公开ZIP验收单独记录，不把本地ZIP测试算真实素材成功。
 
 选中成员只允许`ZIP_STORED`/`ZIP_DEFLATED`。BZIP2、LZMA及其他格式在打开成员前返回`unsupported_compression`，因为固定read长度不能限制这些路径的内部解压分配。详见[内存边界修复](../issues/library-zip-compression-memory.md)。
+
+## 完整训练包（2026-09-29）
+
+```powershell
+C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_training_dataset --phase download
+C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_training_dataset --phase extract
+D:/video/runtime/platform/env/Scripts/python.exe -B -m scripts.library.acquire_training_dataset --phase probe --contracts-root C:/Users/USER/Desktop/Program/badmintonTV --workers 2 --ffprobe D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin/ffprobe.exe --ffmpeg D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin/ffmpeg.exe
+C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotations
+```
+
+前三步依次执行。第四步须等Fine-Badminton ZIP writer退出且官方MD5/大小校验通过，可与后续CPU探测并行；不要同时启动另一个下载writer。这里只列可执行流程，真实完成状态见`docs/status/library.md`与数据验收报告。
+
+完整包固定Zenodo record20292976/v1.0、6,455,837,331 bytes及作者MD5；下载预留40GB，实际字节受精确上限控制。解压总声明上限20GB，另预留声明总额+1GB，单成员提取仍独立预留；共享配额按叠加的保守预留和实占核算。完整原ZIP只读保留，每个成员提取前后校验整个ZIP SHA。本机Windows长路径未开启，因此解压文件用原成员名SHA前24位与扩展名生成短路径；原始名称和精确映射留在ZIP及`archive-inventory.v1.json`，映射碰撞拒绝。
+
+视频完整提取并校验后先登记到`data/training/handoff/training-registry.v1.json`。探测每视频均CPU全解码及全量PTS扫描，最多2个worker，每视频PTS最多2,000,000帧/128MB；每个成功Asset经新合同校验后增量发布到`data/training/handoff/fine-badminton-2026-zenodo-20292976-v1.0.assets.v1.json`。重跑先验证既有清单及原件，再合并成功项，避免中断后缩减已有资产。split保持unassigned，两处usage_scope均training_only，未知注释时基不能生成Event。
+
+`--contracts-root`仅只读复用main新合同；使用既有platform Python提供Pydantic，不安装依赖，不在合同目录写字节码。实际合同提交SHA在验收中记录。
+
+BFMD配置固定到已核对的121项（115活动JSON、1备份、5根源文件），1,825,439,459 bytes，预留2.5GB。文件ID、路径、大小、类型及URL组合的固定SHA验证选择不变；下载只用正常公开Drive入口，遇标准Download anyway页最多读64KiB并正常提交一次。登录、验证码、403/429、异常确认停止批次，保留已验证成果及未尝试数；动态确认UUID不写入收据。作者脚本仅归档，不执行；无视频，不创建Asset、不转换Event。结果为`data/training/handoff/bfmd.annotations.v1.json`。

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "fine-badminton-2026-zenodo-20292976-v1.0",
+  "record_id": 20292976,
+  "version": "v1.0",
+  "api_url": "https://zenodo.org/api/records/20292976",
+  "source_page": "https://zenodo.org/records/20292976",
+  "download_url": "https://zenodo.org/api/records/20292976/files/Fine-Badminton.zip/content",
+  "file_name": "Fine-Badminton.zip",
+  "size_bytes": 6455837331,
+  "publisher_md5": "cb3fcaca0ae9b08c564ac2a19ae4e7a0",
+  "usage_scope": "training_only",
+  "split": "unassigned",
+  "download_peak_bytes": 40000000000,
+  "extraction_total_limit_bytes": 20000000000,
+  "source_claims": {"matches": 10, "duration_hours": 10.72, "frames": 980703, "annotations": 9817, "stroke_categories": 29}
+}
