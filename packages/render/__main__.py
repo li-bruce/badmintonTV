@@ -12,8 +12,20 @@ from .storage import atomic_json
 from .timeline import safe_path, require
 
 
+def resolve_cancel_file(root, relative, environment_file, request):
+    if environment_file:
+        path = Path(environment_file)
+        require(path.is_absolute(), "BTV_RENDER_CANCEL_FILE must be absolute")
+        expected = safe_path(root, f"platform/jobs/{request.get('job_id')}/{request.get('attempt_id')}/cancel.request")
+        require(path.resolve() == expected, "BTV_RENDER_CANCEL_FILE must match this job/attempt exchange directory")
+        return path.resolve()
+    path = safe_path(root, relative) if relative else None
+    require(not path or path.is_relative_to(root / "render"), "cancel_file must be below render/")
+    return path
+
+
 def main():
-    parser = argparse.ArgumentParser(description="badmintonTV CPU renderer (contract 1.0)")
+    parser = argparse.ArgumentParser(description="badmintonTV renderer (contract 1.0)")
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run")
     run.add_argument("--request", type=Path, required=True)
@@ -22,6 +34,7 @@ def main():
     run.add_argument("--ffmpeg", default=os.environ.get("BTV_FFMPEG", "ffmpeg"))
     run.add_argument("--ffprobe", default=os.environ.get("BTV_FFPROBE", "ffprobe"))
     run.add_argument("--threads", type=int, default=4)
+    run.add_argument("--backend", choices=("cpu", "nvenc", "auto"), default=os.environ.get("BTV_RENDER_BACKEND", "cpu"))
     run.add_argument("--cancel-file", help="storage-root relative path below render/")
     run.add_argument("--font-name", default="Microsoft YaHei" if os.name == "nt" else "Noto Sans CJK SC")
     args = parser.parse_args()
@@ -41,9 +54,10 @@ def main():
         require(args.request.stat().st_size <= 10_000_000, "request exceeds 10MB")
         request = json.loads(args.request.read_text(encoding="utf-8-sig"))
         root = args.storage_root.resolve()
-        cancel_file = safe_path(root, args.cancel_file) if args.cancel_file else None
-        require(not cancel_file or cancel_file.is_relative_to(root / "render"), "cancel_file must be below render/")
-        cfg = RenderConfig(root, args.ffmpeg, args.ffprobe, args.threads, font_name=args.font_name, cancel_file=cancel_file)
+        cancel_file = resolve_cancel_file(root, args.cancel_file, os.environ.get("BTV_RENDER_CANCEL_FILE"), request)
+        cfg = RenderConfig(root, args.ffmpeg, args.ffprobe, args.threads, font_name=args.font_name, cancel_file=cancel_file,
+                           backend=args.backend, runtime_db=Path(os.environ["BTV_RUNTIME_DB"]) if os.environ.get("BTV_RUNTIME_DB") else None,
+                           gpu_lease_id=os.environ.get("BTV_GPU_LEASE_ID"))
         result = render(request, cfg, emit, lambda: cancelled)
         atomic_json(args.result, result)
         return {"succeeded": 0, "failed": 1, "cancelled": 130, "blocked": 2}[result["status"]]

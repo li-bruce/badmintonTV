@@ -1,5 +1,15 @@
 # Render 状态
 
+## 2026-09-29 实施轮（进行中）
+
+- 设计：已读main ff2c700新轮与复用调研，见 `docs/render/ROUND_2026-09-29.md`。新分支 `codex/render-presets-acceleration`，旧work/render干净保留。
+- 已实现：30/60fps命名档、安全区文字布局、Shorts总输出180秒限制、可信CPU/NVENC/auto后端、共享GPU租约核验、原始全部引用逐字节hash+公共训练用途门禁、actual fps/field_order/faststart QA。
+- 已运行：113快测通过/3 Windows symlink权限skip/331subtests；后补8项预设入口测试通过。FFmpeg9 CPU30/60各首次+重复3共8job技术PASS，CPU全流程约10.3–11.6秒/17秒片。证据 `D:/video/render/benchmarks/presets-controlled-cpu-beb256d1c5fc/`。
+- 失败：第一次真实NVENC probe blocked/backend_unavailable，FFmpeg9要求NVENC API13.1而驱动提供13.0，见独立issue；没有静默fallback。该job/lease已停止释放，窗口4e5823beb9ca已revoke。
+- 协调：平台GPU7354b1f、合同a7fff391已同步（本分支等价987848b、29d47c4）。library独占初始化有效空registry；正在下载的职业数据不进入本基准。当前GPU已归还models，兼容构建仅CPU/网络准备，之后重新申请。
+- 下一步：隔离核验兼容旧FFmpeg且重跑同构建CPU/NVENC，补无损参考质量指标和原图/字幕区域审阅。没有原生60fps源，未启用NVDEC。
+- 环境/容量：复用FFmpeg9.0.2和平台只读Python，CPU4线程，无端口/新Python依赖；兼容构建预计新增<870MB峰值，runtime/render5GB内，保留旧构建不改全局驱动。输出仅D:/video/render，40GB上限。新提交SHA待产生。
+
 更新：2026-09-28。任务 `01a0e88b-5005-7991-9fb0-d2dec3af8b4f`；分支 `work/render`；cwd `C:\Users\USER\.codex\worktrees\3e52\badmintonTV`。
 
 - 设计：完成 `docs/render/DESIGN.md`，先设计后实现；统一合同8900958兼容已实跑。
