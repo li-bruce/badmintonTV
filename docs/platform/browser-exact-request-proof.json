@@ -1,0 +1,41 @@
+{
+  "captured_at": "2026-09-29T10:11:59.8292282Z",
+  "basis": "Private API read after actual Edge clicks; this is a short real-derived clip, not a long-match load test",
+  "baseline_exact_job_count": 2,
+  "after_three_ordinary_steps_exact_job_count": 2,
+  "cache_reused_visible_in_browser": true,
+  "exact_jobs": [
+    {
+      "job_id": "job-76ab9527c53146868463ebc1bc0052b3",
+      "status": "succeeded",
+      "attempt": 1,
+      "worker_id": "platform-exact-cache-once",
+      "cancel_requested": false,
+      "source_frame_index": 62
+    },
+    {
+      "job_id": "job-3232068ebb15432aacf59d96585d50c4",
+      "status": "cancelled",
+      "attempt": 0,
+      "worker_id": null,
+      "cancel_requested": true,
+      "source_frame_index": 61
+    },
+    {
+      "job_id": "job-38baeb8df6564d929aaedbbc680c1d07",
+      "status": "succeeded",
+      "attempt": 1,
+      "worker_id": "platform-preview-research-r3",
+      "cancel_requested": false,
+      "source_frame_index": 62
+    },
+    {
+      "job_id": "job-35facfae1d684d38a53cc1e1b59826d1",
+      "status": "succeeded",
+      "attempt": 1,
+      "worker_id": "platform-preview-research-r3",
+      "cancel_requested": false,
+      "source_frame_index": 61
+    }
+  ]
+}
