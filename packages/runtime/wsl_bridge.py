@@ -11,6 +11,7 @@ import json
 import os
 import re
 import signal
+import stat
 import subprocess
 import sys
 import threading
@@ -42,15 +43,15 @@ class HeartbeatWriteError(RuntimeError):
         super().__init__(json.dumps(diagnostic, ensure_ascii=True))
 
 
-def _target_has_delete_sharing_conflict(path):
-    """Distinguish Windows rename error 5 from a confirmed delete-share conflict.
+def _delete_access_error(path):
+    """Return a Windows DELETE-open error, or zero when that access is allowed.
 
     This opens an existing file for DELETE access and immediately closes the
     handle; it never deletes or writes it. ACL denial/read-only errors do not
     establish a sharing conflict and must fail closed.
     """
     if os.name != "nt":
-        return False
+        return None
     import ctypes
     kernel = ctypes.WinDLL("kernel32", use_last_error=True)
     kernel.CreateFileW.argtypes = [ctypes.c_wchar_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_void_p]
@@ -58,14 +59,78 @@ def _target_has_delete_sharing_conflict(path):
     kernel.CloseHandle.argtypes = [ctypes.c_void_p]
     handle = kernel.CreateFileW(str(path), 0x00010000, 0x1 | 0x2 | 0x4, None, 3, 0, None)
     if handle in (None, ctypes.c_void_p(-1).value):
-        return ctypes.get_last_error() in HEARTBEAT_SHARING_ERRORS
+        return ctypes.get_last_error()
     kernel.CloseHandle(handle)
-    return False
+    return 0
 
 
-def _heartbeat_replace_retryable(exc, path):
+def _target_has_delete_sharing_conflict(path):
+    return _delete_access_error(path) in HEARTBEAT_SHARING_ERRORS
+
+
+def _regular_identity(path):
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or
+            getattr(info, "st_file_attributes", 0) & (0x1 | 0x400)):
+        raise ValueError("heartbeat file is not a writable regular file")
+    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def _directory_identity(path):
+    info = path.lstat()
+    if (not stat.S_ISDIR(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400 or
+            path.resolve(strict=True) != path.absolute()):
+        raise ValueError("heartbeat directory is not a direct directory")
+    return (info.st_dev, info.st_ino)
+
+
+def _prior_heartbeat_retryable(path, temporary, prior, prepared, attempts):
+    """Narrow Win5 recovery after this publisher already replaced the target.
+
+    A DELETE-sharing conflict can disappear between rename and the probe. Only
+    the same earlier heartbeat, directory and fsynced temporary may use the
+    access-available case; this does not infer that any Win5 was transient.
+    """
+    if os.name != "nt" or prior is None or prepared is None:
+        return False
+    try:
+        if (path.name != "bridge-heartbeat.json" or temporary.parent != path.parent or
+                prior[0] != str(path.absolute()) or _directory_identity(path.parent) != prior[2] or
+                _regular_identity(path) != prior[1] or _regular_identity(temporary) != prepared):
+            _emit_io_diagnostic({"stage": "heartbeat.replace.proof.mismatch", "type": "IdentityMismatch",
+                                 "errno": None, "winerror": None, "attempts": attempts})
+            return False
+    except (OSError, ValueError) as exc:
+        _emit_io_diagnostic(_io_diagnostic("heartbeat.replace.proof.rejected", exc, attempts))
+        return False
+    errors = [_delete_access_error(item) for item in (temporary, path)]
+    # Never retry an ACL denial, missing path or unknown probe failure. A source
+    # or target sharing conflict is eligible; both accessible is the cleared race.
+    allowed = all(error == 0 or error in HEARTBEAT_SHARING_ERRORS for error in errors)
+    probe = next((error for error in errors if error not in (0, 32, 33)),
+                 next((error for error in errors if error), 0))
+    _emit_io_diagnostic({"stage": "heartbeat.replace.delete_probe.allowed" if allowed else
+                         "heartbeat.replace.delete_probe.denied", "type": "DeleteAccessProbe",
+                         "errno": None, "winerror": probe, "attempts": attempts})
+    return allowed
+
+
+def _heartbeat_replace_retryable(exc, path, temporary, prior, prepared, attempts):
     winerror = getattr(exc, "winerror", None)
-    return winerror in HEARTBEAT_SHARING_ERRORS or (winerror == 5 and _target_has_delete_sharing_conflict(path))
+    return winerror in HEARTBEAT_SHARING_ERRORS or (winerror == 5 and (
+        _prior_heartbeat_retryable(path, temporary, prior, prepared, attempts) if prior is not None else
+        _target_has_delete_sharing_conflict(path)))
+
+
+class _HeartbeatPublisher:
+    """One local publisher retains proof; request JSON cannot supply it."""
+    def __init__(self, path, record):
+        self.path, self.record, self.prior = path, dict(record), None
+
+    def publish(self, tick):
+        self.prior = _atomic_json(self.path, {**self.record, "tick": tick, "updated_at": time.time(),
+                                 "cancel_requested": False}, heartbeat=True, prior_heartbeat=self.prior,
+                                 remember_heartbeat=True)
 
 
 def windows_to_wsl(value, *, storage_only=False):
@@ -92,7 +157,7 @@ def windows_to_wsl(value, *, storage_only=False):
     return PurePosixPath("/mnt", path.drive[0].lower(), *parts).as_posix()
 
 
-def _atomic_json(path, body, *, replace=True, heartbeat=False):
+def _atomic_json(path, body, *, replace=True, heartbeat=False, prior_heartbeat=None, remember_heartbeat=False):
     path = Path(path)
     temporary = path.with_name("." + path.name + "." + uuid.uuid4().hex + ".tmp")
     stage, attempts, failed = "open_temp", 1, False
@@ -105,6 +170,8 @@ def _atomic_json(path, body, *, replace=True, heartbeat=False):
             handle.flush()
             stage = "fsync_temp"
             os.fsync(handle.fileno())
+        stage = "verify_temp"
+        prepared = _regular_identity(temporary) if remember_heartbeat else None
         if replace:
             stage = "replace"
             delay, previous = 0.01, None
@@ -116,10 +183,8 @@ def _atomic_json(path, body, *, replace=True, heartbeat=False):
                     break
                 except OSError as exc:
                     remaining = deadline - time.monotonic()
-                    # Windows may report rename sharing conflicts as error 5;
-                    # retry it only after the nonmutating DELETE-access probe
-                    # positively returns a sharing violation (32/33).
-                    if not heartbeat or remaining <= 0 or not _heartbeat_replace_retryable(exc, path):
+                    if not heartbeat or remaining <= 0 or not _heartbeat_replace_retryable(
+                            exc, path, temporary, prior_heartbeat, prepared, attempts):
                         raise
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
@@ -132,6 +197,9 @@ def _atomic_json(path, body, *, replace=True, heartbeat=False):
         else:
             stage = "link"
             os.link(temporary, path)
+        if remember_heartbeat:
+            stage = "remember_identity"
+            return (str(path.absolute()), _regular_identity(path), _directory_identity(path.parent))
     except OSError as exc:
         failed = True
         if heartbeat:
@@ -242,6 +310,7 @@ def run_windows(args):
     heartbeat = directory / "bridge-heartbeat.json"
     token = uuid.uuid4().hex
     record = _base_record(request, token)
+    publisher = _HeartbeatPublisher(heartbeat, record)
     command = build_wsl_command(args, linux_request, linux_result, token)
     stop = threading.Event()
     failure = []
@@ -249,7 +318,7 @@ def run_windows(args):
         tick = 0
         while not stop.is_set():
             try:
-                _atomic_json(heartbeat, {**record, "tick": tick, "updated_at": time.time(), "cancel_requested": False}, heartbeat=True)
+                publisher.publish(tick)
             except BaseException as exc:
                 failure.append(exc if isinstance(exc, HeartbeatWriteError) else
                                HeartbeatWriteError(_io_diagnostic("heartbeat.publish.failed", exc, 1)))
@@ -258,7 +327,7 @@ def run_windows(args):
             stop.wait(0.5)
     process, thread = None, None
     try:
-        _atomic_json(heartbeat, {**record, "tick": -1, "updated_at": time.time(), "cancel_requested": False}, heartbeat=True)
+        publisher.publish(-1)
         thread = threading.Thread(target=beat, daemon=True)
         thread.start()
         process = subprocess.Popen(command, stdin=subprocess.DEVNULL, shell=False)
