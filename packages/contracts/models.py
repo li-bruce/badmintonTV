@@ -81,6 +81,7 @@ class Asset(VersionedModel):
     title: str = ""
     match_id: Identifier
     source_type: SourceType
+    usage_scope: Literal["general", "training_only"] = "general"
     source_url: str | None = None
     source_page: str | None = None
     acquired_at: datetime | None = None

@@ -4,6 +4,8 @@
 
 `asset-manifest.json`、`events.json`、`query.json`、`candidate.json`、`timeline.json` 和 `model-manifest.json` 覆盖主要交换对象。`render-request.json` 有非空已确认的合成片段，`model-request.json` 展示模型入口；assets 只放顶层数组。`result-{succeeded,failed,blocked,cancelled}.json` 与请求的 job_id/attempt_id 一致，分别匹配退出码 0/1/2/130。`progress.jsonl` 无 attempt_id，归属由启动该子进程的 worker 记录。所有未校准置信度、未知手法与未观测值保留 null/unknown。
 
+2026-09-29 用途隔离扩展：旧 Asset fixture 故意不加 usage_scope，用于验证默认 general 的兼容性；`usage-scope-training-asset.json` 与 `usage-scope-derived-asset.json` 展示 training_only 及来源 ID/hash 继承，`training-registry.json` 展示不需要媒体探测字段的最小 registry。此处 registry 只是结构夹具，**不得发布到实际数据 registry**。真实 registry 仅由 library 写到共享根固定 `data/training/handoff/training-registry.v1.json`。
+
 schema 文件在相邻 `../schemas/`；可重新导出：
 
 ```powershell

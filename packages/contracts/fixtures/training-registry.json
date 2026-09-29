@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "asset_id": "asset-training-contract-synthetic",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "relative_path": "data/training/contract-fixture/source.mp4",
+      "usage_scope": "training_only",
+      "provenance": {
+        "fixture_only": true,
+        "synthetic": true
+      }
+    }
+  ]
+}
