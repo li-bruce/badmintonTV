@@ -40,6 +40,9 @@ request/result必填attempt_id；stdout严格ProgressEvent JSONL，seq递增；�
 参数均放`parameters`：
 
 - `timeline`：canonical Timeline。
+- `export_preset`：`portrait_1080p30`（默认）或`portrait_1080p60`，均1080×1920 H.264/yuv420p/AAC48k。显式Timeline.output须与命名档一致，否则preset_conflict；不指定命名档时保留旧24/25/30/50/60输入。30fps封顶8M/缓冲16M，50/60fps12M/24M，实际文件码率受内容影响。
+- `platform_profile="youtube_shorts"`：可选，仅此档要求按最终总帧数/帧率计算的成片≤180秒，包含慢放效果。其他平台不自动套用此限制；平台上传接受仍未测试。
+- `safe_area`：可选归一化`{x:0.06,y:0.10,width:0.82,height:0.78}`，调节标题/字幕/说明的边距和大小，供UI绘制覆盖层；不烧入辅助框，也不裁比赛画面。这是产品默认布局，不是跨平台官方安全区保证。
 - `preview=true`：实际360×640轻量输出，时间/构图逻辑一致；保存的Timeline仍为1080×1920正式工程，实际尺寸记在QA/source_map。
 - `research_preview=true`：未人工确认的本地研究演示，画面加固定说明；默认false。
 - `merge_overlaps=true`：仅合并相邻、同源且编辑设置相同的重叠窗口；审核状态取保守结果，原区间与全部审核者来源保留，任一未确认不会自动升级。
@@ -47,6 +50,20 @@ request/result必填attempt_id；stdout严格ProgressEvent JSONL，seq递增；�
 - `segment_options`：以segment_id为键，每项可含`subtitles`（片段输出毫秒）、`replay_group_id`、`editorial_review`（含reviewer_type）。所有扩展保存在source_map；恢复工程须连同扩展加载。
 
 输出4个已校验Artifact：video/mp4、timeline、source_map、qa_report。Timeline可直接过统一合同；source_map记录源hash、原片毫秒、time_base/start_pts、library PTS索引引用、速度、输出帧边界、量化误差及去重回查。QA的技术通过不表示手法正确或可公开发布。
+
+预设、安全区和平台profile扩展也保存在source_map的`editorial_metadata.preset`及原始request；重载工程须恢复这些parameters。Timeline本身仍只保存合同允许的正式输出规格，360×640预览不改变1080×1920工程。
+
+## 后端与训练用途隔离
+
+管理员使用`BTV_RENDER_BACKEND=cpu|nvenc|auto`或独立CLI `--backend`，默认cpu。请求JSON不能覆盖可信后端。CPU/NVENC均使用CPU解码、ASS字幕、缩放和补边；NVENC只加速H.264编码，未启用NVDEC。30fps转60fps不增加真实动作信息。
+
+nvenc/auto必须通过同一`D:/video/platform/runtime.sqlite3`窗口+worker作业租约。worker注入`BTV_RUNTIME_DB/BTV_GPU_LEASE_ID`，render只读核对job/attempt/worker/model/resource/截止时间，并在运行中持续检查。管理员runner见`docs/platform/CONTROLLED_GPU_RUN.md`；不能只grant窗口后直接运行FFmpeg。编码器以实际输出尺寸/帧率做短可用性预检：nvenc初始化失败明确blocked/backend_unavailable；auto仅对此预检的编码失败回退CPU，原因记录在backend.json和QA。实际分段开始后的失败、取消或租约失效均停止作业，不重跑或降级。CQ21与CRF21不是质量等价承诺。
+
+平台优雅取消使用可信环境变量`BTV_RENDER_CANCEL_FILE`，绝对路径必须精确对应当前`platform/jobs/<job_id>/<attempt_id>/cancel.request`；文件存在即取消，无内容格式要求。此可信env优先于独立CLI `--cancel-file`，后者继续限定render下相对路径。取消时等待本次FFmpeg停止，再释放本模块容量锁。
+
+使用包含共享合同依赖的`D:/video/runtime/platform/env/Scripts/python.exe`运行。原片检查在合并/去重前覆盖每一个原始引用：共享用途helper检查typed/provenance、逻辑/物理保留路径、受信注册表以及实际文件hash。training_only即使confirmed、preview或research_preview仍拒绝；registry损坏/待发布时fail closed。独立CLI也执行同一门禁。没有安装训练框架或修改共享Conda。
+
+QA新增实际avg/r帧率、progressive field_order、moov早于mdat的faststart、requested/effective backend和阶段命令/耗时。技术QA、平台上传、人工业务审核和公开权利仍分别记录。
 
 ## 已交付真实样片
 
