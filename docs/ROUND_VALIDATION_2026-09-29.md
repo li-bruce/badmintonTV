@@ -2,7 +2,7 @@
 
 本轮目标由 [实施计划](IMPLEMENTATION_ROUND_2026-09-29.md) 定义。本表区分工程实现、真实运行与模型效果，旧轮次的 `INTEGRATION_VALIDATION.json` 不作为本轮通过证据。状态仅使用 PASS / FAIL / BLOCKED / NOT_RUN；阶段中部分断言通过不代表整阶段达标。
 
-## 当前检查点：2026-09-29 17:27（北京时间）
+## 当前检查点：2026-09-29 17:40（北京时间）
 
 | 检查 | 目标 / 预期 | 实际 / 证据 | 状态 |
 |---|---|---|---|
@@ -12,7 +12,7 @@
 | 播放代理 R-02a | CFR、VFR、浏览器不支持格式有代理，回写源PTS误差≤一源帧 | 模块真实CPU测试和浏览器测量进行中；最终源码未集成 | NOT_RUN |
 | 网页交互 R-02b | 定位、逐帧、循环、缩略图和标注保存；30点冷/热统计 | 源帧映射、seeked事件、最终画面呈现分别记录；仍在测量 | NOT_RUN |
 | 竖屏输出 R-01a | 1080×1920，30/60fps，H.264/AAC，安全区及工程设置可复用 | 模块旧普通真实素材CPU各4轮完成，主线集成与设置持久化尚待验证 | NOT_RUN |
-| 硬件编码 R-03a | 同版本同输入CPU/NVENC，技术/质量/实际耗时证据齐全 | FFmpeg9实测因NVENC API13.1/驱动13.0不兼容失败；隔离FFmpeg8已准备重测 | FAIL（首次配置；兼容方案待测） |
+| 硬件编码 R-03a | 同版本同输入CPU/NVENC，技术/质量/实际耗时证据齐全 | FFmpeg9首次因API不兼容失败；隔离FFmpeg8同版本CPU/NVENC各8次技术检查通过，root核对16任务全部产物bytes/SHA。质量与视觉检查进行中 | NOT_RUN（兼容方案技术子项PASS；首次FAIL保留） |
 | 轨迹 R-07a | 官方权重、真实输入、源PTS球点/缺失及时间记录 | 旧真实6秒视频离线与因果回放均成功；root核验合同、产物SHA、bridge停止、180帧单调PTS与坐标边界。新职业数据和诊断画面待核 | NOT_RUN（旧真实小样运行子项PASS） |
 | 姿态/位置 R-07b | 坐标可回查，校准和跟踪含义明确 | 连续pose模块报告90真实源PTS帧成功；root尚未核验，场地/身份关联另待验证 | NOT_RUN |
 | 视频向量 R-05a | 隔离WSL对真实短窗及中文查询产生有限向量/排序 | Qwen3-VL-Embedding-2B权重与独立环境下载中 | NOT_RUN |
@@ -38,6 +38,14 @@ root使用 `scripts/integration/verify-job-artifacts.py --require-bridge` 读取
 | `job-4081ac5e54f944b7b087c149efe43e69` / causal_last | 同源180帧，160点/20缺失（含8帧预热）；冷启动11.15211s，paced pipeline5.98484s；每项available_after_source_ms不超过该源帧PTS。2产物大小/SHA与bridge停止/exit0通过 |
 
 两次实际输入均为旧FBBench小样asset-5ad7e41a…，不是正在下载的新职业数据。全部源PTS单调，点坐标有限且在原1280×720范围；accuracy/recall均为null，events为空。上述结构检查不能证明点落在羽球上。NVDEC未使用，解码是PyAV软件路径。首次因果尝试的bridge心跳失败由模块保留独立记录，后续成功不覆盖失败。
+
+## 主线源码与分环境验证
+
+- render `4ecaf6d + db587aa` → main `6518a09 + 281c137`；独立来源闭包反例复核通过，main 142 passed / 1 Windows symlink skip。
+- models `3d018eb` → main `9975361`；平台轻环境227 passed / 13 skip，其中10个NumPy/OpenCV算法用例已在既有WSL模型env独立补跑10/10通过。剩3项为Windows symlink权限。未向平台安装训练依赖；这些检查不加载GPU权重。
+- heartbeat `21e1694` → main `e9b2d7c`；main 47 passed / 1显式WSL集成opt-in skip，独立实际Windows短暂共享冲突恢复检查已通过。原故障缺详细errno，不能追溯断言它一定由共享冲突造成。
+- FFmpeg8同版本真实CPU/NVENC记录分别位于 `render/benchmarks/presets-controlled-cpu-7b61b195daf3` 和 `presets-controlled-nvenc-6e21d23d0d7f`。30fps三次重复中位数CPU10.356806s、NVENC11.194288s；60fps分别11.514771s、12.861280s。均含worker/CLI启动、核验等开销，不是单独编码时间。源hash预读，first-observed不称操作系统冷缓存。
+- 本片CPU/NVENC分别使用CRF/CQ，不等同质量；实际较慢与文件较大不构成NVENC所有场景都无收益的结论。GPU已归还，后续质量对照用CPU。
 
 ## 重现
 

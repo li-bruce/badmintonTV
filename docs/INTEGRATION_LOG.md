@@ -13,6 +13,8 @@
 - 登记来源校验b7d7a85集成为aae0c99；root独立公共合同全套186 passed。library发布端同步修复待最终SHA复核。
 - render候选4ecaf6d独立审查发现来源父资产真实bytes漏验，以及取消文件协议尚未接入旧main worker的集成缺口；已交对应模块修复，暂不提前集成宣称全链通过。当前逐项状态见[本轮验收记录](ROUND_VALIDATION_2026-09-29.md)。
 - root独立读取两项真实TrackNet GPU结果（offline job-16153fad2f21429e8f88aa48fb978ccc、causal job-4081ac5e54f944b7b087c149efe43e69）：当前main合同、4产物大小/SHA、bridge开始/完成绑定及exit0/compute_stopped=true通过；180帧单调源PTS和点坐标边界通过。6秒旧真实小样不是新完整职业数据，也不作为准确率/持续直播通过。
+- render来源闭包P2已复核修复，4ecaf6d+db587aa集成为6518a09+281c137，root142 passed/1skip。models3d018eb集成为9975361，root平台轻环境227 passed/13skip；其中10个数学/OpenCV用例已在既有WSL模型env补跑全部通过，未新增依赖。heartbeat21e1694集成为e9b2d7c，root47 passed/1显式opt-in skip。
+- 同版本FFmpeg8 CPU/NVENC各8次技术检查完成，root16任务全部产物大小/SHA及合同通过；短片NVENC更慢且更大，质量对照尚在进行，默认CPU不因硬件可用自动更改。
 
 本轮目标与断言见[实施计划](IMPLEMENTATION_ROUND_2026-09-29.md)，不以工程回归代替模型准确率、完整数据或浏览器验收。
 
