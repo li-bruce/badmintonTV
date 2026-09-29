@@ -3,8 +3,10 @@ param(
     [string]$ModelsRepo=$PSScriptRoot,
     [string]$WslEnvPrefix='/mnt/d/video/runtime/models/env',
     [string]$VlEnvPrefix='/mnt/d/video/runtime/models/vl-env',
+    [string]$YoloEnvPrefix='/mnt/d/video/runtime/models/yolo-env',
     [switch]$EnableExperimentalBst,
     [switch]$EnableVlEmbedding,
+    [switch]$EnableExperimentalYolo,
     [string]$ModelCatalogPath,
     [string]$FfmpegPath=$env:BTV_FFMPEG,
     [string]$FfprobePath=$env:BTV_FFPROBE
@@ -15,6 +17,12 @@ param(
 $platformPython=Join-Path $StorageRoot 'runtime/platform/env/Scripts/python.exe'
 if (!(Test-Path -LiteralPath $platformPython -PathType Leaf)) { throw 'Platform venv is missing' }
 $modelSource=(Resolve-Path -LiteralPath $ModelsRepo).Path
+if ($EnableExperimentalYolo) {
+    $sharedModelPrefixes=@('/mnt/d/video/runtime/models/env', $WslEnvPrefix.TrimEnd('/'), $VlEnvPrefix.TrimEnd('/'))
+    if ($YoloEnvPrefix.TrimEnd('/') -in $sharedModelPrefixes) {
+        throw 'YOLO requires an independent environment; do not reuse the main or VL environment'
+    }
+}
 $env:BTV_STORAGE_ROOT=$StorageRoot
 $env:PYTHONPATH=$PSScriptRoot
 $env:BTV_MODEL_CATALOG_PATH=if ($ModelCatalogPath) { (Resolve-Path -LiteralPath $ModelCatalogPath).Path } else { Join-Path $modelSource 'configs/models/catalog.json' }
@@ -34,6 +42,10 @@ if ($EnableExperimentalBst) {
 if ($EnableVlEmbedding) {
     $platformModelCommands['qwen3-vl-embedding-2b']=@($platformPython,'-m','packages.runtime.wsl_bridge',
         '--distribution','Ubuntu','--env-prefix',$VlEnvPrefix,'--repo',$modelSource)
+}
+if ($EnableExperimentalYolo) {
+    $platformModelCommands['yolo11n-pose-bytetrack']=@($platformPython,'-m','packages.runtime.wsl_bridge',
+        '--distribution','Ubuntu','--env-prefix',$YoloEnvPrefix,'--repo',$modelSource)
 }
 $env:BTV_MODEL_COMMANDS_JSON=$platformModelCommands | ConvertTo-Json -Compress
 $env:BTV_RENDER_COMMAND_JSON=@($platformPython,'-m','packages.render') | ConvertTo-Json -Compress
