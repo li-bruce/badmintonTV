@@ -2,7 +2,7 @@
 
 本轮目标由 [实施计划](IMPLEMENTATION_ROUND_2026-09-29.md) 定义。本表区分工程实现、真实运行与模型效果，旧轮次的 `INTEGRATION_VALIDATION.json` 不作为本轮通过证据。状态仅使用 PASS / FAIL / BLOCKED / NOT_RUN；阶段中部分断言通过不代表整阶段达标。
 
-## 当前检查点：2026-09-29 17:26（北京时间）
+## 当前检查点：2026-09-29 17:27（北京时间）
 
 | 检查 | 目标 / 预期 | 实际 / 证据 | 状态 |
 |---|---|---|---|
@@ -13,9 +13,10 @@
 | 网页交互 R-02b | 定位、逐帧、循环、缩略图和标注保存；30点冷/热统计 | 源帧映射、seeked事件、最终画面呈现分别记录；仍在测量 | NOT_RUN |
 | 竖屏输出 R-01a | 1080×1920，30/60fps，H.264/AAC，安全区及工程设置可复用 | 模块旧普通真实素材CPU各4轮完成，主线集成与设置持久化尚待验证 | NOT_RUN |
 | 硬件编码 R-03a | 同版本同输入CPU/NVENC，技术/质量/实际耗时证据齐全 | FFmpeg9实测因NVENC API13.1/驱动13.0不兼容失败；隔离FFmpeg8已准备重测 | FAIL（首次配置；兼容方案待测） |
-| 轨迹/姿态/位置 R-07a/b | 官方权重、真实输入、源PTS和坐标含义明确 | TrackNet/BST权重及受限CPU载入已完成，真实GPU任务准备中 | NOT_RUN |
+| 轨迹 R-07a | 官方权重、真实输入、源PTS球点/缺失及时间记录 | 旧真实6秒视频离线与因果回放均成功；root核验合同、产物SHA、bridge停止、180帧单调PTS与坐标边界。新职业数据和诊断画面待核 | NOT_RUN（旧真实小样运行子项PASS） |
+| 姿态/位置 R-07b | 坐标可回查，校准和跟踪含义明确 | 连续pose模块报告90真实源PTS帧成功；root尚未核验，场地/身份关联另待验证 | NOT_RUN |
 | 视频向量 R-05a | 隔离WSL对真实短窗及中文查询产生有限向量/排序 | Qwen3-VL-Embedding-2B权重与独立环境下载中 | NOT_RUN |
-| 实时 R-07c | 因果输入，稳态RTF≤1，延迟/积压/丢帧有测量 | 原版TrackNet离线窗口不能作为实时通过证据；因果变体待实际测量 | NOT_RUN |
+| 实时 R-07c | 因果输入，稳态RTF≤1，延迟/积压/丢帧有测量 | 因果6秒文件回放active steady RTF=0.606，模拟到达完成P95=36.04ms/max=150.46ms，12/180帧超40ms，0主动丢帧；非物理直播，持续整链未验收 | NOT_RUN（短窗paced子项PASS，直播未测） |
 | 粗动作 R-07e | 作者权重以真实双人姿态、场地与球轨迹运行 | 不能用随机或补零特征代替真实链；实际输入准备中 | NOT_RUN |
 | 细手法及正式检索 R-05b/R-06a | 专家定义、独立真值与整场划分后评测 | 缺展搓/收搓/后退小跳专家真值；不因下载粗球种标注而解除 | BLOCKED |
 
@@ -26,6 +27,17 @@
 - 取消与锁：旧worker强杀可留下render owner锁。新取消文件协议须与worker接通，并实际证明取消后下一任务可运行；仅 `compute_stopped=true` 不足。
 - 工程设置：导出Timeline保留正式尺寸；preset、安全区和平台profile应随工程设置保存并回载，避免只在一次CLI请求生效。
 - 模型环境：管理员按model_id映射WSL环境，VL使用新隔离环境，不能把所有新模型投到旧torch环境；无权重或无GPU窗口如实显示。
+
+## 已核验的真实模型产物
+
+root使用 `scripts/integration/verify-job-artifacts.py --require-bridge` 读取实际落盘结果，不重复占GPU：
+
+| 任务 | 实际证据 |
+|---|---|
+| `job-16153fad2f21429e8f88aa48fb978ccc` / offline_weight | 6秒180帧，165点/15缺失；pipeline4.42055s，冷启动13.95494s；未来帧依赖明确为true（非因果）。2产物大小/SHA与bridge停止/exit0通过 |
+| `job-4081ac5e54f944b7b087c149efe43e69` / causal_last | 同源180帧，160点/20缺失（含8帧预热）；冷启动11.15211s，paced pipeline5.98484s；每项available_after_source_ms不超过该源帧PTS。2产物大小/SHA与bridge停止/exit0通过 |
+
+两次实际输入均为旧FBBench小样asset-5ad7e41a…，不是正在下载的新职业数据。全部源PTS单调，点坐标有限且在原1280×720范围；accuracy/recall均为null，events为空。上述结构检查不能证明点落在羽球上。NVDEC未使用，解码是PyAV软件路径。首次因果尝试的bridge心跳失败由模块保留独立记录，后续成功不覆盖失败。
 
 ## 重现
 
