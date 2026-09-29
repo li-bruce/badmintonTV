@@ -50,14 +50,48 @@ def test_environment_prefix_is_fixed_to_models_runtime(value):
         validate_env_prefix(value)
 
 
-def test_wsl_command_uses_argv_env_and_fixed_python_module():
+def test_wsl_command_uses_argv_env_and_fixed_python_module(monkeypatch):
+    monkeypatch.setenv("PYTHONNOUSERSITE", "0")
     args = argparse.Namespace(distribution="Ubuntu", env_prefix="/mnt/d/video/runtime/models/env", repo="C:/repo with spaces", heartbeat_timeout=8)
     command = build_wsl_command(args, "/mnt/d/video/platform/jobs/job/attempt-1/request.json", "/mnt/d/video/platform/jobs/job/attempt-1/result.json", "token")
     assert command[:5] == ["wsl.exe", "--distribution", "Ubuntu", "--exec", "/usr/bin/env"]
     assert "HF_HUB_OFFLINE=1" in command and "TRANSFORMERS_OFFLINE=1" in command
     assert "TORCH_HOME=/mnt/d/video/models/cache/torch" in command
+    assert "PYTHONNOUSERSITE=1" in command
+    assert "PYTHONNOUSERSITE=0" not in command
     assert command[command.index("--repo") + 1] == "/mnt/c/repo with spaces"
     assert "bash" not in command and "-c" not in command
+
+
+@pytest.mark.parametrize("entrypoint", ["guardian", "model"])
+@pytest.mark.parametrize("inherited_value", ["", "0"])
+def test_linux_children_force_user_site_disabled(tmp_path, monkeypatch, entrypoint, inherited_value):
+    import packages.runtime.wsl_bridge as bridge
+    monkeypatch.setenv("PYTHONNOUSERSITE", inherited_value)
+    args = argparse.Namespace(env_prefix="/mnt/d/video/runtime/models/fixture-env", repo=str(tmp_path),
+                              request=str(tmp_path / "request.json"), result=str(tmp_path / "result.json"),
+                              token="fixture-token", heartbeat_timeout=8)
+    launches = []
+    def launch(command, **kwargs):
+        launches.append((command, kwargs))
+        return argparse.Namespace(pid=12345, poll=lambda: 0, wait=lambda: 0)
+    monkeypatch.setattr(bridge.subprocess, "Popen", launch)
+    if entrypoint == "guardian":
+        assert bridge.linux_entry(args) == 0
+    else:
+        # Exercise Linux environment construction without WSL or a model/GPU process.
+        monkeypatch.setattr(bridge, "_validate_linux_paths", lambda _: {"job_id": "fixture", "attempt_id": "attempt-1"})
+        monkeypatch.setattr(bridge, "_heartbeat_state", lambda *_: ("alive", {"tick": 1, "updated_at": time.time()}))
+        monkeypatch.setattr(bridge.signal, "SIGHUP", 129, raising=False)
+        monkeypatch.setattr(bridge.signal, "signal", lambda *_: None)
+        monkeypatch.setattr(bridge, "stop_model_group", lambda _: True)
+        assert bridge.supervise_model(args) == 0
+    assert len(launches) == 1
+    command, options = launches[0]
+    assert options["env"]["PYTHONNOUSERSITE"] == "1"
+    assert options["env"] is not os.environ
+    assert os.environ["PYTHONNOUSERSITE"] == inherited_value
+    assert ("_supervise" if entrypoint == "guardian" else "packages.models") in command
 
 
 @pytest.mark.parametrize("body,expected", [
