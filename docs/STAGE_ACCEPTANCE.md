@@ -115,9 +115,9 @@ PASS 只适用于证据注明的范围：单元夹具、真实小样、完整比
 
 | 用例 ID | 目标要求 | 实测结果与范围 | 状态 | 证据 |
 |---|---|---|---|---|
-| G-01 | 统一接口及关键失败边界有可复现回归，失败/跳过如实披露 | 已执行集合 478 通过、5 条件跳过；跳过项不视为通过，四模块旧计数不重复累加 | PASS | [集成验证](INTEGRATION_VALIDATION.json)、`scripts/integration/check-all.ps1` |
+| G-01 | 统一接口及关键失败边界有可复现回归，失败/跳过如实披露 | 本轮main bb22c67：Python1276+前端38，共1314通过、22条件跳过；另列WSL补测，不把跳过或历史478再次累加 | PASS | [本轮机器记录](ROUND_INTEGRATION_VALIDATION_2026-09-29.json)、`scripts/integration/check-all.ps1`；不代表模型准确率 |
 | G-02 | 源码入 Git，模型/媒体/凭据不入库；隔离环境、任务状态/错误及 GPU 协调有记录 | 四分支已集成 main，环境锁和真实任务结果可追溯。WSL CPU watchdog 已实测；真实 CUDA 中途取消未测，不包含在该 PASS 的覆盖范围 | PASS | [集成日志](INTEGRATION_LOG.md)、[环境交接](ENVIRONMENT_HANDOFF.md)、[平台验证](platform/VALIDATION.md) |
-| G-03 | 固定配额与写前预检可用，报告数据/环境实测及范围，不能把预算当已用量 | 已核算数据/环境约 18.31GB，小于 700GB；容量边界有回归。源码/历史测试目录未纳入该数字，ACL 限制已记录；新任务仍需预检 | PASS | [容量快照](INTEGRATION_CAPACITY.json)、[执行预算](EXECUTION_PLAN.md)；不是全文件系统精确总量或未来空间保证 |
+| G-03 | 固定配额与写前预检可用，报告数据/环境实测及范围，不能把预算当已用量 | 本轮WSL只读GNU du实测约50.74十进制GB，含D盘5owner与原生Conda base/cache，低于700GB；源码/历史测试目录未计入。安装后、最后VL产物前的非原子快照，新写入仍需预检 | PASS | [本轮容量快照](ROUND_CAPACITY_2026-09-29.json)、[执行预算](EXECUTION_PLAN.md)；不把runtime70GB预算当实际占用 |
 
 ## 后续每阶段的更新格式
 

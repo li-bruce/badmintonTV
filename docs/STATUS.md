@@ -47,6 +47,6 @@
 
 控制面为 Windows 隔离 Python 环境与原生 SQLite；模型使用 WSL Ubuntu Conda，通过 JSON 进程边界通信，不跨系统共享 SQLite WAL。渲染使用独立 CPU FFmpeg。GPU 由账本、有限会话窗口和运行租约管理；无授权窗口或资源繁忙时明确 blocked，不争用显存。
 
-第一版历史容量快照约 **18.31 GB**，本轮新增下载和环境未计入该旧数值。历史`D:/video`五个owner合计12,386,795,593 bytes，另加既有原生Conda base/cache 5,924,496,893 bytes。当前任务仍须按700,000,000,000 bytes总硬上限与固定owner配额重新预检，不能用历史快照代替配额。历史统计范围及ACL限制见[容量记录](INTEGRATION_CAPACITY.json)，本轮收尾另存新快照。
+本轮安装后只读统计约 **50.74十进制GB**，包含`D:/video`五个owner以及原生Conda base/cache；低于700GB。该非原子快照在最后VL推理产物之前，源码及历史测试临时目录未计入，后续仍需按固定配额预检；详见[本轮容量](ROUND_CAPACITY_2026-09-29.json)。第一版18.31GB只保留为历史记录，library报告中的runtime70GB是保守预算上界，不是实际占用。
 
 详见 [集成记录](INTEGRATION_LOG.md)、[环境交接](ENVIRONMENT_HANDOFF.md)、`docs/status/` 和 `docs/issues/`。

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "recorded_local_date": "2026-09-29",
+  "measurement": "GNU du --summarize --bytes; no symlink dereference; all calls exit 0; hardlinked storage counted once by du",
+  "owners_bytes": {
+    "data": 14802357491,
+    "platform": 199146910,
+    "models": 6997392226,
+    "render": 647917504,
+    "runtime": 22167805296
+  },
+  "native_conda_base_and_pkgs_bytes": 5924496893,
+  "native_conda_command": "du --summarize --bytes --exclude=envs /home/ubuntu/miniforge3",
+  "hard_limit_bytes": 700000000000,
+  "shared_root_bytes": 44814619427,
+  "project_accounted_bytes": 50739116320,
+  "remaining_to_hard_limit_bytes": 649260883680,
+  "physical_D_free_bytes": 922903756800,
+  "scope": "Measured shared project data/environments and reused native Conda base/cache; no old user environments. Not a reservation or atomic snapshot.",
+  "notes": [
+    "Measured after VL dependency installation and before its final small inference output; later job deltas require owner preflight.",
+    "Source worktrees and historical test scratch are not included; no cache/partial/archive deletion.",
+    "Owner quotas continue to bound all concurrent writes. The library report runtime=70GB is a conservative allocation ceiling, not measured usage.",
+    "Original ZIP plus extracted files, retained partial downloads, wheels, weights, environments, database and exports are retained within the measured owner trees."
+  ]
+}

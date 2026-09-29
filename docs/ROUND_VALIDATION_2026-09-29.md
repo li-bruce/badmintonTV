@@ -75,4 +75,6 @@ New-Item -ItemType Directory -Path $verifyDir | Out-Null
 
 首次root验收脚本错误地给worker传入业务库`platform.sqlite3`，未领取队列任务；已修正为同目录`runtime.sqlite3`，原queued任务成功完成。没有删除或重写业务数据；错误建入的空queue表保留，见[验收脚本路径问题](issues/integration-worker-database-path.md)。模块失败与root验收失败均不隐去。
 
-主线等待VL实际运行、下载器最后中断竞态修复和最终全套回归；完成后追加机器可读本轮汇总，不覆盖第一版JSON。
+主线`bb22c67`统一检查已通过：contracts/platform607通过7跳过，前端38通过，library186通过，models318通过14跳过，render165通过1跳过，共**1314通过、22条件跳过**。models的10个NumPy/OpenCV用例已另在既有WSL环境独立通过，不在Windows数字重复相加；余为Windows符号链接权限、真实媒体/WSL显式opt-in。旧5素材合同和实际原片/PTS重hash通过。结果见[机器可读汇总](ROUND_INTEGRATION_VALIDATION_2026-09-29.json)，不覆盖第一版JSON。
+
+library最终中断修复已合`763b369`：成功完成结果集合可幂等回放，重复Ctrl-C不会漏掉完成交接；独立原反例和32定向用例通过，真实121项仍是原单流完成，没有宣称真实双流/Range验证。VL真实首attempt在官方类加载时报config_class兼容错误，失败和停止记录保留；仅调整显式本地config实例后将重试同一冻结输入。

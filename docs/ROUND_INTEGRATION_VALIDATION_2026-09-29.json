@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0",
+  "recorded_at": "2026-09-29T10:59:13Z",
+  "source_revision": "bb22c6793a444078a7dbfa2c4fbc837c7787e403",
+  "status": "PASS",
+  "scope": "Software integration and listed bounded real executions; not product-stage or recognition-accuracy acceptance",
+  "command": "./scripts/integration/check-all.ps1",
+  "exit_code": 0,
+  "groups": [
+    {
+      "scope": "contracts/platform",
+      "passed": 607,
+      "skipped": 7,
+      "seconds": 61.94
+    },
+    {
+      "scope": "frontend",
+      "passed": 38,
+      "skipped": 0,
+      "seconds": 1.4686483
+    },
+    {
+      "scope": "library",
+      "passed": 186,
+      "skipped": 0,
+      "seconds": 19.861
+    },
+    {
+      "scope": "models (Windows light environment)",
+      "passed": 318,
+      "skipped": 14,
+      "seconds": 3.585
+    },
+    {
+      "scope": "render",
+      "passed": 165,
+      "skipped": 1,
+      "seconds": 5.94
+    }
+  ],
+  "passed": 1314,
+  "skipped": 22,
+  "log": {
+    "path": ".runtime/round-full-validation.log",
+    "sha256": "cd138b22637ba36fe848896c83192e628f0eba9fbc25b5e60f8391e53b8b0577"
+  },
+  "skip_scope": {
+    "contracts_platform": "5 opt-in real-media, 1 Windows symlink, 1 opt-in WSL watchdog",
+    "models": "10 NumPy/OpenCV algorithm cases and 4 Windows symlink permission cases",
+    "render": "1 Windows symlink permission case"
+  },
+  "separate_supplement": "The 10 NumPy/OpenCV cases were separately run in the existing WSL model environment; all passed. Not added again to the Windows totals.",
+  "real_main_flow": {
+    "preview_job_id": "job-93c4658e2a0644a5b74903568465d3b5",
+    "render_job_id": "job-8a03b4ab5ff94074ac94bb84021088d9",
+    "elapsed_seconds": 24.41475009918213,
+    "timeline_id": "timeline-root-main-round-1790678933",
+    "asset_count": 6,
+    "artifact_size_sha_verified": 7,
+    "range_status": 206,
+    "range_bytes": 128,
+    "source_pts_pagination": "PASS",
+    "browser_source_frame_step": {
+      "before": 0,
+      "after": 1,
+      "after_pts": 512,
+      "time_base": "1/15360"
+    },
+    "browser_export_playback": {
+      "duration_seconds": 2,
+      "ended": true,
+      "error": null
+    },
+    "reviewer_type": "agent",
+    "research_preview": true,
+    "accuracy_claim": false,
+    "all_12_export_technical_checks": true,
+    "artifacts": [
+      {
+        "schema_version": "1.0",
+        "artifact_id": "render-f323044f0846457d9fd8d0ec99686cb1",
+        "kind": "video/mp4",
+        "relative_path": "render/jobs/job-8a03b4ab5ff94074ac94bb84021088d9/attempt-1/export.mp4",
+        "sha256": "ef885cdb6818a4049b4c5f722b0886b2f763f53105e8115ded776e97c7750a60",
+        "size_bytes": 214333,
+        "created_at": "2026-09-29T10:49:05.084823Z",
+        "producer": "badmintonTV.render/0.1.0"
+      },
+      {
+        "schema_version": "1.0",
+        "artifact_id": "render-ebce855dfbfb45789ee3e12ec057fdf0",
+        "kind": "timeline",
+        "relative_path": "render/jobs/job-8a03b4ab5ff94074ac94bb84021088d9/attempt-1/timeline.json",
+        "sha256": "2e09e00789f616565558b9b6b5a0b6ddc336d3c7bc14962a994cbecf7ea7f65e",
+        "size_bytes": 742,
+        "created_at": "2026-09-29T10:49:05.091336Z",
+        "producer": "badmintonTV.render/0.1.0"
+      },
+      {
+        "schema_version": "1.0",
+        "artifact_id": "render-99fa53f17fe445e4b13a269f033857ca",
+        "kind": "source_map",
+        "relative_path": "render/jobs/job-8a03b4ab5ff94074ac94bb84021088d9/attempt-1/source_map.json",
+        "sha256": "1154755924b4f8152ac7589aba1c580d0c36160e3199532c29fac57081af7446",
+        "size_bytes": 9153,
+        "created_at": "2026-09-29T10:49:05.095829Z",
+        "producer": "badmintonTV.render/0.1.0"
+      },
+      {
+        "schema_version": "1.0",
+        "artifact_id": "render-1e0aa064ab6242bd86800e1bc7e0a747",
+        "kind": "qa_report",
+        "relative_path": "render/jobs/job-8a03b4ab5ff94074ac94bb84021088d9/attempt-1/qa.json",
+        "sha256": "5e28dcdc3c2ba806748298c820141f2a13372431df99955fd1b19e8383be5da0",
+        "size_bytes": 13589,
+        "created_at": "2026-09-29T10:49:05.102347Z",
+        "producer": "badmintonTV.render/0.1.0"
+      }
+    ]
+  },
+  "training_data": {
+    "fine_video_count": 10,
+    "fine_decoded_video_count": 10,
+    "fine_frames": 980703,
+    "fine_duration_ms": 38592556,
+    "fine_annotation_rows": 9817,
+    "fine_manifest_sha256": "2725970f4485732e67ba249b72262c51dbba24ee17e5e97d901b18ec8a29e286",
+    "root_fine_full_original_and_pts_hashes_verified": 10,
+    "bfmd_files_verified": 121,
+    "bfmd_total_bytes": 1825439459,
+    "bfmd_manifest_sha256": "8643173ce76db81f93d28a382e9492544522c07e24ba1905761a6687a6dff1bf",
+    "production_imports": 0,
+    "new_events": 0,
+    "usage_scope": "training_only",
+    "fine_is_uncut_broadcast_claim": false,
+    "bfmd_raw_videos_present": false
+  },
+  "new_professional_model_jobs": [
+    {
+      "job_id": "job-d9c832fd94384ee3950918badc767b15",
+      "attempt_id": "attempt-1",
+      "status": "PASS",
+      "model_id": "tracknetv3-reuse",
+      "events_count": 0,
+      "bridge_completion_verified": true,
+      "artifacts": [
+        {
+          "kind": "shuttle_observations",
+          "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-points.json",
+          "size_bytes": 34127,
+          "sha256": "1984f48c7ef961b83f4d8296b5fc5eaca610d83993febe9aec93868833343db6"
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-d9c832fd94384ee3950918badc767b15/attempt-1/tracknet-report.json",
+          "size_bytes": 4170,
+          "sha256": "c907fdf4a846fc4b13df55f3f08439ffec5e1e4acd32f1eb3555d4cd0b54c76c"
+        }
+      ],
+      "model_accuracy_verified": false
+    },
+    {
+      "job_id": "job-57c6354813b94ad1ba12d42b24e5968e",
+      "attempt_id": "attempt-1",
+      "status": "PASS",
+      "model_id": "yolo11n-pose-bytetrack",
+      "events_count": 0,
+      "bridge_completion_verified": true,
+      "artifacts": [
+        {
+          "kind": "pose_features",
+          "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/features.json",
+          "size_bytes": 1793762,
+          "sha256": "26f6b936682b18a64e6fd50e4cebed7bf0a3f95e23a725175a234d44271c532e"
+        },
+        {
+          "kind": "evaluation_report",
+          "relative_path": "models/jobs/job-57c6354813b94ad1ba12d42b24e5968e/attempt-1/report.json",
+          "size_bytes": 8412,
+          "sha256": "cd32782e14b72b46029411cb6303c94ea437894f829686569faa2f2308bbcd82"
+        }
+      ],
+      "model_accuracy_verified": false
+    }
+  ],
+  "render_benchmark_job_ids": [
+    "job-6f22d4657d704732a6c32f9739b78f3f",
+    "job-4dddb006c2934368a2f1e4d30f8d7f7b",
+    "job-841e6d2a293b4078ae37e23c50321c53",
+    "job-595db9b08cc54a8ca9c9e46d611487cc",
+    "job-979ec45166a0443db6d6c57a41303607",
+    "job-1f18808bbb89471db61d25c70684e4a2",
+    "job-11ea7736d2894c2797195af22b9656cc",
+    "job-8ae918d6893c4fcda80fc24d19ba916e",
+    "job-2171dd52987a41c5919aa6bb0459e5bd",
+    "job-05bbbf7da20b4fec94c735ba4b3f82f5",
+    "job-062df0055ebf407abfd661933801feb6",
+    "job-8670e4598a554c2abeae6b8371f09bc3",
+    "job-37d8ad54aff04cc38f667fcedc12fb2b",
+    "job-8f9dc57314dd48ba8b67523d89396401",
+    "job-156a3f2a23fd4e3d8e73279bcdcfae33",
+    "job-5a42f6e90c004698b49af6a2e600caee"
+  ],
+  "vl_final_execution": "PENDING; downloaded/installed is not forward success",
+  "limitations": [
+    "No human-confirmed fine labels or independent held-out matches; no recognition accuracy claim.",
+    "Browser target-frame callback waits approximately one second; smooth long-video interaction has not passed.",
+    "BST frozen input has 25 missing ball frames; official Inpaint mask has zero eligible positions in that window.",
+    "Physical live input, sustained end-to-end real-time analysis and automatic tactical intent remain unvalidated."
+  ]
+}
