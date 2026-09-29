@@ -15,6 +15,8 @@ def catalog_entries(root):
          ['torch','torchvision','av'],'env','CONTINUOUS_POSE_REUSE.md'),
         ('bst-cg-ap-reuse','BST 单打离线粗球种实验','stroke_classification','bst/reuse-manifest.json',
          ['torch','av','positional_encodings','torchinfo'],'env','BST_REUSE.md'),
+        ('yolo11n-pose-bytetrack','YOLO11n姿态与ByteTrack匿名跟踪实验','tracking','yolo11n-pose/reuse-manifest.json',
+         ['torch','torchvision','ultralytics','av','cv2','lap','scipy'],'yolo-env','YOLO_POSE_REUSE.md'),
     ]
     for mid,name,capability,relative,modules,environment,report in specs:
         status,reason,weights='experimental','本地文件存在；执行时重验hash/版本，识别质量未经真值验证',[]
@@ -41,6 +43,9 @@ def catalog_entries(root):
                     from .bst_reuse import COMMIT
                     if manifest['source_commit']!=COMMIT: raise ValueError('source commit')
                     files=[*manifest['code'].values(),manifest['checkpoint']]
+                elif mid=='yolo11n-pose-bytetrack':
+                    if manifest['package_version']!='8.3.203': raise ValueError('package version')
+                    files=[manifest['package'],manifest['checkpoint']]
                 else:
                     files=manifest['files']
                     if not any(f['relative_path']=='models/weights/torchvision-pose/keypointrcnn_resnet50_fpn_coco-fc266e95.pth' for f in files):
@@ -57,13 +62,13 @@ def catalog_entries(root):
         entries.append({'schema_version':'1.0','model_id':mid,'version':'0.1.0','display_name':name,
             'capabilities':[capability],'status':status,'reason':reason,
             'entrypoint':['python','-m','packages.models','run','--request','{request}','--result','{result}'],
-            'environment':{'kind':'wsl-conda','prefix':'/mnt/d/video/runtime/models/'+environment},
+            'environment':{'kind':'wsl-venv' if environment=='yolo-env' else 'wsl-conda','prefix':'/mnt/d/video/runtime/models/'+environment},
             'weights':weights,'parameters_schema':{'type':'object','required':['model_id'],
                 'properties':{'model_id':{'const':mid}},'description':'See bounded adapter parameters in docs/models/'+report},
             'input_schema':'JobRequest@1.0','output_schema':'JobResult@1.0','supported_labels':[],
             'supported_camera_types':[],'evaluation_report':'docs/models/'+report,
-            'license':{'code':'project license not declared','upstream':{'tracknetv3-reuse':'MIT','qwen3-vl-embedding-2b':'Apache-2.0','torchvision-continuous-pose':'BSD-3-Clause; COCO terms separate','bst-cg-ap-reuse':'MIT code; weights not separately stated'}[mid],
+            'license':{'code':'project license not declared','upstream':{'tracknetv3-reuse':'MIT','qwen3-vl-embedding-2b':'Apache-2.0','torchvision-continuous-pose':'BSD-3-Clause; COCO terms separate','bst-cg-ap-reuse':'MIT code; weights not separately stated','yolo11n-pose-bytetrack':'AGPL-3.0; enterprise license separate'}[mid],
                        'media':'Source Asset rights remain separate'},
-            'resource_requirements':{'device':'cuda','gpu_exclusive':True,'max_clip_ms':3000 if mid=='torchvision-continuous-pose' else 30000,
+            'resource_requirements':{'device':'cuda','gpu_exclusive':True,'max_clip_ms':3000 if mid in {'torchvision-continuous-pose','yolo11n-pose-bytetrack'} else 30000,
                                      'diagnostic_only':True,'accuracy_validated':False}})
     return entries

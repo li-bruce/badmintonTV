@@ -1,0 +1,123 @@
+{
+  "model_id": "yolo11n-pose-bytetrack",
+  "model_version": "0.1.0",
+  "adapter_operation": "tracking",
+  "assets": [
+    {
+      "title": "FineBadmintonBenchmark video_001951",
+      "match_id": "unknown",
+      "source_type": "dataset",
+      "source_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/resolve/ff86093a51efdf9a243a0635704952d404e99e52/hf_video_clips_qa/video_001951.mp4",
+      "source_page": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark",
+      "acquired_at": "2026-09-28T15:15:48.058231+00:00",
+      "camera_type": "rear",
+      "discipline": "singles",
+      "players": [],
+      "rights": {
+        "status": "unknown",
+        "license_url": "https://huggingface.co/datasets/iLearn-Lab/FineBadmintonBenchmark/blob/ff86093a51efdf9a243a0635704952d404e99e52/README.md",
+        "evidence": "Publisher hosts an ungated dataset with Apache-2.0 card. Original broadcaster footage ownership/redistribution clearance is not separately supplied; do not infer commercial/public video rights from dataset or code licensing.",
+        "allowed_uses": []
+      },
+      "split": "unassigned",
+      "provenance": {
+        "dataset": "FineBadmintonBenchmark",
+        "dataset_revision": "ff86093a51efdf9a243a0635704952d404e99e52",
+        "video_uid": "video_001951",
+        "publisher_sha256": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+        "annotation_rights": {
+          "license": "Apache-2.0",
+          "scope": "Dataset card declaration for released annotations; keep underlying video rights separate."
+        },
+        "source_match_offset_ms": null,
+        "grouping": {
+          "match_id": "unknown",
+          "split": "unassigned",
+          "quarantine_group": "finebadmintonbenchmark-source-matches-unresolved",
+          "reason": "QA video_uid does not expose canonical full-match ID or source offset. Never random-split these clips or claim independent matches. Quarantine all until provenance is resolved."
+        },
+        "identity_status": "unconfirmed",
+        "visual_observation": {
+          "camera_type": "rear",
+          "discipline": "singles",
+          "scoreboard_names": [
+            "LEI L.X.",
+            "AXELSEN"
+          ],
+          "still_relative_path": "data/qa/stills/video_001951.jpg",
+          "sample_time_ms": 1000,
+          "identity_status": "unconfirmed",
+          "identity_note": "Scoreboard text observation only; player identity and canonical match are unconfirmed."
+        },
+        "label_constraints": {
+          "hand_technique": "unknown",
+          "footwork": "unknown"
+        },
+        "intended_use": "local research smoke test; public footage rights unresolved"
+      },
+      "schema_version": "1.0",
+      "asset_id": "asset-5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+      "relative_path": "data/raw/finebadmintonbenchmark/video_001951.mp4",
+      "sha256": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+      "size_bytes": 669106,
+      "duration_ms": 6000,
+      "width": 1280,
+      "height": 720,
+      "fps_num": 30,
+      "fps_den": 1,
+      "time_base": "1/15360",
+      "probe": {
+        "ffprobe_version": "ffprobe version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+        "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+        "probed_at": "2026-09-28T15:15:48.262730+00:00",
+        "codec_name": "h264",
+        "stream_index": 0,
+        "fps_source": "avg_frame_rate",
+        "duration_source": "stream.duration",
+        "start_time": "0.000000",
+        "start_pts": 0,
+        "avg_frame_rate": "30/1",
+        "r_frame_rate": "30/1",
+        "vfr_status": "cfr_observed",
+        "pts_index": {
+          "relative_path": "data/probes/video_001951.pts.jsonl",
+          "sha256": "15efa499303607c73169b62d96dc7dd0277b21220af6f2be66cf0b36cd8bc99c",
+          "size_bytes": 5626,
+          "format": "jsonl",
+          "frame_count": 180,
+          "time_base": "1/15360",
+          "pts_field": "best_effort_timestamp",
+          "complete": true,
+          "vfr_status": "cfr_observed",
+          "min_delta_ticks": 512,
+          "max_delta_ticks": 512
+        },
+        "timing_note": "Container rates alone do not prove CFR; original timestamps retained when indexed.",
+        "decode": {
+          "status": "passed",
+          "scope": "full_video_stream",
+          "device": "cpu",
+          "frames": 180,
+          "exit_code": 0
+        },
+        "source_sha256": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+        "source_size_bytes": 669106
+      }
+    }
+  ],
+  "parameters": {
+    "start_ms": 700,
+    "end_ms": 3700,
+    "device": "cuda",
+    "imgsz": 640,
+    "camera_segment": {
+      "id": "video001951-fixed-rear-agent-001",
+      "start_ms": 0,
+      "end_ms": 6000,
+      "status": "agent_reviewed",
+      "method": "Root agent inspected original source frames at 0,1,2,3,5 seconds",
+      "evidence": "Visible court lines and image framing stable at inspected times; no human confirmation or automated cut-detection claim"
+    }
+  },
+  "gpu_required": true
+}

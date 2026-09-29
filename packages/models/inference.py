@@ -118,6 +118,9 @@ def execute(request, root, output_path, progress):
     if model_id == 'bst-cg-ap-reuse':
         from .bst_reuse import execute as execute_bst
         return execute_bst(request, root, output_path, progress)
+    if model_id == 'yolo11n-pose-bytetrack':
+        from .yolo_pose_reuse import execute as execute_yolo
+        return execute_yolo(request, root, output_path, progress)
     allowed = {'query-rule-v1':'query_parse','query-endpoint-v1':'query_parse','qwen3-0.6b':'query_parse',
                'torchvision-keypointrcnn':'pose','clip-frame-mean':'video_embedding','skeleton-temporal-v1':'movement_classification'}
     if model_id not in allowed:
