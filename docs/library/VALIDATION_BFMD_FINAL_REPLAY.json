@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-09-29T10:55:04.470541+00:00",
+  "scope": "Temporary fixtures and actual threads/atomic writes only; no public network or real dataset I/O",
+  "old_implementation_control": {
+    "prior_passed": 27,
+    "new_core_regressions_failed": 4,
+    "fifth_progress_regression_run_on_old": false
+  },
+  "new_regression_windows": [
+    "before final record_outcome",
+    "after attempted record append, before verified.setdefault",
+    "before final publish",
+    "before actual write_json os.replace",
+    "before final INTERRUPTED progress write"
+  ],
+  "coordinator_original_reproducer": {
+    "script": "C:/Users/USER/Desktop/Program/badmintonTV/.runtime/library-final-review/review_bfmd_final_drain.py",
+    "only_adaptation": "Use default temporary directory instead of coordinator checkout directory",
+    "exit_code": 0,
+    "completed_verified_worker_files": 1,
+    "published_handoff_files": 1,
+    "attempted_record_count": 1,
+    "not_attempted_record_count": 3,
+    "final_status": "INTERRUPTED",
+    "active_reservations": 0,
+    "owner_lock_exists": false
+  },
+  "targeted_tests": {
+    "passed": 32,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 5.443
+  },
+  "independent_review": {
+    "critical_tests_passed": 6,
+    "seconds": 1.159,
+    "remaining_material_findings": 0
+  },
+  "full_library_tests": {
+    "command": "C:/Users/USER/miniforge3/python.exe -B -m unittest discover -s tests/library -v",
+    "passed": 186,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 20.608
+  },
+  "first_exception_identity_preserved": true,
+  "real_dataset_changed": false,
+  "new_dependencies": false
+}

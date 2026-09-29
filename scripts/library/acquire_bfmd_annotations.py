@@ -8,7 +8,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-from queue import Empty, SimpleQueue
 import re
 import threading
 import time
@@ -242,11 +241,18 @@ def acquire_annotations(config, quota, budget, *, response_opener, workers=1):
                                     catalog_sha, progress, workers=workers, stop_path=stop_path)
         except BaseException as error:
             # Best-effort reporting must not hide the original failure or interrupt.
-            try:
-                progress("INTERRUPTED" if isinstance(error, (KeyboardInterrupt, SystemExit)) else "FAIL",
-                         blocked_reason=getattr(error, "code", None))
-            except Exception as report_error:
-                error.add_note(f"BFMD run progress could not be saved: {type(report_error).__name__}")
+            while True:
+                try:
+                    progress("INTERRUPTED" if isinstance(error, (KeyboardInterrupt, SystemExit)) else "FAIL",
+                             blocked_reason=getattr(error, "code", None))
+                    break
+                except (KeyboardInterrupt, SystemExit):
+                    # A repeated interrupt must not replace the original error
+                    # or discard the completed-attempt accounting.
+                    continue
+                except Exception as report_error:
+                    error.add_note(f"BFMD run progress could not be saved: {type(report_error).__name__}")
+                    break
             raise
     print(json.dumps({"event": "bfmd_capacity_after_writer_release", "capacity": quota.snapshot()}), flush=True)
     return result
@@ -304,7 +310,7 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
     halted = threading.Event()
     ordered = sorted(sources, key=lambda value: (value["relative_path"].startswith("annotations/"), value["expected_bytes"], value["relative_path"]))
 
-    def publish():
+    def publish(*, recovery=False):
         # Called only by the owner thread. MetadataBudget deliberately stays here.
         summary = {"schema_version": "1.0", "dataset_id": "bfmd", "usage_scope": "training_only",
                    "complete": len(verified) == len(sources),
@@ -314,7 +320,12 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
                    "scripts_executed": False, "backup_is_active_annotation": False}
         summary["acquisition_status"] = "PASS" if summary["complete"] else "IN_PROGRESS"
         summary["run_progress_relative_path"] = "data/" + PROGRESS_PATH
-        write_json(quota.resolve_path(HANDOFF_PATH), summary, quota=quota, budget=budget)
+        path = quota.resolve_path(HANDOFF_PATH)
+        if recovery and path.exists() and _strict_json(path) == summary:
+            # The interrupted atomic write may already have committed. Do not
+            # spend another metadata reservation replacing an identical result.
+            return
+        write_json(path, summary, quota=quota, budget=budget)
 
     # Recheck prior receipts without rewriting the entire handoff for each cached
     # entry. A 115-file resume must not consume its metadata budget on old files.
@@ -332,7 +343,7 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
 
     queue = iter(pending)
     inflight = {}
-    completed = SimpleQueue()
+    completed = []
     active_condition = threading.Condition()
     active_tasks = 0
 
@@ -349,7 +360,8 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
             result = _acquire_one(config, item, quota, response_opener, halt=halted)
             # Independent of the owner's submit/assignment window. Even an
             # admitted future lost to Ctrl-C is recovered during final draining.
-            completed.put((item, *result))
+            with active_condition:
+                completed.append((item, *result))
             return result
         finally:
             with active_condition:
@@ -449,28 +461,33 @@ def _acquire_items(config, sources, quota, budget, response_opener, verified, re
     # All file writers/completion producers have ended while this owner still
     # holds its handoff lock and batch reservation. Recover results even if
     # submit raised after admitting a task, or an owner interrupt landed while
-    # consuming a future.
-    completion_seen = False
+    # consuming a future. Keep every outcome: a destructive queue pop would
+    # lose it if a second interrupt arrived before record_outcome. Replaying
+    # the whole bounded collection repairs partially applied bookkeeping.
+    recovery = False
     while True:
         try:
-            item, entry, error = completed.get_nowait()
-        except Empty:
+            for item, entry, error in completed:
+                record_outcome(item, entry, error)
+            failures = sum(record["download_status"] in {"failed", "interrupted"} for record in records)
+            stopped = stop_path.exists() and len(verified) < len(sources)
+            publish(recovery=recovery)
+            status = ("INTERRUPTED" if isinstance(pending_error, (KeyboardInterrupt, SystemExit)) else "FAIL") if pending_error is not None else (
+                "BLOCKED" if blocked else "FAIL" if failures else "STOPPED" if stopped else "PASS")
+            progress(status, blocked_reason=blocked)
             break
-        completion_seen = True
-        record_outcome(item, entry, error)
-    if completion_seen and pending_error is not None:
-        try:
-            publish()
-        except BaseException as publish_error:
+        except (KeyboardInterrupt, SystemExit) as error:
+            pending_error = pending_error or error
+            recovery = True
+        except Exception as publish_error:
+            # Storage/budget errors are not retryable interrupts. Retain the
+            # first failure and report the inability to finish publication.
+            if pending_error is None:
+                raise
             pending_error.add_note("BFMD final completion publication failed: " + type(publish_error).__name__)
+            break
     if pending_error is not None:
         raise pending_error
-    failures = sum(record["download_status"] in {"failed", "interrupted"} for record in records)
-    stopped = stop_path.exists() and len(verified) < len(sources)
-    # Also publish a fully cached rerun or a stop before the first new file.
-    publish()
-    status = "BLOCKED" if blocked else "FAIL" if failures else "STOPPED" if stopped else "PASS"
-    progress(status, blocked_reason=blocked)
     print(json.dumps({"event": "bfmd_completed", "files": len(records), "failures": failures,
                       "blocked_reason": blocked, "not_attempted": len(sources) - len(records),
                       "verified_bytes": sum(record.get("size_bytes", 0) for record in records),

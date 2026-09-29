@@ -9,3 +9,11 @@
 3. Python3.12重复Ctrl-C中断Thread.join可令其状态提前看似停止：Condition保护独立active任务计数，完成结果先入队才减数；owner等待active=0后再join清理资源。不能把线程对象状态当文件写者完成证明。
 
 确定性临时文件/真实线程回归覆盖上述窗口；真实join acquire边界注入中断的测试对旧控制实现确实失败，对新实现通过。没有因此放宽下载校验、删除锁或失去文件级字节限制。失败或停止后旧verified清单保持，主线程统一发布已在途成功，然后返回原失败/停止结果。
+
+## 最终结果回收的重复中断修复
+
+主任务复核2b81ea4时又确认：首个Ctrl-C发生于submit完成但future尚未登记，第二个发生于最终队列取走结果后、记账前；已完成原件和成功receipt仍存在，但稳定清单和attempted可同时为0。前述join保护不能解决消费结果后的这个窗口。
+
+完成结果现为在active计数归零前追加的保留列表，最终回放不移除条目，也不提前移动消费游标。记账按DriveID幂等；即使已追加attempt而尚未写verified时中断，重放仍补齐verified而不重复attempt。全体回放、handoff发布、最终progress都在重复KeyboardInterrupt/SystemExit的重试范围内，首次异常对象最终原样传播。普通存储/预算错误不无限重试，保留首错误并附发布失败说明；累计预算不清零。若原子替换已完成才发生中断，严格读取并确认已有handoff等于目标快照后跳过重复写入。
+
+新增5项确定性回归覆盖记账前、attempt追加后verified前、publish入口、真实os.replace之前、最终INTERRUPTED进度写入。旧实现的前4项均确实失败；修复后BFMD32/32通过，独立复核新增5项加缓存反复写后中断共6项全部通过。主任务原复现脚本只将tempdir改为默认临时目录后执行，实际输出completed1/handoff1/attempted1/not_attempted3、INTERRUPTED、active reservations0、owner锁false。完整library186/186通过、0skip、20.608秒，见 `docs/library/VALIDATION_BFMD_FINAL_REPLAY.json`。本修复没有读取、重下或修改已交付的真实121项数据。

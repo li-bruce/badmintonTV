@@ -101,6 +101,6 @@ C:/Users/USER/miniforge3/python.exe -B -m scripts.library.acquire_bfmd_annotatio
 
 `--request-stop`仅支持新版本owner的run-id标记，停止新派发、完成在途文件后退出；原PID-only锁拒绝此命令。停止不完整批次返回3/STOPPED，完整为0/PASS，普通失败1，访问或限流BLOCKED为2。此处STOPPED是运行进度，不是数据验收状态。marker保留用于追溯，不自动删除原数据或猜测锁过期。
 
-worker完成结果通过独立队列回到主线程，即使Ctrl-C发生在submit和future登记之间也不丢失；Condition下活动任务数归零之后才能释放批次锁/预留，不依赖Python线程join被重复中断后的内部状态。任一失败或停止请求拒绝后续任务进入文件/网络操作，已在途成功仍正常发布。标准下载器的Range、If-Range、206、Content-Range、validator和实际字节硬限均保持，服务不支持续传就保留partial并失败，不降级为盲目追加。
+worker完成结果保存在只追加、不消费的列表中，即使Ctrl-C发生在submit和future登记之间也能回收；最终记账、handoff发布和progress更新可整体重放，重复中断不会取走并丢失成功结果。Condition下活动任务数归零之后才能释放批次锁/预留，不依赖Python线程join被重复中断后的内部状态。任一失败或停止请求拒绝后续任务进入文件/网络操作，已在途成功仍正常发布。标准下载器的Range、If-Range、206、Content-Range、validator和实际字节硬限均保持，服务不支持续传就保留partial并失败，不降级为盲目追加。
 
 2026-09-29实际121文件由原单连接自然完成，无进程切换、续传或实际双流。本可选功能的测试是临时小文件/受控transport/真实线程竞态回归；真实公开服务双流和Range恢复仍NOT_RUN。

@@ -589,6 +589,109 @@ class BfmdResumeTests(unittest.TestCase):
             self.assertEqual(0, self.download_calls)
         self.assertEqual([], self.quota.active_reservations())
 
+    def assert_final_replay_survives_interrupt(self, window):
+        """Interrupt real completion accounting/publication after a lost submit."""
+        self.expand_to_four()
+        real_submit = acquisition.ThreadPoolExecutor.submit
+        first_interrupt = KeyboardInterrupt("original interrupt after completed submit")
+        second_interrupt = KeyboardInterrupt("second interrupt at " + window)
+        admitted, injected = [], []
+        owner_filename = acquisition._acquire_items.__code__.co_filename
+        owner_source, owner_start = inspect.getsourcelines(acquisition._acquire_items)
+        verified_line = next(owner_start + index for index, line in enumerate(owner_source)
+                             if line.strip().startswith('verified.setdefault(item["google_drive_id"], entry)'))
+        writer_code = acquisition.write_json.__code__
+        writer_source, writer_start = inspect.getsourcelines(acquisition.write_json)
+        replace_line = next(writer_start + index for index, line in enumerate(writer_source)
+                            if line.strip() == "os.replace(temp, path)")
+        def interrupt_after_completed_submit(pool, *args, **kwargs):
+            future = real_submit(pool, *args, **kwargs)
+            admitted.append(future)
+            # Ensure the completion is available, but no future was registered
+            # in the owner's inflight map before the first interrupt.
+            self.assertEqual("downloaded", future.result(timeout=5)[0]["download_status"])
+            raise first_interrupt
+        def trace(frame, event, arg):
+            if injected:
+                return trace
+            own_helper = frame.f_code.co_filename == owner_filename
+            target = (
+                window == "before_record_outcome" and event == "call" and own_helper
+                and frame.f_code.co_name == "record_outcome"
+            ) or (
+                window == "after_record_append" and event == "line" and own_helper
+                and frame.f_code.co_name == "record_outcome" and frame.f_lineno == verified_line
+            ) or (
+                window == "before_publish" and event == "call" and own_helper
+                and frame.f_code.co_name == "publish"
+            ) or (
+                window == "before_atomic_replace" and event == "line" and frame.f_code is writer_code
+                and frame.f_lineno == replace_line and frame.f_locals.get("path") == self.handoff
+            ) or (
+                window == "before_interrupted_progress" and event == "call" and frame.f_code is writer_code
+                and frame.f_locals.get("path") == self.progress
+                and frame.f_locals.get("value", {}).get("acquisition_status") == "INTERRUPTED"
+            )
+            if target:
+                self.assertTrue(self.quota.resolve_path(acquisition.HANDOFF_PATH + ".lock").exists())
+                self.assertTrue(self.quota.active_reservations())
+                if window == "after_record_append":
+                    self.assertEqual(1, len(frame.f_locals["records"]))
+                    self.assertEqual(0, len(frame.f_locals["verified"]))
+                if window == "before_atomic_replace":
+                    self.assertTrue(frame.f_locals["temp"].is_file())
+                    self.assertFalse(self.handoff.exists())
+                if window == "before_interrupted_progress":
+                    self.assertEqual(1, len(json.loads(self.handoff.read_text())["files"]))
+                injected.append((frame.f_code.co_name, frame.f_lineno))
+                raise second_interrupt
+            return trace
+        original_trace = sys.gettrace()
+        try:
+            sys.settrace(trace)
+            with mock.patch.object(acquisition.ThreadPoolExecutor, "submit", new=interrupt_after_completed_submit):
+                with self.assertRaises(KeyboardInterrupt) as caught:
+                    self.run_acquisition(workers=2)
+        finally:
+            sys.settrace(original_trace)
+            for future in admitted:
+                future.result(timeout=5)
+        self.assertEqual(1, len(admitted))
+        self.assertEqual(1, len(injected), "Regression did not reach the requested final replay boundary")
+        self.assertIs(first_interrupt, caught.exception, "The original interrupt must be propagated after complete cleanup")
+        self.assertTrue(self.handoff.is_file(), "Completed worker result was lost before final handoff publication")
+        handoff = json.loads(self.handoff.read_text())
+        self.assertEqual(1, len(handoff["files"]))
+        progress = json.loads(self.progress.read_text())
+        self.assertEqual("INTERRUPTED", progress["acquisition_status"])
+        self.assertEqual(1, len(progress["files_attempted_this_run"]))
+        self.assertEqual(1, progress["verified_handoff_files"])
+        self.assertEqual(3, progress["not_attempted_this_run"])
+        self.assertEqual(handoff["files"][0], progress["files_attempted_this_run"][0])
+        item = next(item for item in self.config["files"]
+                    if item["google_drive_id"] == handoff["files"][0]["google_drive_id"])
+        path = self.quota.resolve_path(acquisition.BASE + "/raw/" + item["relative_path"])
+        self.assertEqual(self.payload(item), path.read_bytes())
+        self.assertEqual(handoff["files"][0]["sha256"], acquisition._verified_receipt(path, item)["sha256"])
+        self.assertEqual([], list(self.handoff.parent.glob("*.tmp")))
+        self.assertEqual([], self.quota.active_reservations())
+        self.assertFalse(self.quota.resolve_path(acquisition.HANDOFF_PATH + ".lock").exists())
+
+    def test_final_replay_interrupt_before_accounting_preserves_completed_result(self):
+        self.assert_final_replay_survives_interrupt("before_record_outcome")
+
+    def test_final_replay_interrupt_after_record_append_replays_without_duplicate(self):
+        self.assert_final_replay_survives_interrupt("after_record_append")
+
+    def test_final_replay_interrupt_before_publish_retries_and_preserves_original_interrupt(self):
+        self.assert_final_replay_survives_interrupt("before_publish")
+
+    def test_final_replay_interrupt_before_atomic_replace_retries_real_publication(self):
+        self.assert_final_replay_survives_interrupt("before_atomic_replace")
+
+    def test_final_interrupted_progress_retries_without_replacing_original_interrupt(self):
+        self.assert_final_replay_survives_interrupt("before_interrupted_progress")
+
     def test_stop_control_refuses_legacy_owner_without_writing_marker(self):
         lock = self.quota.resolve_path(acquisition.HANDOFF_PATH + ".lock")
         lock.parent.mkdir(parents=True, exist_ok=True)

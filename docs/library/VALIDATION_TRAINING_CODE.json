@@ -84,10 +84,10 @@
   },
   "final_full_library_tests": {
     "command": "C:/Users/USER/miniforge3/python.exe -B -m unittest discover -s tests/library -v",
-    "passed": 181,
+    "passed": 186,
     "failed": 0,
     "skipped": 0,
-    "seconds": 19.476
+    "seconds": 20.608
   },
   "bfmd_coordinator": {
     "source_file_sha256": "28f248c4b5ddb2e4fc6e350187ebdaa28d0905f4e34dfc5c7fb00fbdc7fcc983",
@@ -100,6 +100,21 @@
     "real_stop_control": "NOT_RUN",
     "actual_dataset_download_mode": "original single sequential writer;121 successful attempts;0 resume bytes;no process interrupted",
     "implementation_commit": "2b81ea4ee0882b712d315b27bbf945154464944f",
-    "source_file_sha256_basis": "Observed workspace file bytes; Git line-ending normalization may differ by checkout"
+    "source_file_sha256_basis": "Observed workspace file bytes; Git line-ending normalization may differ by checkout",
+    "final_replay_fix": {
+      "based_on_commit": "2b81ea4ee0882b712d315b27bbf945154464944f",
+      "targeted_tests_passed": 32,
+      "independent_critical_regressions_passed": 6,
+      "independent_critical_seconds": 1.159,
+      "source_file_sha256": "be5f16615d2711885b71949cbc5f3b38206a654c0692182c1f5da9783fbb3e68",
+      "evidence": "docs/library/VALIDATION_BFMD_FINAL_REPLAY.json"
+    }
+  },
+  "before_final_replay_fix_tests": {
+    "command": "C:/Users/USER/miniforge3/python.exe -B -m unittest discover -s tests/library -v",
+    "passed": 181,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 19.476
   }
 }
