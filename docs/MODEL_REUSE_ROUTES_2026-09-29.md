@@ -56,6 +56,6 @@ BST替换作者姿态提取器会产生输入域差异。可先验证作者真�
 
 ## 补充标注数据状态
 
-[BFMD作者仓库](https://github.com/Ning-D/BFMD)和[公开Drive](https://drive.google.com/drive/folders/1wQr4DpMbx-e8jFnvOH9WUJXxfXgTC1IJ)提供标注与比赛索引，不附原视频。远端目录核对116个JSON及5个根文件约1.825GB，实际下载后的字节/hash以library报告为准。公开包声明1058回合/11301拍，与论文规模不同；19场索引不当成19场已下载视频。双打标注范围有限，球轨迹含模型预测/推断，不能全部算human真值。用于训练专用补充，先按视频ID和时间轴匹配，不能随意套到另一数据集。
+[BFMD作者仓库](https://github.com/Ning-D/BFMD)和[公开Drive](https://drive.google.com/drive/folders/1wQr4DpMbx-e8jFnvOH9WUJXxfXgTC1IJ)提供标注与比赛索引，不附原视频。初查116个标注目录文件与5个根文件约1.825GB；library进一步核对为115个有效JSON及1个.json.bak，备用文件不计有效标注。最终选择及下载后字节/hash以library报告为准。公开包声明1058回合/11301拍，与论文规模不同；19场索引不当成19场已下载视频。双打标注范围有限，球轨迹含模型预测/推断，不能全部算human真值。用于训练专用补充，先按视频ID和时间轴匹配，不能随意套到另一数据集。
 
 [DoublesEval官方仓库](https://github.com/Chengjt1999/DoublesEval)当前只有README/许可，代码和数据尚无可下载入口，登记BLOCKED；其论文里的职业双打不计本地已取得素材。

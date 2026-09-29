@@ -5,10 +5,11 @@
 四个原任务复用既有worktree，新分支分别为codex/platform-research-implementation、codex/library-training-datasets、codex/models-reuse-experiments、codex/render-presets-acceleration。根main冻结本轮用途/验收合同ff2c700及registry补充f966520，旧分支保留。
 
 - GPU渲染受信登记7354b1f集成为632a532；root独立45 passed、1既有Windows symlink skip，无GPU。第一次root调用未创建pytest基目录父目录，46项在setup失败；建立父目录后通过，是验证命令问题而非代码回归。
-- 用途公共合同a7fff39集成为2850123；root独立111 passed。独立审阅未发现确定性放行漏洞，但发现批量registry重复Path.resolve及来源别名DAG指数遍历的P2性能缺陷，已交platform修复；整条R-04b尚未达标。
+- 用途公共合同a7fff39集成为2850123；root独立111 passed。独立审阅未发现确定性放行漏洞，但发现批量registry重复Path.resolve及来源别名DAG指数遍历的P2性能缺陷。修复4fdd200集成为0e3e04a，root独立119 passed；每次调用仍重读registry，单次索引/memo复用并限制节点/边/深度；整条R-04b尚未达标。
 - library自行同步公共合同被自动审批拒绝（跨library修改边界）。采用main2850123只读contracts-root校验作为安全替代，不重复申请同一跨边界写入；主任务负责共享合同集成。render已同步等价合同/runtime提交。
 - root只读查验本机Python/PowerShell进程与18080/18081/18082监听，当前没有旧主服务或worker。未停止任何进程；render GPU基准期间不启动主worker，避免竞争领取任务。
 - library已开始作者完整6,455,837,331字节ZIP受限下载；有效空训练registry已原子发布（当前无完成校验的训练媒体），root读取核对。下载中文件不当完整素材；最终字节/哈希/场数/标注报告待完成。
+- render旧真实普通小样30/60fps各4次CPU技术检查通过（completion: render/benchmarks/presets-controlled-cpu-beb256d1c5fc）。GPU首次探测失败：FFmpeg9.0.2要求NVENC API13.1，本机驱动提供13.0；窗口与租约已归还。正在准备兼容构建重新公平对照，不改驱动、不把自动回退计成GPU通过。
 
 本轮目标与断言见[实施计划](IMPLEMENTATION_ROUND_2026-09-29.md)，不以工程回归代替模型准确率、完整数据或浏览器验收。
 
