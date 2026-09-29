@@ -9,6 +9,8 @@ This script measures technical quality; it does not grant human acceptance.
 from __future__ import annotations
 
 import argparse
+from contextlib import closing
+from copy import deepcopy
 from fractions import Fraction
 import json
 import math
@@ -17,6 +19,7 @@ from pathlib import Path
 import re
 import shutil
 import signal
+import sqlite3
 import subprocess
 import sys
 import time
@@ -25,7 +28,9 @@ import uuid
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from packages.render.storage import atomic_json, directory_bytes, reservation, sha256, utcnow
 from packages.render.timeline import RenderError, assets_by_id, require, safe_path
-from packages.render.usage import check_usage, referenced_assets, verify_source_bytes
+from packages.render.usage import check_usage, lineage_assets, referenced_assets, verify_source_bytes
+from packages.contracts import JobRequest, JobResult
+from packages.contracts.usage import inherit_usage_scope, UsageScopeError
 
 BUDGET = 1_000_000_000  # Decimal bytes, including references, PNGs and logs.
 HEADROOM = 64_000_000
@@ -61,8 +66,9 @@ def option(argv, name, *, before=None, after=None):
     return argv[indexes[0] + 1]
 
 
-def segment_commands(directory, count):
+def segment_commands(directory, count, trusted_timings):
     timings = read_json(directory / "stage_timings.json")
+    require(timings == trusted_timings, "Stage commands differ from the registered QA artifact", "artifact_mismatch")
     require(isinstance(timings, list), "stage_timings.json must be a list")
     result = []
     for i in range(count):
@@ -95,14 +101,15 @@ def segment_commands(directory, count):
     return result
 
 
-def original_request_sources(directory, root):
+def original_request_sources(directory, root, request=None):
     """Use the same gate as render, on every original reference before editing.
 
     source_map is an alignment artifact, not a substitute for canonical Asset
     usage/provenance. verify_source_bytes also rechecks the shared gate using
     actual digests, including source references later discarded as replays.
     """
-    request = read_json(under(directory / "request.json", directory))
+    if request is None:
+        request = read_json(under(directory / "request.json", directory))
     require(request.get("operation") == "render", "Original request must be a render operation")
     require(isinstance(request.get("assets"), list), "Original request requires top-level canonical assets array")
     params = request.get("parameters", {})
@@ -116,6 +123,146 @@ def original_request_sources(directory, root):
     return assets, paths
 
 
+def verify_job_artifacts(directory, root):
+    """Bind every consumed result to the fixed, read-only platform job ledger.
+
+    Adjacent request/result/QA files cannot authorize replacement output bytes.
+    No Queue constructor, version query, reservation, or media process runs here.
+    """
+    root, directory = Path(root).resolve(), Path(directory).absolute()
+    require(directory == directory.resolve(), "Job output directory must not redirect", "quality_job_mismatch")
+    request = JobRequest.model_validate(read_json(directory / "request.json")).model_dump(mode="json")
+    job, attempt = request["job_id"], request["attempt_id"]
+    require(re.fullmatch(r"[A-Za-z0-9_-]+", job) is not None and re.fullmatch(r"attempt-[1-9][0-9]*", attempt) is not None,
+            "Quality inputs require a controlled job/attempt identity", "quality_job_mismatch")
+    relative_output = f"render/jobs/{job}/{attempt}"
+    require(request["operation"] == "render" and request["output_dir"] == relative_output
+            and directory == root / relative_output and directory.resolve() == directory,
+            "Request identity does not match its canonical job directory", "quality_job_mismatch")
+    ledger_path = root / "platform/runtime.sqlite3"
+    require(ledger_path.is_file() and ledger_path.resolve() == ledger_path,
+            "Fixed platform job ledger is missing or redirected", "quality_job_mismatch")
+    try:
+        with closing(sqlite3.connect(ledger_path.as_uri() + "?mode=ro", uri=True, timeout=10)) as db:
+            db.row_factory = sqlite3.Row
+            row = db.execute("SELECT job_id,operation,status,attempt,payload,result FROM jobs WHERE job_id=?", (job,)).fetchone()
+        require(row is not None and row["operation"] == "render" and row["status"] == "succeeded"
+                and type(row["attempt"]) is int and attempt == f"attempt-{row['attempt']}",
+                "No matching successful render attempt in the trusted ledger", "quality_job_mismatch")
+        require(isinstance(row["payload"], str) and isinstance(row["result"], str)
+                and len(row["payload"]) <= 32_000_000 and len(row["result"]) <= 32_000_000,
+                "Missing/oversized trusted job metadata", "quality_job_mismatch")
+        payload, raw_result = json.loads(row["payload"]), json.loads(row["result"])
+    except sqlite3.Error as exc:
+        raise RenderError("quality_job_mismatch", "Cannot read the fixed platform job ledger") from exc
+    expected = JobRequest.model_validate(dict(schema_version="1.0", job_id=job, attempt_id=attempt,
+        operation="render", output_dir=relative_output, assets=payload.get("assets", []),
+        parameters=payload.get("parameters", {}))).model_dump(mode="json")
+    require(request == expected, "Local request differs from the trusted job payload", "quality_job_mismatch")
+    # Worker adds exactly this transport field after validating JobResult.
+    raw_result = dict(raw_result)
+    if "exit_code" in raw_result:
+        require(type(raw_result["exit_code"]) is int and raw_result.pop("exit_code") == 0,
+                "Trusted worker result has a nonzero exit code", "quality_job_mismatch")
+    result = JobResult.model_validate(raw_result).model_dump(mode="json")
+    require(result["status"] == "succeeded" and result["job_id"] == job and result["attempt_id"] == attempt,
+            "Trusted result identity/status differs from the job", "quality_job_mismatch")
+    params = request["parameters"]
+    preview = params.get("preview", False)
+    require(type(preview) is bool, "Invalid trusted preview flag", "quality_job_mismatch")
+    names = {"video/mp4": "preview.mp4" if preview else "export.mp4", "timeline": "timeline.json",
+             "source_map": "source_map.json", "qa_report": "qa.json"}
+    artifacts = result["artifacts"]
+    require(len({a["artifact_id"] for a in artifacts}) == len(artifacts)
+            and len({a["relative_path"] for a in artifacts}) == len(artifacts),
+            "Trusted artifact identities/paths are not unique", "artifact_mismatch")
+    assets, source_paths = original_request_sources(directory, root, request)
+    sources = referenced_assets(params.get("timeline"), assets)
+    selected, verified_hashes = {}, {}
+    for kind, filename in names.items():
+        matches = [a for a in artifacts if a["kind"] == kind]
+        require(len(matches) == 1, f"Expected exactly one trusted {kind} artifact", "artifact_mismatch")
+        artifact = matches[0]
+        relative = f"{relative_output}/{filename}"
+        require(artifact["relative_path"] == relative, "Artifact path is not its canonical job output", "artifact_mismatch")
+        path = root / relative
+        require(path.is_file() and safe_path(root, relative) == path,
+                "Artifact is missing or redirected", "artifact_mismatch")
+        producer = artifact["producer"] if isinstance(artifact["producer"], dict) else {}
+        provenance = deepcopy(producer.get("provenance", {}))
+        require(isinstance(provenance, dict), "Invalid artifact producer provenance", "artifact_mismatch")
+        for key in ("usage_scope", "source_asset_id", "source_sha256"):
+            if key in producer:
+                require(key not in provenance or provenance[key] == producer[key],
+                        "Artifact producer has conflicting provenance", "artifact_mismatch")
+                provenance[key] = producer[key]
+        record = dict(asset_id=artifact["artifact_id"], relative_path=relative, sha256=artifact["sha256"],
+                      size_bytes=artifact["size_bytes"], usage_scope=producer.get("usage_scope", "general"), provenance=provenance)
+        require(record["asset_id"] not in assets, "Artifact identity collides with a source", "artifact_mismatch")
+        check_usage([record], assets, root, params.get("research_preview", False))
+        # Actual digest reaches the shared registry before a mismatch can hide
+        # the fact that replacement bytes are training-only.
+        record["sha256"] = sha256(path)
+        check_usage([record], assets, root, params.get("research_preview", False))
+        ancestors = [a for a in lineage_assets([record], {**assets, record["asset_id"]: record})
+                     if a["asset_id"] != record["asset_id"]]
+        if ancestors:
+            verify_source_bytes(ancestors, assets, root, lambda: None, params.get("research_preview", False))
+        # The contract supports one direct parent per record. Check the declared
+        # producer lineage above, and a separate derived view for every actual
+        # request source; never discard or overwrite that producer relationship.
+        for source in sources:
+            view = {**record, "provenance": {"usage_scope": provenance.get("usage_scope", record["usage_scope"])}}
+            try:
+                derived = inherit_usage_scope(view, source, root, source_assets=list(assets.values()))
+            except UsageScopeError as exc:
+                raise RenderError(exc.code, str(exc), "blocked") from exc
+            check_usage([derived], assets, root, params.get("research_preview", False))
+        require(path.stat().st_size == artifact["size_bytes"] and record["sha256"].lower() == artifact["sha256"].lower(),
+                "Actual artifact bytes differ from the trusted job result", "artifact_mismatch")
+        selected[kind], verified_hashes[kind] = artifact, record["sha256"]
+    return dict(request=request, assets=assets, verified_sources=source_paths, media=directory / names["video/mp4"],
+                artifacts=selected, trusted_job=dict(job_id=job, attempt_id=attempt,
+                ledger_relative_path="platform/runtime.sqlite3", verified_artifact_sha256=verified_hashes))
+
+
+def verify_reference_sidecars(directory, bound, qa):
+    """Authenticate the unregistered ASS sidecars by deterministic regeneration.
+
+    This experiment supports the renderer's default font, as used by both
+    controlled benchmarks. A custom-font export needs a trusted font snapshot
+    before this reconstruction can be supported.
+    """
+    from packages.render.engine import RenderConfig, write_ass
+    from packages.render.presets import resolve_preset
+    from packages.render.timeline import normalize_timeline
+
+    params = bound["request"]["parameters"]
+    timeline = deepcopy(params["timeline"])
+    preset = resolve_preset(params, timeline.get("output"))
+    require(preset == qa.get("preset"), "Registered QA preset differs from the trusted request", "artifact_mismatch")
+    timeline["output"] = preset["output"]
+    for segment in timeline["segments"]:
+        segment.update(params.get("segment_options", {}).get(segment["segment_id"], {}))
+    normalized = normalize_timeline(timeline, bound["assets"], **{
+        k: params.get(k, False) for k in ("merge_overlaps", "deduplicate_replays", "preview", "research_preview")})
+    normalized["render_metadata"]["preset"] = preset
+
+    class TextSink:
+        def write_text(self, content, *, encoding):
+            require(encoding == "utf-8", "Unsupported ASS encoding")
+            self.content = content
+
+    for index, segment in enumerate(normalized["segments"]):
+        sink = TextSink()
+        write_ass(sink, normalized, segment, index, len(normalized["segments"]), RenderConfig().font_name)
+        sidecar = directory / f"segment-{index:03}.ass"
+        require(sidecar.is_file() and sidecar.resolve() == sidecar and sidecar.stat().st_size <= 1_000_000,
+                "ASS reference sidecar is missing, redirected or oversized", "artifact_mismatch")
+        require(sidecar.read_text(encoding="utf-8") == sink.content,
+                "ASS differs from the bound request/default-font renderer", "artifact_mismatch")
+
+
 def preflight(args):
     root = args.storage_root.resolve()
     allowed = Path("D:/video" if os.name == "nt" else "/mnt/d/video").resolve()
@@ -124,10 +271,14 @@ def preflight(args):
     require(cpu != nvenc, "CPU and NVENC outputs must differ")
     # Shared metadata and actual-byte gates precede every reservation and
     # FFmpeg/ffprobe invocation, including the runtime version query below.
-    original_a = original_request_sources(cpu, root)
-    original_b = original_request_sources(nvenc, root)
+    bound_a = verify_job_artifacts(cpu, root)
+    bound_b = verify_job_artifacts(nvenc, root)
+    original_a = bound_a["assets"], bound_a["verified_sources"]
+    original_b = bound_b["assets"], bound_b["verified_sources"]
     qa_a, qa_b = (read_json(p / "qa.json") for p in (cpu, nvenc))
     sm_a, sm_b = (read_json(p / "source_map.json") for p in (cpu, nvenc))
+    verify_reference_sidecars(cpu, bound_a, qa_a)
+    verify_reference_sidecars(nvenc, bound_b, qa_b)
     for qa, backend in ((qa_a, "cpu"), (qa_b, "nvenc")):
         require(qa.get("technical_pass") is True and all(qa.get("checks", {}).values()), "Both QA reports must pass")
         require(qa.get("backend", {}).get("effective") == backend, f"Expected actual {backend} backend")
@@ -159,7 +310,8 @@ def preflight(args):
                 and not any(d.get("rotation", 0) for d in video.get("side_data_list", [])),
                 "Fixed active-picture ROI requires unrotated square-pixel 16:9 sources")
     require(cursor / fps <= 30, "Comparison duration exceeds 30 seconds")
-    commands_a, commands_b = segment_commands(cpu, 3), segment_commands(nvenc, 3)
+    commands_a = segment_commands(cpu, 3, qa_a.get("stage_timings"))
+    commands_b = segment_commands(nvenc, 3, qa_b.get("stage_timings"))
     require(commands_a == commands_b, "A/B input/filter/ASS/timing differs")
     for segment, command in zip(segments, commands_a):
         source = safe_path(root, segment["relative_path"])
@@ -194,10 +346,8 @@ def preflight(args):
     actual_version = version_probe.stdout.decode("utf-8", "replace")
     require(actual_version.splitlines() == expected_version.splitlines(),
             "Actual reference FFmpeg version differs from A/B QA", "runtime_version_mismatch")
-    media = [under(folder / ("preview.mp4" if qa.get("preview") else "export.mp4"), folder)
-             for folder, qa in ((cpu, qa_a), (nvenc, qa_b))]
-    require(all(path.is_file() for path in media), "Completed output video missing")
-    return root, cpu, nvenc, fps, segments, commands_a, media, binaries
+    media = [bound_a["media"], bound_b["media"]]
+    return root, cpu, nvenc, fps, segments, commands_a, media, binaries, [bound_a["trusted_job"], bound_b["trusted_job"]]
 
 
 class Runner:
@@ -407,7 +557,7 @@ def main():
 
     signal.signal(signal.SIGTERM, interrupt)
     try:
-        root, cpu, nvenc, fps, segments, commands, media, binaries = preflight(args)
+        root, cpu, nvenc, fps, segments, commands, media, binaries, trusted_jobs = preflight(args)
         job = "quality-" + uuid.uuid4().hex[:16]
         with reservation(root, job, BUDGET) as ledger:
             output = root / "render" / job
@@ -415,6 +565,7 @@ def main():
             runner = Runner(root, output, binaries)
             try:
                 report = compare(runner, fps, segments, commands, media, cpu)
+                report["verified_job_artifacts"] = trusted_jobs
                 code = 0
             except KeyboardInterrupt:
                 report.update(status="cancelled", error={"code": "cancelled", "message": "Interrupted; generated files retained"})
