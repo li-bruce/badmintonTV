@@ -14,6 +14,7 @@
 - 环境/容量：独立FFmpeg8.0.1已实际NVENC成功，原9.0.2保留。09:45:43Z render646,588,608 bytes/40GB，runtime/render873,315,597 bytes/5GB，磁盘剩余943,805,825,024 bytes；09:42共享可见23,948,960,885 bytes/700GB（非原子快照，其他模块仍工作）。无端口/新Python依赖/驱动修改；质量两轮各1GB和ROI200MB预留均释放，所有本模块FFmpeg已停止，.render.lock不存在，render owner已归还platform。
 - 失败/限制/下一步：FFmpeg9 API不兼容原失败保留；可显式使用compat8，默认CPU不变。原生60fps源、NVDEC、长片吞吐、连续播放听感和平台上传未测；细技法、人类内容审核和权利未知。后续由主任务集成本轮工具/报告、platform完成设置持久化与取消补丁集成，不把本模块技术通过宣布整个产品验收通过。
 - 核心实现SHA：`4ecaf6dfcf0536fe95e720a612c7bfd3a9a54206`，来源闭包修复`db587aa179ea100a199fe1c67c758b74810f9307`；主任务已集成等价6518a09/281c137。平台独立render_options与Timeline ID/CAS绑定保存，重开恢复预设/安全区/profile；canonical Timeline根合同不私自增加字段。
+- 本轮验证交付SHA：`f2bd7bbb0bd929ad7ebce7cf57a8a0663a17f648`，包括兼容环境/安装器、固定输入双后端基准、质量脚本与报告、8个固化异常回归、只读开销诊断。最终测试150 passed/1 skipped/378subtests，Git差异检查和脚本AST/JSON通过；未推送、未合并main、未发布媒体。
 
 更新：2026-09-28。任务 `01a0e88b-5005-7991-9fb0-d2dec3af8b4f`；分支 `work/render`；cwd `C:\Users\USER\.codex\worktrees\3e52\badmintonTV`。
 
