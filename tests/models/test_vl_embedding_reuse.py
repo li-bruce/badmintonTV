@@ -1,8 +1,9 @@
 """CPU-only boundary tests. Fake frames are not video/model accuracy evidence."""
 import copy
-from contextlib import nullcontext
+from contextlib import nullcontext, redirect_stdout
 from fractions import Fraction
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -12,13 +13,19 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from packages.models import vl_embedding_reuse as vl
-from packages.models.protocol import InvalidRequest, ModelBlocked
+from packages.models.protocol import InvalidRequest, ModelBlocked, run_request
 
 
 def request():
     return {"schema_version": "1.0", "job_id": "j", "attempt_id": "a", "operation": "video_embedding",
             "assets": [{"asset_id": "asset", "relative_path": "data/source.mp4", "duration_ms": 60000,
-                        "provenance": {}, "size_bytes": 0, "sha256": hashlib.sha256(b"").hexdigest()}],
+                        "provenance": {}, "size_bytes": 0, "sha256": hashlib.sha256(b"").hexdigest(),
+                        "schema_version": "1.0", "title": "Synthetic transport fixture; never decoded",
+                        "width": 320, "height": 192, "fps_num": 30, "fps_den": 1, "time_base": "1/1000",
+                        "match_id": "synthetic", "source_type": "synthetic", "source_url": None,
+                        "source_page": None, "acquired_at": None, "camera_type": "unknown",
+                        "discipline": "unknown", "players": [], "split": "unassigned", "probe": {},
+                        "rights": {"status": "unknown", "license_url": None, "evidence": [], "allowed_uses": []}}],
             "parameters": {"model_id": vl.MODEL_ID, "windows": [{"asset_id": "asset", "start_ms": 5000, "end_ms": 11000}],
                            "queries": [{"query_id": "zh-1", "text": "羽毛球后退杀球", "language": "zh"}]},
             "output_dir": "models/handoff/new-attempt"}
@@ -214,6 +221,39 @@ class SamplingTests(unittest.TestCase):
 
 
 class FailureTests(unittest.TestCase):
+    def test_real_protocol_diagnostic_status_and_code_match_result(self):
+        # Full protocol dispatch with injected boundary failures, no ML imports.
+        cases = ((ModelBlocked("DEPENDENCY_VERSION", "CPU review fixture"), "blocked", 2, "DEPENDENCY_VERSION"),
+                 (KeyboardInterrupt(), "cancelled", 130, "cancelled"),
+                 (ImportError("CPU fixture dependency absent"), "blocked", 2, "DEPENDENCY_NOT_INSTALLED"),
+                 (RuntimeError("CPU fixture failure"), "failed", 1, "execution_failed"))
+        for error, status, expected_exit, expected_code in cases:
+            with self.subTest(status=status, code=expected_code), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory).resolve()
+                r = request()
+                r["assets"][0]["usage_scope"] = "training_only"
+                source = root / r["assets"][0]["relative_path"]
+                source.parent.mkdir(parents=True)
+                source.write_bytes(b"")
+                request_path, result_path = root / "request.json", root / "result.json"
+                request_path.write_text(json.dumps(r), encoding="utf-8")
+                with patch.dict(os.environ, {"BTV_STORAGE_ROOT": str(root)}), \
+                     patch.object(vl, "reserve", return_value=nullcontext()), \
+                     patch.object(vl, "verify_weights", side_effect=error), redirect_stdout(io.StringIO()):
+                    actual_exit = run_request(request_path, result_path)
+                result = json.loads(result_path.read_text(encoding="utf-8"))
+                failure = json.loads((root / r["output_dir"] / "failure.json").read_text(encoding="utf-8"))
+                self.assertEqual(actual_exit, expected_exit)
+                self.assertEqual(result["status"], status)
+                self.assertEqual(failure["status"], result["status"])
+                self.assertEqual(result["error"]["code"], expected_code)
+                self.assertEqual(failure["failure"]["code"], result["error"]["code"])
+                self.assertEqual(failure["failure"]["stage"], "weight_verification")
+                self.assertEqual(failure["producer"]["attempt_id"], result["attempt_id"])
+                self.assertEqual(failure["usage_scope"], "training_only")
+                self.assertEqual(result["artifacts"], [])
+                self.assertFalse((root / r["output_dir"] / "features.json").exists())
+
     def test_mock_execution_preserves_strict_scope_in_all_artifacts(self):
         # Transport/inheritance fixture only: no model prediction is exercised.
         with tempfile.TemporaryDirectory() as directory:
@@ -276,6 +316,7 @@ class FailureTests(unittest.TestCase):
             failure = json.loads((output / "failure.json").read_text(encoding="utf-8"))
             self.assertEqual(failure["usage_scope"], "training_only")
             self.assertEqual(failure["producer"]["usage_scope"], "training_only")
+            self.assertEqual(failure["status"], "blocked")
             self.assertEqual(failure["failure"]["code"], "MODEL_NOT_INSTALLED")
             self.assertFalse((output / "features.json").exists())
 
@@ -290,6 +331,38 @@ class FailureTests(unittest.TestCase):
             with patch.object(vl, "reserve", return_value=nullcontext()), self.assertRaises(FileExistsError):
                 vl.execute(r, root, output, lambda *args, **kwargs: None)
             self.assertEqual(original.read_text(encoding="utf-8"), "original")
+
+
+class TimingTests(unittest.TestCase):
+    def test_clip_pooling_and_cpu_transfer_are_timed_separately(self):
+        # Mock computation only tests the timing boundary, never GPU performance.
+        clock = [0.0]
+        vector = MagicMock()
+        vector.mean.return_value = vector
+        def pool(*args, **kwargs):
+            clock[0] += 0.5
+            return vector
+        def copy_to_cpu():
+            clock[0] += 0.25
+            return vector
+        def to_list():
+            clock[0] += 0.25
+            return [1.0] + [0.0] * 511
+        vector.cpu.side_effect = copy_to_cpu
+        vector.tolist.side_effect = to_list
+        torch = MagicMock()
+        torch.cat.side_effect = pool
+        torch.nn.functional.normalize.return_value = vector
+        transformers = types.SimpleNamespace(CLIPModel=MagicMock(), CLIPProcessor=MagicMock())
+        with patch.dict("sys.modules", {"transformers": transformers}), \
+             patch("packages.models.inference.weights_dir", return_value=Path("cpu-fixture")), \
+             patch.object(vl.time, "perf_counter", side_effect=lambda: clock[0]):
+            comparison = vl.clip_comparison(Path("cpu-fixture"), torch, [],
+                                            [{"window_id": "window-01"}], [[object()]])
+        self.assertEqual(comparison["timings"][0]["postprocess_seconds"], 0.0)
+        self.assertEqual(comparison["video_aggregation_timings"],
+                         [{"window_id": "window-01", "postprocess_seconds": 1.0}])
+        self.assertEqual(comparison["video_vectors"], [[1.0] + [0.0] * 511])
 
 
 if __name__ == "__main__":

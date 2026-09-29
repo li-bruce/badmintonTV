@@ -25,7 +25,7 @@ class AcquisitionPaused(RuntimeError):
     """Administrator requested a cooperative yield at a flushed Range boundary."""
 
 
-def fetch_large_ranges(url,target,size,sha,*,pause_file=None):
+def fetch_large_ranges(url,target,size,sha,*,pause_file=None,concurrency=1):
     """Normal HTTP Range, one append-only partial, same immutable source identity.
 
     Full-response transfer stalled before its first MiB on this host. Ranges
@@ -45,6 +45,13 @@ def fetch_large_ranges(url,target,size,sha,*,pause_file=None):
     else: atomic_write_json(marker,identity)
     count=partial.stat().st_size if partial.exists() else 0
     if count>size: raise ValueError('oversize partial preserved')
+    if concurrency != 1:
+        from scripts.models.range_transfer import append_ranges
+        stats=append_ranges(url,partial,size,concurrency=concurrency,pause_file=pause_file)
+        print(json.dumps({'range_transfer':stats}),flush=True)
+        if stats['status']=='paused':
+            raise AcquisitionPaused(f"partial retained at {stats['final_offset']} bytes; models writer released")
+        return fetch(url,target,size,expected_sha=sha)
     started=time.monotonic()
     with partial.open('ab' if partial.exists() else 'xb') as out:
         while count<size:
@@ -76,6 +83,7 @@ def fetch_large_ranges(url,target,size,sha,*,pause_file=None):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--pause-file',help='Administrator control file; presence yields between flushed ranges')
+    parser.add_argument('--concurrency',type=int,choices=[1,2,3,4],default=1)
     args=parser.parse_args()
     root = storage_root()
     metadata = json_url(f'https://huggingface.co/api/models/{MODEL}/revision/{REVISION}?blobs=true')
@@ -96,7 +104,7 @@ def main():
             target = resolve_relative(root,ROOT_RELATIVE+'/'+filename,owner='models')
             url = f'{SOURCE}/resolve/{REVISION}/{quote(filename,safe="/")}'
             lfs = entry.get('lfs')
-            info = (fetch_large_ranges(url,target,entry['size'],lfs['sha256'],pause_file=args.pause_file) if lfs and entry['size']>64_000_000
+            info = (fetch_large_ranges(url,target,entry['size'],lfs['sha256'],pause_file=args.pause_file,concurrency=args.concurrency) if lfs and entry['size']>64_000_000
                     else fetch(url,target,entry['size'],expected_sha=lfs['sha256'] if lfs else None,
                                expected_blob=None if lfs else entry['blobId']))
             manifest['files'].append({'relative_path':target.relative_to(root).as_posix(),

@@ -67,3 +67,48 @@ unattributed_seconds，未回写旧实验；下一真实运行验证新分项。
 下一步：视觉QA独立记录；连续pose+球点+Agent场地候选与显式击球边界组成BST探索输入，
 缺失不伪造。Qwen3VL独立env/权重完成后中文查询真实embedding。library新训练handoff
 到齐再至少一个新职业窗口；用途training_only必须完整继承。
+
+
+## 新职业训练素材：修复桥接后的真实重试
+
+2026-09-29，library已发布首个经过完整SHA/CPU解码/PTS验证的新训练Asset
+`asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913`，
+原片 `data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/876ddac3abe9141b8ce7f2fe.mp4`，
+231,500,744B、1280×720、25fps、time_base1/12800，发布者processed片1306.040s。
+固定窗口120000–123000ms，75原帧3000–3074、PTS步长512；用途training_only、
+split unassigned、比赛轮次未确认，版权research_only。不用发布者CSV作本次细动作真值。
+Root按固定asset_id取源帧，6时点Agent观察见完整后场机位；非人工确认/自动切镜检测。
+
+旧bridge首次TrackNet d1ef与YOLO440e因heartbeat.replace WinError5取消，原记录保留；
+main fd6155b合入窄重试后，用独立新job，未覆盖失败attempt：
+
+| 模型 | job_id | 真实结果 |
+|---|---|---|
+| TrackNet offline | job-d9c832fd94384ee3950918badc767b15 | succeeded，75帧44 observed/31 missing/0 inpainted |
+| YOLO640+ByteTrack | job-57c6354813b94ad1ba12d42b24e5968e | succeeded，精确覆盖75源帧；所有检测保留、无confirmed事件 |
+
+两份bridge.done均compute_stopped=true/reason completed/exit0，结束lease/window均null。
+q.logs没有heartbeat retry诊断，因此只确认该修复版本正常跑通，不能声称此次触发了Win5恢复。
+Artifact与报告均继承training_only，events=[]；主任务另行核验四份产物hash和合同。
+
+| 产物（各自models/jobs/job-id/attempt-1下） | bytes | SHA256 |
+|---|---:|---|
+| d9c tracknet-points.json | 34127 | 1984f48c7ef961b83f4d8296b5fc5eaca610d83993febe9aec93868833343db6 |
+| d9c tracknet-report.json | 4170 | c907fdf4a846fc4b13df55f3f08439ffec5e1e4acd32f1eb3555d4cd0b54c76c |
+| 57c features.json | 1793762 | 26f6b936682b18a64e6fd50e4cebed7bf0a3f95e23a725175a234d44271c532e |
+| 57c report.json | 8412 | cd32782e14b72b46029411cb6303c94ea437894f829686569faa2f2308bbcd82 |
+
+TrackNet cold13.0936s，pipeline2.2619s，模型窗口前向0.3537s；offline未来背景采样32帧，
+不算因果实时；allocator431,071,744/683,671,552B。原report各RTF口径保留，不能外推整小时。
+YOLO实测执行至features JSON写完35.0752s：源hash0.6626、cold31.9151、
+decode0.2204、pose1.6207、tracking0.0544、D2H/list0.01735、
+序列化0.00438、features写入0.05126、unattributed0.52895秒。
+该边界仍不含最终report发布、artifact hash与worker IPC；allocator151,847,936/176,160,768B。
+旧90帧YOLO缺D2H计时的报告保持原样，不以后续测量覆盖。
+
+独立于模型缺失，Agent按可见三拍邻帧提出previous3016/current3052/next3062，
+作者规则候选完整窗[3016,3068)52帧；存在接触时刻模糊和数px相机漂移，不是精确击球/校准真值。
+此窗球点仅27 observed/25 missing，连续3020–3044缺球，保持窗口不删帧或调边界。
+新YOLO远端人物还存在独立漏检，匿名ID2实际为场外人员，不能把任意两个ID当场上两人。
+BST真实完整输入仍BLOCKED。额外仅核对已下载官方InpaintNet规则，若适用才单独实验；
+imputed也不会自动升级为observed或通过BST可靠性门槛。
