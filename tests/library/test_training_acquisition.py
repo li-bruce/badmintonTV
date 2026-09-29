@@ -219,13 +219,18 @@ class ProbeManifestResumeTests(unittest.TestCase):
         self.assertEqual(0, self.probe_calls)
         self.assertEqual([], self.quota.active_reservations())
 
-    def test_partial_prior_and_new_completed_asset_survive_later_worker_failure(self):
+    def test_partial_prior_and_completed_results_before_and_after_worker_failure_survive(self):
         self.prior([0, 1])
         self.report_paths[8].unlink()
         with self.assertRaisesRegex(RuntimeError, "injected worker failure"):
             self.run_probe([9, 1, 8, 0, 2, 3, 4, 5, 6, 7], error=RuntimeError("injected worker failure"))
-        expected = {self.items[i]["sha256"] for i in (0, 1, 9)}
-        self.assertEqual([expected, expected], self.publications)
+        early = {self.items[i]["sha256"] for i in (0, 1, 9)}
+        expected = {self.items[i]["sha256"] for i in range(10) if i != 8}
+        self.assertEqual([early, early], self.publications[:2])
+        self.assertEqual(9, len(self.publications))
+        self.assertEqual(expected, self.publications[-1])
+        for before, after in zip(self.publications, self.publications[1:]):
+            self.assertLessEqual(before, after)
         saved = json.loads(self.manifest.read_text())
         self.assertEqual(expected, {asset["sha256"] for asset in saved["assets"]})
         self.assertEqual([], self.quota.active_reservations())

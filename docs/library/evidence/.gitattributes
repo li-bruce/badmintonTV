@@ -1,0 +1,2 @@
+# Diagnostic receipts hash the exact captured tool bytes.
+*.txt -text whitespace=cr-at-eol

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "usage_scope": "training_only",
+  "purpose": "independent original-order full-source PTS diagnosis; not Asset publication",
+  "source_sha256_expected": "80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+  "source_path": "D:\\video\\data\\training\\fine-badminton-2026-zenodo-20292976-v1.0\\extracted\\dad96556571445665120c49a.mp4",
+  "command": [
+    "D:/video/runtime/render/install-20260928T151048Z-8cca16ed/ffmpeg-9.0.2-essentials_build/bin/ffprobe.exe",
+    "-v",
+    "error",
+    "-threads",
+    "1",
+    "-select_streams",
+    "0",
+    "-show_frames",
+    "-show_entries",
+    "frame=best_effort_timestamp",
+    "-of",
+    "csv=p=0",
+    "D:\\video\\data\\training\\fine-badminton-2026-zenodo-20292976-v1.0\\extracted\\dad96556571445665120c49a.mp4"
+  ],
+  "started_at": "2026-09-29T10:13:41.894156+00:00",
+  "elapsed_seconds": 158.7970000000205,
+  "exit_code": 0,
+  "time_base": "1/90000",
+  "frame_count": 120015,
+  "first_pts": 0,
+  "last_pts": 431481600,
+  "delta_histogram": {
+    "1800": 316,
+    "3600": 119698
+  },
+  "nonincreasing_examples": [],
+  "canonical_pts_jsonl_sha256": "d4c517227b310b47bff15bcc34e6c8686508755caaf92ef139d0fce157706b8c",
+  "stderr_bytes": 0,
+  "stderr": "",
+  "sorting_or_deduplication": false
+}

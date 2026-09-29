@@ -292,9 +292,24 @@ def probe_dataset(config, quota, budget, *, ffprobe, ffmpeg, workers, contracts_
     with quota.reserve(len(media) * 128_000_000 + 50_000_000, purpose="ten complete CPU decode/PTS indexes and bounded training handoff"):
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [executor.submit(one, item) for item in media]
+            worker_errors = []
             try:
                 for future in as_completed(futures):
-                    item, report_path, report, asset = future.result()
+                    if future.cancelled():
+                        continue
+                    try:
+                        item, report_path, report, asset = future.result()
+                    except Exception as error:
+                        worker_errors.append(error)
+                        # Stop queued work, but retain independently verified
+                        # results from jobs which were already running. Their
+                        # complete PTS indexes must not become orphaned merely
+                        # because a different source failed.
+                        for pending in futures:
+                            pending.cancel()
+                        announce("probe_worker_failed", error_type=type(error).__name__,
+                                 error=str(error), completed_this_run=completed_this_run)
+                        continue
                     if not report_path.exists():
                         write_json(report_path, report, quota=quota, budget=budget)
                     assets_by_sha[asset["sha256"]] = asset
@@ -305,6 +320,8 @@ def probe_dataset(config, quota, budget, *, ffprobe, ffmpeg, workers, contracts_
                              decoded_frames=asset["probe"]["decode"]["frames"],
                              manifest_path=str(published["manifest_path"]), completed_this_run=completed_this_run,
                              published_assets=len(assets_by_sha), total_assets=len(media))
+                if worker_errors:
+                    raise worker_errors[0]
             except BaseException:
                 # Do not start the rest of a long-video queue after a failure.
                 # Already-running probes still finish within their own bounds
