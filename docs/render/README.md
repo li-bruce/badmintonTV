@@ -61,7 +61,7 @@ nvenc/auto必须通过同一`D:/video/platform/runtime.sqlite3`窗口+worker作�
 
 平台优雅取消使用可信环境变量`BTV_RENDER_CANCEL_FILE`，绝对路径必须精确对应当前`platform/jobs/<job_id>/<attempt_id>/cancel.request`；文件存在即取消，无内容格式要求。此可信env优先于独立CLI `--cancel-file`，后者继续限定render下相对路径。取消时等待本次FFmpeg停止，再释放本模块容量锁。
 
-使用包含共享合同依赖的`D:/video/runtime/platform/env/Scripts/python.exe`运行。原片检查在合并/去重前覆盖每一个原始引用：共享用途helper检查typed/provenance、逻辑/物理保留路径、受信注册表以及实际文件hash。training_only即使confirmed、preview或research_preview仍拒绝；registry损坏/待发布时fail closed。独立CLI也执行同一门禁。没有安装训练框架或修改共享Conda。
+使用包含共享合同依赖的`D:/video/runtime/platform/env/Scripts/python.exe`运行。原片检查在合并/去重前覆盖每一个原始引用及本请求提供的全部可达来源祖先：共享用途helper检查typed/provenance、逻辑/物理保留路径、受信注册表以及实际文件hash。衍生物和父Asset共同伪造声明hash也不能跳过父文件真实字节核验。training_only即使confirmed、preview或research_preview仍拒绝；registry损坏/待发布时fail closed。独立CLI也执行同一门禁。没有安装训练框架或修改共享Conda。
 
 QA新增实际avg/r帧率、progressive field_order、moov早于mdat的faststart、requested/effective backend和阶段命令/耗时。技术QA、平台上传、人工业务审核和公开权利仍分别记录。
 

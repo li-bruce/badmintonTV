@@ -31,11 +31,40 @@ def check_usage(selected, assets, root, research_preview=False):
         raise RenderError(exc.code, str(exc), "blocked") from exc
 
 
+def lineage_assets(selected, assets):
+    """Include every available ancestor reachable by declared source ID/hash.
+
+    Metadata can forge both ends of a source link consistently. Only checking
+    the selected derivative's bytes would then miss a renamed training parent.
+    The shared helper still owns source conflict/cycle and usage semantics.
+    """
+    by_hash = {}
+    for asset in assets.values():
+        by_hash.setdefault(asset["sha256"].lower(), []).append(asset)
+    pending, found = list(selected), {}
+    while pending:
+        asset = pending.pop(0)
+        aid = asset["asset_id"]
+        if aid in found:
+            continue
+        found[aid] = asset
+        provenance = asset.get("provenance", {})
+        parent_id = provenance.get("source_asset_id")
+        parent_hash = provenance.get("source_sha256")
+        if parent_id in assets:
+            pending.append(assets[parent_id])
+        if parent_hash:
+            pending.extend(by_hash.get(parent_hash.lower(), ()))
+    return list(found.values())
+
+
 def verify_source_bytes(selected, assets, root, check, research_preview=False):
-    """Check even replay inputs later discarded. No media process or reservation."""
+    """Check original inputs and reachable ancestors before editing or media I/O."""
     verified = []
     paths = {}
-    for asset in selected:
+    closure = lineage_assets(selected, assets)
+    check_usage(closure, assets, root, research_preview)
+    for asset in closure:
         aid = asset["asset_id"]
         path = safe_path(root, asset.get("relative_path"))
         require(path.is_file(), f"Asset file unavailable: {aid}", "missing_asset")
