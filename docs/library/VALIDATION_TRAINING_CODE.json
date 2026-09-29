@@ -75,11 +75,29 @@
     "real_window_ab": "3006 frames both; original six DTS errors; demux encoder timebase zero errors",
     "real_full_reprobe": "2/2 PASS; all ten final sources and full PTS valid"
   },
-  "current_full_test_snapshot": {
+  "prior_full_test_snapshot": {
     "passed": 180,
     "failed": 0,
     "skipped": 0,
     "seconds": 18.948,
     "scope": "before pending repeated-Ctrl-C shutdown repair; final concurrency validation will supersede"
+  },
+  "final_full_library_tests": {
+    "command": "C:/Users/USER/miniforge3/python.exe -B -m unittest discover -s tests/library -v",
+    "passed": 181,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 19.476
+  },
+  "bfmd_coordinator": {
+    "source_file_sha256": "28f248c4b5ddb2e4fc6e350187ebdaa28d0905f4e34dfc5c7fb00fbdc7fcc983",
+    "targeted_tests_passed": 27,
+    "independent_critical_regressions_passed": 6,
+    "independent_critical_seconds": 1.277,
+    "review": "PASS: submit registration, stopped worker entry, repeated interrupted join fixed",
+    "real_public_dual_connection": "NOT_RUN",
+    "real_public_range_resume": "NOT_RUN",
+    "real_stop_control": "NOT_RUN",
+    "actual_dataset_download_mode": "original single sequential writer;121 successful attempts;0 resume bytes;no process interrupted"
   }
 }

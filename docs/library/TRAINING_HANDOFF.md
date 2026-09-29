@@ -100,3 +100,11 @@ JSON默认单文件上限10,000,000 bytes，调用方只能降低；每次发布
 失败与修正记录：首次version正则过窄，拒绝实际既有目录 `fine-badminton-2026-zenodo-20292976-v1.0`，真实空registry调用在写入前失败；未重命名目录。已允许安全中间点并加入该精确版本名的临时文件登记测试，以及连续点、尾点和AUX/COM设备名的拒绝测试。library随后已真实重试共享盘初始化成功，内容为schema_version1.0/assets[]，SHA为`5d7572aea12757f02e262b10a65d217103152bd1e6ffe835a2347c2fceb251a1`；此时已验证媒体数明确为0。
 
 真实十场包、完整解码及制作库/选片/独立render/研究预览入口的端到端拒绝由主任务及对应模块继续验证。上述真实R-04b总项在这些证据齐备前仍为NOT_RUN，不因本文件或publisher存在升级为PASS。
+
+## 本轮最终实物与后续协调器
+
+上文为实现期证据。2026-09-29完整真实Fine10/10、BFMD121/121已完成并独立审计，最终manifest/registry哈希和用途拒绝的实际边界见 `TRAINING_DATA_ACCEPTANCE.md`、`VALIDATION_TRAINING_ISOLATION.json`；媒体探测通过不解除标注语义和许可限制。
+
+BFMD可选workers=2仍只有一个handoff owner；新锁包含pid/run_id/stop_protocol，停止标记限定该run。先验证全部旧源，再成批复核缓存条目，旧稳定清单不缩减；pending任务最多两个，worker不写共享进度或使用非线程安全MetadataBudget。独立完成队列回收submit登记中断窗口的成功结果，逻辑结果按DriveID去重；入口处拒绝失去运行许可的任务。Condition下active计数只在完成结果入队后递减，owner确认归零后才能释放锁/配额，避免Python3.12重复Ctrl-C破坏Thread.join状态后提前放行。
+
+新增边界测试区分缓存复核途中和全部缓存完成后的中断；访问限制、普通失败、发布错误均停止新派发并保全在途成功。27项BFMD目标测试通过；其中真实join边界trace注入中断的回归在旧join-only控制实现上确定失败、新实现通过。独立审阅另实际跑6项关键回归通过。本批公共数据仍由旧顺序writer自然完成，未对真实下载器执行停止或双流续传。
