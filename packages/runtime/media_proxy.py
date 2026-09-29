@@ -418,12 +418,59 @@ def create_proxy(context, exchange_dir):
         ledger.release(reservation)
 
 
+def _verified_preview_index(context, payload, asset):
+    """Recheck the queued job's dependency at execution, not only at API time."""
+    from .artifact_identity import ArtifactIdentityError, hash_identity, check_proof
+    from .production import check_sources
+    preview_id = payload.get('preview_job_id')
+    if not isinstance(preview_id, str) or not preview_id:
+        raise ArtifactIdentityError('ARTIFACT_REVERIFY_REQUIRED: exact_frame缺少可信预览任务绑定')
+    selected = context.queue.get(preview_id)
+    if not selected or selected['operation'] != 'media_proxy' or selected['status'] != 'succeeded':
+        raise ArtifactIdentityError('ARTIFACT_CHANGED: 预览依赖不是已完成的media_proxy任务')
+    result = selected.get('result') or {}
+    preview = result.get('preview') or {}
+    source = selected['payload'].get('asset') or {}
+    if (any(source.get(key) != asset.get(key) for key in ('asset_id','sha256','relative_path'))
+            or preview.get('source_asset_id') != asset['asset_id'] or preview.get('source_sha256') != asset['sha256']):
+        raise ArtifactIdentityError('ARTIFACT_CHANGED: 预览依赖与源素材快照不一致')
+    relative = preview.get('index_relative_path')
+    prefix = f"platform/jobs/{preview_id}/attempt-{selected['attempt']}/"
+    if not isinstance(relative,str) or not relative.startswith(prefix) or payload.get('index_relative_path') != relative:
+        raise ArtifactIdentityError('ARTIFACT_CHANGED: 索引路径与预览attempt快照不一致')
+    matches = [item for item in result.get('artifacts',[]) if item.get('relative_path') == relative]
+    if len(matches) != 1 or matches[0].get('kind') != 'frame_index':
+        raise ArtifactIdentityError('ARTIFACT_REVERIFY_REQUIRED: 预览缺少唯一frame_index产物记录')
+    artifact = matches[0]
+    path = resolve_owner_path(context.storage_root, relative, 'platform', must_exist=True)
+    proof = context.queue.artifact_identity(preview_id, selected['attempt'], artifact['artifact_id'])
+    legacy = proof is None
+    if legacy:
+        proof = {**hash_identity(path,check=context.check,max_bytes=8_000_000),'relative_path':relative}
+    else:
+        check_proof(path,proof)
+    base = {'relative_path':relative,'sha256':proof['sha256'],'size_bytes':proof['size_bytes']}
+    records = [asset,{**base,'provenance':{'source_asset_id':asset['asset_id'],'source_sha256':asset['sha256']}}]
+    for declaration in (artifact,result,preview):
+        records.append({**base,**{key:declaration[key] for key in ('usage_scope','provenance') if key in declaration}})
+    # Actual legacy bytes reach the usage gate before a claimed-hash mismatch.
+    check_sources(context,records)
+    if any(proof[key] != artifact.get(key) for key in ('relative_path','sha256','size_bytes')):
+        raise ArtifactIdentityError('ARTIFACT_CHANGED: 索引当前内容与预览产物证明不一致')
+    check_proof(path,proof)
+    if legacy:
+        context.queue.remember_legacy_artifact_identity(preview_id,selected['attempt'],artifact,proof)
+    return path,proof
+
+
 def exact_frame(context, exchange_dir):
+    from .artifact_identity import check_proof
     payload = context.job["payload"]
     asset, *_ = _options(payload)
+    index_path, index_proof = _verified_preview_index(context,payload,asset)
     source, identity = _source(context, asset)
     number = _integer(payload.get("source_frame_index"), "source_frame_index", 0, MAX_SOURCE_FRAMES - 1)
-    index_path = resolve_owner_path(context.storage_root, payload["index_relative_path"], "platform", must_exist=True)
+    check_proof(index_path,index_proof)
     with _connect(index_path, True) as db:
         metadata = _metadata(db)
         if metadata.get("source_sha256") != asset["sha256"] or metadata.get("source_asset_id") != asset["asset_id"]:
@@ -432,6 +479,7 @@ def exact_frame(context, exchange_dir):
         if not row:
             raise ValueError("source frame is outside the indexed video")
         row = dict(row)
+    check_proof(index_path,index_proof)
     ledger = CapacityLedger(context.queue.db_path, context.storage_root)
     reservation = ledger.reserve("platform", estimate_peak_bytes(payload, "exact_frame"), job_id=context.job["job_id"])
     try:
@@ -442,9 +490,12 @@ def exact_frame(context, exchange_dir):
         if not output.exists() or not 0 < output.stat().st_size <= MAX_IMAGE_BYTES:
             raise ValueError("exact frame missing or exceeds byte bound")
         _check_unchanged(source, identity)
-        return _result(context, "frame", {"source_asset_id": asset["asset_id"], "source_sha256": asset["sha256"], "usage_scope": asset.get("usage_scope", "general"),
+        check_proof(index_path,index_proof)
+        result = _result(context, "frame", {"source_asset_id": asset["asset_id"], "source_sha256": asset["sha256"], "usage_scope": asset.get("usage_scope", "general"),
                        "source_frame_index": number, "source_pts": row["source_pts"], "source_pts_ms": row["source_pts_ms"], "source_time_base": metadata["source_time_base"],
                        "width": metadata["source_width"], "height": metadata["source_height"], "relative_path": output.relative_to(context.storage_root).as_posix()}, [_artifact(output, context, "source_frame")])
+        check_proof(index_path,index_proof)
+        return result
     finally:
         ledger.release(reservation)
 

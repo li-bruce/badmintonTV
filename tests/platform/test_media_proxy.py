@@ -309,9 +309,9 @@ def test_real_ffmpeg_proxy_and_original_frame(case):
         claimed = queue.claim("media-actual", lease_seconds=300)
         context = WorkerContext(queue, claimed, "media-actual", root, 300)
         started = time.perf_counter()
-        result = create_proxy(context, case_dir / "proxy-attempt-1")
+        result = create_proxy(context, root / 'platform/jobs' / job['job_id'] / 'attempt-1')
         elapsed = time.perf_counter() - started
-        queue.finish(job["job_id"], "media-actual", "succeeded", result=result)
+        queue.finish(job["job_id"], "media-actual", "succeeded", result=result,artifact_identities=context.artifact_identities)
         preview = result["preview"]
         proxy = root / preview["relative_path"]
         index_path = root / preview["index_relative_path"]
@@ -352,10 +352,10 @@ def test_real_ffmpeg_proxy_and_original_frame(case):
             assert len(source_frames) >= 2 * len(frames) - 1
             assert len(source_frames) > len(frames)
         frame_number = len(source_frames) // 2
-        frame_job = queue.enqueue("exact_frame", {"asset": asset, "index_relative_path": preview["index_relative_path"], "source_frame_index": frame_number})
+        frame_job = queue.enqueue("exact_frame", {"asset": asset, "preview_job_id":job['job_id'], "index_relative_path": preview["index_relative_path"], "source_frame_index": frame_number})
         frame_context = WorkerContext(queue, queue.claim("media-actual", lease_seconds=300), "media-actual", root, 300)
-        exact = exact_frame(frame_context, case_dir / "frame-attempt-1")
-        queue.finish(frame_job["job_id"], "media-actual", "succeeded", result=exact)
+        exact = exact_frame(frame_context, root / 'platform/jobs' / frame_job['job_id'] / 'attempt-1')
+        queue.finish(frame_job["job_id"], "media-actual", "succeeded", result=exact,artifact_identities=frame_context.artifact_identities)
         image = root / exact["frame"]["relative_path"]
         jpeg_info = json.loads(subprocess.check_output([ffprobe, "-v", "error", "-show_streams", "-of", "json", str(image)], timeout=30))["streams"][0]
         assert (jpeg_info["width"], jpeg_info["height"]) == (asset["width"], asset["height"])
