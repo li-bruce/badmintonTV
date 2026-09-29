@@ -344,6 +344,11 @@ def test_verify_manifest_streams_actual_bytes_and_returns_verified_assets(tmp_pa
     assert result["result"]["attempt_id"] == "attempt-1"
     assert result["result"]["artifacts"] == []
     assert [item["sha256"] for item in result["result"]["assets"]] == [first["sha256"], second["sha256"]]
+    for asset in (first, second):
+        stat = (tmp_path / asset["relative_path"]).stat()
+        assert result["result"]["source_identities"][asset["asset_id"]] == [
+            stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns]
+        assert "source_identities" not in asset.get("probe", {})
     assert result["progress"]["stage"] == "verify_manifest"
     assert result["progress"]["current"] == result["progress"]["total"] == first["size_bytes"] + second["size_bytes"]
     assert Queue(queue.db_path).get(job["job_id"])["result"] == result["result"]

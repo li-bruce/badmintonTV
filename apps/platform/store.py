@@ -1,6 +1,7 @@
 """Single-host SQLite business data; all writes use short transactions."""
 import json
 import sqlite3
+import os
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,8 +16,9 @@ class Conflict(ValueError):
 
 
 class Store:
-    def __init__(self, path):
+    def __init__(self, path, storage_root=None):
         self.path = Path(path)
+        self.storage_root = Path(storage_root or os.getenv('BTV_STORAGE_ROOT') or self.path.parent.parent).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript('''
@@ -26,6 +28,8 @@ class Store:
               PRIMARY KEY(kind,id));
             CREATE TABLE IF NOT EXISTS assets(id TEXT PRIMARY KEY, sha256 TEXT UNIQUE NOT NULL,
               library_id TEXT NOT NULL, match_id TEXT NOT NULL, split TEXT NOT NULL, body TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS source_identities(asset_id TEXT PRIMARY KEY,relative_path TEXT NOT NULL,
+              sha256 TEXT NOT NULL,identity TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, asset_id TEXT NOT NULL REFERENCES assets(id),
               revision INTEGER NOT NULL, body TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS event_revisions(event_id TEXT, revision INTEGER,
@@ -71,11 +75,29 @@ class Store:
             row = db.execute('SELECT body FROM objects WHERE kind=? AND id=?', (kind,id)).fetchone()
         return json.loads(row[0]) if row else None
 
+    def save_render_options(self,timeline_id,options,expected_revision):
+        if type(expected_revision) is not int or expected_revision<0:
+            raise ValueError('expected_revision必须是非负整数')
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute("SELECT body FROM objects WHERE kind='render_options' AND id=?",(timeline_id,)).fetchone()
+            current=json.loads(row[0]) if row else None
+            if (current['revision'] if current else 0)!=expected_revision:
+                raise Conflict('导出设置已变化，请重载后再保存；当前草稿未覆盖')
+            result={'schema_version':'1.0','timeline_id':timeline_id,'revision':expected_revision+1,'options':options}
+            db.execute("INSERT INTO objects VALUES('render_options',?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body",(timeline_id,json.dumps(result,ensure_ascii=False)))
+        return result
+
     def list(self, kind):
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute('SELECT body FROM objects WHERE kind=? ORDER BY rowid', (kind,))]
 
-    def import_assets(self, assets, library_id):
+    def import_assets(self, assets, library_id, *, verified_identities=None):
+        from packages.contracts import assert_production_allowed
+        # Must run before SHA dedup: a restrictive incoming declaration cannot
+        # borrow an existing general row's identity or missing metadata.
+        sources=self._raw_assets()
+        assert_production_allowed(assets, self.storage_root, source_assets=sources)
         result = []
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -83,24 +105,80 @@ class Store:
                 a={**a,'sha256':a['sha256'].lower()}
                 prior = db.execute('SELECT body FROM assets WHERE sha256=?', (a['sha256'],)).fetchone()
                 if prior:
-                    result.append({'asset':json.loads(prior[0]), 'duplicate':True})
+                    prior_asset=json.loads(prior[0])
+                    assert_production_allowed([prior_asset],self.storage_root,source_assets=sources)
+                    if prior_asset['relative_path']==a['relative_path'] and verified_identities is not None:
+                        self._remember_source(db,prior_asset,verified_identities[a['asset_id']])
+                    result.append({'asset':prior_asset, 'duplicate':True})
                     continue
                 split = db.execute("SELECT split FROM assets WHERE match_id=? AND split != 'unassigned' LIMIT 1", (a['match_id'],)).fetchone()
                 if split and a['split'] not in ('unassigned',split[0]):
                     raise Conflict('同场比赛不可跨训练/验证/测试划分')
                 db.execute('INSERT INTO assets VALUES(?,?,?,?,?,?)', (a['asset_id'],a['sha256'],library_id,a['match_id'],a['split'],json.dumps(a,ensure_ascii=False)))
+                if verified_identities is not None:
+                    self._remember_source(db,a,verified_identities[a['asset_id']])
                 result.append({'asset':a, 'duplicate':False})
         return result
 
-    def assets(self, library_id=None):
+    @staticmethod
+    def _file_identity(path):
+        s=path.stat()
+        return [s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns,s.st_ctime_ns]
+
+    def _remember_source(self,db,asset,identity):
+        from packages.runtime import resolve_relative_path
+        path=resolve_relative_path(self.storage_root,asset['relative_path'])
+        if not path.is_file() or self._file_identity(path)!=identity:
+            raise Conflict('SOURCE_CHANGED: 校验后原片变化，未保存文件身份')
+        db.execute('INSERT OR REPLACE INTO source_identities VALUES(?,?,?,?)',
+            (asset['asset_id'],asset['relative_path'],asset['sha256'],json.dumps(identity)))
+
+    def verified_source_path(self,asset):
+        """Range serving uses trusted import identity; changed files need reverify."""
+        from packages.runtime import resolve_relative_path
+        path=resolve_relative_path(self.storage_root,asset['relative_path'],must_exist=True)
+        with self.connect() as db:
+            row=db.execute('SELECT relative_path,sha256,identity FROM source_identities WHERE asset_id=?',(asset['asset_id'],)).fetchone()
+            if row is None:
+                # Legacy assets have no trusted stat proof: only bounded media
+                # can be upgraded synchronously; large media uses normal probe.
+                if path.stat().st_size>8_000_000:
+                    raise Conflict('SOURCE_REVERIFY_REQUIRED: 旧素材缺少文件身份，请重新探测后播放')
+                import hashlib
+                from packages.contracts import assert_production_allowed
+                before=self._file_identity(path)
+                with path.open('rb') as stream:
+                    digest=hashlib.file_digest(stream,'sha256').hexdigest()
+                if before!=self._file_identity(path):
+                    raise Conflict('SOURCE_CHANGED: 原片校验期间变化，请重新探测')
+                assert_production_allowed([{**asset,'sha256':digest}],self.storage_root,source_assets=self._raw_assets())
+                if digest!=asset['sha256'] or before[2]!=asset['size_bytes']:
+                    raise Conflict('SOURCE_CHANGED: 原片内容变化，请重新探测')
+                self._remember_source(db,asset,before)
+            elif row['relative_path']!=asset['relative_path'] or row['sha256']!=asset['sha256'] or json.loads(row['identity'])!=self._file_identity(path):
+                raise Conflict('SOURCE_CHANGED: 原片文件身份变化，请重新探测后播放')
+        return path
+
+    def _raw_assets(self, library_id=None):
         with self.connect() as db:
             rows = db.execute('SELECT body,library_id FROM assets' + (' WHERE library_id=?' if library_id else ''), (library_id,) if library_id else ()).fetchall()
         return [{**json.loads(r[0]), 'library_id':r[1]} for r in rows]
 
+    def assets(self, library_id=None):
+        from packages.contracts import UsageScopeGuard
+        all_assets=self._raw_assets()
+        selected=[a for a in all_assets if library_id is None or a['library_id']==library_id]
+        decisions=UsageScopeGuard(self.storage_root).check_many(selected,source_assets=all_assets)
+        return [asset for asset,decision in zip(selected,decisions) if decision.allowed]
+
     def asset(self, id):
         with self.connect() as db:
             row = db.execute('SELECT body FROM assets WHERE id=?', (id,)).fetchone()
-        return json.loads(row[0]) if row else None
+        asset=json.loads(row[0]) if row else None
+        if asset:
+            from packages.contracts import assert_production_allowed
+            assert_production_allowed([asset],self.storage_root,source_assets=self._raw_assets())
+        return asset
 
     def update_asset_probe(self, asset_id, probe):
         """Merge newly verified probe data without replacing source metadata."""

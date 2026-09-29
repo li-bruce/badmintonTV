@@ -1,12 +1,13 @@
 """Local control plane. Media computation belongs to packages.runtime.worker."""
 import json
 import hashlib
+import mimetypes
+import math
 import os
 import re
 import sys
 import uuid
 from pathlib import Path
-from fractions import Fraction
 from urllib.parse import urlsplit
 
 import httpx
@@ -18,6 +19,7 @@ from pydantic import ValidationError
 
 from packages.contracts import AssetManifest, Candidate, Event, EventManifest, QuerySpec, Timeline
 from packages.runtime import Queue, CapacityLedger, resolve_relative_path
+from packages.runtime.storage import resolve_owner_path
 from .retrieval import parse_rules, search, merge_segments
 from .store import Conflict, Store
 
@@ -29,8 +31,9 @@ def uid(prefix):
 def create_app(storage_root=None, db_path=None):
     root = Path(storage_root or os.getenv('BTV_STORAGE_ROOT', 'D:/video' if os.name == 'nt' else '/mnt/d/video')).resolve()
     state = Path(db_path or os.getenv('BTV_DB_PATH', str(root/'platform'/'platform.sqlite3')))
-    store = Store(state)
+    store = Store(state, root)
     queue = Queue(state.with_name('runtime.sqlite3'))
+    queue.bind_business_database(state)
     app = FastAPI(title='badmintonTV 本地工作台', version='0.1.0')
     app.state.store, app.state.queue, app.state.storage_root = store, queue, root
     templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
@@ -71,6 +74,23 @@ def create_app(storage_root=None, db_path=None):
         if not a:
             raise HTTPException(404,'素材不存在')
         return a
+
+    def production_assets(assets):
+        from packages.contracts import assert_production_allowed
+        assert_production_allowed(assets,root,source_assets=store._raw_assets())
+
+    def production_job(j):
+        payload=j['payload']
+        snapshots=payload.get('assets',[]) + ([payload['asset']] if payload.get('asset') else [])
+        production_assets(snapshots)
+        for a in snapshots:
+            if a.get('asset_id'):
+                store.asset(a['asset_id'])  # Recheck current authoritative metadata.
+        if payload.get('relative_path'):
+            production_assets([{**payload.get('asset_metadata',{}),'relative_path':payload['relative_path']}])
+        if j.get('result'):
+            result=j['result']
+            production_assets(result.get('assets',[]) + ([result['asset']] if result.get('asset') else []))
 
     def resource(kind,id):
         obj = store.get(kind,id)
@@ -130,6 +150,7 @@ def create_app(storage_root=None, db_path=None):
         library_id=body['library_id']
         resource('library',library_id)
         manifest=AssetManifest.model_validate(body['manifest']).model_dump(mode='json')
+        production_assets(manifest['assets'])
         if len(manifest['assets'])>1000:
             raise ValueError('单次清单最多1000条素材')
         for a in manifest['assets']:
@@ -139,17 +160,26 @@ def create_app(storage_root=None, db_path=None):
         if sum(a['size_bytes'] for a in manifest['assets'])>8_000_000:
             return JSONResponse(enqueue('verify_manifest',{'assets':manifest['assets'],'library_id':library_id}),status_code=202)
         # A bounded small manifest avoids queue overhead; larger media is hashed by the worker.
+        identities={}; actual_assets=[]
         for a in manifest['assets']:
-            with resolve_relative_path(root,a['relative_path']).open('rb') as stream:
+            path=resolve_relative_path(root,a['relative_path']); before=store._file_identity(path)
+            with path.open('rb') as stream:
                 digest=hashlib.file_digest(stream,'sha256').hexdigest()
-            if digest.lower()!=a['sha256'].lower():
-                raise ValueError('素材SHA-256不符，未导入：'+a['asset_id'])
-        return {'imported':store.import_assets(manifest['assets'],library_id), 'integrity':'sha256_verified'}
+            if before!=store._file_identity(path):
+                raise Conflict('SOURCE_CHANGED: 素材校验期间变化，未导入')
+            actual_assets.append({**a,'sha256':digest})
+            identities[a['asset_id']]=before
+        production_assets(actual_assets)
+        for declared,actual in zip(manifest['assets'],actual_assets):
+            if actual['sha256'].lower()!=declared['sha256'].lower():
+                raise ValueError('素材SHA-256不符，未导入：'+declared['asset_id'])
+        return {'imported':store.import_assets(manifest['assets'],library_id,verified_identities=identities), 'integrity':'sha256_verified'}
 
     @app.post('/api/v1/assets/import-path',status_code=202)
     def import_path(body:dict):
         resource('library',body['library_id'])
         relative=str(body['relative_path'])
+        production_assets([{**body.get('metadata',{}),'relative_path':relative}])
         if not resolve_relative_path(root,relative).is_file():
             raise ValueError('源文件不存在')
         return enqueue('probe',{'relative_path':relative,'asset_metadata':body.get('metadata',{}), 'library_id':body['library_id']},idempotency_key=body.get('idempotency_key'))
@@ -157,7 +187,93 @@ def create_app(storage_root=None, db_path=None):
     @app.get('/api/v1/assets/{asset_id}/media')
     def media(asset_id:str):
         a=asset_or_404(asset_id)
-        return FileResponse(resolve_relative_path(root,a['relative_path']),media_type='video/mp4',filename=Path(a['relative_path']).name,content_disposition_type='inline')
+        return FileResponse(store.verified_source_path(a),media_type=mimetypes.guess_type(a['relative_path'])[0] or 'application/octet-stream',filename=Path(a['relative_path']).name,content_disposition_type='inline',headers={'Cache-Control':'no-store'})
+
+    def preview_job(asset_id, job_id=None):
+        asset=asset_or_404(asset_id)
+        if job_id:
+            selected=queue.get(job_id)
+            if not selected or selected['operation']!='media_proxy' or selected['payload'].get('asset',{}).get('asset_id')!=asset_id:
+                raise HTTPException(404,'预览任务与当前素材不匹配')
+        else:
+            with queue.connection() as db:
+                found=db.execute("SELECT job_id FROM jobs WHERE operation='media_proxy' AND json_extract(payload,'$.asset.asset_id')=? ORDER BY created_at DESC LIMIT 1",(asset_id,)).fetchone()
+            selected=queue.get(found[0]) if found else None
+        if selected:
+            production_job(selected)
+            snapshot=selected['payload']['asset']
+            if snapshot['sha256']!=asset['sha256'] or snapshot['relative_path']!=asset['relative_path']:
+                raise Conflict('素材已变化，请重新创建预览')
+        return selected
+
+    def ready_preview(asset_id, job_id):
+        if not isinstance(job_id,str) or not job_id.strip():
+            raise ValueError('必须指定已完成预览的preview_job_id')
+        selected=preview_job(asset_id,job_id)
+        if selected['status']!='succeeded' or not (selected.get('result') or {}).get('preview'):
+            raise Conflict('兼容预览尚未完成')
+        p=selected['result']['preview']; source=selected['payload']['asset']
+        if p.get('source_asset_id')!=source['asset_id'] or p.get('source_sha256')!=source['sha256']:
+            raise Conflict('预览结果来源与任务素材不匹配')
+        prefix=f"platform/jobs/{selected['job_id']}/attempt-{selected['attempt']}/"
+        for key in ('relative_path','index_relative_path','thumbnail_relative_path'):
+            relative=p.get(key)
+            if not isinstance(relative,str) or not relative.startswith(prefix):
+                raise ValueError('预览产物必须属于当前任务attempt目录')
+            resolve_owner_path(root,relative,'platform',must_exist=True)
+            production_assets([{'relative_path':relative,'usage_scope':p.get('usage_scope','general'),'provenance':{'source_asset_id':source['asset_id'],'source_sha256':source['sha256']}}])
+        return selected,p
+
+    @app.post('/api/v1/assets/{asset_id}/preview',status_code=202)
+    def create_preview(asset_id:str,body:dict):
+        from packages.runtime.media_proxy import estimate_peak_bytes
+        payload={'asset':asset_or_404(asset_id),**{key:body[key] for key in ('start_ms','end_ms','max_height','max_fps') if key in body}}
+        estimate_peak_bytes(payload)  # Validate bounds; the worker owns actual reservation.
+        return enqueue('media_proxy',payload,idempotency_key=body.get('idempotency_key'))
+
+    @app.get('/api/v1/assets/{asset_id}/preview')
+    def get_preview(asset_id:str):
+        selected=preview_job(asset_id)
+        if not selected:
+            return {'status':'not_ready','job_id':None}
+        response={'status':selected['status'],'job_id':selected['job_id'],'error':selected.get('error')}
+        if selected['status']=='succeeded':
+            _,p=ready_preview(asset_id,selected['job_id']); base=f"/api/v1/assets/{asset_id}/previews/{selected['job_id']}"
+            response['preview']={**p,'media_url':base+'/media','frame_map_url':base+'/frame-map','source_frames_url':base+'/source-frames','thumbnail_url':base+'/thumbnails'}
+        return response
+
+    @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/frame-map')
+    def preview_map(asset_id:str,job_id:str,offset_frame:int=0,limit:int=1000,at_ms:float|None=None):
+        from packages.runtime.media_proxy import read_frame_map
+        _,p=ready_preview(asset_id,job_id)
+        return read_frame_map(resolve_relative_path(root,p['index_relative_path'],must_exist=True),offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+
+    @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/source-frames')
+    def preview_source_frames(asset_id:str,job_id:str,offset_frame:int=0,limit:int=128,at_ms:float|None=None):
+        from packages.runtime.media_proxy import read_source_frames
+        _,p=ready_preview(asset_id,job_id)
+        return read_source_frames(resolve_relative_path(root,p['index_relative_path'],must_exist=True),offset_frame=offset_frame,limit=limit,at_ms=at_ms)
+
+    @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/media')
+    def preview_media(asset_id:str,job_id:str):
+        _,p=ready_preview(asset_id,job_id)
+        return FileResponse(resolve_relative_path(root,p['relative_path'],must_exist=True),media_type='video/mp4',headers={'Cache-Control':'no-store'})
+
+    @app.get('/api/v1/assets/{asset_id}/previews/{job_id}/thumbnails')
+    def preview_thumbnails(asset_id:str,job_id:str):
+        _,p=ready_preview(asset_id,job_id)
+        return FileResponse(resolve_relative_path(root,p['thumbnail_relative_path'],must_exist=True),media_type='image/jpeg')
+
+    @app.post('/api/v1/assets/{asset_id}/source-frame',status_code=202)
+    def source_frame(asset_id:str,body:dict):
+        from packages.runtime.media_proxy import estimate_peak_bytes
+        _,p=ready_preview(asset_id,str(body.get('preview_job_id','')))
+        number=body.get('source_frame_index')
+        if type(number) is not int or not 0<=number<p['source_frame_count']:
+            raise ValueError('source_frame_index必须是有效的0起始原片帧序号')
+        payload={'asset':asset_or_404(asset_id),'source_frame_index':number,'index_relative_path':p['index_relative_path'],'preview_job_id':body['preview_job_id']}
+        estimate_peak_bytes(payload,'exact_frame')
+        return enqueue('exact_frame',payload)
 
     @app.get('/api/v1/assets/{asset_id}/thumbnail')
     def thumbnail(asset_id:str):
@@ -165,31 +281,35 @@ def create_app(storage_root=None, db_path=None):
         relative=a.get('probe',{}).get('thumbnail_relative_path')
         if not relative:
             raise HTTPException(404,'尚无缩略图，请运行探测任务')
-        return FileResponse(resolve_relative_path(root,relative),media_type='image/jpeg')
+        linked={'relative_path':relative,'provenance':{'source_asset_id':a['asset_id'],'source_sha256':a['sha256']}}
+        production_assets([linked])
+        path=resolve_relative_path(root,relative,must_exist=True);before=store._file_identity(path)
+        if before[2]>32_000_000:
+            raise ValueError('缩略图超过32MB上限')
+        with path.open('rb') as stream:
+            digest=hashlib.file_digest(stream,'sha256').hexdigest()
+        production_assets([{**linked,'sha256':digest}])
+        if before!=store._file_identity(path):
+            raise Conflict('缩略图校验期间变化')
+        return FileResponse(path,media_type='image/jpeg',headers={'Cache-Control':'no-store'})
 
     @app.get('/api/v1/assets/{asset_id}/frame-map')
     def frame_map(asset_id:str):
+        from .frame_index import read_label_studio_frame_map
         a=asset_or_404(asset_id)
-        index=a.get('probe',{}).get('pts_index',{})
-        if not index.get('complete') or not index.get('relative_path'):
-            raise ValueError('没有完整原片PTS索引，不能推算标注帧时间')
-        path=resolve_relative_path(root,index['relative_path'])
-        if path.stat().st_size>32_000_000:
-            raise ValueError('PTS索引过大，请先生成小段代理映射')
-        raw=path.read_bytes()
-        if index.get('sha256') and hashlib.sha256(raw).hexdigest()!=index['sha256']:
-            raise ValueError('PTS索引hash不符')
-        rows=[json.loads(line) for line in raw.decode('utf-8').splitlines() if line.strip()]
-        timebase=Fraction(a['time_base'])
-        origin=rows[0]['pts']
-        starts=[int((r['pts']-origin)*timebase*1000) for r in rows]
-        frames=[{'ls_frame':i+1,'source_start_ms':starts[i],
-                 'source_end_ms':starts[i+1] if i+1<len(starts) else a['duration_ms'],
-                 'source_pts':row['pts']} for i,row in enumerate(rows)]
-        from .labelstudio import FrameMap
-        fm=FrameMap.from_dict({'mapping_id':'pts-'+hashlib.sha256(raw).hexdigest()[:20],
-                              'source_duration_ms':a['duration_ms'],'frames':frames})
-        return fm.as_dict()
+        index=a.get('probe',{}).get('pts_index') or {}
+        if index.get('relative_path'):
+            production_assets([{'relative_path':index['relative_path'],'sha256':index.get('sha256'),'provenance':{'source_asset_id':a['asset_id'],'source_sha256':a['sha256']}}])
+        return read_label_studio_frame_map(a,root)
+
+    @app.get('/api/v1/assets/{asset_id}/source-frames')
+    def source_frame_page(asset_id:str,offset_frame:int=0,limit:int=128,at_ms:float|None=None):
+        from .frame_index import read_source_frame_page
+        a=asset_or_404(asset_id)
+        index=a.get('probe',{}).get('pts_index') or {}
+        if index.get('relative_path'):
+            production_assets([{'relative_path':index['relative_path'],'sha256':index.get('sha256'),'provenance':{'source_asset_id':a['asset_id'],'source_sha256':a['sha256']}}])
+        return read_source_frame_page(a,root,offset_frame=offset_frame,limit=limit,at_ms=at_ms)
 
     @app.get('/api/v1/players')
     def players():
@@ -269,6 +389,7 @@ def create_app(storage_root=None, db_path=None):
     @app.post('/api/v1/candidates/{id}/confirm')
     def confirm(id:str,body:dict):
         candidate=resource('candidate',id)
+        asset_or_404(candidate['asset_id'])
         if body.get('review_status') not in ('confirmed','rejected') or not body.get('reviewer'):
             raise ValueError('须明确确认/拒绝并填写审阅者')
         reviewer_type=body.get('reviewer_type','human')
@@ -281,6 +402,52 @@ def create_app(storage_root=None, db_path=None):
     @app.get('/api/v1/timelines')
     def timelines():
         return store.list('timeline')
+
+    def render_options(timeline):
+        current=store.get('render_options',timeline['timeline_id'])
+        if current:
+            return current
+        fps=timeline['output']['fps']
+        expected={'width':1080,'height':1920,'fps':fps,'video_codec':'h264','audio_codec':'aac'}
+        return {'schema_version':'1.0','timeline_id':timeline['timeline_id'],'revision':0,'options':{
+            'export_preset':f'portrait_1080p{int(fps)}' if fps in (30,60) and timeline['output']==expected else None,
+            'safe_area':{'x':0.06,'y':0.10,'width':0.82,'height':0.78},'platform_profile':None}}
+
+    def validate_render_options(options,timeline):
+        if not isinstance(options,dict) or set(options)!={'export_preset','safe_area','platform_profile'}:
+            raise ValueError('导出设置必须包含export_preset、safe_area、platform_profile')
+        preset=options['export_preset']
+        if preset not in (None,'portrait_1080p30','portrait_1080p60'):
+            raise ValueError('仅支持portrait_1080p30或portrait_1080p60预设')
+        if preset is not None:
+            expected={'width':1080,'height':1920,'fps':30 if preset.endswith('30') else 60,'video_codec':'h264','audio_codec':'aac'}
+            if timeline['output']!=expected:
+                raise Conflict('preset_conflict: 时间线输出与预设不一致，请同步输出参数')
+        safe=options['safe_area']
+        if not isinstance(safe,dict) or set(safe)!={'x','y','width','height'} or any(type(v) not in (int,float) or not math.isfinite(v) or not 0<=v<=1 for v in safe.values()):
+            raise ValueError('安全区必须包含0到1之间的有限x/y/width/height')
+        if safe['width']<=0 or safe['height']<=0 or safe['x']+safe['width']>1 or safe['y']+safe['height']>1:
+            raise ValueError('安全区必须位于完整输出画面内且有正面积')
+        profile=options['platform_profile']
+        if profile not in (None,'youtube_shorts'):
+            raise ValueError('platform_profile仅支持null或youtube_shorts')
+        # Renderer rechecks final frame-quantized duration; reject clear overruns early.
+        duration=sum((s['out_ms']-s['in_ms'])/s['speed'] for s in timeline['segments'])
+        if profile=='youtube_shorts' and duration>180000:
+            raise ValueError('youtube_shorts输出不能超过180000ms')
+        return {**options,'safe_area':dict(safe)}
+
+    @app.get('/api/v1/timelines/{id}/render-options')
+    def get_render_options(id:str):
+        return render_options(resource('timeline',id))
+
+    @app.put('/api/v1/timelines/{id}/render-options')
+    def put_render_options(id:str,body:dict):
+        timeline=resource('timeline',id)
+        for segment in timeline['segments']:
+            asset_or_404(segment['asset_id'])
+        options=validate_render_options(body.get('options'),timeline)
+        return store.save_render_options(id,options,body.get('expected_revision'))
 
     def timeline_digest(t):
         return hashlib.sha256(json.dumps(t,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
@@ -351,15 +518,43 @@ def create_app(storage_root=None, db_path=None):
                 raise Conflict('候选审核已变化，请重新确认当前剪辑')
         assets=[asset_or_404(aid) for aid in dict.fromkeys(s['asset_id'] for s in t['segments'])]
         editorial=selection if selection_valid else {'reviewer_type':'unknown','reason':'当前时间线没有对应审核记录'}
-        return enqueue('render',{'assets':assets,'parameters':{'timeline':t,'research_preview':research,
+        from packages.runtime.worker import render_backend
+        backend=render_backend()
+        settings=render_options(t)
+        options=validate_render_options(settings['options'],t)
+        parameters={key:value for key,value in options.items() if key!='export_preset' or value is not None}
+        return enqueue('render',{'assets':assets,'render_backend':backend,'gpu_required':backend in ('nvenc','auto'),
+            'model_id':'render-nvenc' if backend in ('nvenc','auto') else 'render-cpu','render_options_revision':settings['revision'],'parameters':{**parameters,'timeline':t,'research_preview':research,
             'segment_options':{s['segment_id']:{'editorial_review':editorial} for s in t['segments']}}},idempotency_key=body.get('idempotency_key'))
 
     @app.get('/api/v1/models')
     def models():
-        result=store.list('model')
+        from packages.contracts import ModelManifest
+        entries={m['model_id']:m for m in store.list('model')}
+        configured=os.getenv('BTV_MODEL_CATALOG_PATH')
+        if configured:
+            path=Path(configured)
+            if not path.is_file() or path.stat().st_size>16_000_000:
+                raise ValueError('管理员模型目录不存在或超过16MB上限')
+            catalog=json.loads(path.read_text(encoding='utf-8-sig'))
+            if not isinstance(catalog,dict) or catalog.get('schema_version')!='1.0' or not isinstance(catalog.get('models'),list):
+                raise ValueError('管理员模型目录须为schema_version=1.0/models列表')
+            for item in catalog['models']:
+                m=ModelManifest.model_validate(item).model_dump(mode='json')
+                entries[m['model_id']]=m  # Local administrator catalog is current authority.
+        result=list(entries.values())
+        for m in result:
+            if m['status'] in ('ready','experimental') and not model_command_registered(m['model_id']):
+                m['status']='unavailable';m['reason']='模型卡存在，但管理员尚未登记对应独立运行环境'
         if not result:
             return [{'model_id':'models-adapter','version':None,'display_name':'模型模块','capabilities':[],
                 'status':'not_installed','reason':'尚未导入模型卡与登记执行环境','parameters_schema':{}}]
+        return result
+
+    def configured_model(id):
+        result=next((m for m in models() if m['model_id']==id),None)
+        if result is None:
+            raise HTTPException(404,'模型不存在')
         return result
 
     def model_command_registered(model_id):
@@ -387,12 +582,12 @@ def create_app(storage_root=None, db_path=None):
 
     @app.get('/api/v1/models/{id}/health')
     def model_health(id:str):
-        m=resource('model',id)
+        m=configured_model(id)
         return {'model_id':id,'status':m['status'],'reason':m.get('reason'),'command_registered':model_command_registered(id)}
 
     @app.post('/api/v1/models/{id}/run',status_code=202)
     def model_run(id:str,body:dict):
-        m=resource('model',id)
+        m=configured_model(id)
         operation=body.get('operation') or (m['capabilities'][0] if m['capabilities'] else None)
         if operation not in m['capabilities']:
             raise ValueError('操作不在模型已登记能力中')
@@ -429,6 +624,7 @@ def create_app(storage_root=None, db_path=None):
 
     @app.post('/api/v1/jobs/{id}/retry')
     def retry(id:str):
+        production_job(job(id))
         try:
             return queue.retry(id)
         except RuntimeError as exc:
@@ -440,20 +636,44 @@ def create_app(storage_root=None, db_path=None):
         if j['status']!='succeeded':
             raise Conflict('只可应用成功完成的结果')
         result=j.get('result') or {}
+        production_job(j)
+        def verified_apply_assets(assets):
+            identities={}
+            for asset in assets:
+                path=resolve_relative_path(root,asset['relative_path'],must_exist=True)
+                before=store._file_identity(path)
+                proof=result.get('source_identities',{}).get(asset['asset_id'])
+                if proof is not None:
+                    if proof!=before:
+                        raise Conflict('SOURCE_CHANGED: 后台校验后原片变化，请重新运行任务')
+                else:
+                    if before[2]>8_000_000:
+                        raise Conflict('SOURCE_REVERIFY_REQUIRED: 旧任务缺少源文件身份，请重新运行探测/校验')
+                    with path.open('rb') as stream:
+                        digest=hashlib.file_digest(stream,'sha256').hexdigest()
+                    production_assets([{**asset,'sha256':digest}])
+                    if before!=store._file_identity(path) or digest!=asset['sha256']:
+                        raise Conflict('SOURCE_CHANGED: 后台校验后原片内容变化，请重新运行任务')
+                if before[2]!=asset['size_bytes']:
+                    raise Conflict('SOURCE_CHANGED: 原片大小变化，请重新运行任务')
+                identities[asset['asset_id']]=before
+            return identities
         if j['operation']=='verify_manifest':
             verified=AssetManifest.model_validate({'assets':result['assets']}).model_dump(mode='json')['assets']
-            return {'imported':store.import_assets(verified,j['payload']['library_id']),'integrity':'worker_sha256_verified'}
+            identities=verified_apply_assets(verified)
+            return {'imported':store.import_assets(verified,j['payload']['library_id'],verified_identities=identities),'integrity':'worker_sha256_verified'}
         if j['operation']=='probe':
             asset=result.get('asset') or (result.get('assets') or [None])[0]
             if not asset:
                 raise ValueError('探测结果没有Asset')
             asset=AssetManifest.model_validate({'assets':[asset]}).model_dump(mode='json')['assets'][0]
+            identities=verified_apply_assets([asset])
             # Probe already hashes the complete source in the independent worker.
             # Do not route a large successful result back into asynchronous import.
             source=resolve_relative_path(root,asset['relative_path'],must_exist=True)
             if not source.is_file() or source.stat().st_size!=asset['size_bytes']:
                 raise Conflict('探测后源文件缺失或大小变化，请重新探测')
-            imported={'imported':store.import_assets([asset],j['payload']['library_id']),'integrity':'worker_sha256_verified'}
+            imported={'imported':store.import_assets([asset],j['payload']['library_id'],verified_identities=identities),'integrity':'worker_sha256_verified'}
             target=imported['imported'][0]['asset']
             store.update_asset_probe(target['asset_id'],asset.get('probe',{}))
             return imported
@@ -468,14 +688,34 @@ def create_app(storage_root=None, db_path=None):
     @app.get('/api/v1/jobs/{id}/artifacts/{artifact_id}')
     def artifact(id:str,artifact_id:str):
         j=job(id)
+        production_job(j)
         if j['status']!='succeeded':
             raise HTTPException(409,'产物尚未完成')
         a=next((a for a in (j.get('result') or {}).get('artifacts',[]) if a['artifact_id']==artifact_id),None)
         if not a:
             raise HTTPException(404,'产物不存在')
-        is_video=Path(a['relative_path']).suffix.lower()=='.mp4'
+        # A general input does not grant production use to every output. Keep
+        # declarations separate so no general layer can overwrite a restriction.
+        result=j.get('result') or {}
+        base={'relative_path':a['relative_path'],'sha256':a['sha256']}
+        declarations=[a,result]
+        for value in (a.get('producer'),result.get('producer'),result.get('preview'),result.get('frame')):
+            if isinstance(value,dict):
+                declarations.append(value)
+        usage_records=[]
+        for declaration in declarations:
+            usage_records.append({**base,**{key:declaration[key] for key in ('usage_scope','provenance') if key in declaration}})
+            source={key:declaration[key] for key in ('source_asset_id','source_sha256') if key in declaration}
+            if source:
+                usage_records.append({**base,'provenance':source})
+        sources=[*store._raw_assets(),*j['payload'].get('assets',[]),*result.get('assets',[])]
+        sources.extend(value for value in (j['payload'].get('asset'),result.get('asset')) if value)
+        from packages.contracts import assert_production_allowed
+        assert_production_allowed(usage_records,root,source_assets=sources)
+        media_type=mimetypes.guess_type(a['relative_path'])[0] or 'application/octet-stream'
+        inline=media_type.startswith(('video/','image/'))
         return FileResponse(resolve_relative_path(root,a['relative_path']),filename=Path(a['relative_path']).name,
-                            media_type='video/mp4' if is_video else None,content_disposition_type='inline' if is_video else 'attachment')
+                            media_type=media_type,content_disposition_type='inline' if inline else 'attachment',headers={'Cache-Control':'no-store'})
 
     def llm_config():
         return store.get('setting','llm') or {'provider':'openai-compatible','base_url':'','model':'','timeout':20,'key_env':'BTV_LLM_API_KEY'}
