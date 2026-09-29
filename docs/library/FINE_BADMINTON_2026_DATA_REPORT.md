@@ -1,6 +1,6 @@
 # Fine-Badminton 2026 实际数据核验
 
-生成时间：2026-09-29T10:25:57.156621+00:00。固定用例 R-04a；用途 training_only，split=unassigned。
+生成时间：2026-09-29T10:41:27.976622+00:00。固定用例 R-04a；用途 training_only，split=unassigned。
 
 本快照已提取 22 项：10 CSV、10 MP4；原 member stem 精确配对 10 组，完整 probe/PTS 已核验 10 组。解压完成标志：True。
 
@@ -14,9 +14,11 @@ LICENSE和README均指向CC BY-NC 4.0；API的CC BY 4.0另行保留。LICENSE允
 | annotation_rows | 9817 | 9817 | PASS |
 | category_mapping | 29 | 语义类别未确认；60种原始字符串 | BLOCKED |
 | decoded_frames | 980703 | 980703 | PASS |
-| duration_hours | 10.72 | 10.720154444444445 | BLOCKED |
+| duration_hours | 10.72 | 约10.720154444 | PASS |
 
-未完成时上表实际值只是已就绪子集，不能将差值解释为完整包缺失。作者的约10.72小时未给比较容差，完整实测时长仅作证据，一致性判定保留BLOCKED，不自行设定阈值。归档完整性沿用已验证获取报告，本脚本不重复读取整包或重哈希媒体；CSV/README/LICENSE及就绪PTS均实际读取并校验SHA。
+未完成时上表实际值只是已就绪子集，不能将差值解释为完整包缺失。时长采用本项目公开的机械断言 published-precision consistency：整数毫秒经Decimal除以3600000换算小时，以ROUND_HALF_UP保留两位小数，与作者显示的10.72比较。这不是作者给定容差，也不表示精确秒数相同。
+原始实测38592556 ms；舍入后10.72小时；与10.72小时的精确差值为0.556秒，断言状态PASS。整数毫秒和精确分数保存在JSON中；小时十进制计算精度为50位。
+归档完整性沿用已验证获取报告，本脚本不重复读取整包或重哈希媒体；CSV/README/LICENSE及就绪PTS均实际读取并校验SHA。
 
 README外原始标签有31种，不能擅自翻译合并后宣布29类已对齐。总数据行包含5条精确重复；不删除、不以去重数替换作者总量。数值/结构诊断：`{"equal_start_end_semantics_unverified": 3, "label_not_in_readme": 1301}`。
 

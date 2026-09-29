@@ -9,7 +9,7 @@
 - 语义/许可限制仍BLOCKED：Fine双语类别映射及帧端点未确认、processed clips非无剪辑整场；BFMD无原视频/PTS并有回合数差异；细手法/步法unknown，不具新公开再分发许可。详见`docs/library/TRAINING_DATA_ACCEPTANCE.md`与两份数据报告、独立问题单。
 - 18:32:18容量：data14802357491 B（300GB额度）、active reservations0、物理剩余931035758592 B；项目保守账92.252GB包括runtime70GB配额上界。runtime/library新增0、无安装/端口/GPU；所有原媒体与原失败/孤立PTS保留。
 - 最新完整工程回归181/181、0skip、19.476秒。新BFMD两worker/停止标记27目标测试通过，独立审阅确认submit登记、停止入口和Python3.12重复中断join三个竞态已修，另6项关键回归通过。真实网络双流/Range恢复/停止仍NOT_RUN，不为获得该成绩重下数据。
-- 实际数据审计已独立提交`af9d5e8b658d5c2574d3bf4a995dff2ddca409b8`；最终并发实现和测试结果独立交主任务集成。library本轮完成；后续仅由主协调进行模块集成，并在有作者规则/持权原片/人工复核后解除已列语义限制。完整字段/路径/SHA、许可、启动命令及资源见`docs/library/TRAINING_DATA_ACCEPTANCE.md`、`RUNBOOK.md`、`TRAINING_CAPACITY.json`。不推送、不自行合并main。
+- 实际数据审计已独立提交`af9d5e8b658d5c2574d3bf4a995dff2ddca409b8`；最终并发实现与181项回归提交`2b81ea4ee0882b712d315b27bbf945154464944f`，交主任务集成。时长核对按主协调最新要求采用公布的两位小数：Decimal ROUND_HALF_UP(10.720154444)=10.72，一致性PASS，原差0.556秒保留，不声明作者容差；类别/帧端点BLOCKED保持。library本轮完成；后续仅由主协调进行模块集成，并在有作者规则/持权原片/人工复核后解除已列语义限制。完整字段/路径/SHA、许可、启动命令及资源见`docs/library/TRAINING_DATA_ACCEPTANCE.md`、`RUNBOOK.md`、`TRAINING_CAPACITY.json`。不推送、不自行合并main。
 
 ## 2026-09-29 18:17 历史执行快照
 

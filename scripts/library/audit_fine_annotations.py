@@ -9,7 +9,7 @@ import argparse
 from collections import Counter, defaultdict
 import csv
 from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 import hashlib
 import heapq
 import io
@@ -263,6 +263,29 @@ def audit_probe(asset, video, root, numeric):
             "note": "Four diagnostic hypotheses, not confirmed annotation-to-time mappings. Raw media SHA reused from extraction/probe evidence; media not rehashed by this audit."}
 
 
+def published_duration_comparison(total_ms, *, complete):
+    """Project assertion at the author's displayed precision; no inferred tolerance."""
+    if type(total_ms) is not int or total_ms < 0:
+        raise ValueError("Duration evidence must be nonnegative integer milliseconds")
+    with localcontext() as context:
+        context.prec = 50
+        published = Decimal("10.72")
+        hours = Decimal(total_ms) / Decimal(3_600_000)
+        rounded = hours.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        difference_seconds = Decimal(total_ms) / Decimal(1000) - published * Decimal(3600)
+        difference_hours = difference_seconds / Decimal(3600)
+    return {"author_claim_approximate": "10.72", "actual_duration_ms": total_ms,
+            "actual_from_probed_duration": format(hours, "f"),
+            "actual_hours_exact_ratio": {"numerator": total_ms, "denominator": 3_600_000},
+            "decimal_calculation_precision": 50, "rounded_hours": format(rounded, ".2f"),
+            "difference_seconds": format(difference_seconds, "f") if complete else None,
+            "difference_hours": format(difference_hours, "f") if complete else None,
+            "assertion": "published-precision consistency",
+            "rule": "Decimal(total_duration_ms) / Decimal(3600000), quantized to 0.01 hours with ROUND_HALF_UP, equals Decimal('10.72')",
+            "status": ("PASS" if rounded == published else "FAIL") if complete else "NOT_RUN",
+            "reason": "Project mechanical comparison at the author's two displayed decimals; not an author-defined tolerance or exact-second equality."}
+
+
 def audit(root):
     root = Path(root).resolve()
     extraction, extraction_sha = read_json(safe_asset_path(BASE + "/extracted-sources.v1.json", root))
@@ -341,10 +364,7 @@ def audit(root):
                              "status": "PASS" if complete_csv and set(all_labels) == set(categories) else "BLOCKED" if complete_csv else "NOT_RUN",
                              "reason": "Distinct label strings are not semantic category count; untranslated/unmapped originals must not be silently merged."},
         "decoded_frames": {"author_claim": 980703, "actual": sum(p["decoded_frames"] for p in probed), "status": "PASS" if complete_probe and sum(p["decoded_frames"] for p in probed) == 980703 else "FAIL" if complete_probe else "NOT_RUN"},
-        "duration_hours": {"author_claim_approximate": 10.72, "actual_from_probed_duration": sum(p["duration_ms"] for p in probed)/3600000,
-                           "difference_hours": sum(p["duration_ms"] for p in probed)/3600000 - 10.72 if complete_probe else None,
-                           "status": "BLOCKED" if complete_probe else "NOT_RUN",
-                           "reason": "Measured duration is evidence only; the author's approximate claim has no stated comparison tolerance."},
+        "duration_hours": published_duration_comparison(sum(p["duration_ms"] for p in probed), complete=complete_probe),
     }
     return {"schema_version": "1.0", "case_id": "R-04a", "dataset_id": DATASET, "usage_scope": "training_only",
             "split": "unassigned", "generated_at": datetime.now(timezone.utc).isoformat(), "converted_events": 0,
@@ -378,10 +398,15 @@ def markdown(report):
              "| 项目 | 作者声明 | 本快照实测 | 状态 |", "|---|---:|---:|---|"]
     for name, value in report["comparisons"].items():
         actual = value.get('actual', value.get('actual_from_probed_duration'))
+        if name == "duration_hours":
+            actual = f"约{Decimal(actual):.9f}"
         if name == "category_mapping" and actual is None:
             actual = f"语义类别未确认；{value['observed_raw_label_strings']}种原始字符串"
         lines.append(f"| {name} | {value.get('author_claim', value.get('author_claim_approximate'))} | {actual} | {value['status']} |")
-    lines.extend(["", "未完成时上表实际值只是已就绪子集，不能将差值解释为完整包缺失。作者的约10.72小时未给比较容差，完整实测时长仅作证据，一致性判定保留BLOCKED，不自行设定阈值。归档完整性沿用已验证获取报告，本脚本不重复读取整包或重哈希媒体；CSV/README/LICENSE及就绪PTS均实际读取并校验SHA。", "",
+    duration = report["comparisons"]["duration_hours"]
+    lines.extend(["", "未完成时上表实际值只是已就绪子集，不能将差值解释为完整包缺失。时长采用本项目公开的机械断言 published-precision consistency：整数毫秒经Decimal除以3600000换算小时，以ROUND_HALF_UP保留两位小数，与作者显示的10.72比较。这不是作者给定容差，也不表示精确秒数相同。",
+                  f"原始实测{duration['actual_duration_ms']} ms；舍入后{duration['rounded_hours']}小时；与10.72小时的精确差值为{duration['difference_seconds']}秒，断言状态{duration['status']}。整数毫秒和精确分数保存在JSON中；小时十进制计算精度为50位。",
+                  "归档完整性沿用已验证获取报告，本脚本不重复读取整包或重哈希媒体；CSV/README/LICENSE及就绪PTS均实际读取并校验SHA。", "",
                   f"README外原始标签有{len(report['comparisons']['category_mapping']['unmapped_raw_label_strings'])}种，不能擅自翻译合并后宣布29类已对齐。总数据行包含{report['aggregate']['exact_duplicate_rows']}条精确重复；不删除、不以去重数替换作者总量。数值/结构诊断：`" + json.dumps(report['aggregate']['issue_counts'], ensure_ascii=False) + "`。", "",
                   "| 原 member stem | 数据行 | 精确重复 | 原值标签数/README外 | 最小start / 最大end | probe |", "|---|---:|---:|---|---|---|"])
     for file in report["files"]:

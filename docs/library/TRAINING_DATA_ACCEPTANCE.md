@@ -6,7 +6,7 @@
 
 来源为 Zenodo record `20292976` / `v1.0`，DOI `10.5281/zenodo.20292976`。完整原包 `fine-badminton-2026-zenodo-20292976-v1.0/source/Fine-Badminton.zip` 为 **6,455,837,331 B**，作者MD5 `cb3fcaca0ae9b08c564ac2a19ae4e7a0` 匹配，本地SHA256 `a3518f52d66dd6c5d2b01ce1347de8e589516ccc24a72aae818fea64e0b04439`。一次连续200响应完成，3354.230秒，无续传。
 
-安全提取22/22成员（10 MP4、10 CSV、README、LICENSE），展开6,467,329,596 B；原名与短路径保存在 `archive-inventory.v1.json` / `extracted-sources.v1.json`。视频是作者处理过的片段，不能称10份无剪辑整场。真实全片CPU解码和完整原序PTS **10/10 PASS**，合计 **980,703帧、38,592,556 ms**，标注实读 **9,817行**。帧数和标注数精确符合作者声明；作者约10.72小时未给比较容差，数值差0.556秒只作证据。
+安全提取22/22成员（10 MP4、10 CSV、README、LICENSE），展开6,467,329,596 B；原名与短路径保存在 `archive-inventory.v1.json` / `extracted-sources.v1.json`。视频是作者处理过的片段，不能称10份无剪辑整场。真实全片CPU解码和完整原序PTS **10/10 PASS**，合计 **980,703帧、38,592,556 ms**，标注实读 **9,817行**。帧数和标注数精确符合作者声明；实测10.720154444小时按作者公布的两位小数、Decimal ROUND_HALF_UP舍入为10.72，公布精度的一致性 **PASS**。本项目只比较这一显示精度，不推断作者容差或精确秒数一致，原差0.556秒继续保留。
 
 2017视频是真实VFR：`time_base=1/90000`，316个1800-tick间隔和119698个3600-tick间隔，不能用frame/25替代PTS。首轮null输出时基误报已通过真实A/B、全源PTS和修正后的完整解码定位并修复；所有原失败/孤立PTS保留，详见 [时基问题](../issues/library-probe-output-timebase.md)。修正后的两份全片stdout/stderr日志位于数据集 `diagnostics/reprobe-20260929T101835Z-970261c6/`，分别64,069 / 65,122 B，均exit0、stderr0。
 
