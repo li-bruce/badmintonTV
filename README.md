@@ -11,6 +11,7 @@
 - [跨模块数据合同](docs/CONTRACTS.md)
 - [四任务分工、环境和容量预算](docs/EXECUTION_PLAN.md)
 - [首批案例与验收](docs/ACCEPTANCE.md)
+- [各阶段目标与达标状态](docs/STAGE_ACCEPTANCE.md)
 - [进度与问题记录](docs/STATUS.md)
 
 代码进入 Git；视频、模型、数据库、缓存、训练产物和导出文件放 `D:\video`，WSL 路径为 `/mnt/d/video`。所有任务合计硬上限 **700,000,000,000 bytes（700 GB，约 652 GiB）**。
