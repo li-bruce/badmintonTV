@@ -1,0 +1,742 @@
+{
+  "schema_version": "1.0",
+  "status": "complete",
+  "environment": "/mnt/d/video/runtime/models/vl-env",
+  "python_probe": {
+    "versions": {
+      "torch": "2.8.0+cu128",
+      "torchvision": "0.23.0+cu128",
+      "nvidia-cuda-nvrtc-cu12": "12.8.93",
+      "nvidia-cuda-runtime-cu12": "12.8.90",
+      "nvidia-cuda-cupti-cu12": "12.8.90",
+      "nvidia-cudnn-cu12": "9.10.2.21",
+      "nvidia-cublas-cu12": "12.8.4.1",
+      "nvidia-cufft-cu12": "11.3.3.83",
+      "nvidia-curand-cu12": "10.3.9.90",
+      "nvidia-cusolver-cu12": "11.7.3.90",
+      "nvidia-cusparse-cu12": "12.5.8.93",
+      "nvidia-cusparselt-cu12": "0.7.1",
+      "nvidia-nccl-cu12": "2.27.3",
+      "nvidia-nvtx-cu12": "12.8.90",
+      "nvidia-nvjitlink-cu12": "12.8.93",
+      "nvidia-cufile-cu12": "1.13.1.3",
+      "triton": "3.4.0",
+      "transformers": "4.57.3",
+      "qwen-vl-utils": "0.0.14",
+      "accelerate": "1.6.0",
+      "safetensors": "0.5.3",
+      "av": "15.0.0",
+      "pillow": "11.2.1"
+    },
+    "python": "3.11.16",
+    "prefix": "/mnt/d/video/runtime/models/vl-env",
+    "torch_cuda_build": "12.8",
+    "cuda_initialized": false,
+    "model_weights_loaded": false,
+    "qwen3_vl_classes_imported": true
+  },
+  "pip_check": "No broken requirements found.",
+  "capacity_before": {
+    "usage_bytes": {
+      "models_runtime": 12125932469,
+      "shared_disk": 1244822546,
+      "native_base_and_pkgs": 5924496893
+    },
+    "other_runtime_reserved_bytes": 20000000000,
+    "additional_models_peak_bytes": 20000000000,
+    "additional_shared_peak_bytes": 2000000000,
+    "free_bytes": 930013790208,
+    "checks": {
+      "models_35GB": true,
+      "shared_15GB": true,
+      "runtime_70GB": true,
+      "free_5GB_margin": true
+    },
+    "passed": true
+  },
+  "capacity_after": {
+    "usage_bytes": {
+      "models_runtime": 19164852807,
+      "shared_disk": 1244822546,
+      "native_base_and_pkgs": 5924496893
+    },
+    "other_runtime_reserved_bytes": 20000000000,
+    "additional_models_peak_bytes": 0,
+    "additional_shared_peak_bytes": 0,
+    "free_bytes": 922903875584,
+    "checks": {
+      "models_35GB": true,
+      "shared_15GB": true,
+      "runtime_70GB": true,
+      "free_5GB_margin": true
+    },
+    "passed": true
+  },
+  "evidence": {
+    "start.json": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/start.json",
+      "size_bytes": 5781,
+      "sha256": "d2d0ec4bd2863bdde9e3aa388c5f964befab427a53549f0437dac3eedcaa9bf2"
+    },
+    "result.json": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/result.json",
+      "size_bytes": 94,
+      "sha256": "778ece9003c8873187737c2fc56d2f70e78e9276ab5f09b1e13426cb6089ad4c"
+    },
+    "01-capacity-before.stdout.txt": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/01-capacity-before.stdout.txt",
+      "size_bytes": 391,
+      "sha256": "265df11a703f2c5f0c68d6d6d87abf03d791aa70b99151a86312fb531ead64ca"
+    },
+    "04-pip-check.stdout.txt": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/04-pip-check.stdout.txt",
+      "size_bytes": 30,
+      "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09"
+    },
+    "05-cpu-import-versions.stdout.txt": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/05-cpu-import-versions.stdout.txt",
+      "size_bytes": 905,
+      "sha256": "7ebe5e84fab3eaf3d2edb24a88240b4b7a56fed8b732d152790a190df98205a8"
+    },
+    "06-pip-freeze.stdout.txt": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/06-pip-freeze.stdout.txt",
+      "size_bytes": 4356,
+      "sha256": "39d53d4649d11136e7f593df0a9a5eb93351c4af6b388174576d67fe546c1770"
+    },
+    "07-capacity-after.stdout.txt": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/07-capacity-after.stdout.txt",
+      "size_bytes": 372,
+      "sha256": "c85a99b20a08f4111e2b0f2a11dcb8d3a027029d55e789b86789784ea98d9d52"
+    },
+    "core-pip-report.json": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/core-pip-report.json",
+      "size_bytes": 85681,
+      "sha256": "b0749035d0865d7c83ecdd916ddb37e4eb32da7da83ca7d3adaf103a64e4a609"
+    },
+    "phase2-pip-report.json": {
+      "relative_path": "runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2/phase2-pip-report.json",
+      "size_bytes": 398636,
+      "sha256": "f47d805175b3122bbfefe7a562f5e1c4db808f06f2964f558e38c2d0e53f3469"
+    }
+  },
+  "installed_packages": [
+    {
+      "phase": "core",
+      "name": "nvidia-cuda-nvrtc-cu12",
+      "version": "12.8.93",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "a7756528852ef889772a84c6cd89d41dfa74667e24cca16bb31f8f061e3e9994"
+          },
+          "hash": "sha256=a7756528852ef889772a84c6cd89d41dfa74667e24cca16bb31f8f061e3e9994"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cuda-runtime-cu12",
+      "version": "12.8.90",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "adade8dcbd0edf427b7204d480d6066d33902cab2a4707dcfc48a2d0fd44ab90"
+          },
+          "hash": "sha256=adade8dcbd0edf427b7204d480d6066d33902cab2a4707dcfc48a2d0fd44ab90"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cuda-cupti-cu12",
+      "version": "12.8.90",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "ea0cb07ebda26bb9b29ba82cda34849e73c166c18162d3913575b0c9db9a6182"
+          },
+          "hash": "sha256=ea0cb07ebda26bb9b29ba82cda34849e73c166c18162d3913575b0c9db9a6182"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cudnn-cu12",
+      "version": "9.10.2.21",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "949452be657fa16687d0930933f032835951ef0892b37d2d53824d1a84dc97a8"
+          },
+          "hash": "sha256=949452be657fa16687d0930933f032835951ef0892b37d2d53824d1a84dc97a8"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cublas-cu12",
+      "version": "12.8.4.1",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "8ac4e771d5a348c551b2a426eda6193c19aa630236b418086020df5ba9667142"
+          },
+          "hash": "sha256=8ac4e771d5a348c551b2a426eda6193c19aa630236b418086020df5ba9667142"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cufft-cu12",
+      "version": "11.3.3.83",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "4d2dd21ec0b88cf61b62e6b43564355e5222e4a3fb394cac0db101f2dd0d4f74"
+          },
+          "hash": "sha256=4d2dd21ec0b88cf61b62e6b43564355e5222e4a3fb394cac0db101f2dd0d4f74"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-curand-cu12",
+      "version": "10.3.9.90",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "b32331d4f4df5d6eefa0554c565b626c7216f87a06a4f56fab27c3b68a830ec9"
+          },
+          "hash": "sha256=b32331d4f4df5d6eefa0554c565b626c7216f87a06a4f56fab27c3b68a830ec9"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cusolver-cu12",
+      "version": "11.7.3.90",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "4376c11ad263152bd50ea295c05370360776f8c3427b30991df774f9fb26c450"
+          },
+          "hash": "sha256=4376c11ad263152bd50ea295c05370360776f8c3427b30991df774f9fb26c450"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cusparse-cu12",
+      "version": "12.5.8.93",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "1ec05d76bbbd8b61b06a80e1eaf8cf4959c3d4ce8e711b65ebd0443bb0ebb13b"
+          },
+          "hash": "sha256=1ec05d76bbbd8b61b06a80e1eaf8cf4959c3d4ce8e711b65ebd0443bb0ebb13b"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cusparselt-cu12",
+      "version": "0.7.1",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "f1bb701d6b930d5a7cea44c19ceb973311500847f81b634d802b7b539dc55623"
+          },
+          "hash": "sha256=f1bb701d6b930d5a7cea44c19ceb973311500847f81b634d802b7b539dc55623"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-nccl-cu12",
+      "version": "2.27.3",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "adf27ccf4238253e0b826bce3ff5fa532d65fc42322c8bfdfaf28024c0fbe039"
+          },
+          "hash": "sha256=adf27ccf4238253e0b826bce3ff5fa532d65fc42322c8bfdfaf28024c0fbe039"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-nvtx-cu12",
+      "version": "12.8.90",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "5b17e2001cc0d751a5bc2c6ec6d26ad95913324a4adb86788c944f8ce9ba441f"
+          },
+          "hash": "sha256=5b17e2001cc0d751a5bc2c6ec6d26ad95913324a4adb86788c944f8ce9ba441f"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-nvjitlink-cu12",
+      "version": "12.8.93",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "81ff63371a7ebd6e6451970684f916be2eab07321b73c9d244dc2b4da7f73b88"
+          },
+          "hash": "sha256=81ff63371a7ebd6e6451970684f916be2eab07321b73c9d244dc2b4da7f73b88"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "nvidia-cufile-cu12",
+      "version": "1.13.1.3",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "1d069003be650e131b21c932ec3d8969c1715379251f8d23a1860554b1cb24fc"
+          },
+          "hash": "sha256=1d069003be650e131b21c932ec3d8969c1715379251f8d23a1860554b1cb24fc"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "triton",
+      "version": "3.4.0",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/triton-3.4.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "7b70f5e6a41e52e48cfc087436c8a28c17ff98db369447bcaff3b887a3ab4467"
+          },
+          "hash": "sha256=7b70f5e6a41e52e48cfc087436c8a28c17ff98db369447bcaff3b887a3ab4467"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "torch",
+      "version": "2.8.0+cu128",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/torch-2.8.0%2Bcu128-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "039b9dcdd6bdbaa10a8a5cd6be22c4cb3e3589a341e5f904cbb571ca28f55bed"
+          },
+          "hash": "sha256=039b9dcdd6bdbaa10a8a5cd6be22c4cb3e3589a341e5f904cbb571ca28f55bed"
+        }
+      }
+    },
+    {
+      "phase": "core",
+      "name": "torchvision",
+      "version": "0.23.0+cu128",
+      "download_info": {
+        "url": "file:///mnt/d/video/runtime/models/vl-wheelhouse/torchvision-0.23.0%2Bcu128-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "93f1b5f56b20cd6869bca40943de4fd3ca9ccc56e1b57f47c671de1cdab39cdb"
+          },
+          "hash": "sha256=93f1b5f56b20cd6869bca40943de4fd3ca9ccc56e1b57f47c671de1cdab39cdb"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "transformers",
+      "version": "4.57.3",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/6a/6b/2f416568b3c4c91c96e5a365d164f8a4a4a88030aa8ab4644181fdadce97/transformers-4.57.3-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "c77d353a4851b1880191603d36acb313411d3577f6e2897814f333841f7003f4"
+          },
+          "hash": "sha256=c77d353a4851b1880191603d36acb313411d3577f6e2897814f333841f7003f4"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "qwen-vl-utils",
+      "version": "0.0.14",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/c4/43/80f67e0336cb2fc725f8e06f7fe35c1d0fe946f4d2b8b2175e797e07349e/qwen_vl_utils-0.0.14-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "5e28657bfd031e56bd447c5901b58ddfc3835285ed100f4c56580e0ade054e96"
+          },
+          "hash": "sha256=5e28657bfd031e56bd447c5901b58ddfc3835285ed100f4c56580e0ade054e96"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "accelerate",
+      "version": "1.6.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/63/b1/8198e3cdd11a426b1df2912e3381018c4a4a55368f6d0857ba3ca418ef93/accelerate-1.6.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "1aee717d3d3735ad6d09710a7c26990ee4652b79b4e93df46551551b5227c2aa"
+          },
+          "hash": "sha256=1aee717d3d3735ad6d09710a7c26990ee4652b79b4e93df46551551b5227c2aa"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "safetensors",
+      "version": "0.5.3",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a6/f8/dae3421624fcc87a89d42e1898a798bc7ff72c61f38973a65d60df8f124c/safetensors-0.5.3-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "cead1fa41fc54b1e61089fa57452e8834f798cb1dc7a09ba3524f1eb08e0317a"
+          },
+          "hash": "sha256=cead1fa41fc54b1e61089fa57452e8834f798cb1dc7a09ba3524f1eb08e0317a"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "av",
+      "version": "15.0.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/ed/64/6dcfb449ed287a590ecf70d6259f1f2c06fa9a576996f53d1949d65c4ee5/av-15.0.0-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "e2a5f0d1817ab73370fdb35e2e2ecd4c2e5a45d43b8d96d5ae8dfe86098fb9b3"
+          },
+          "hash": "sha256=e2a5f0d1817ab73370fdb35e2e2ecd4c2e5a45d43b8d96d5ae8dfe86098fb9b3"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "pillow",
+      "version": "11.2.1",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/20/f2/805ad600fc59ebe4f1ba6129cd3a75fb0da126975c8579b8f57abeb61e80/pillow-11.2.1-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "8f4f3724c068be008c08257207210c138d5f3731af6c155a81c2b09a9eb3a788"
+          },
+          "hash": "sha256=8f4f3724c068be008c08257207210c138d5f3731af6c155a81c2b09a9eb3a788"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "numpy",
+      "version": "2.4.6",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/02/03/74fe2a4cb3817d94d86402f2506554130a2f01414e299b5a843e5a8a957f/numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+          },
+          "hash": "sha256=89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "huggingface_hub",
+      "version": "0.36.2",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a8/af/48ac8483240de756d2438c380746e7130d1c6f75802ef22f3c6d49982787/huggingface_hub-0.36.2-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "48f0c8eac16145dfce371e9d2d7772854a4f591bcb56c9cf548accf531d54270"
+          },
+          "hash": "sha256=48f0c8eac16145dfce371e9d2d7772854a4f591bcb56c9cf548accf531d54270"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "hf-xet",
+      "version": "1.6.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/67/4e/a28359bf1c1ecf11eba22123168c138698f7cb576ac678f5a2e16cd5da08/hf_xet-1.6.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "d62671bb130879cef0ee4c9ebe47a14af6c66ec53e6d84dc15936e5ffdfac82f"
+          },
+          "hash": "sha256=d62671bb130879cef0ee4c9ebe47a14af6c66ec53e6d84dc15936e5ffdfac82f"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "tokenizers",
+      "version": "0.22.2",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/2e/76/932be4b50ef6ccedf9d3c6639b056a967a86258c6d9200643f01269211ca/tokenizers-0.22.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "369cc9fc8cc10cb24143873a0d95438bb8ee257bb80c71989e3ee290e8d72c67"
+          },
+          "hash": "sha256=369cc9fc8cc10cb24143873a0d95438bb8ee257bb80c71989e3ee290e8d72c67"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "filelock",
+      "version": "4.0.6",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a9/3b/b74ae9db2f78f1354278731372ae89870626be7b86cbb46b8d707acd1a98/filelock-4.0.6-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "9b139fb93b2ac5807f7feaf63aa4546fbd74074a2d3f554c040f40a4694d7b9f"
+          },
+          "hash": "sha256=9b139fb93b2ac5807f7feaf63aa4546fbd74074a2d3f554c040f40a4694d7b9f"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+          },
+          "hash": "sha256=481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "sympy",
+      "version": "1.14.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"
+          },
+          "hash": "sha256=e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "mpmath",
+      "version": "1.3.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
+          },
+          "hash": "sha256=a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "networkx",
+      "version": "3.6.1",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/9e/c9/b2622292ea83fbb4ec318f5b9ab867d0a28ab43c5717bb85b0a5f6b3b0a4/networkx-3.6.1-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762"
+          },
+          "hash": "sha256=d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+          },
+          "hash": "sha256=85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "fsspec",
+      "version": "2026.9.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/6c/c0/a98505f18594f1bce828bb159cec0fcf9860562f1a2c85913409fc8f3d9e/fsspec-2026.9.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f"
+          },
+          "hash": "sha256=8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "MarkupSafe",
+      "version": "3.0.3",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/30/ac/0273f6fcb5f42e314c6d8cd99effae6a5354604d461b8d392b5ec9530a54/markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "0bf2a864d67e76e5c9a34dc26ec616a66b9888e25e7b9460e1c76d3293bd9dbf"
+          },
+          "hash": "sha256=0bf2a864d67e76e5c9a34dc26ec616a66b9888e25e7b9460e1c76d3293bd9dbf"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/71/60/917329f640924b18ff085ab889a11c763e0b573da888e8404ff486657602/pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+          },
+          "hash": "sha256=b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "regex",
+      "version": "2026.9.29",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/8a/70/aa08d1d2b294894b365e5f8ba5380fe3f8546acdb81f10639dfd74209c37/regex-2026.9.29-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "612b709381c0355b70d89cdb51b7f670591ed5cbbc0e3b5337488019dc667b65"
+          },
+          "hash": "sha256=612b709381c0355b70d89cdb51b7f670591ed5cbbc0e3b5337488019dc667b65"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "tqdm",
+      "version": "4.70.1",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a7/03/921a3d3c75785aca9ebfbfcabfbc3a1be12e2ab5265deb026d55a5a3f83e/tqdm-4.70.1-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73"
+          },
+          "hash": "sha256=c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "psutil",
+      "version": "7.2.2",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/b5/70/5d8df3b09e25bce090399cf48e452d25c935ab72dad19406c77f4e828045/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9"
+          },
+          "hash": "sha256=076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "requests",
+      "version": "2.34.2",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+          },
+          "hash": "sha256=2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "charset-normalizer",
+      "version": "3.5.1",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/0d/35/731ac04aa0a097fc1c97f0994c375bdb230c6c96619db794208fe664e9ce/charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "c7b742bf31c88566b4bb6335a7f393bb322e580b6bb98df7bd0c25e6e3519ce8"
+          },
+          "hash": "sha256=c7b742bf31c88566b4bb6335a7f393bb322e580b6bb98df7bd0c25e6e3519ce8"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "idna",
+      "version": "3.20",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+          },
+          "hash": "sha256=ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "urllib3",
+      "version": "2.8.0",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+          },
+          "hash": "sha256=0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+        }
+      }
+    },
+    {
+      "phase": "phase2",
+      "name": "certifi",
+      "version": "2026.7.22",
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+          },
+          "hash": "sha256=62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775"
+        }
+      }
+    }
+  ],
+  "gpu_inference_run": false,
+  "note": "Installation evidence only. Core local wheel origins/full official hashes are in docs/models/vl-linux-cp311-wheels.json; GPU evidence is separate."
+}

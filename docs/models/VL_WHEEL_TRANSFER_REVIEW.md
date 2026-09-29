@@ -10,7 +10,7 @@
 
 本地已下载 Torch METADATA 明确为 `2.8.0+cu128`，torchvision 为 `0.23.0+cu128`。NVIDIA 与 Triton 固定版本逐项来自 Torch 的 Linux/x86_64 Requires-Dist；与下表 PyPI 元数据一致。
 
-## 正在运行的安装
+## 调查时正在运行的安装（17:54–18:08 快照）
 
 检查对象：[bootstrap_reuse_vl.sh](../../scripts/models/bootstrap_reuse_vl.sh) 与 [models-vl.env.sh](../../environments/models-vl.env.sh)。
 
@@ -91,7 +91,7 @@ Torch 的固定 SHA 为 `039b9dcdd6bdbaa10a8a5cd6be22c4cb3e3589a341e5f904cbb571c
 
 24 GB 是保守容量预留，不是已测安装大小。它覆盖约 3.916 GB 全套核心 wheel、主线程预留约 10 GB 的库拆包、Python 依赖和临时开销；保留现有完整件使用硬链接不会再复制其 1.657 GB 内容。必须继续沿原配额计入 wheelhouse、partial、环境与临时解包，安装完成后记录真实大小；不得因“硬链接不复制”跳过实际目录/磁盘核查。
 
-## 已完成与未完成
+## 调查时已完成与未完成
 
 已完成：官方版本/URL/SHA/大小核查；七个本地完整 wheel 的全 SHA 核验；明确 current partial；进程父关系只读定位；容量快照；固定核心清单。
 
@@ -105,3 +105,28 @@ Torch 的固定 SHA 为 `039b9dcdd6bdbaa10a8a5cd6be22c4cb3e3589a341e5f904cbb571c
 - 为保留中断证据不随append变化，182,190,080B归档partial另复制一份到正常续传前缀并建立固定URL/总bytes/SHA的来源标记；额外182MB包含上述24GB预留。最终全SHA才证明完整权重，prefix并不独立声称官方内容完整。
 - 原生Windows acquire_vl_wheelhouse.py 默认dry-run确认7个完整skip、cusolver前缀182,190,080B，全清单剩余2,076,979,077B；15项CPU守卫测试通过后用4并发严格206 Range执行。没有使用Windows pip解算Linux包。
 - 第一个cusolver实际剩余85,316,825B在41.187s下载完，随后整个267,506,905B SHA与官方匹配并排他发布。原partial归档仍在。这是下载与完整性进展，不代表env安装或VL GPU已完成。
+
+## 核心 wheel 下载实际完成（2026-09-29 18:50，Asia/Shanghai）
+
+主线程 Windows 下载已完成：**17/17 个核心 wheel 全文件 SHA-256 通过，合计 3,916,256,631 B**。完成回执为 `D:/video/runtime/models/vl-wheelhouse/acquisition-a0db88fce2d345b8a42d951a3eea89b2.json`，本次只读核对其 17 个 filename、size_bytes、SHA-256 与固定清单逐项一致，没有重新下载或改写 wheel。
+
+回执没有内嵌完成时间字段；文件最后写入时间为 **2026-09-29 18:50:24.527838 +08:00**（UTC 10:50:24.527838），用于定位本次完成记录，而非逐包网络结束时间。回执文件 SHA-256 为 `7f1b13fa430ac502e95cf48d9bea83827d520c06bebb327dfb0b1ab2f8c0843d`，其中记录的固定 manifest SHA-256 为 `e80d83e7a002bd8849a5a5a0ee257943ffe2cfc25af566fa8e7cb2a2f7f267c0`。
+
+| 实际完成项 | 完整大小 | 主线程下载器记录的耗时 |
+| --- | ---: | ---: |
+| Torch 2.8.0+cu128 | 889,185,760 B | 4 并发 Range，1,308.625 s |
+| torchvision 0.23.0+cu128 | 8,628,439 B | 5.625 s |
+
+这些是实际下载耗时；不能用此前 8 MiB 测速推算值代替，也不包含后续环境安装或模型推理。此前保留的七个完整 wheel 共 1,657,087,474 B 继续以硬链接保护。中断归档 `nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl.pip-interrupted-20260929.partial` 仍保留，本次只读 stat 确认为 **182,190,080 B**；它与已完成、通过全 SHA 的 cusolver wheel 分开，不当作可安装的完整 wheel。
+
+恢复脚本的进程识别 P2 修复已进入提交 `31f116a`。主线程报告独立 WSL 现场检查 `active_pip=[]`，另有 **7 项定向检查通过**。这些仅证明恢复前的进程检查和指定守卫行为，不证明安装成功。
+
+18:50 追加时，主线程尚在 session **87573** 中恢复安装既有 `vl-env`，当时没有将下载完成记为安装或推理成功。该 receipt 仍只覆盖固定 17 个核心 wheel，不是完整离线依赖闭包；后续安装与真实运行结果如下。
+
+## 最终安装与真实运行结果（2026-09-29）
+
+恢复 run `runtime/models/vl-resume-runs/20260929T105054Z-3c3fa8e2` 已 **complete**：17 个核心 wheel 离线安装、后续受约束依赖安装、`pip check`、CPU 导入/版本检查、freeze 和安装后容量复核全部完成。原 wheels 保留。44 个本次安装包的实际来源及归档 hash、原始 pip report 引用和 CPU/容量证据已写入 [models-vl-installed-20260929.json](../../environments/models-vl-installed-20260929.json)，版本快照见 [freeze](../../environments/models-vl-installed-20260929.freeze.txt)。CPU 探针 `cuda_initialized=false/model_weights_loaded=false`，与 GPU 实验分开记录。
+
+安装后 models runtime **19,164,852,807 B < 35 GB**；shared disk 与既有 native base/pkgs 合计 **7,169,319,439 B < 15 GB**；加其余 runtime 20 GB 预留后 **46,334,172,246 B < 70 GB**；D 盘剩余 **922,903,875,584 B**。这组安装后实测替代前文容量估算作为本次最终环境证据，七个完整硬链接及 182,190,080 B 中断归档仍保留。
+
+首次 GPU job `job-a258df27cc5d4598896dd1d6495c955a` 在配置加载失败，原因是动态 compile 继承 future annotations，使官方 config_class 变为字符串；失败文件保留。适配层修复 `c609b53` 后，同权重/窗口/查询的新 job **`job-604bf54336ae449a88e004622efd6d1f` succeeded**，Qwen 及同帧 CLIP 比较均成功。两真实窗与 6 条中英查询的 Qwen 向量均为 2048 维；详细安装、首次失败、修复和重试证据见[真实实验记录](../experiments/models-vl-real-001.md)。这不构成准确率或 P@K 成绩；无冻结人类真值，二者未测。主线程确认 GPU/queue 已释放，本次文档更新没有启动任何模型或安装。
