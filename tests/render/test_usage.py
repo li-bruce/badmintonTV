@@ -3,6 +3,7 @@ from contextlib import ExitStack
 from copy import deepcopy
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -11,6 +12,8 @@ import unittest
 from unittest.mock import patch
 
 from packages.render.engine import RenderConfig, render
+from packages.render.storage import sha256
+from packages.render.timeline import RenderError, normalize_timeline
 
 
 REGISTRY_PATH = "data/training/handoff/training-registry.v1.json"
@@ -173,6 +176,98 @@ class UsageIntegrationTests(unittest.TestCase):
         request["assets"].append(parent)  # Parent is lineage metadata, not a timeline segment.
         self.reject_before_editing(request)
 
+    def test_unselected_training_parent_with_consistently_forged_hash_is_checked_by_actual_bytes(self):
+        for include_source_id in (True, False):
+            with self.subTest(include_source_id=include_source_id):
+                parent = self.small_file(f"renamed-parent-{include_source_id}", b"registered training parent bytes")
+                self.publish_registry([self.training_entry(sha256=parent["sha256"])])
+                parent["sha256"] = "c" * 64
+                provenance = {"source_sha256": parent["sha256"].upper()}
+                if include_source_id:
+                    provenance["source_asset_id"] = parent["asset_id"]
+                derived = self.small_file(f"derived-{include_source_id}", b"valid distinct derivative bytes",
+                                          provenance=provenance)
+                request = request_fixture(derived)
+                request["assets"].append(parent)
+                with patch("packages.render.usage.sha256", wraps=sha256) as hash_file:
+                    result = self.reject_before_editing(request, discover_tools=True)
+                self.assertIn("sha256 is in the trusted training registry", result["error"]["message"])
+                self.assertEqual({call.args[0] for call in hash_file.call_args_list},
+                                 {self.root / source["relative_path"] for source in (derived, parent)})
+
+    def test_multihop_training_grandparent_actual_bytes_are_checked_before_editing(self):
+        grandparent = self.small_file("renamed-grandparent", b"registered training grandparent bytes")
+        self.publish_registry([self.training_entry(sha256=grandparent["sha256"])])
+        grandparent["sha256"] = "d" * 64
+        parent = self.small_file("intermediate", b"valid intermediate bytes", provenance={
+            "source_asset_id": grandparent["asset_id"], "source_sha256": grandparent["sha256"],
+        })
+        derived = self.small_file("selected-derivative", b"valid selected derivative bytes", provenance={
+            "source_asset_id": parent["asset_id"], "source_sha256": parent["sha256"],
+        })
+        request = request_fixture(derived)
+        request["assets"].extend([grandparent, parent])
+        with patch("packages.render.usage.sha256", wraps=sha256) as hash_file:
+            self.reject_before_editing(request, discover_tools=True)
+        self.assertEqual({call.args[0] for call in hash_file.call_args_list},
+                         {self.root / source["relative_path"] for source in (derived, parent, grandparent)})
+
+    def test_general_ancestor_chain_is_fully_hashed_and_reaches_media_preflight(self):
+        self.publish_registry()
+        grandparent = self.small_file("general-grandparent", b"general original bytes")
+        parent = self.small_file("general-parent", b"general intermediate bytes", provenance={
+            "source_asset_id": grandparent["asset_id"], "source_sha256": grandparent["sha256"],
+        })
+        derived = self.small_file("general-derived", b"general selected bytes", provenance={
+            "source_asset_id": parent["asset_id"], "source_sha256": parent["sha256"],
+        })
+        request = request_fixture(derived)
+        request["assets"].extend([grandparent, parent, asset("unreferenced-missing-file")])
+        before = self.files()
+        with ExitStack() as stack:
+            hash_file = stack.enter_context(patch("packages.render.usage.sha256", wraps=sha256))
+            which = stack.enter_context(patch("packages.render.engine.shutil.which", return_value="mock-available-tool"))
+            normalize = stack.enter_context(patch("packages.render.engine.normalize_timeline", wraps=normalize_timeline))
+            capture = stack.enter_context(patch("packages.render.engine.Runner.capture", side_effect=
+                RenderError("test_source_validation_complete", "Stop before media subprocesses")))
+            hooks = [stack.enter_context(patch(target)) for target in (
+                "packages.render.engine.Runner.probe", "packages.render.engine.Runner.ffmpeg",
+                "packages.render.engine.reservation", "packages.render.engine.subprocess.Popen",
+            )]
+            result = render(request, self.config)
+        self.assertEqual((result["status"], result["error"]["code"]), ("failed", "test_source_validation_complete"))
+        self.assertEqual(which.call_count, 2)
+        normalize.assert_called_once()
+        capture.assert_called_once()
+        for hook in hooks:
+            hook.assert_not_called()
+        expected_paths = {self.root / source["relative_path"] for source in (derived, parent, grandparent)}
+        self.assertEqual({call.args[0] for call in hash_file.call_args_list}, expected_paths)
+        self.assertEqual(hash_file.call_count, len(expected_paths), "Repeated ID/hash references must hash each ancestor once")
+        self.assertEqual(self.files(), before)
+        self.assertFalse((self.root / "render").exists())
+
+    def test_missing_or_tampered_unselected_ancestor_fails_closed_before_editing(self):
+        for condition in ("missing", "same-size-tamper", "size-mismatch"):
+            with self.subTest(condition=condition):
+                parent = self.small_file("ancestor-" + condition, b"ordinary ancestor bytes")
+                derived = self.small_file("derived-" + condition, b"valid derivative", provenance={
+                    "source_asset_id": parent["asset_id"], "source_sha256": parent["sha256"],
+                })
+                parent_path = self.root / parent["relative_path"]
+                if condition == "missing":
+                    parent_path.unlink()
+                elif condition == "same-size-tamper":
+                    parent_path.write_bytes(b"X" + b"ordinary ancestor bytes"[1:])
+                else:
+                    parent_path.write_bytes(b"ordinary ancestor bytes!")
+                request = request_fixture(derived)
+                request["assets"].append(parent)
+                result = self.reject_before_editing(request,
+                    "missing_asset" if condition == "missing" else "asset_mismatch",
+                    status="failed", discover_tools=True)
+                self.assertIn(parent["asset_id"], result["error"]["message"])
+
     def test_present_training_directory_without_registry_fails_closed(self):
         (self.root / "data/training").mkdir(parents=True)
         self.reject_before_editing(request_fixture(), "TRAINING_REGISTRY_PENDING")
@@ -220,25 +315,60 @@ class UsageIntegrationTests(unittest.TestCase):
                 request["parameters"]["timeline"]["segments"] = segments
                 self.reject_before_editing(request, code, status="failed")
 
-    def symlink(self, target, link):
+    def directory_alias(self, target, link):
+        """Create only test-root links; remove the link before TemporaryDirectory."""
+        root = self.root.resolve()
+        self.assertTrue(target.resolve().is_relative_to(root))
+        self.assertTrue(link.parent.resolve().is_relative_to(root))
+        self.assertFalse(link.exists())
         link.parent.mkdir(parents=True, exist_ok=True)
+        junction_result = None
         try:
             link.symlink_to(target, target_is_directory=True)
         except (NotImplementedError, OSError) as exc:
-            self.skipTest(f"Creating directory symlinks unavailable: {exc}")
+            if os.name != "nt":
+                self.skipTest(f"Creating directory symlinks unavailable: {exc}")
+            # Junctions do not need Windows symbolic-link privileges. Paths are
+            # passed as environment values, never interpolated into shell code.
+            junction_result = subprocess.run([
+                "powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                "$ErrorActionPreference='Stop'; New-Item -ItemType Junction "
+                "-Path $env:BTV_RENDER_TEST_LINK -Target $env:BTV_RENDER_TEST_TARGET | Out-Null",
+            ], env={**os.environ, "BTV_RENDER_TEST_LINK": str(link),
+                    "BTV_RENDER_TEST_TARGET": str(target)},
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
+                creationflags=subprocess.CREATE_NO_WINDOW)
+
+        def remove_alias():
+            self.assertTrue(link.parent.resolve().is_relative_to(root))
+            self.assertEqual(link.resolve(), target.resolve())
+            if os.name == "nt":
+                os.rmdir(link)  # Removes the directory reparse entry, not its target.
+            else:
+                link.unlink()
+            self.assertTrue(target.is_dir(), "Alias cleanup must preserve its target")
+
+        # Cleanup is LIFO: remove this entry before recursive temp-root cleanup.
+        if link.exists():
+            self.addCleanup(remove_alias)
+        if junction_result is not None:
+            self.assertEqual(junction_result.returncode, 0, junction_result.stderr)
+        self.assertEqual(link.resolve(), target.resolve())
 
     def test_general_logical_alias_to_physical_training_directory_is_rejected(self):
         self.publish_registry()
         target = self.root / "data/training/set"
         target.mkdir()
-        self.symlink(target, self.root / "data/raw/alias")
+        (target / "source.mp4").write_bytes(b"tiny bytes")
+        self.directory_alias(target, self.root / "data/raw/alias")
         self.reject_before_editing(request_fixture(asset(relative_path="data/raw/alias/source.mp4")))
 
     def test_logical_training_alias_to_general_physical_directory_is_still_rejected(self):
         self.publish_registry()
         target = self.root / "data/raw/set"
         target.mkdir(parents=True)
-        self.symlink(target, self.root / "data/training/alias")
+        (target / "source.mp4").write_bytes(b"tiny bytes")
+        self.directory_alias(target, self.root / "data/training/alias")
         self.reject_before_editing(request_fixture(asset(relative_path="data/training/alias/source.mp4")))
 
     def test_real_cli_returns_exit_two_and_blocked_result_without_ffmpeg(self):
