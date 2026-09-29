@@ -111,19 +111,91 @@ class ResumeWheelhouseTests(unittest.TestCase):
         self.assertFalse((self.wheels / ".wheelhouse-writer.json").exists())
         self.assertEqual(partial.read_bytes(), b"real prefix remains")
 
-    def test_paused_pip_detected_from_cmdline_not_ignored_by_state(self):
+    def process_fixture(self, entries):
+        """Mock only proc symlinks so Windows CPU tests need no link privilege."""
         proc = self.root / "proc"
         proc.mkdir()
-        environment = self.root / "vl-env"
-        for pid, argv in [("123", [str(environment / "bin/python"), "-m", "pip", "install"]),
-                          ("124", ["/other/env/bin/python", "-m", "pip"]),
-                          ("125", [str(environment / "bin/python"), "real_cpu_job.py"]),
-                          ("126", ["/usr/bin/python3", str(environment / "bin/pip"), "install"])]:
-            folder = proc / pid
+        links = {}
+        for pid, argv, executable, cwd in entries:
+            folder = proc / str(pid)
             folder.mkdir()
             (folder / "cmdline").write_bytes(("\0".join(argv) + "\0").encode())
             (folder / "status").write_text("State:\tT (stopped)\n")
-        self.assertEqual(resume.active_environment_pip(environment, proc), [123, 126])
+            links[folder / "exe"] = executable
+            links[folder / "cwd"] = cwd
+        return proc, links
+
+    def test_paused_activated_and_absolute_pip_use_executable_identity(self):
+        environment, other = self.root / "vl-env", self.root / "vl-env-other"
+        python, other_python = environment / "bin/python3.11", other / "bin/python3.11"
+        proc, links = self.process_fixture([
+            (123, [str(environment / "bin/python"), "-m", "pip", "install"], python, self.root),
+            (124, ["python", "-m", "pip"], other_python, self.root),
+            (125, ["python", "real_cpu_job.py"], python, self.root),
+            (126, ["python", str(environment / "bin/pip"), "install"], other_python, self.root),
+            (127, ["python", "-I", "-m", "pip", "install"], python, self.root),
+            (128, ["pip3.11", "install"], python, self.root),
+        ])
+        with patch.object(Path, "readlink", side_effect=lambda self: links[self], autospec=True) as readlink:
+            self.assertEqual(resume.active_environment_pip(environment, proc), [123, 126, 127, 128])
+        self.assertFalse(any(call.args[0].name == "cwd" for call in readlink.call_args_list))
+
+    def test_relative_interpreter_and_console_script_resolve_against_process_cwd(self):
+        environment, other = self.root / "vl-env", self.root / "other-env"
+        shared_python = self.root / "base/bin/python3.11"
+        proc, links = self.process_fixture([
+            (201, ["./bin/python", "-m", "pip"], shared_python, environment),
+            (202, ["./bin/python", "-m", "pip"], shared_python, other),
+            (203, ["python", "./bin/pip", "install"], shared_python, environment),
+            (204, ["python", "./bin/pip", "install"], shared_python, other),
+            (205, ["../vl-env/bin/python", "-m", "pip"], shared_python, other),
+        ])
+        with patch.object(Path, "readlink", side_effect=lambda self: links[self], autospec=True):
+            self.assertEqual(resume.active_environment_pip(environment, proc), [201, 203, 205])
+
+    def test_pid_disappearing_before_cmdline_is_skipped(self):
+        proc = self.root / "proc"
+        proc.mkdir()
+        vanished = proc / "301"
+        with patch.object(Path, "iterdir", return_value=iter([vanished])):
+            self.assertEqual(resume.active_environment_pip(self.root / "vl-env", proc), [])
+
+    def test_pid_disappearing_between_cmdline_and_exe_is_skipped(self):
+        environment = self.root / "vl-env"
+        proc, _ = self.process_fixture([(302, ["python", "-m", "pip"], environment / "bin/python", self.root)])
+        def disappear(path):
+            (path.parent / "cmdline").unlink()
+            (path.parent / "status").unlink()
+            path.parent.rmdir()
+            raise FileNotFoundError("synthetic vanished PID")
+        with patch.object(Path, "readlink", side_effect=disappear, autospec=True):
+            self.assertEqual(resume.active_environment_pip(environment, proc), [])
+
+    def test_unreadable_live_cmdline_fails_closed(self):
+        environment = self.root / "vl-env"
+        proc, _ = self.process_fixture([(303, ["python", "-m", "pip"], environment / "bin/python", self.root)])
+        with patch.object(Path, "read_bytes", side_effect=PermissionError("synthetic inaccessible cmdline")), \
+             self.assertRaisesRegex(RuntimeError, "Cannot establish"):
+            resume.active_environment_pip(environment, proc)
+
+    def test_missing_or_unreadable_live_exe_fails_closed(self):
+        environment = self.root / "vl-env"
+        proc, _ = self.process_fixture([(304, ["python", "-m", "pip"], environment / "bin/python", self.root)])
+        for error in (PermissionError("synthetic access denied"), FileNotFoundError("live PID lacks exe")):
+            with self.subTest(error=type(error).__name__), patch.object(Path, "readlink", side_effect=error), \
+                 self.assertRaisesRegex(RuntimeError, "Cannot establish"):
+                resume.active_environment_pip(environment, proc)
+
+    def test_unreadable_required_cwd_fails_closed(self):
+        environment = self.root / "vl-env"
+        proc, links = self.process_fixture([(305, ["./bin/python", "-m", "pip"], self.root / "base/bin/python", environment)])
+        def inaccessible_cwd(path):
+            if path.name == "cwd":
+                raise PermissionError("synthetic inaccessible cwd")
+            return links[path]
+        with patch.object(Path, "readlink", side_effect=inaccessible_cwd, autospec=True), \
+             self.assertRaisesRegex(RuntimeError, "Cannot establish"):
+            resume.active_environment_pip(environment, proc)
 
     def test_controlled_environment_removes_pip_overrides_and_user_python(self):
         with patch.dict(os.environ, {"PIP_EXTRA_INDEX_URL": "https://example.invalid", "PIP_TARGET": "/elsewhere",

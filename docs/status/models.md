@@ -4,7 +4,7 @@
 
 - 已运行：真实旧FBBench单打6秒TrackNet离线与因果回放成功，连续pose3秒90帧成功；三项均经过平台worker/WSL bridge/GPU租约，计算已停止、窗口已归还。报告和job见models-004-reuse-forward.md；10时点Agent球点视觉QA已完成，非人工真值。
 - 已实现：TrackNet、Qwen3-VL、连续pose、BST四个标准适配器，固定源/权重校验、usage_scope传播、严格预算和真实分项计时。稳定提交3d018eb435624e4d6d7b20d34cc860d68dc32d41已交main；240项CPU回归237通过/3个Windows权限skip。
-- 正在做：Qwen权重4并发续传（最新只读快照3,439,853,568B/4,255,140,312B）；VL已切换Windows传输同一批官方Linux torch2.8 wheels，保留旧完整/partial、独立同一个vl-env等待完整文件后恢复安装，不另建降级环境。YOLO小隔离env已安装、pip check通过，CPU真实导入确认用户site关闭、torch/vision/numpy来自项目父env，cv2/lap/ultralytics来自子env。
+- Qwen下载已完成：固定revision全18文件4,271,068,726B逐文件大小/整文件SHA校验成功，writer已释放；尚未执行embedding。VL同一批17个官方Linux核心wheels已完成15个，torch/torchvision仍在续传；保留旧完整/partial、同一个vl-env等待恢复安装，不另建降级环境。YOLO小隔离env已安装、pip check通过，CPU真实导入确认用户site关闭、torch/vision/numpy来自项目父env，cv2/lap/ultralytics来自子env。
 - 新实跑：YOLO11n-pose+ByteTrack job-98cb65954fab42408f3b6fd1082d6330成功，同旧片700–3700ms完整90帧；cold load32.2095s、pose1.7377s、ByteTrack0.0608s、allocator151,847,424/176,160,768B。原报告尚缺D2H/序列化等计时，不能把阶段和当总端到端；后续已补计时和首尾完整覆盖守卫（16定向CPU tests通过）。无命名身份、细标签或准确率；独立视觉QA和同PTS比较进行中。bridge compute_stopped=true/exit0，GPU lease/window均null。
 - YOLO对照已核对：同PTS/同Agent场地H下旧pose87/90通过输入守卫，YOLO81/90；31/32远端漏人未解决、54关联跳变改善，41/66重复候选新失败。9帧原图Agent QA另发现65帧脚踝高分错位与场外ID13；不能称整体改善或稳定身份。适配器+比较器19项CPU守卫通过，报告在models-yolo-input-comparison-001与models-yolo-visual-review-001。
 - 当前阻塞/未测：BST旧60帧仅55帧满足输入检查，新职业独立52帧窗口还有25帧连续缺球和远端人体缺失；实际分类尚未执行，不补零或删除失败帧。Qwen实际embedding、物理live端到端、正式P@K/动作准确率仍未测；新职业Asset两项真实诊断已完成，不能与这些未验收项混同。
@@ -15,7 +15,8 @@
 - 当前完整CPU回归310项，306通过/4个Windows权限skip；VL adapter另修failure.json与协议的blocked/cancelled状态一致及CLIP聚合/D2H计时，25项定向通过。官方Inpaint mask静态诊断拒绝目标25帧缺口（前后y=5，未过36px门槛），仅3068/3069两帧可补且在冻结BST窗之外；不改变规则强行GPU试跑。
 - GPU/端口：目前models无计算进程，无服务端口。render完成兼容NVENC后明确归还GPU；下一模型启动前仍检查同账本。当前只网络和轻CPU准备。
 - 环境/容量：旧WSL models/env保持torch2.7.1/vision.22.1；VL独立vl-env；YOLO为yolo-env小venv只读共享旧框架、不修改父环境。安装前runtime/models8.581GB，追加VL24GB+YOLO0.6GB、shared2GB保守峰值均通过35/15/70GB；数据/缓存/权重只在D:/video。来源/版本/锁见environments/models-*和各模型文档。
-- 下一步：完成Qwen有限embedding/中文排名；仅核对已下载官方InpaintNet是否允许补当前25帧缺口，不改变作者规则或伪造observed。真实缺失、延迟、显存和失败继续独立记录，主任务负责集成，不推送。
+- 恢复安装审查修复：active_environment_pip读取/proc的exe及必要的cwd，识别激活后的裸python、相对解释器和pip脚本；区分其他环境，PID消失跳过、存活PID身份不可读则拒绝。23项定向测试22通过/1个Windows symlink权限skip；没有读取进程environ或发信号。修复提交前不运行安装。
+- 下一步：完成同一VL环境安装及Qwen有限embedding/中文排名，随后按旧env/YOLO/VL各自实机状态生成11个模型卡。Inpaint静态结论与新源BST审阅已完成，目标缺口不可按作者mask补点，BST仍blocked。真实缺失、延迟、显存和失败继续独立记录，主任务负责集成，不推送。
 
 ### 本轮阶段记录（以下是当时状态，不代表当前尚未运行）
 
