@@ -102,6 +102,15 @@
           "title": "Source Type",
           "type": "string"
         },
+        "usage_scope": {
+          "default": "general",
+          "enum": [
+            "general",
+            "training_only"
+          ],
+          "title": "Usage Scope",
+          "type": "string"
+        },
         "source_url": {
           "anyOf": [
             {

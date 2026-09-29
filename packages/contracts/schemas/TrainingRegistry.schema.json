@@ -1,0 +1,69 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "TrainingRegistryEntry": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "description": "Small registry record; does not pretend probe metadata is available.",
+      "properties": {
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-fA-F]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "usage_scope": {
+          "const": "training_only",
+          "title": "Usage Scope",
+          "type": "string"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "asset_id",
+        "sha256",
+        "relative_path",
+        "usage_scope"
+      ],
+      "title": "TrainingRegistryEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/TrainingRegistryEntry"
+      },
+      "title": "Assets",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "assets"
+  ],
+  "title": "TrainingRegistry",
+  "type": "object"
+}

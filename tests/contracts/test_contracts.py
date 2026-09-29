@@ -301,15 +301,15 @@ def test_schema_export_covers_all_public_transport_types(tmp_path, monkeypatch, 
     from packages.contracts.__main__ import main
 
     exported = schemas()
-    assert len(exported) == 12
+    assert len(exported) == 13
     for name, schema in exported.items():
         assert schema["properties"]["schema_version"]["const"] == "1.0", name
         assert schema["additionalProperties"] is False
         json.dumps(schema, ensure_ascii=False, allow_nan=False)
     monkeypatch.setattr("sys.argv", ["packages.contracts", "--output", str(tmp_path)])
     main()
-    assert "Exported 12" in capsys.readouterr().out
-    assert len(list(tmp_path.glob("*.schema.json"))) == 12
+    assert "Exported 13" in capsys.readouterr().out
+    assert len(list(tmp_path.glob("*.schema.json"))) == 13
     assert json.loads((tmp_path / "Asset.schema.json").read_text(encoding="utf-8"))["title"] == "Asset"
 
 
