@@ -59,3 +59,9 @@ BST替换作者姿态提取器会产生输入域差异。可先验证作者真�
 [BFMD作者仓库](https://github.com/Ning-D/BFMD)和[公开Drive](https://drive.google.com/drive/folders/1wQr4DpMbx-e8jFnvOH9WUJXxfXgTC1IJ)提供标注与比赛索引，不附原视频。初查116个标注目录文件与5个根文件约1.825GB；library进一步核对为115个有效JSON及1个.json.bak，备用文件不计有效标注。最终选择及下载后字节/hash以library报告为准。公开包声明1058回合/11301拍，与论文规模不同；19场索引不当成19场已下载视频。双打标注范围有限，球轨迹含模型预测/推断，不能全部算human真值。用于训练专用补充，先按视频ID和时间轴匹配，不能随意套到另一数据集。
 
 [DoublesEval官方仓库](https://github.com/Chengjt1999/DoublesEval)当前只有README/许可，代码和数据尚无可下载入口，登记BLOCKED；其论文里的职业双打不计本地已取得素材。
+
+### 取回原件后的修正
+
+2026-09-29实际取得Fine-Badminton ZIP：6,455,837,331B，作者MD5一致；22/22文件已完整提取，为10MP4、10CSV、README和LICENSE。包内README/LICENSE为CC BY-NC4.0，与API的CC BY4.0保留差异；README称仅提供processed clips，不能把完整公开包等同于未经剪辑的整场转播。九个CSV覆盖29个英文标签，但2010亚运CSV的1301行使用31个中文标签；合计60个原始字符串，不擅自并译成29类。全10CSV共9817行，发现5个精确重复、3个start=end、3文件各1处乱序，保留原行及异常。帧号0/1基与结束端点规则仍未说明，先保留原字段。
+
+BFMD实际根文件进一步明确：19行视频索引含12单打和7双打；11,301拍是12单打的作者声明，并非19场合计。已下载单打手工Rally JSON实测1,054回合，与match_index.csv一致、与README的1,058不符；caption/hit_inferred各11,301项。双打另有634回合/5450次hit，分开计数，不能混入单打作者目标。全量文件尚在下载，完整审计以library最终报告为准。caption有自动生成及部分人工改写两层，不能全部算人工真值。作者声明已迁移为0基帧号不等于本地已验证原视频PTS。

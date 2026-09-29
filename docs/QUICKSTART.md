@@ -1,6 +1,6 @@
 # 本机启动与第一条工作流
 
-从 `C:/Users/USER/Desktop/Program/badmintonTV` 运行。现有环境和权重已安装，无需重复安装。
+从 `C:/Users/USER/Desktop/Program/badmintonTV` 运行。既有控制面环境无需重复安装；新增模型各自的安装和实际运行状态见[本轮验收](ROUND_VALIDATION_2026-09-29.md)，不能把部分下载的权重当作可用模型。
 
 ## 启动网页与 worker
 
@@ -31,7 +31,7 @@ $renderTools = Get-Content environments/render-runtime.json -Raw | ConvertFrom-J
 
 网页经 Windows worker 调用 WSL `/mnt/d/video/runtime/models/env`，不会让 WSL 打开 SQLite。默认配置登记受限规则解析和 COCO17 姿态；没有启动 GPU 窗口时任务明确 blocked。
 
-本轮模型独立实验已结束。后续每次先确认训练任务已暂停且平台 GPU 账本没有 active/orphaned 计算，再在仓库根为交互会话开启至多一小时窗口：
+研究实施轮的模型实验正在进行，主worker暂不常驻，以便模块串行实测。后续每次先与models任务协调归还GPU，确认独立实验已停止且账本没有 active/orphaned 计算，再在仓库根为交互会话开启至多一小时窗口；下面命令仅在这些前提满足后使用：
 
 ```powershell
 $gpuSession = 'interactive-' + [guid]::NewGuid().ToString('N')
