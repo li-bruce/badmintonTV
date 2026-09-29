@@ -1,6 +1,12 @@
 # Library 状态
 
-## 2026-09-29 当前状态：本轮实现与完整数据核验已完成
+## 2026-09-29 18:53 最终回收中断补丁
+
+- 主任务独立复现2b81ea4在第二次Ctrl-C落于最终queue取出后、record_outcome之前时漏登记成功项。已改为不消费的完成列表与整体可重放的记账、handoff、progress；幂等DriveID记账保持首异常和旧verified，普通磁盘/预算错误不无限重试。
+- 主任务原复现脚本在本任务默认临时目录执行：completed1、handoff1、attempted1、not_attempted3、INTERRUPTED，active reservations0、owner锁false。新增5回归中前4在旧版确实失败；修复后BFMD32/32、独立关键6项和全库186/186全部通过（20.608秒、0skip）。
+- 仅代码、临时夹具、文档变化；真实10视频与121文件未重下/重审，原交付哈希和training_only限制保持。修复记录见`docs/issues/library-bfmd-coordinator-interrupt.md`与`docs/library/VALIDATION_BFMD_FINAL_REPLAY.json`，提交交主任务复核集成。
+
+## 2026-09-29 完整数据交付记录（补丁前181项工程快照）
 
 - Fine完整原ZIP、22成员提取、10/10视频全CPU解码+完整PTS、9817原CSV全部完成；980703帧与作者精确一致，实际38592556ms。真实VFR时基误报已修复并完整复验。代码提交`acd0225a748d1b2751668a2b4eca73078f3f12db`已由主任务集成为main4dc9125；独立主线又核对10个原片与PTS哈希全部通过。
 - BFMD原顺序下载器自然完成121/121，1825439459 B、0失败、121次尝试、0续传，未杀进程或实际切双流。全量严格审计121份（115活动JSON+1备份+根5）20.297秒、exit0、缺项/JSON/完整性错误0；Pose12份含317734个组内帧记录，不能称唯一原片帧数。
