@@ -174,8 +174,10 @@ def load_reviewed_module(folder):
     module = types.ModuleType(name)
     module.__file__ = str(folder / "scripts" / "qwen3_vl_embedding.py")
     sys.modules[name] = module
+    # Preserve the upstream module's annotation semantics: inheriting this
+    # adapter's future annotations makes Transformers derive a string config_class.
     # Execute precisely the reviewed bytes, never a stale .pyc or remote AutoClass.
-    exec(compile(source, module.__file__, "exec"), module.__dict__)
+    exec(compile(source, module.__file__, "exec", dont_inherit=True), module.__dict__)
     return module
 
 
@@ -450,7 +452,8 @@ def execute(request, root, output_path, progress):
             stage = "cold_load"
             started = time.perf_counter()
             official = load_reviewed_module(folder)
-            model = official.Qwen3VLForEmbedding.from_pretrained(str(folder), local_files_only=True, trust_remote_code=False,
+            config = transformers.Qwen3VLConfig.from_pretrained(str(folder), local_files_only=True, trust_remote_code=False)
+            model = official.Qwen3VLForEmbedding.from_pretrained(str(folder), config=config, local_files_only=True, trust_remote_code=False,
                        use_safetensors=True, torch_dtype=torch.bfloat16, attn_implementation="sdpa").to("cuda").eval()
             processor = transformers.Qwen3VLProcessor.from_pretrained(str(folder), local_files_only=True, trust_remote_code=False, padding_side="right")
             torch.cuda.synchronize()
