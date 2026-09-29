@@ -29,6 +29,19 @@ MAX_SOURCE_DEPTH = 128
 UsageScope = Literal["general", "training_only"]
 
 
+def _validate_source_fields(provenance: Mapping[str, JsonValue]) -> None:
+    """Keep publisher and production-gate lineage validation identical."""
+    scope = provenance.get("usage_scope")
+    if scope is not None and scope not in ("general", "training_only"):
+        raise ValueError("provenance.usage_scope is invalid")
+    source_id = provenance.get("source_asset_id")
+    source_sha = provenance.get("source_sha256")
+    if source_id is not None and (not isinstance(source_id, str) or not source_id.strip()):
+        raise ValueError("provenance.source_asset_id must be a nonempty string")
+    if source_sha is not None and (not isinstance(source_sha, str) or len(source_sha) != 64 or any(char not in "0123456789abcdefABCDEF" for char in source_sha)):
+        raise ValueError("provenance.source_sha256 must be a SHA256 string")
+
+
 class TrainingRegistryEntry(BaseModel):
     """Small registry record; does not pretend probe metadata is available."""
 
@@ -39,6 +52,11 @@ class TrainingRegistryEntry(BaseModel):
     relative_path: RelativePath
     usage_scope: Literal["training_only"]
     provenance: dict[str, JsonValue] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def source_fields(self):
+        _validate_source_fields(self.provenance)
+        return self
 
 
 class TrainingRegistry(VersionedModel):
@@ -69,15 +87,7 @@ class _UsageRecord(BaseModel):
 
     @model_validator(mode="after")
     def source_fields(self):
-        scope = self.provenance.get("usage_scope")
-        if scope is not None and scope not in ("general", "training_only"):
-            raise ValueError("provenance.usage_scope is invalid")
-        source_id = self.provenance.get("source_asset_id")
-        source_sha = self.provenance.get("source_sha256")
-        if source_id is not None and (not isinstance(source_id, str) or not source_id.strip()):
-            raise ValueError("provenance.source_asset_id must be a nonempty string")
-        if source_sha is not None and (not isinstance(source_sha, str) or len(source_sha) != 64 or any(char not in "0123456789abcdefABCDEF" for char in source_sha)):
-            raise ValueError("provenance.source_sha256 must be a SHA256 string")
+        _validate_source_fields(self.provenance)
         return self
 
 
