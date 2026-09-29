@@ -118,6 +118,92 @@ test('late asset A lookup cannot replace selected B or contaminate its saved eve
   assert.equal(saved.event.asset_id,'asset-b');assert.equal(saved.event.match_id,'match-b');assert.equal(saved.event.evidence[0].asset_id,'asset-b');
   assert.equal(saved.expected_revision,0);assert.equal(saved.reviewer_type,'agent');
 });
+async function eventUI(){
+  const context=ui(),{scope,api}=context;await new Promise(resolve=>setTimeout(resolve,0));
+  const asset=key=>({asset_id:key,title:key,sha256:'hash-'+key,match_id:'match-'+key,duration_ms:4000,width:1280,height:720});
+  api.state.assets=['A','B'].map(asset);
+  const event=key=>({event_id:'event-'+key,asset_id:key,match_id:'match-'+key,revision:1,start_ms:20,end_ms:200,kind:'stroke',review_status:'unreviewed',labels:{},visibility:'visible'});
+  context.events={A:[event('A')],B:[event('B')]};context.calls=[];context.response=body=>({ok:true,json:async()=>body});
+  const list=scope.document.getElementById('events');
+  scope.document.getElementById('notice');
+  list.querySelectorAll=()=>{context.buttons=[...list.innerHTML.matchAll(/data-event="([^"]+)"/g)].map(match=>{const button=scope.document.createElement('button');button.dataset.event=match[1];return button});return context.buttons};
+  scope.fetch=async(path,init={})=>{
+    context.calls.push({path,method:init.method||'GET',body:init.body?JSON.parse(init.body):null});
+    const intercepted=context.respond?.(path,init);if(intercepted!==undefined)return intercepted;
+    if(path.startsWith('/api/v1/events?asset_id='))return context.response(context.events[path.split('=').at(-1)]||[]);
+    if(path==='/api/v1/events'&&init.method==='POST')return context.response(JSON.parse(init.body).event);
+    return context.response(path.endsWith('/preview')?{status:'not_ready'}:path.endsWith('/workflow')?{jobs:[]}:[]);
+  };
+  for(const [key,value] of Object.entries({'event-labels':'{}','event-kind':'stroke','event-visibility':'visible','event-review':'unreviewed','reviewer':'agent-ui-test','reviewer-type':'agent'}))scope.document.getElementById(key).value=value;
+  return context;
+}
+
+test('late event-list A response cannot replace B or start a second B preview refresh',async()=>{
+  const context=await eventUI(),{api,nodes,response}=context;let release;
+  context.respond=path=>path==='/api/v1/events?asset_id=A'?new Promise(resolve=>{release=()=>resolve(response(context.events.A))}):undefined;
+  const pendingA=api.selectAsset('A',500);await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(typeof release,'function');await api.selectAsset('B',1500);
+  release();await pendingA;
+  assert.equal(api.state.asset.asset_id,'B');assert.deepEqual(context.buttons.map(button=>button.dataset.event),['event-B']);
+  assert.equal(context.calls.filter(call=>call.path==='/api/v1/assets/B/preview').length,1);
+  assert.doesNotMatch(nodes.get('events').innerHTML,/event-A/);
+  await nodes.get('save-event').onclick();
+  const saved=context.calls.find(call=>call.method==='POST').body;
+  assert.equal(saved.event.asset_id,'B');assert.equal(saved.expected_revision,0);assert.notEqual(saved.event.event_id,'event-A');
+});
+
+test('event buttons from an earlier asset epoch remain inert after B or A→B→A selection',async()=>{
+  for(const backToA of [false,true]){
+    const context=await eventUI(),{api,nodes,video}=context;
+    await api.selectAsset('A');const oldButton=context.buttons[0];await api.selectAsset('B');if(backToA)await api.selectAsset('A');
+    const before={time:video.currentTime,text:nodes.get('edit-state').textContent,start:nodes.get('event-start').value};
+    oldButton.onclick();assert.equal(api.state.event,null);
+    assert.equal(video.currentTime,before.time);assert.equal(nodes.get('edit-state').textContent,before.text);assert.equal(nodes.get('event-start').value,before.start);
+  }
+});
+
+test('late save success or failure cannot alter another asset epoch or refresh its event list',async()=>{
+  for(const failure of [false,true])for(const backToA of [false,true]){
+    const context=await eventUI(),{api,nodes,response}=context;await api.selectAsset('A');let release;
+    context.respond=(path,init)=>path==='/api/v1/events'&&init.method==='POST'?new Promise(resolve=>{
+      const submitted=JSON.parse(init.body).event;
+      release=()=>resolve(failure?{ok:false,status:409,json:async()=>({detail:'old A conflict'})}:response({...submitted,revision:2}));
+    }):undefined;
+    const pendingSave=nodes.get('save-event').onclick();assert.equal(typeof release,'function');
+    await api.selectAsset('B');if(backToA)await api.selectAsset('A');
+    const before={calls:context.calls.length,text:nodes.get('edit-state').textContent,notice:nodes.get('notice').textContent};
+    release();await pendingSave;
+    assert.equal(context.calls.length,before.calls);assert.equal(api.state.event,null);
+    assert.equal(nodes.get('edit-state').textContent,before.text);assert.equal(nodes.get('notice').textContent,before.notice);
+    const sent=context.calls.find(call=>call.method==='POST').body.event;assert.equal(sent.asset_id,'A');assert.equal(sent.evidence[0].asset_id,'A');
+  }
+});
+
+test('selection clears the old event before a slow new frame-map lookup and saving uses revision zero',async()=>{
+  const context=await eventUI(),{api,nodes,response}=context;await api.selectAsset('A');context.buttons[0].onclick();
+  assert.equal(api.state.event.event_id,'event-A');let release;
+  context.respond=path=>path==='/api/v1/assets/B/frame-map'?new Promise(resolve=>{release=()=>resolve(response([]))}):undefined;
+  const pending=api.selectAsset('B');assert.equal(typeof release,'function');assert.equal(api.state.event,null);assert.equal(nodes.get('events').innerHTML,'');
+  await nodes.get('save-event').onclick();const saved=context.calls.find(call=>call.method==='POST').body;
+  assert.equal(saved.event.asset_id,'B');assert.equal(saved.expected_revision,0);assert.notEqual(saved.event.event_id,'event-A');
+  release();await pending;
+});
+
+test('same-asset switch to a new event draft keeps a late successful save receipt out of the editor',async()=>{
+  const context=await eventUI(),{api,nodes,response}=context;await api.selectAsset('A');let release;
+  context.respond=(path,init)=>path==='/api/v1/events'&&init.method==='POST'?new Promise(resolve=>{release=()=>resolve(response(JSON.parse(init.body).event))}):undefined;
+  const pending=nodes.get('save-event').onclick();await nodes.get('new-event').onclick();
+  release();await pending;assert.equal(api.state.event,null);assert.equal(nodes.get('edit-state').textContent,'新标注 · revision 1');
+});
+
+test('an event seek waiting for A metadata cannot seek B when metadata later becomes ready',async()=>{
+  const context=await eventUI(),{api,nodes,video}=context;await api.selectAsset('A');
+  video.readyState=0;context.buttons[0].onclick();await api.selectAsset('B');
+  const before={time:video.currentTime,notice:nodes.get('notice').textContent};
+  video.readyState=1;video.dispatchEvent(new Event('loadedmetadata'));await new Promise(resolve=>setTimeout(resolve,5));
+  assert.equal(api.state.asset.asset_id,'B');assert.equal(video.currentTime,before.time);assert.equal(nodes.get('notice').textContent,before.notice);
+});
+
 test('a slower old source seek cannot replace a later intent',async()=>{
   const {scope,api}=ui();let complete;
   scope.fetch=()=>new Promise(resolve=>{complete=()=>resolve({ok:true,json:async()=>({source_frames:[{source_frame_index:61,source_pts_ms:1016,source_end_ms:1033}]})})});

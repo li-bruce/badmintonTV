@@ -22,6 +22,7 @@ from pathlib import Path
 
 from .queue import Queue
 from .storage import CapacityLedger, resolve_owner_path, resolve_relative_path
+from .artifact_identity import hash_identity, remember_worker_artifact, result_artifact_proofs
 
 
 class JobCancelled(Exception):
@@ -96,6 +97,7 @@ class WorkerContext:
         self.compute_stopped = True
         self.render_cancel_path = None
         self.render_cancel_outcome = None
+        self.artifact_identities = {}
         self.thread = threading.Thread(target=self._keepalive, daemon=True)
 
     def _keepalive(self):
@@ -315,10 +317,13 @@ def render_backend():
 
 
 def _artifact(path, context, kind):
-    return {"artifact_id": "artifact-" + uuid.uuid4().hex, "kind": kind,
+    proof = hash_identity(path, check=context.check)
+    artifact = {"artifact_id": "artifact-" + uuid.uuid4().hex, "kind": kind,
             "relative_path": Path(path).relative_to(context.storage_root).as_posix(),
-            "sha256": _sha256(path, context), "size_bytes": Path(path).stat().st_size,
+            "sha256": proof['sha256'], "size_bytes": proof['size_bytes'],
             "created_at": datetime.now(timezone.utc).isoformat(), "producer": "platform.worker"}
+    remember_worker_artifact(context, artifact, proof)
+    return artifact
 
 
 def verify_manifest(context, exchange_dir):
@@ -566,8 +571,10 @@ def adapter(context, exchange_dir):
         output = resolve_owner_path(context.storage_root, relative_output, owner)
         if not path.is_relative_to(output) or not path.is_file():
             raise ValueError("CLI Artifact is outside its controlled job output")
-        if path.stat().st_size != artifact["size_bytes"] or _sha256(path, context) != artifact["sha256"]:
+        proof = hash_identity(path, check=context.check)
+        if proof['size_bytes'] != artifact["size_bytes"] or proof['sha256'] != artifact["sha256"]:
             raise ValueError("CLI Artifact size or SHA-256 mismatch")
+        remember_worker_artifact(context, artifact, proof)
     result["exit_code"] = code
     return result
 
@@ -631,6 +638,8 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
             from .production import check_sources
             check_sources(context,result.get('assets',[]) + ([result['asset']] if result.get('asset') else []))
         status, error = result["status"], result.get("error")
+        if status == 'succeeded':
+            context.artifact_identities = result_artifact_proofs(context, result)
     except JobCancelled as exc:
         status, result, error = "cancelled", None, {"code": "cancelled", "message": context.redact(exc)}
     except JobBlocked as exc:
@@ -663,7 +672,8 @@ def run_once(queue, storage_root, worker_id=None, lease_seconds=30):
                 queue.append_log(job["job_id"], "state" if context.render_cancel_outcome['graceful'] else "error",
                                  stage="render_cancel_cleanup", **context.render_cancel_outcome)
             try:
-                queue.finish(job["job_id"], worker_id, status, result=result, error=error, expected_attempt=job["attempt"])
+                queue.finish(job["job_id"], worker_id, status, result=result, error=error, expected_attempt=job["attempt"],
+                             artifact_identities=context.artifact_identities if status == 'succeeded' else None)
             except RuntimeError:
                 pass  # A newer lease/recovery owns durable state; never overwrite it.
         finally:
