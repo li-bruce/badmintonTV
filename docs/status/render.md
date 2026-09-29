@@ -1,5 +1,13 @@
 # Render 状态
 
+## 2026-09-29 质量输入 P2 复核修复（验证完成）
+
+- 设计/实现：修复 `quality_compare` 只核验原片却未绑定实际成片的问题。只读固定平台账本绑定成功 job/attempt、规范化请求和 MP4/timeline/source_map/QA Artifact；实际 SHA 复用共享用途门禁，保留 producer 来源并逐源继承。字幕从可信请求重算，命令与认证 QA 对齐。所有拒绝先于版本查询、预留和媒体进程。
+- 已运行：四个既有 CPU/NVENC × 30/60fps 成片只读完整性核对通过，0 媒体进程/0 容量预留，见 `docs/render/QUALITY_INPUT_AUDIT_2026-09-29.json`。新增 15 项/31 subtests 全通过，真实 Windows junction 未跳过；完整 render 快测 165 passed / 1 旧 timeline symlink 权限 skipped / 409 subtests passed（6.34秒）。独立只读审查未发现本 P2 范围内阻塞遗漏，脚本 AST、审计 JSON 和 Git diff --check 通过。
+- 环境/容量：沿用 platform Python 3.12；无安装、端口、GPU 或新 D 盘媒体，仅代码和小型审计 JSON。旧基准与质量报告未改，16 个真实基准不重跑。
+- 限制/下一步：质量脚本要求可信平台作业账本及默认字体；不覆盖恶意本机进程并发改写。提交 SHA 将在随后的状态提交记录；由主任务复核和集成。
+- 验证命令：`D:/video/runtime/platform/env/Scripts/python.exe -B -m pytest tests/render -q -p no:cacheprovider`；质量 CLI 启动命令沿用 `docs/render/QUALITY_2026-09-29.md`，本次未运行媒体 CLI。
+
 ## 2026-09-29 实施轮（本模块交付完成）
 
 - 设计：已读main ff2c700新轮与复用调研，见 `docs/render/ROUND_2026-09-29.md`。新分支 `codex/render-presets-acceleration`，旧work/render干净保留。

@@ -1,0 +1,72 @@
+{
+  "checked_at": "2026-09-29T10:12:42.092494+00:00",
+  "purpose": "Read-only post-fix validation of existing controlled quality inputs; no rerender",
+  "results": [
+    {
+      "job_id": "job-6f22d4657d704732a6c32f9739b78f3f",
+      "attempt_id": "attempt-1",
+      "ledger_relative_path": "platform/runtime.sqlite3",
+      "verified_artifact_sha256": {
+        "video/mp4": "f5343ec879abe6250f763028337b0d5868fc793473f9eba8b030d4f75ee8987c",
+        "timeline": "d95f8f1d5848b8d98501f242722cd49b69f243d80c7f4577bb9f05fab201bf23",
+        "source_map": "4dd7fdae95bc5ddc8067bff452460ba7cb04467cdd2d19e78fb631ea8df07965",
+        "qa_report": "d662fa78092111cbe2c3c7c3eef67d56e1e2c387548c4ddeb2ad335091239e88"
+      },
+      "artifact_binding": "passed",
+      "usage_gate": "passed",
+      "ass_from_trusted_request": "passed",
+      "stage_commands_from_bound_qa": "passed",
+      "segment_count": 3
+    },
+    {
+      "job_id": "job-2171dd52987a41c5919aa6bb0459e5bd",
+      "attempt_id": "attempt-1",
+      "ledger_relative_path": "platform/runtime.sqlite3",
+      "verified_artifact_sha256": {
+        "video/mp4": "1aaebc8b7bf0a0b359cfbffd36c089606b6f61c1e420d06677da1667b54e3666",
+        "timeline": "d95f8f1d5848b8d98501f242722cd49b69f243d80c7f4577bb9f05fab201bf23",
+        "source_map": "4dd7fdae95bc5ddc8067bff452460ba7cb04467cdd2d19e78fb631ea8df07965",
+        "qa_report": "95aeafafd2c1c9a0365b4268eddb94cf3f24d94e00fff284713344f33a05a4a8"
+      },
+      "artifact_binding": "passed",
+      "usage_gate": "passed",
+      "ass_from_trusted_request": "passed",
+      "stage_commands_from_bound_qa": "passed",
+      "segment_count": 3
+    },
+    {
+      "job_id": "job-979ec45166a0443db6d6c57a41303607",
+      "attempt_id": "attempt-1",
+      "ledger_relative_path": "platform/runtime.sqlite3",
+      "verified_artifact_sha256": {
+        "video/mp4": "b3000cf66e203005a5c880516a276764f7aa0c4d79867477b4b6cc156170cd67",
+        "timeline": "6fa93ba4209dde54aba3191cd83eb556675304015ff40df7c1ad0598ea725d97",
+        "source_map": "15c2d3109d13dceaf9ca42182d7aec4f87c73ad085f612c5e413d434ba6e8bf1",
+        "qa_report": "e0c14644c0dc4a892f8d7882b286735a8236e0bf873c7ecb3d89d1ed72a4640d"
+      },
+      "artifact_binding": "passed",
+      "usage_gate": "passed",
+      "ass_from_trusted_request": "passed",
+      "stage_commands_from_bound_qa": "passed",
+      "segment_count": 3
+    },
+    {
+      "job_id": "job-37d8ad54aff04cc38f667fcedc12fb2b",
+      "attempt_id": "attempt-1",
+      "ledger_relative_path": "platform/runtime.sqlite3",
+      "verified_artifact_sha256": {
+        "video/mp4": "6fb4e0bee1709eb3579059bdd8df57e832f81c38565706bb63da218d5e61bb47",
+        "timeline": "6fa93ba4209dde54aba3191cd83eb556675304015ff40df7c1ad0598ea725d97",
+        "source_map": "15c2d3109d13dceaf9ca42182d7aec4f87c73ad085f612c5e413d434ba6e8bf1",
+        "qa_report": "b74c4e872ed08692e42d44d6e17238fb58f0876735582cd55fb4d68dc593cb15"
+      },
+      "artifact_binding": "passed",
+      "usage_gate": "passed",
+      "ass_from_trusted_request": "passed",
+      "stage_commands_from_bound_qa": "passed",
+      "segment_count": 3
+    }
+  ],
+  "media_processes_started": 0,
+  "storage_reservations": 0
+}
