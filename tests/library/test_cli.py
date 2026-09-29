@@ -55,6 +55,65 @@ class CliTests(unittest.TestCase):
         self.assertEqual(sha256_file(target), completed["after"][0]["sha256"])
         self.assertEqual([], self.quota.active_reservations())
 
+    def test_training_json_regeneration_keeps_audits_in_training_subtree(self):
+        target = self.quota.resolve_path("training/dataset-v1/acquisition.json")
+        budget = sample.MetadataBudget()
+        with self.quota.reserve(1_000_000, purpose="training audit test"):
+            sample.write_json(target, {"revision": 1}, quota=self.quota, budget=budget)
+            self.assertFalse((self.quota.data_root / "training/handoff/audit").exists())
+            sample.write_json(target, {"revision": 2}, quota=self.quota, budget=budget)
+        audit_files = list((self.quota.data_root / "training/handoff/audit").glob("*.json"))
+        self.assertEqual(2, len(audit_files))
+        completed = next(json.loads(path.read_text()) for path in audit_files if "completed" in path.name)
+        self.assertEqual("succeeded", completed["state"])
+        self.assertEqual("data/training/dataset-v1/acquisition.json", completed["after"][0]["relative_path"])
+        self.assertEqual(sha256_file(target), completed["after"][0]["sha256"])
+        self.assertFalse((self.quota.data_root / "handoff").exists())
+        self.assertEqual([], self.quota.active_reservations())
+
+    def test_training_publication_failure_record_stays_with_training(self):
+        target = self.quota.resolve_path("training/handoff/registry.json")
+        target.parent.mkdir(parents=True)
+        target.write_text("before", encoding="utf-8")
+        with self.quota.reserve(1_000_000, purpose="failed training audit test"):
+            with self.assertRaisesRegex(RuntimeError, "publication failed"):
+                with cli.publication_audit([target], self.quota, reason="test failed publication"):
+                    raise RuntimeError("publication failed")
+        audits = list((self.quota.data_root / "training/handoff/audit").glob("*.completed.json"))
+        self.assertEqual(1, len(audits))
+        completed = json.loads(audits[0].read_text())
+        self.assertEqual("failed", completed["state"])
+        self.assertEqual(completed["before"], completed["after"])
+        self.assertFalse((self.quota.data_root / "handoff").exists())
+
+    def test_mixed_audit_batch_is_rejected_before_first_or_repeat_publication(self):
+        training = self.quota.resolve_path("training/dataset-v1/report.json")
+        ordinary = self.quota.resolve_path("handoff/report.json")
+        for existing in (False, True):
+            if existing:
+                for target in (training, ordinary):
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(b"original")
+            with self.subTest(existing=existing), self.assertRaisesRegex(ValueError, "cannot mix"):
+                with cli.publication_audit([training, ordinary], self.quota, reason="invalid mixed batch"):
+                    self.fail("Mixed publication body must never run")
+            self.assertFalse((self.quota.data_root / "handoff/audit").exists())
+            self.assertFalse((self.quota.data_root / "training/handoff/audit").exists())
+            if existing:
+                self.assertEqual(training.read_bytes(), b"original")
+                self.assertEqual(ordinary.read_bytes(), b"original")
+
+    def test_training_audit_retains_record_byte_bound_before_mutation(self):
+        target = self.quota.resolve_path("training/dataset-v1/report.json")
+        target.parent.mkdir(parents=True)
+        target.write_bytes(b"original")
+        with patch.object(cli, "AUDIT_MAX_BYTES", 16), self.assertRaisesRegex(ValueError, "bounded allowance"):
+            with cli.publication_audit([target], self.quota, reason="bounded training audit"):
+                self.fail("Over-budget publication body must never run")
+        self.assertEqual(target.read_bytes(), b"original")
+        self.assertFalse((self.quota.data_root / "handoff").exists())
+        self.assertFalse((self.quota.data_root / "training/handoff/audit").exists())
+
     def test_bounded_input_rejects_before_output_or_reservation(self):
         target = self.root / "big.json"
         target.write_bytes(b" " * 30)

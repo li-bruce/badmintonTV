@@ -1,5 +1,24 @@
 # Library 状态
 
+## 2026-09-29完整训练数据实施（进行中）
+
+- 新分支codex/library-training-datasets从main ff2c700创建；原work/library保留，git cherry确认既有五提交已被main等价集成，切换前清洁。
+- 已读本轮IMPLEMENTATION_ROUND、CONTRACTS、STAGE_ACCEPTANCE及实际文件REUSE_RESEARCH_2026-09-29.md。仅负责library，不追加制作库/生产DB，不制作集锦。
+- R-04a预期：完整公开ZIP的官方bytes/MD5、本地SHA、安全解压、10场逐场探测及原CSV真实语义/总数核对；当前下载进行中，完整验收仍NOT_RUN。
+- Zenodo官方API确认record20292976/v1.0，唯一ZIP 6,455,837,331 bytes，MD5 cb3fcaca0ae9b08c564ac2a19ae4e7a0。API license为CC-BY4.0但description限定非商用学术研究，视频版权仍原权利人；同时记录并从严training_only。
+- 写入仅D:/video/data/training/fine-badminton-2026-zenodo-20292976-v1.0；下载峰值暂预留40GB，解压声明总额硬限20GB，完整ZIP到齐后精确核算，超限停在原件不解压。
+- R-04b预期：data/training/handoff/training-registry.v1.json可信SHA用途登记先原子发布，后发布新typed合同校验的training-only manifest；split先unassigned。publisher和共享合同夹具联调已通过；十场真实媒体端到端仍NOT_RUN。
+- 并行：官方源/论文语义核验、有界ZIP64兼容（>4GB包），本轮代码和验证SHA待完成后记录。既有生产handoff不写；无GPU、端口或环境安装。
+- 真实进度：2026-09-29 17:24本地时间ZIP已2,905,014,272/6,455,837,331 bytes正常下载，未完成MD5/解压/Asset，R-04a仍NOT_RUN。连接无ETag/Last-Modified；额外两公开URL Range/HEAD均403，无绕过，保留当前200连接。
+- 空registry已原子初始化为schema_version1.0/assets[]，SHA5d7572aea12757f02e262b10a65d217103152bd1e6ffe835a2347c2fceb251a1，明确已验证媒体数0；通知platform/root/render。初次因版本名v1.0不在白名单失败，已修复安全点号并加回归，原数据路径未改。
+- 最新完整工程回归149/149通过、0skip（13.868秒）：32项ZIP/ZIP64、25项training publisher、10项完整包采集边界、8项BFMD选择边界、17项Drive公开确认及既有下载/探测/CLI检查；不计作真实R-04a/b已PASS。
+- 共享合同a7fff39已由root集成为main2850123；本任务cherry-pick被自动审批以越library模块边界拒绝，未重试/绕过，改用--contracts-root对main合同只读验证，不写contracts目录。
+- 追加BFMD已获主任务授权：先只读独立枚举，待本ZIP writer结束后顺序下载annotations与5根文件（不运行YouTube脚本、不下载其视频），预留2.5GB；缺媒体保持unmatched，不造Asset。
+- 已实现：标准单卷ZIP64、原member短路径映射、完整包三阶段采集、先登记用途后typed manifest增量发布、严格来源引用校验、训练子树审计、BFMD精确121项选择摘要锁定与公开Drive确认适配。独立review修复UUID落盘、重跑清单缩减及失败后未启动探测取消；原生产5样本和manifest不改。
+- BFMD配置实测枚举总1,825,439,459 bytes：115活动JSON、1个备份、5根文件，下载NOT_RUN。两种源的逐文件真实标注核验方案见ANNOTATION_AUDIT_PLAN；不同模态不重复计拍、未知时基不造Event。
+- 本机LongPathsEnabled=0，不改系统设置；解压目标按原member SHA前24位生成短名，MP4含最长收据临时后缀仅152字符。原名/对应关系保留ZIP与inventory。
+- 实现提交在149项单测及review后生成，仅library所有目录；纯实现先交主线集成，下载进程继续，真实结果稍后独立提交。启动命令、现有Python/平台Pydantic/FFmpeg来源及容量预留见docs/library/RUNBOOK.md；新环境0、端口0、GPU0。
+
 - 日期：2026-09-28；任务：01a0e88b-31fa-7fd3-939c-b7e0c895deef。
 - cwd：C:/Users/USER/.codex/worktrees/9163/badmintonTV；分支：work/library。
 - 设计：已读取六份约定文档；见 docs/library/DESIGN.md。

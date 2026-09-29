@@ -105,6 +105,7 @@ def download(
     peak_bytes: int | None = None,
     timeout: float = 30,
     resume: bool = True,
+    response_opener=None,
 ) -> DownloadResult:
     """Download to a path relative to the data owner, without replacing files.
 
@@ -116,12 +117,25 @@ def download(
     Errors retain the partial file and a bounded attempt history. A process kill
     also retains its exclusive .lock and reservation; recovery is deliberately
     manual, after confirming that the writer has stopped.
+
+    ``response_opener(request, timeout=...)`` optionally supplies a specialized
+    public transport (for example a normal Drive download-confirmation form).
+    Its returned response follows the same byte/range/hash validation below.
+    An optional ``response_opener.validate_request(request)`` runs before any
+    metadata write, so a transport can reject unstable/credential-bearing URLs.
     """
     _validate_url(url)
     if type(max_bytes) is not int or max_bytes <= 0:
         raise ValueError("max_bytes must be a finite positive integer")
     if timeout <= 0:
         raise ValueError("timeout must be positive")
+    if response_opener is not None and not callable(response_opener):
+        raise TypeError("response_opener must be callable")
+    validate_request = getattr(response_opener, "validate_request", None)
+    if validate_request is not None:
+        if not callable(validate_request):
+            raise TypeError("response_opener.validate_request must be callable")
+        validate_request(urllib.request.Request(url))
     if expected_sha256 is not None:
         expected_sha256 = expected_sha256.lower()
         if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
@@ -197,7 +211,8 @@ def download(
                 headers["Range"] = f"bytes={offset}-"
                 headers["If-Range"] = metadata["validator"]
             request = urllib.request.Request(url, headers=headers)
-            with urllib.request.build_opener(_SafeRedirect()).open(request, timeout=timeout) as response:
+            open_response = response_opener if response_opener is not None else urllib.request.build_opener(_SafeRedirect()).open
+            with open_response(request, timeout=timeout) as response:
                 _validate_url(response.url)
                 if response.headers.get("Content-Encoding", "identity").lower() != "identity":
                     raise DownloadError("content_encoding", "Encoded transport is unsafe for byte-offset resume")

@@ -27,8 +27,14 @@ def publication_audit(paths, quota, *, reason, charge=None):
 
     The caller must already hold capacity for both records. A killed process
     leaves its started record, including hashes before any replacement.
+    Training-only paths keep their audit records in data/training; a batch
+    cannot mix training and ordinary paths, even on first publication.
     """
     paths = [quota.resolve_path(Path(path).relative_to(quota.data_root)) for path in paths]
+    training_scopes = {path.relative_to(quota.data_root).parts[0].casefold() == "training" for path in paths}
+    if len(training_scopes) > 1:
+        raise ValueError("Publication audit cannot mix training and non-training paths")
+    audit_root = "training/handoff/audit" if training_scopes == {True} else "handoff/audit"
     def snapshot():
         return [{"relative_path": path.relative_to(quota.project_root).as_posix(),
                  "sha256": sha256_file(path) if path.exists() else None,
@@ -46,7 +52,7 @@ def publication_audit(paths, quota, *, reason, charge=None):
             raise ValueError("Publication audit exceeds bounded allowance")
         if charge:
             charge(len(payload))
-        target = quota.resolve_path(f"handoff/audit/{audit_id}.{stage}.json")
+        target = quota.resolve_path(f"{audit_root}/{audit_id}.{stage}.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("xb") as stream:
             stream.write(payload)

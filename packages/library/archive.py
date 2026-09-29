@@ -77,11 +77,89 @@ def _strict_member_name(name: str) -> None:
         raise ArchiveError("unsafe_member_name", "Empty, dot, parent, and alternate-stream member components are forbidden")
 
 
-def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> None:
-    """Bound central-directory parsing before ZipFile allocates its inventory.
+def _zip64_directory(stream, end_offset: int, classic: tuple) -> tuple[int, int, int, int]:
+    """Resolve one fixed ZIP64 EOCD and verify its locator/classic agreement.
 
-    This first version handles ordinary single-volume ZIPs. ZIP64 directory
-    records, appended trailers, and multi-volume archives fail explicitly.
+    Python 3.12 zipfile ignores the locator's offset and assumes a 56-byte EOCD
+    immediately before it. Require both interpretations to identify the same
+    record; extensible-data sectors need another parser and are rejected here.
+    """
+    locator_offset = end_offset - 20
+    stream.seek(locator_offset)
+    locator = stream.read(20)
+    if len(locator) != 20:
+        raise ArchiveError("invalid_zip64", "Truncated ZIP64 locator")
+    signature, record_disk, record_offset, disks = struct.unpack("<4sIQI", locator)
+    if signature != b"PK\x06\x07":
+        raise ArchiveError("invalid_zip64", "Missing ZIP64 locator")
+    if record_disk != 0 or disks != 1:
+        raise ArchiveError("unsupported_multivolume", "ZIP64 locator must describe exactly one disk")
+    if record_offset > locator_offset - 56:
+        raise ArchiveError("invalid_zip64", "ZIP64 end record is outside its permitted bounds")
+    stream.seek(record_offset)
+    raw = stream.read(56)
+    if len(raw) != 56:
+        raise ArchiveError("invalid_zip64", "Truncated ZIP64 end record")
+    signature, length, _, needed, disk, directory_disk, disk_entries, entries, size, offset = struct.unpack("<4sQ2H2I4Q", raw)
+    if signature != b"PK\x06\x06" or needed < 45:
+        raise ArchiveError("invalid_zip64", "ZIP64 end record signature or minimum version is invalid")
+    if length != 44:
+        raise ArchiveError("unsupported_zip64_extension", "ZIP64 extensible-data sectors are not supported")
+    if record_offset + 56 != locator_offset:
+        raise ArchiveError("invalid_zip64", "ZIP64 locator and fixed end-record positions disagree")
+    if disk != 0 or directory_disk != 0 or disk_entries != entries:
+        raise ArchiveError("unsupported_multivolume", "ZIP64 end record must describe a single-volume directory")
+    expanded = (disk, directory_disk, disk_entries, entries, size, offset)
+    for previous, actual, sentinel in zip(classic, expanded, (0xFFFF,) * 4 + (0xFFFFFFFF,) * 2):
+        if previous != sentinel and previous != actual:
+            raise ArchiveError("invalid_zip64", "Classic and ZIP64 end-record fields disagree")
+    return entries, size, offset, record_offset
+
+
+def _member_bounds(header: bytes, extra: bytes, directory_offset: int) -> None:
+    """Validate per-member ZIP64 sizes/offset/disk before ZipInfo decodes extras."""
+    compressed, size = struct.unpack_from("<2I", header, 20)
+    disk = struct.unpack_from("<H", header, 34)[0]
+    offset = struct.unpack_from("<I", header, 42)[0]
+    values = [size, compressed, offset, disk]
+    sentinels = (0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFF)
+    required = [index for index, (value, sentinel) in enumerate(zip(values, sentinels)) if value == sentinel]
+    seen_zip64 = False
+    position = 0
+    while position < len(extra):
+        if len(extra) - position < 4:
+            raise ArchiveError("invalid_zip", "Truncated ZIP extra-field header")
+        kind, length = struct.unpack_from("<2H", extra, position)
+        position += 4
+        if position + length > len(extra):
+            raise ArchiveError("invalid_zip", "ZIP extra-field length exceeds its declared boundary")
+        if kind == 1:
+            if seen_zip64:
+                raise ArchiveError("invalid_zip64", "Duplicate ZIP64 member extra fields are ambiguous")
+            seen_zip64 = True
+            expected = sum(4 if index == 3 else 8 for index in required)
+            if length != expected:
+                raise ArchiveError("invalid_zip64", "ZIP64 member extra fields must match the sentinel fields in order")
+            cursor = position
+            for index in required:
+                fmt = "<I" if index == 3 else "<Q"
+                values[index] = struct.unpack_from(fmt, extra, cursor)[0]
+                cursor += struct.calcsize(fmt)
+        position += length
+    if required and not seen_zip64:
+        raise ArchiveError("invalid_zip64", "ZIP64 member sentinel has no matching extra field")
+    _, compressed, offset, disk = values
+    if disk != 0:
+        raise ArchiveError("unsupported_multivolume", "A ZIP member refers to another disk")
+    if offset + 30 + compressed > directory_offset:
+        raise ArchiveError("invalid_zip", "ZIP member offset or compressed data exceeds the file-data region")
+
+
+def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> None:
+    """Bound ordinary/ZIP64 single-volume directory parsing before ZipFile.
+
+    ZIP64 fixed end records are supported. Extended ZIP64 end records,
+    appended trailers, and multi-volume archives fail explicitly.
     """
     stream.seek(0, os.SEEK_END)
     archive_size = stream.tell()
@@ -97,20 +175,22 @@ def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> 
     if position + 22 + record[-1] != len(tail):
         raise ArchiveError("invalid_zip", "ZIP end-record comment length or embedded signature is ambiguous")
     _, disk, directory_disk, disk_entries, entries, directory_size, directory_offset, _ = record
-    if 0xFFFF in (disk, directory_disk, disk_entries, entries) or 0xFFFFFFFF in (directory_size, directory_offset):
-        raise ArchiveError("unsupported_zip64", "ZIP64 directories are not supported by bounded extraction v1")
-    if disk != 0 or directory_disk != 0 or disk_entries != entries:
-        raise ArchiveError("unsupported_multivolume", "Multi-volume ZIPs are not supported")
-    if entries > max_members or directory_size > max_directory_bytes:
-        raise ArchiveError("inventory_limit", "ZIP directory exceeds the configured member or metadata limit")
     end_offset = archive_size - tail_size + position
+    directory_end = end_offset
+    has_locator = False
     if end_offset >= 20:
         stream.seek(end_offset - 20)
-        if stream.read(4) == b"PK\x06\x07":
-            # ZipFile recognizes this even when classic EOCD fields are not
-            # sentinels. Reject before it can override our measured bounds.
-            raise ArchiveError("unsupported_zip64", "ZIP64 directory locators are not supported by bounded extraction v1")
-    if directory_offset + directory_size != end_offset:
+        has_locator = stream.read(4) == b"PK\x06\x07"
+    if has_locator:
+        entries, directory_size, directory_offset, directory_end = _zip64_directory(stream, end_offset, record[1:7])
+    else:
+        if 0xFFFF in (disk, directory_disk, disk_entries, entries) or 0xFFFFFFFF in (directory_size, directory_offset):
+            raise ArchiveError("invalid_zip64", "ZIP64 sentinel fields require a valid ZIP64 locator and end record")
+        if disk != 0 or directory_disk != 0 or disk_entries != entries:
+            raise ArchiveError("unsupported_multivolume", "Multi-volume ZIPs are not supported")
+    if entries > max_members or directory_size > max_directory_bytes:
+        raise ArchiveError("inventory_limit", "ZIP directory exceeds the configured member or metadata limit")
+    if directory_offset + directory_size != directory_end:
         raise ArchiveError("invalid_zip", "ZIP central-directory offset/length does not match the end record")
     stream.seek(directory_offset)
     consumed, seen = 0, 0
@@ -119,14 +199,16 @@ def _preflight_directory(stream, max_members: int, max_directory_bytes: int) -> 
         if len(header) != 46 or header[:4] != b"PK\x01\x02":
             raise ArchiveError("invalid_zip", "Malformed ZIP central-directory entry")
         name_size, extra_size, comment_size = struct.unpack_from("<3H", header, 28)
-        disk_start = struct.unpack_from("<H", header, 34)[0]
-        if disk_start != 0:
-            raise ArchiveError("unsupported_multivolume", "A ZIP member refers to another disk")
         consumed += 46 + name_size + extra_size + comment_size
         seen += 1
         if consumed > directory_size or seen > max_members or seen > entries:
             raise ArchiveError("inventory_limit", "ZIP directory count or entry lengths exceed their declared bounds")
-        stream.seek(name_size + extra_size + comment_size, os.SEEK_CUR)
+        stream.seek(name_size, os.SEEK_CUR)
+        extra = stream.read(extra_size)
+        if len(extra) != extra_size:
+            raise ArchiveError("invalid_zip", "ZIP member extra fields are truncated")
+        _member_bounds(header, extra, directory_offset)
+        stream.seek(comment_size, os.SEEK_CUR)
     if seen != entries:
         raise ArchiveError("invalid_zip", "ZIP directory entry count does not match its end record")
     stream.seek(0)
