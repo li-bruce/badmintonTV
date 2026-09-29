@@ -19,3 +19,5 @@
 R-02a关联工程回归（临时合成索引和字节，非真实解码验收）：`test_exact_frame_index_identity.py`新增11项PASS，覆盖排队后同大小/同mtime的PTS及timebase修改、同大小文件替换、有效proof和旧小索引正常流程、旧大索引不打开哈希、缺绑定/错路径、解码期间变化不发布、实际training SHA先于声明不一致拒绝。首次产物修复保留于组合提交`19a36cc`，索引门禁另作追加提交。
 
 追加后的完整定向命令：`D:/video/runtime/platform/env/Scripts/python.exe -m pytest tests/platform/test_artifact_identity.py tests/platform/test_exact_frame_index_identity.py tests/platform/test_media_proxy.py tests/platform/test_preview_api.py tests/platform/test_runtime.py tests/platform/test_api.py tests/platform/test_source_identities.py tests/platform/test_source_identity_api.py tests/platform/test_production_usage.py -q`。结果185 PASS、6 SKIP（5个media opt-in和1个原环境条件）、1个既有Starlette弃用警告，34.35秒。本次未运行真实FFmpeg、未重启18082、未操作生产队列或GPU；重启后的旧小预览/旧成片兼容、新exact_frame及最新registry负例由主任务验收。
+
+最终组合及真实短片验证由平台主任务完成：冻结代码607 PASS/7 SKIP，独立API重启后旧预览正常；job-06a35bd0cd134c9d8c919a4ee3ec0e9a实际CPU提取#61成功并存在可信proof；旧成片Range206/video-mp4/no-store通过。详见[最终证据](../platform/browser-final-artifact-proof.json)。无长片性能或GPU推理结论。

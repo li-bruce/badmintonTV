@@ -45,3 +45,7 @@
 Microsoft 文档说明删除权限可来自文件 DELETE 或父目录 DELETE_CHILD，且只读与未授删除共享的打开句柄会阻止删除/替换：[DeleteFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-deletefilew)、[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)、[文件访问权限](https://learn.microsoft.com/en-us/windows/win32/fileio/file-security-and-access-rights)。本机测试确认本次可重现的 Win5 路径，不从文档推断生产失败根因。
 
 安装/环境：未安装任何包；Windows平台既有 Python3.12 venv，测试仅CPU/Win32标准库。媒体、生产队列、原失败证据均未修改，无新增服务/端口。下一次 models 实跑使用本提交；若仍失败，根据新 proof/probe 分类定位，保留失败与取消证据，不无限重试。
+
+## 后续独立模型任务回执
+
+models随后在main fd6155b运行真实职业片3秒窗口，TrackNet job-d9c832fd94384ee3950918badc767b15与YOLO job-57c6354813b94ad1ba12d42b24e5968e均成功。平台主任务mode=ro核对队列均attempt1/succeeded/result.exit_code=0；models报告done确认停止、资源释放，日志无heartbeat错误。因此前表NOT_RUN描述本CPU修复子任务的范围；后续真实链路已成功，但没有证据称这两次实际触发Win5重试。

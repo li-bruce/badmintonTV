@@ -1,0 +1,111 @@
+{
+  "captured_at": "2026-09-29T10:37:45.822683+00:00",
+  "implementation_commit": "e1da6ee97a61eb377e2282bd6e2355a1cd8be0ff",
+  "service": {
+    "verified_at": "2026-09-29T10:34:02.1461467Z",
+    "api_pid": 53520,
+    "port": 18082,
+    "database": "D:/video/platform/research-20260929/platform.sqlite3",
+    "worker_pid": null,
+    "worker_state": "No permanent worker",
+    "previous_api_pid": 59656,
+    "stdout": "api-20260929T103402Z.out.log",
+    "stderr": "api-20260929T103402Z.err.log",
+    "worktree": "C:\\Users\\USER\\.codex\\worktrees\\6991\\badmintonTV"
+  },
+  "new_exact_job": {
+    "job_id": "job-06a35bd0cd134c9d8c919a4ee3ec0e9a",
+    "status": "succeeded",
+    "attempt": 1,
+    "worker_id": "platform-artifact-proof-once",
+    "result": {
+      "schema_version": "1.0",
+      "job_id": "job-06a35bd0cd134c9d8c919a4ee3ec0e9a",
+      "attempt_id": "attempt-1",
+      "status": "succeeded",
+      "frame": {
+        "source_asset_id": "asset-media-test-derived_60_to_30",
+        "source_sha256": "d26b53123b54395037454219fcf3356c218ca9e15adcb5cba6c2f871bf58f76d",
+        "usage_scope": "general",
+        "source_frame_index": 61,
+        "source_pts": 15616,
+        "source_pts_ms": 1016.6666666666666,
+        "source_time_base": "1/15360",
+        "width": 1280,
+        "height": 720,
+        "relative_path": "platform/jobs/job-06a35bd0cd134c9d8c919a4ee3ec0e9a/attempt-1/source-frame-61.jpg"
+      },
+      "artifacts": [
+        {
+          "artifact_id": "media-d1dd9bd118ae3932e3686ff9",
+          "kind": "source_frame",
+          "relative_path": "platform/jobs/job-06a35bd0cd134c9d8c919a4ee3ec0e9a/attempt-1/source-frame-61.jpg",
+          "sha256": "d1dd9bd118ae3932e3686ff9bc6aa10532cf7288cf88580243003a6e5b3e7908",
+          "size_bytes": 133920,
+          "created_at": "2026-09-29T10:36:18.706394+00:00",
+          "producer": "platform.media_proxy"
+        }
+      ],
+      "events": [],
+      "error": null
+    }
+  },
+  "trusted_proof_rows_verified": [
+    {
+      "job_id": "job-06a35bd0cd134c9d8c919a4ee3ec0e9a",
+      "attempt": 1,
+      "artifact_id": "media-d1dd9bd118ae3932e3686ff9",
+      "relative_path": "platform/jobs/job-06a35bd0cd134c9d8c919a4ee3ec0e9a/attempt-1/source-frame-61.jpg",
+      "sha256": "d1dd9bd118ae3932e3686ff9bc6aa10532cf7288cf88580243003a6e5b3e7908",
+      "size_bytes": 133920,
+      "identity": "{\"path\": [8979646616988072346, 72057594038195318, 133920, 1790678178694706300, 1790678178694706300], \"descriptor\": [8979646616988072346, 72057594038195318, 133920, 1790678178694706300, 1790678178694706300]}"
+    },
+    {
+      "job_id": "job-3851a50c5be148a3b4892ec5a9be09bc",
+      "attempt": 1,
+      "artifact_id": "media-2ac71318046be7de36811ca3",
+      "relative_path": "platform/jobs/job-3851a50c5be148a3b4892ec5a9be09bc/attempt-1/preview.mp4",
+      "sha256": "2ac71318046be7de36811ca32fd630e8097a3666408908078477e89e801dcf42",
+      "size_bytes": 679946,
+      "identity": "{\"path\": [8979646616988072346, 5348024557760885, 679946, 1790672645251310500, 1790672645031993700], \"descriptor\": [8979646616988072346, 5348024557760885, 679946, 1790672645251310500, 1790672645251310500]}"
+    },
+    {
+      "job_id": "job-3851a50c5be148a3b4892ec5a9be09bc",
+      "attempt": 1,
+      "artifact_id": "media-2fe7e34f706a2e232ee626d3",
+      "relative_path": "platform/jobs/job-3851a50c5be148a3b4892ec5a9be09bc/attempt-1/thumbnails.jpg",
+      "sha256": "2fe7e34f706a2e232ee626d3fdbcae3675d8adacf3a324e4c4abe6ea2fd739c1",
+      "size_bytes": 55081,
+      "identity": "{\"path\": [8979646616988072346, 5066549581050232, 55081, 1790672645910946100, 1790672645910946100], \"descriptor\": [8979646616988072346, 5066549581050232, 55081, 1790672645910946100, 1790672645910946100]}"
+    },
+    {
+      "job_id": "job-3851a50c5be148a3b4892ec5a9be09bc",
+      "attempt": 1,
+      "artifact_id": "media-f03b1ea109839b6e7cb72b1a",
+      "relative_path": "platform/jobs/job-3851a50c5be148a3b4892ec5a9be09bc/attempt-1/frame-index.sqlite3",
+      "sha256": "f03b1ea109839b6e7cb72b1a517c75487655d041b88f0f8086d5aa796cd5eacc",
+      "size_bytes": 45056,
+      "identity": "{\"path\": [8979646616988072346, 26458647811060084, 45056, 1790672645777342500, 1790672644730452100], \"descriptor\": [8979646616988072346, 26458647811060084, 45056, 1790672645777342500, 1790672645777342500]}"
+    },
+    {
+      "job_id": "job-7f8fb7431dac4a92b571d485fd1f9152",
+      "attempt": 1,
+      "artifact_id": "render-c0d911b5cd8f44d3bc6bc1c2de41ffae",
+      "relative_path": "render/jobs/job-7f8fb7431dac4a92b571d485fd1f9152/attempt-1/export.mp4",
+      "sha256": "be377469da2b4b55f0c5d7af1368338d65d703adc661c624b31220512d6ea59f",
+      "size_bytes": 109708,
+      "identity": "{\"path\": [8979646616988072346, 281474976974339, 109708, 1790675253648307700, 1790675253642173300], \"descriptor\": [8979646616988072346, 281474976974339, 109708, 1790675253648307700, 1790675253764264000]}"
+    }
+  ],
+  "private_queued_or_running": 0,
+  "old_render_range": {
+    "status": 206,
+    "content_range": "bytes 0-15/109708",
+    "content_type": "video/mp4",
+    "cache_control": "no-store",
+    "bytes": 16
+  },
+  "worker_exit_code": 0,
+  "scope": "Actual private API, real-derived short source, CPU one-shot worker; not whole-match performance or human action truth",
+  "observed_nonfatal_log": "Two Windows asyncio connection-reset (WinError10054) callbacks during reload; API remained ready and requests succeeded"
+}

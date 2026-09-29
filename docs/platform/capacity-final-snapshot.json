@@ -1,0 +1,33 @@
+{
+  "captured_at": "2026-09-29T10:40:15.626571+00:00",
+  "scope": "Only platform-owned storage and runtime; not all-owner 700 GB audit",
+  "owners": {
+    "platform": {
+      "bytes": 198503318,
+      "quota_bytes": 60000000000
+    },
+    "runtime/platform": {
+      "bytes": 1048280806,
+      "quota_bytes": 10000000000
+    }
+  },
+  "disk_free_bytes": 930113617920,
+  "private_validation_permanent_worker": false,
+  "previous_snapshot": {
+    "captured_at": "2026-09-29T10:17:27.467831+00:00",
+    "scope": "Only platform-owned storage and runtime, not all-owner 700 GB audit",
+    "owners": {
+      "platform": {
+        "bytes": 197914463,
+        "quota_bytes": 60000000000
+      },
+      "runtime/platform": {
+        "bytes": 1048280806,
+        "quota_bytes": 10000000000
+      }
+    },
+    "disk_free_bytes": 933803532288,
+    "media_in_git": false,
+    "private_validation_permanent_worker": false
+  }
+}
