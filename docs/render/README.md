@@ -55,9 +55,11 @@ request/result必填attempt_id；stdout严格ProgressEvent JSONL，seq递增；�
 
 ## 后端与训练用途隔离
 
-管理员使用`BTV_RENDER_BACKEND=cpu|nvenc|auto`或独立CLI `--backend`，默认cpu。请求JSON不能覆盖可信后端。CPU/NVENC均使用CPU解码、ASS字幕、缩放和补边；NVENC只加速H.264编码，未启用NVDEC。30fps转60fps不增加真实动作信息。
+管理员使用`BTV_RENDER_BACKEND=cpu|nvenc|auto`或独立CLI `--backend`，默认cpu。请求JSON不能覆盖可信后端。CPU/NVENC均使用CPU解码、ASS字幕、缩放和补边；NVENC只负责H.264硬件编码，未启用NVDEC，不保证端到端更快。30fps转60fps不增加真实动作信息。
 
 nvenc/auto必须通过同一`D:/video/platform/runtime.sqlite3`窗口+worker作业租约。worker注入`BTV_RUNTIME_DB/BTV_GPU_LEASE_ID`，render只读核对job/attempt/worker/model/resource/截止时间，并在运行中持续检查。管理员runner见`docs/platform/CONTROLLED_GPU_RUN.md`；不能只grant窗口后直接运行FFmpeg。编码器以实际输出尺寸/帧率做短可用性预检：nvenc初始化失败明确blocked/backend_unavailable；auto仅对此预检的编码失败回退CPU，原因记录在backend.json和QA。实际分段开始后的失败、取消或租约失效均停止作业，不重跑或降级。CQ21与CRF21不是质量等价承诺。
+
+本机FFmpeg9默认构建需要NVENC API13.1，驱动591.86提供13.0，真实probe会阻塞。管理员要启用本轮实测成功的NVENC路径，应从`environments/render-runtime-compat.json`读取FFmpeg8.0.1的`checks.ffmpeg/ffprobe`配置worker环境；旧9仍保留。`auto`判断可用性，不按速度/质量选档。当前约17秒三片样本CPU端到端更快，故默认仍CPU；同版本16次实测和质量证据见`ROUND_2026-09-29_RESULTS.md`与`QUALITY_2026-09-29.md`。
 
 平台优雅取消使用可信环境变量`BTV_RENDER_CANCEL_FILE`，绝对路径必须精确对应当前`platform/jobs/<job_id>/<attempt_id>/cancel.request`；文件存在即取消，无内容格式要求。此可信env优先于独立CLI `--cancel-file`，后者继续限定render下相对路径。取消时等待本次FFmpeg停止，再释放本模块容量锁。
 

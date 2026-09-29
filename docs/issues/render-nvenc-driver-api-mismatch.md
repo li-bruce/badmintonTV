@@ -9,3 +9,5 @@ FFmpeg `9.0.2-essentials_build-www.gyan.dev` 在已获同平台账本GPU窗口�
 窗口 `render-benchmark-4e5823beb9ca`，租约 `gpu-lease-8d6672d608344b84817e2430d2432d6f`，worker已核验计算停止并释放；窗口在09:02:44 UTC提前revoke，active_window/lease均null。已明确归还models，不占GPU等待下载。
 
 处理方案：不升级/修改全局驱动；在runtime/render配额内独立核验可兼容FFmpeg8/7构建，保留现有9和失败文件。若成功取得兼容构建，CPU和NVENC都使用它重新测量，不能跨构建直接比速度。当前旧构建硬件路径缺口仍开放，兼容尝试结果随后追加。
+
+后续结果：独立FFmpeg8.0.1（ffnvcodec API13.0）于本机591.86驱动上完成30/60fps各首次+3复测，共8个NVENC完整job全部技术PASS；同版本CPU8job作为配对。证据 `D:/video/render/benchmarks/presets-controlled-nvenc-6e21d23d0d7f/`，详见 `docs/render/ROUND_2026-09-29_RESULTS.md`。最后job停止后窗口已撤销、active_window/lease均null。当前硬件编码有可用的显式兼容环境；FFmpeg9默认环境的API不匹配仍成立，不自动改全局环境或掩盖原失败。使用NVENC应显式选择compat配置。

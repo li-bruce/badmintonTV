@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.0",
+  "owner": "render",
+  "status": "ready",
+  "prepared_at": "2026-09-29T09:15:34.097593+00:00",
+  "runtime_root": "D:\\video\\runtime\\render",
+  "purpose": "compatibility candidate for unchanged API13.0 host; CPU validation only",
+  "post_install_hardware_validation": {
+    "date": "2026-09-29",
+    "status": "PASS",
+    "scope": "Eight controlled h264_nvenc render jobs; CPU decode and filters; no NVDEC",
+    "paired_cpu_batch": "render/benchmarks/presets-controlled-cpu-7b61b195daf3",
+    "nvenc_batch": "render/benchmarks/presets-controlled-nvenc-6e21d23d0d7f",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "591.86",
+    "window_id": "render-benchmark-6e21d23d0d7f",
+    "window_revoked_at": "2026-09-29T09:32:18Z",
+    "lease_released": true,
+    "notes": "Separate post-install evidence; original installer checks and external environment.json remain unchanged. Default FFmpeg9 API mismatch remains."
+  },
+  "python": {
+    "executable": "D:\\video\\runtime\\platform\\env\\Scripts\\python.exe",
+    "version": "3.12.11 | packaged by conda-forge | (main, Jun  4 2025, 14:29:09) [MSC v.1943 64 bit (AMD64)]",
+    "no_environment_changes": true
+  },
+  "sources": {
+    "official_download_index": "https://ffmpeg.org/download.html",
+    "build_provider": "https://www.gyan.dev/ffmpeg/builds/",
+    "release_page": "https://github.com/GyanD/codexffmpeg/releases/tag/8.0.1",
+    "ffmpeg_source_commit": "https://github.com/FFmpeg/FFmpeg/commit/894da5ca7d",
+    "license": "GPLv3",
+    "license_reference": "https://ffmpeg.org/legal.html"
+  },
+  "acquisition": {
+    "asset_id": 318696612,
+    "name": "ffmpeg-8.0.1-essentials_build.zip",
+    "size_bytes": 106259850,
+    "sha256": "e2aaeaa0fdbc397d4794828086424d4aaa2102cef1fb6874f6ffd29c0b88b673",
+    "url": "https://github.com/GyanD/codexffmpeg/releases/download/8.0.1/ffmpeg-8.0.1-essentials_build.zip",
+    "release_page": "https://github.com/GyanD/codexffmpeg/releases/tag/8.0.1",
+    "metadata_url": "https://api.github.com/repos/GyanD/codexffmpeg/releases/tags/8.0.1",
+    "release_published_at": "2025-11-20T07:15:48Z",
+    "asset_updated_at": "2025-11-20T07:06:24Z",
+    "path": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\ffmpeg-8.0.1-essentials_build.zip",
+    "verified_at": "2026-09-29T09:15:28.685639+00:00",
+    "delivery_host": "release-assets.githubusercontent.com",
+    "range_workers": 8,
+    "ranges": [
+      {
+        "start": 0,
+        "end": 13282481,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 0-13282481/106259850"
+      },
+      {
+        "start": 13282482,
+        "end": 26564963,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 13282482-26564963/106259850"
+      },
+      {
+        "start": 26564964,
+        "end": 39847445,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 26564964-39847445/106259850"
+      },
+      {
+        "start": 39847446,
+        "end": 53129927,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 39847446-53129927/106259850"
+      },
+      {
+        "start": 53129928,
+        "end": 66412409,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 53129928-66412409/106259850"
+      },
+      {
+        "start": 66412410,
+        "end": 79694891,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 66412410-79694891/106259850"
+      },
+      {
+        "start": 79694892,
+        "end": 92977373,
+        "actual_bytes": 13282482,
+        "http_status": 206,
+        "content_range": "bytes 79694892-92977373/106259850"
+      },
+      {
+        "start": 92977374,
+        "end": 106259849,
+        "actual_bytes": 13282476,
+        "http_status": 206,
+        "content_range": "bytes 92977374-106259849/106259850"
+      }
+    ],
+    "actual_new_archive_bytes_received": 106259850,
+    "retained_prior_partial_bytes": 12582912,
+    "actual_archive_bytes_including_retained_partial": 118842762
+  },
+  "unpacked_bytes": 310354584,
+  "checks": {
+    "ffmpeg": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\ffmpeg-8.0.1-essentials_build\\bin\\ffmpeg.exe",
+    "ffprobe": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\ffmpeg-8.0.1-essentials_build\\bin\\ffprobe.exe",
+    "ffmpeg_sha256": "5af82a0d4fe2b9eae211b967332ea97edfc51c6b328ca35b827e73eac560dc0d",
+    "ffprobe_sha256": "192a1d6899059765ac8c39764fc3148d4e6049955956dc2029f81f4bd6a8972d",
+    "version": "ffmpeg version 8.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers",
+    "build_configuration": "configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband",
+    "required_encoders": {
+      "libx264": "verified",
+      "aac": "verified"
+    },
+    "subtitles_filter": "verified",
+    "chinese_font_files": [
+      "C:\\Windows\\Fonts\\msyh.ttc",
+      "C:\\Windows\\Fonts\\simhei.ttf"
+    ],
+    "font_selection_log": [
+      "[Parsed_subtitles_0 @ 000001ef078b1580] fontselect: (Microsoft YaHei, 400, 0) -> MicrosoftYaHei, 0, MicrosoftYaHei"
+    ],
+    "smoke_mp4": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\runtime-smoke.mp4",
+    "smoke_frame": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\chinese-test.png",
+    "smoke_type": "synthetic_runtime_check_only",
+    "smoke_duration": "1.000000",
+    "full_decode": "passed",
+    "manual_chinese_frame_review": "pending"
+  },
+  "nvcodec_dependency": {
+    "included_readme": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\ffmpeg-8.0.1-essentials_build\\README.txt",
+    "readme_sha256": "a0e976df3cf1d781264c41db8ee3421978c1278be92ed00edbc96337529670be",
+    "compiled_dependency_line": "ffnvcodec n13.0.19.0-2-g876af32",
+    "sdk_api_major": 13,
+    "sdk_api_minor": 0,
+    "gpu_probe": "not_run",
+    "compatibility": "compiled_dependency_only_not_runtime_verified",
+    "headers_reference": "https://raw.githubusercontent.com/FFmpeg/nv-codec-headers/n13.0.19.0/README",
+    "headers_reference_windows_min_driver": "570.0 for SDK 13.0.19"
+  },
+  "capacity_before": {
+    "owner_used_bytes": 456635886,
+    "shared_used_bytes": 16711758759,
+    "additional_reserved_bytes": 870000000,
+    "other_owner_allocation_ceiling_bytes": 645000000000,
+    "measured_shared_peak_bytes": 17581758759,
+    "allocated_owner_peak_bytes": 646326635886,
+    "other_active_reserved_bytes": null,
+    "physical_safety_margin_bytes": 256000000,
+    "physical_free_bytes": 951415439360,
+    "owner_quota_bytes": 5000000000,
+    "shared_hard_limit_bytes": 700000000000
+  },
+  "capacity_after": {
+    "owner_used_bytes": 873307783,
+    "shared_used_bytes": 17264882696,
+    "additional_reserved_bytes": 0,
+    "other_owner_allocation_ceiling_bytes": 645000000000,
+    "measured_shared_peak_bytes": 17264882696,
+    "allocated_owner_peak_bytes": 645873307783,
+    "other_active_reserved_bytes": null,
+    "physical_safety_margin_bytes": 256000000,
+    "physical_free_bytes": 950858764288,
+    "owner_quota_bytes": 5000000000,
+    "shared_hard_limit_bytes": 700000000000
+  },
+  "planned_peak_bytes": 870000000,
+  "gpu_used": false,
+  "driver_changed": false,
+  "previous_9_0_2_installation": "retained unchanged",
+  "existing_files_deleted_or_overwritten": false,
+  "record_scope": "installer_run_and_cpu_validation_only; later benchmark results are separate",
+  "audit": {
+    "checked_at": "2026-09-29T09:33:25.7109796Z",
+    "mode": "small_existing_reports_and_file_metadata_only",
+    "immutable_installation_report": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\environment.json",
+    "original_fields_match_immutable_report": true,
+    "archive_ranges_contiguous_and_exact": true,
+    "archive_and_retained_partial_stat_sizes_match": true,
+    "included_readme_license": "GPL v3",
+    "included_license_document": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\ffmpeg-8.0.1-essentials_build\\LICENSE",
+    "included_readme_dependency_matches": true,
+    "cancelled_download": {
+      "status": "cancelled_for_bounded_range_retry",
+      "path": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T090900Z-38df180f\\ffmpeg-8.0.1-essentials_build.zip",
+      "retained_bytes": 12582912,
+      "complete_archive_hash_verified": false,
+      "extracted": false,
+      "evidence": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T090900Z-38df180f\\cancelled-for-range-retry.json",
+      "is_gpu_compatibility_failure": false
+    },
+    "prior_ffmpeg_9_nvenc_failure": {
+      "required_api": "13.1",
+      "driver_provided_api": "13.0",
+      "reported_minimum_driver": "610.00",
+      "requested_backend": "nvenc",
+      "effective_backend": "unavailable",
+      "silent_cpu_fallback": false,
+      "probe_log": "D:\\video\\render\\jobs\\job-6ddb2881f44048eda5f306f741a3b035\\attempt-1\\nvenc-probe.log",
+      "backend_report": "D:\\video\\render\\jobs\\job-6ddb2881f44048eda5f306f741a3b035\\attempt-1\\backend.json",
+      "issue": "docs/issues/render-nvenc-driver-api-mismatch.md"
+    },
+    "installation_reservation": {
+      "status": "completed",
+      "reserved_bytes": 0,
+      "actual_install_directory_bytes": 416679776,
+      "ended_at": "2026-09-29T09:15:37.005728+00:00",
+      "evidence": "D:\\video\\runtime\\render\\compat-8.0.1-20260929T091434Z-72fe981b\\reservation-completed.json"
+    },
+    "capacity_fields_scope": "historical_installation_snapshots_at_2026-09-29T09:15Z_not_current_benchmark_usage",
+    "final_capacity_scan": {
+      "started_at": "2026-09-29T09:37:10.192731+00:00",
+      "completed_at": "2026-09-29T09:37:15.111708+00:00",
+      "method": "one_read_only_metadata_traversal_no_reparse_directory_following",
+      "atomic_snapshot": false,
+      "concurrent_activity": "parent CPU quality checks writing under render owner lock; approximately 400000000 additional bytes expected; final parent render-only delta will supersede render usage",
+      "directories_bytes": {
+        "D:/video": 22386669805,
+        "D:/video/data": 5179148376,
+        "D:/video/data/annotations": 1285553,
+        "D:/video/data/handoff": 61687,
+        "D:/video/data/probes": 30129,
+        "D:/video/data/qa": 1095565,
+        "D:/video/data/raw": 8265613,
+        "D:/video/data/sources": 8689,
+        "D:/video/data/training": 5168372468,
+        "D:/video/models": 4546771618,
+        "D:/video/models/handoff": 20580350,
+        "D:/video/models/jobs": 3334130,
+        "D:/video/models/upstream": 1268886,
+        "D:/video/models/weights": 4521584591,
+        "D:/video/platform": 196602848,
+        "D:/video/platform/annotations": 14413,
+        "D:/video/platform/handoff": 127282,
+        "D:/video/platform/jobs": 4133181,
+        "D:/video/platform/labelstudio": 2209136,
+        "D:/video/platform/media-proxy-test-20260929-r1": 68953069,
+        "D:/video/platform/media-proxy-test-20260929-r2": 68953070,
+        "D:/video/platform/qa": 50049933,
+        "D:/video/platform/research-20260929": 880443,
+        "D:/video/render": 639633036,
+        "D:/video/render/benchmarks": 1116592,
+        "D:/video/render/handoff": 555688,
+        "D:/video/render/jobs": 211754397,
+        "D:/video/render/quality-4343ec344d5a485c": 146311164,
+        "D:/video/render/quality-611d73097277408e": 274987431,
+        "D:/video/render/review": 3273434,
+        "D:/video/render/smoke-inputs": 1634330,
+        "D:/video/runtime": 11824513927,
+        "D:/video/runtime/models": 8658113200,
+        "D:/video/runtime/platform": 1048280806,
+        "D:/video/runtime/render": 873315597,
+        "D:/video/runtime/render/compat-8.0.1-20260929T090900Z-38df180f": 12583763,
+        "D:/video/runtime/render/compat-8.0.1-20260929T091434Z-72fe981b": 416679912,
+        "D:/video/runtime/render/install-20260928T151048Z-8cca16ed": 444051922,
+        "D:/video/runtime/shared": 1244804324
+      },
+      "counted_file_entries": 89420,
+      "unreadable_entries": [],
+      "disappeared_during_scan": [],
+      "excluded_reparse_directories": [
+        "D:\\video\\runtime\\shared\\pkgs\\python-3.11.16-h5f976f7_2_cpython\\lib\\python3.1",
+        "D:\\video\\runtime\\shared\\pkgs\\ncurses-6.6-hdb14827_1\\lib\\terminfo",
+        "D:\\video\\runtime\\shared\\pkgs\\icu-78.3-py310h44b86e0_2\\lib\\icu\\current",
+        "D:\\video\\runtime\\models\\vl-env\\lib\\python3.1",
+        "D:\\video\\runtime\\models\\vl-env\\lib\\terminfo",
+        "D:\\video\\runtime\\models\\vl-env\\lib\\icu\\current",
+        "D:\\video\\runtime\\models\\env\\lib\\python3.1",
+        "D:\\video\\runtime\\models\\env\\lib\\terminfo",
+        "D:\\video\\runtime\\models\\env\\lib\\icu\\current"
+      ],
+      "physical_disk_total_bytes": 1000186310656,
+      "physical_disk_free_bytes": 945599983616,
+      "owner_quotas_bytes": {
+        "D:/video/render": 40000000000,
+        "D:/video/runtime/render": 5000000000
+      },
+      "shared_hard_limit_bytes": 700000000000,
+      "scope": "visible D:/video logical file bytes; external WSL native environments remain within fixed owner allocations and are not represented as measured bytes",
+      "other_active_reserved_bytes": null,
+      "fixed_other_owner_allocation_ceiling_bytes_for_runtime_render": 645000000000,
+      "checks": {
+        "complete_visible_traversal": true,
+        "render_below_quota": true,
+        "runtime_render_below_quota": true,
+        "visible_shared_below_hard_limit": true,
+        "runtime_render_plus_other_fixed_allocations_below_hard_limit": true,
+        "physical_free_above_256mb_margin": true
+      }
+    },
+    "new_media_or_gpu_execution": false,
+    "new_large_file_hashing": false
+  }
+}
