@@ -171,6 +171,26 @@ class IntegrityTests(unittest.TestCase):
                 vl.load_reviewed_module(folder)
             self.assertEqual(raised.exception.code, "SOURCE_HASH_MISMATCH")
 
+    def test_reviewed_exec_preserves_real_config_annotation(self):
+        # Synthetic source models Transformers' actual child-annotation lookup.
+        # The checksum is explicitly mocked; this is not an upstream model test.
+        source = b"""class Config:
+    pass
+class Pretrained:
+    def __init_subclass__(cls):
+        cls.config_class = cls.__dict__["__annotations__"]["config"]
+class Embedding(Pretrained):
+    config: Config
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "scripts").mkdir()
+            (folder / "scripts" / "qwen3_vl_embedding.py").write_bytes(source)
+            with patch.object(vl, "CODE_SHA256", hashlib.sha256(source).hexdigest()):
+                module = vl.load_reviewed_module(folder)
+            self.assertIs(module.Embedding.config_class, module.Config)
+            self.assertIs(module.Embedding.__annotations__["config"], module.Config)
+
 
 class SamplingTests(unittest.TestCase):
     def test_pixels_and_grid_bounded(self):
@@ -269,7 +289,7 @@ class FailureTests(unittest.TestCase):
             torch.cuda.get_device_name.return_value = "fake GPU; no execution"
             torch.cuda.max_memory_allocated.return_value = 0
             torch.cuda.max_memory_reserved.return_value = 0
-            transformers = types.SimpleNamespace(__version__="4.57.3", Qwen3VLProcessor=MagicMock())
+            transformers = types.SimpleNamespace(__version__="4.57.3", Qwen3VLProcessor=MagicMock(), Qwen3VLConfig=MagicMock())
             official = types.SimpleNamespace(Qwen3VLForEmbedding=MagicMock())
             timing = {"decode_seconds": 0, "frame_preprocess_seconds": 0}
             output = root / r["output_dir"]
@@ -292,6 +312,9 @@ class FailureTests(unittest.TestCase):
             self.assertTrue(kwargs["local_files_only"])
             self.assertTrue(kwargs["use_safetensors"])
             self.assertFalse(kwargs["trust_remote_code"])
+            transformers.Qwen3VLConfig.from_pretrained.assert_called_once_with(
+                str(root), local_files_only=True, trust_remote_code=False)
+            self.assertIs(kwargs["config"], transformers.Qwen3VLConfig.from_pretrained.return_value)
 
     def test_failure_redacts_secrets_but_retains_original_type_and_stage(self):
         with patch.dict(os.environ, {"HF_TOKEN": "hf_testSecretLongValue"}):
