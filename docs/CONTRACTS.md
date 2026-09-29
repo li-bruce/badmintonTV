@@ -21,6 +21,7 @@
 | fps_num, fps_den, time_base | 有理帧率/流时间基；VFR需另有PTS索引引用 |
 | title, match_id | 字符串；match_id贯穿同场回放/剪辑，不能因换文件而换组 |
 | source_type | broadcast / personal / dataset / synthetic |
+| usage_scope | general / training_only；兼容默认general；与许可和train/validation/test独立。训练专用不能进入集锦，research_preview不豁免 |
 | source_url, source_page, acquired_at | 来源和ISO8601时间；本地个人素材URL可null |
 | camera_type, discipline | rear/side/overhead/handheld/mixed/unknown；singles/doubles/unknown |
 | players | `[{player_id,display_name,identity_status}]`，身份可unconfirmed |
@@ -29,6 +30,8 @@
 | probe, provenance | 扩展字典：探测器版本、原始URL/数据集版本、hash等 |
 
 下载前 source candidate 使用独立清单，含 URL、预估峰值bytes、用途、许可调查、download_status 与失败原因；不把下载候选当已经存在的 Asset。
+
+2026-09-29扩展：typed usage_scope、provenance.usage_scope、规范或物理路径data/training/任一表示训练专用即从严处理。新职业数据独立训练handoff，衍生物继承用途与源关系。边界与用例见[本轮实施合同](IMPLEMENTATION_ROUND_2026-09-29.md)。
 
 ## Event 与人工真值
 
