@@ -11,3 +11,5 @@ FFmpeg默认视频encoder时基为帧率倒数；本源nominal25fps不能表示�
 批次修复在一个worker失败后取消尚未开始的任务，但继续保存已在运行且独立通过的结果，最后仍抛原失败；不写成功summary。原生产manifest不会缩减。临时夹具回归验证首错后成功结果、队列取消、旧数据保持和reservation释放；独立真实线程池临时文件验证也通过。上述夹具不是视频识别成绩。
 
 目标回归：probe/manifest29项及training acquisition10项全部通过；排除并行开发中的BFMD采集测试后，其余完整154项PASS、0skip、14.722秒。期间一次168项全库测试读到BFMD尚在修改的缓存中断断言，1项失败；一次stdin自定义runner因Windows multiprocessing不能重新打开`<stdin>`导致1项错误，改为`python -c`后上述154项通过，未修改配额逻辑。两份源片的全片修复后复验正在运行，以新日志与新PTS完成后才发布；已有孤立PTS保留。完整复验日志受每份4MB/总8MB硬限，额外预留16MB，仅写训练诊断子树。
+
+后续真实完成：两份修正后全片decode均exit0/stderr0，完整PTS和源SHA复验通过；分别118201和120015帧，全批10/10、980703帧、38592556ms。World2017正式PTS摘要与独立诊断完全一致。日志位于训练数据集 `diagnostics/reprobe-20260929T101835Z-970261c6/`：Asian2014日志SHA `45172146e1619a7435851da897c07d1ec8f2ed83559a544bdf36917e8849bb7f`，World2017日志SHA `ca179eade5790397c14782553a2ab1e938d0fd30d2e7bf2d009fb75681254c58`。源码修复提交 `acd0225a748d1b2751668a2b4eca73078f3f12db`，主线集成为4dc9125。

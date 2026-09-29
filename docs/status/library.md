@@ -1,6 +1,32 @@
 # Library 状态
 
-## 2026-09-29完整训练数据实施（进行中）
+## 2026-09-29 18:35 当前状态：完整数据已交付，并发实现最后复核中
+
+- Fine完整原ZIP、22成员提取、10/10视频全CPU解码+完整PTS、9817原CSV全部完成；980703帧与作者精确一致，实际38592556ms。真实VFR时基误报已修复并完整复验。代码提交`acd0225a748d1b2751668a2b4eca73078f3f12db`已由主任务集成为main4dc9125；独立主线又核对10个原片与PTS哈希全部通过。
+- BFMD原顺序下载器自然完成121/121，1825439459 B、0失败、121次尝试、0续传，未杀进程或实际切双流。全量严格审计121份（115活动JSON+1备份+根5）20.297秒、exit0、缺项/JSON/完整性错误0；Pose12份含317734个组内帧记录，不能称唯一原片帧数。
+- 全部新素材双training_only，Fine split=unassigned，BFMD unmatched；新Event0、生产DB写入0。最终typed/guard检查新10拒绝、旧5允许、20纯metadata别名拒绝；原生产manifest哈希不变，未知比赛内容重叠不由SHA交集0替代。
+- 真实QA10/10，共397365 B；4张可见球场主体（1张清洁场地），6张人物/场边镜头，未挑图、未认身份或标注边界。
+- 语义/许可限制仍BLOCKED：Fine双语类别映射及帧端点未确认、processed clips非无剪辑整场；BFMD无原视频/PTS并有回合数差异；细手法/步法unknown，不具新公开再分发许可。详见`docs/library/TRAINING_DATA_ACCEPTANCE.md`与两份数据报告、独立问题单。
+- 18:32:18容量：data14802357491 B（300GB额度）、active reservations0、物理剩余931035758592 B；项目保守账92.252GB包括runtime70GB配额上界。runtime/library新增0、无安装/端口/GPU；所有原媒体与原失败/孤立PTS保留。
+- 最新完整工程回归180/180、0skip、18.948秒；这是并发重复Ctrl-C修复前的快照。新BFMD两worker/停止标记已26目标测试通过，独立审阅发现Python3.12重复中断join可提前释额，正补独立active计数及回归后再提交。真实网络双流/Range恢复仍NOT_RUN，不为获得该成绩重下数据。
+- 下一步仅剩最终并发修复复核、独立代码提交与本批报告提交交主任务。完整数据、字段/路径/SHA、许可、启动命令及资源见`docs/library/TRAINING_DATA_ACCEPTANCE.md`、`RUNBOOK.md`、`TRAINING_CAPACITY.json`。不推送、不自行合并main。
+
+## 2026-09-29 18:17 历史执行快照
+
+- 分支 `codex/library-training-datasets`，本任务只写 library 边界。实现 `a9047d1`、BFMD稳定清单修复 `1aa32b5`、ZIP Unicode严格兼容修复 `e8331d3` 已交主任务集成；没有推送或自行合并 main。
+- Fine-Badminton完整包下载已完成：6,455,837,331 B，作者 MD5 `cb3fcaca0ae9b08c564ac2a19ae4e7a0` 验证通过，本地 SHA `a3518f52d66dd6c5d2b01ce1347de8e589516ccc24a72aae818fea64e0b04439`。一次连续200连接3354.23秒，无续传。
+- 真实解压22/22完成：10个作者处理过的视频片段、10 CSV、README和LICENSE，原件6,467,329,596 B。第一次Unicode Path拒绝和失败收据保留，修复后复用3项、完成其余19项。ZIP+原件12,923,166,927 B。原README并不保证完整未剪辑比赛。
+- 媒体真实通过8/10：742,487帧、29,070,236 ms，全片CPU解码和完整原序PTS逐一通过，已发布双 `training_only` typed Asset。源SHA先登记10/10，再增量发布可信manifest。原生产5条和两个manifest保持不变；20项改名/改路径/去provenance的metadata-only别名检查仍全部TRAINING_ONLY，不冒称物理复制测试。
+- 失败：2017World片段的FFmpeg null输出报告重复DTS，首轮停止，未发布该Asset。并行的2014Asian已生成完整PTS但没有被该失败循环发布，也不当作通过。原错误只有4000字符异常尾部保留；新独立全源PTS诊断和窗口A/B正在记录，未屏蔽stderr、排序、去重或改写视频。
+- 标注实测9817行，9份English CSV覆盖29个原标签，2010Asian为31种中文原字串；合计60原字串不等于60语义球种。5条完全重复、3条零长度及其他时序诊断保留；帧基数/端点/原广播偏移仍未知，0个Event转换。具体见 `docs/library/FINE_BADMINTON_2026_DATA_REPORT.md`。
+- BFMD健康单网络writer持续运行。18:11:55实测115/121，已验证861,488,631 B，剩余约947,304,684 B；近期0.19–0.20 MB/s，预计79–83分钟但会随速率变化。正在授权范围内测试同owner两连接协调器；测试通过和可安全保留partial后才切换，不另启互抢writer、不绕403/429。
+- BFMD当前审计区分12单打11301拍和7双打5450拍；metadata单打1058回合与手工表1054差4，19场手工合计1688与作者overview1687差1；12 caption实际11301全部有refined字段，但作者人工修订声明未经本任务逐条复核。未下载BFMD视频，0个Asset/Event，保持unmatched/training_only。报告会在121项完整后刷新。
+- 5张真实训练QA截图和收据165,998 B均只在训练子树，CPU1线程、原SHA前后与完整PTS核验。2张球场主体可见、3张转播近景，不能证明全片球场可见、球员身份或动作真值。
+- 最新完整库回归165/165 PASS、0skip、15.511秒（e8331d3）；新PTS修复/并发下载器尚在独立验证，不能纳入此数字。Render实际4种入口均TRAINING_ONLY阻止且0子进程/0媒体产物，证据 `D:/video/render/handoff/training-denial-5f1e29d2eab9/validation.json`；平台和模型后续结果由对应模块验证。
+- 环境：既有Miniforge Python3.12.11、只读复用平台Pydantic环境/主线contracts、FFmpeg9.0.2；没有新依赖/新环境/端口/GPU。数据在D:/video/data，library数据硬额300GB、runtime5GB；BFMD批次预留2.5GB和每流实际上限，probe曾预留1.33GB，失败退出已释放。最终容量快照待所有writer退出。
+- 下一步：完成两份媒体诊断与独立复验，完成BFMD剩余文件并刷新严格审计，补齐10份QA，提交独立代码修复和实际数据报告供主线复核。精确启动命令见 `docs/library/RUNBOOK.md`。
+
+## 2026-09-29完整训练数据实施（以下为按发生顺序保留的历史记录）
 
 - 新分支codex/library-training-datasets从main ff2c700创建；原work/library保留，git cherry确认既有五提交已被main等价集成，切换前清洁。
 - 已读本轮IMPLEMENTATION_ROUND、CONTRACTS、STAGE_ACCEPTANCE及实际文件REUSE_RESEARCH_2026-09-29.md。仅负责library，不追加制作库/生产DB，不制作集锦。
@@ -9,7 +35,7 @@
 - 写入仅D:/video/data/training/fine-badminton-2026-zenodo-20292976-v1.0；下载峰值暂预留40GB，解压声明总额硬限20GB，完整ZIP到齐后精确核算，超限停在原件不解压。
 - R-04b预期：data/training/handoff/training-registry.v1.json可信SHA用途登记先原子发布，后发布新typed合同校验的training-only manifest；split先unassigned。publisher和共享合同夹具联调已通过；十场真实媒体端到端仍NOT_RUN。
 - 并行：官方源/论文语义核验、有界ZIP64兼容（>4GB包），本轮代码和验证SHA待完成后记录。既有生产handoff不写；无GPU、端口或环境安装。
-- 真实进度：2026-09-29 17:24本地时间ZIP已2,905,014,272/6,455,837,331 bytes正常下载，未完成MD5/解压/Asset，R-04a仍NOT_RUN。连接无ETag/Last-Modified；额外两公开URL Range/HEAD均403，无绕过，保留当前200连接。
+- 真实进度：2026-09-29 17:42:34本地完整ZIP下载完成（3354.23秒、1次连续200响应、无续传），6,455,837,331 bytes；作者MD5 cb3fcaca0ae9b08c564ac2a19ae4e7a0通过，本地SHA a3518f52d66dd6c5d2b01ce1347de8e589516ccc24a72aae818fea64e0b04439。连接无ETag/Last-Modified；此前额外两公开URL Range/HEAD均403，无绕过。十场实际probe及完整R-04a尚未完成。
 - 空registry已原子初始化为schema_version1.0/assets[]，SHA5d7572aea12757f02e262b10a65d217103152bd1e6ffe835a2347c2fceb251a1，明确已验证媒体数0；通知platform/root/render。初次因版本名v1.0不在白名单失败，已修复安全点号并加回归，原数据路径未改。
 - 最新完整工程回归149/149通过、0skip（13.868秒）：32项ZIP/ZIP64、25项training publisher、10项完整包采集边界、8项BFMD选择边界、17项Drive公开确认及既有下载/探测/CLI检查；不计作真实R-04a/b已PASS。
 - 共享合同a7fff39已由root集成为main2850123；本任务cherry-pick被自动审批以越library模块边界拒绝，未重试/绕过，改用--contracts-root对main合同只读验证，不写contracts目录。
@@ -17,7 +43,11 @@
 - 已实现：标准单卷ZIP64、原member短路径映射、完整包三阶段采集、先登记用途后typed manifest增量发布、严格来源引用校验、训练子树审计、BFMD精确121项选择摘要锁定与公开Drive确认适配。独立review修复UUID落盘、重跑清单缩减及失败后未启动探测取消；原生产5样本和manifest不改。
 - BFMD配置实测枚举总1,825,439,459 bytes：115活动JSON、1个备份、5根文件，下载NOT_RUN。两种源的逐文件真实标注核验方案见ANNOTATION_AUDIT_PLAN；不同模态不重复计拍、未知时基不造Event。
 - 本机LongPathsEnabled=0，不改系统设置；解压目标按原member SHA前24位生成短名，MP4含最长收据临时后缀仅152字符。原名/对应关系保留ZIP与inventory。
-- 实现提交在149项单测及review后生成，仅library所有目录；纯实现先交主线集成，下载进程继续，真实结果稍后独立提交。启动命令、现有Python/平台Pydantic/FFmpeg来源及容量预留见docs/library/RUNBOOK.md；新环境0、端口0、GPU0。
+- 实现提交`a9047d19b8c38ea5171682237ff975ba3c6c3517`在149项单测及review后生成，仅library所有目录；纯实现已交主线集成，下载进程继续，真实结果稍后独立提交。启动命令、现有Python/平台Pydantic/FFmpeg来源及容量预留见docs/library/RUNBOOK.md；新环境0、端口0、GPU0。
+- BFMD清单重跑修复提交`1aa32b5c8f3e192d5ea86494f55a46133d4c7600`：稳定verified清单与本run进度分离，旧目录/文件/receipt严格复核，批次锁，禁止预检后将旧SHA绑定新同尺寸字节。完整155/155 PASS，0skip，15.226秒。main已集成两提交为041a5a9+a2f0eaf；不把夹具通过算真实数据下载完成。
+- 实际ZIP64目录通过：22普通成员（10视频、10CSV、README、LICENSE），解压声明总6,467,329,596 bytes，ZIP+原件12,923,166,927 bytes。首轮提取3成员后在标准0x7075 Unicode Path全角！上安全停止：orig_filename为CP437原名字串，filename为正确Unicode扩展，旧检查一概视作不安全规范化；失败收据保留且无partial，严格兼容修复进行中。
+- 原包实证：README/LICENSE均CC BY-NC4.0，README另外限制再分发，并称processed video clips，不能称10无剪辑整场；CSV列start/end/label/location，帧基数/结束端点规则仍未说明。API cc-by4与包内许可并列记录。
+- BFMD唯一网络writer在完整ZIP校验后启动；17:47:55实测已81/121文件，0失败，仍IN_PROGRESS。已验证根CSV/README显示match_index只含12单打且TOTAL1054，与README1058待对账；11301拍是12单打口径，不是19场含双打合计。真实JSON核验进行中，不造视频Asset或Event。
 
 - 日期：2026-09-28；任务：01a0e88b-31fa-7fd3-939c-b7e0c895deef。
 - cwd：C:/Users/USER/.codex/worktrees/9163/badmintonTV；分支：work/library。

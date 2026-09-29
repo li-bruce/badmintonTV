@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "validated_on": "2026-09-29",
+  "implementation_commit": "a9047d19b8c38ea5171682237ff975ba3c6c3517",
+  "library_tests": {
+    "command": "C:/Users/USER/miniforge3/python.exe -B -m unittest discover -s tests/library -v",
+    "passed": 149,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 13.868
+  },
+  "git_diff_check": "PASS",
+  "bfmd_rerun_fix": {
+    "commit": "1aa32b5c8f3e192d5ea86494f55a46133d4c7600",
+    "full_library_tests_passed": 155,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 15.226
+  },
+  "zip_unicode_fix": {
+    "commit": "e8331d318c70938bd6b8d307ba2e3fe1edce056b",
+    "full_library_tests_passed": 165,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 15.511
+  },
+  "actual_existing_production_assets": {
+    "source_and_pts_hash_checks": "5/5 PASS",
+    "manifests": [
+      {
+        "relative_path": "data/handoff/assets.v1.json",
+        "assets": 4,
+        "sha256": "f6a646668ec688ecbbe85386f64db9d81b4c6b951a8284a1a581195cd57563aa"
+      },
+      {
+        "relative_path": "data/handoff/assets.doubles.v1.json",
+        "assets": 1,
+        "sha256": "3b8b76738bc8a5ca1197fec71cd7a5d48efea22d6977bd614ff6f1ffa001815f"
+      }
+    ],
+    "typed_manifest_validation": "PASS",
+    "usage_scope_guard_check_many": {
+      "allowed": 5,
+      "total": 5,
+      "main_contract_commit": "aae0c995538c2347eaa1b17b4713f6fced0cfaa5"
+    }
+  },
+  "actual_training_registry_before_media": {
+    "relative_path": "data/training/handoff/training-registry.v1.json",
+    "sha256": "5d7572aea12757f02e262b10a65d217103152bd1e6ffe835a2347c2fceb251a1",
+    "entries": 0
+  },
+  "real_complete_dataset_acceptance": {
+    "fine_source_bytes_and_hashes": "PASS",
+    "fine_extracted_members": 22,
+    "fine_full_cpu_decode_and_pts": {
+      "passed": 10,
+      "frames": 980703,
+      "duration_ms": 38592556
+    },
+    "fine_csv_rows": 9817,
+    "bfmd_files": 121,
+    "bfmd_bytes": 1825439459,
+    "bfmd_strict_complete_audit": "PASS:115 active JSON + 1 backup + 5 root files",
+    "event_conversion": "BLOCKED: original frame and class semantics unconfirmed; BFMD video missing",
+    "converted_events": 0,
+    "raw_data_modified": false
+  },
+  "source_timebase_fix": {
+    "commit": "acd0225a748d1b2751668a2b4eca73078f3f12db",
+    "non_bfmd_library_tests_passed": 154,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 14.722,
+    "real_window_ab": "3006 frames both; original six DTS errors; demux encoder timebase zero errors",
+    "real_full_reprobe": "2/2 PASS; all ten final sources and full PTS valid"
+  },
+  "current_full_test_snapshot": {
+    "passed": 180,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 18.948,
+    "scope": "before pending repeated-Ctrl-C shutdown repair; final concurrency validation will supersede"
+  }
+}
