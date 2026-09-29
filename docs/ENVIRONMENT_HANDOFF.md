@@ -2,12 +2,27 @@
 
 更新：2026-09-29。运行环境是机器本地事实，路径可随安装更新；改路径时由owner更新记录并通知消费者。
 
-## 主分支运行交接
+## 本轮运行状态
 
-- API 与 worker 当前从 `C:/Users/USER/Desktop/Program/badmintonTV` 启动，Windows 解释器为 `D:/video/runtime/platform/env/Scripts/python.exe`。业务数据库为 `D:/video/platform/platform.sqlite3`，任务与 GPU 账本为同目录 `runtime.sqlite3`。
+2026-09-29研究实施轮正在集成。主API/worker的00:23运行记录是历史检查点，不能据此判断端口/PID现在有效；主worker暂不常驻，models持有GPU实测排期。platform使用独立测试业务库和18082端口，仍共享受控GPU账本。恢复主服务前核对实际进程、账本及最新代码，见[本轮验收](ROUND_VALIDATION_2026-09-29.md)。
+
+| 运行环境 | 用途与当前事实 |
+|---|---|
+| Windows `runtime/platform/env` | Web、SQLite、原生worker和轻量回归，不安装训练框架 |
+| WSL `runtime/models/env` | 已有torch2.7.1+cu128，TrackNet与连续姿态真实小窗已运行 |
+| WSL `runtime/models/yolo-env` | YOLO11n-pose+ByteTrack小环境，只读复用旧torch；旧视频真实90帧已运行，AGPL许可单列 |
+| WSL `runtime/models/vl-env` | Qwen3-VL-Embedding-2B按官方torch2.8依赖单独安装，安装/权重仍在下载，不能视为ready |
+| Windows FFmpeg9.0.2 | 原CPU环境保留；当前驱动591.86与该版本NVENC API13.1不兼容，失败证据保留 |
+| Windows隔离FFmpeg8.0.1 | 兼容当前NVENC API13.0，同版本CPU/NVENC各8真实job已完成；管理员显式选择兼容配置，不覆盖原安装 |
+
+所有新模型仍由管理员按model_id显式映射WSL解释器，权重/环境不完整或未映射时报告unavailable。仅有单个适配器成功不代表自动球场、稳定身份、细动作或战术识别已经达标。
+
+## 第一版主分支运行交接（历史）
+
+- API与worker于第一版验收时从 `C:/Users/USER/Desktop/Program/badmintonTV` 启动，Windows解释器为 `D:/video/runtime/platform/env/Scripts/python.exe`。业务数据库为 `D:/video/platform/platform.sqlite3`，任务与GPU账本为同目录 `runtime.sqlite3`。
 - 工作台 http://127.0.0.1:18080；Label Studio http://127.0.0.1:18081。旧平台工作树的 API/worker 已在确认队列和 GPU 空闲后停止，Label Studio 保留运行。
 - 本次启动代码版本 `a851dcbb239f8789e1566aea8031c2ee277692ae`；启动 PID、时间和日志目录仅保存在本机 `.runtime/main-services.json`。后续文档提交不改变运行代码。主分支规则任务与真实渲染、浏览器完整播放均已验证，详见 [集成验证](INTEGRATION_VALIDATION.json)。
-- 启动配置、模型参数和 GPU 会话命令见 [启动说明](QUICKSTART.md)。当前模型任务已停止独立 GPU 实验，且不自动恢复；今后训练与网页推理均须先检查同一 GPU 账本。
+- 启动配置、模型参数和GPU会话命令见[启动说明](QUICKSTART.md)。第一版收尾时曾停止独立GPU实验；本轮用户授权后已恢复受控实验，训练与网页推理均须检查同一GPU账本并协调排期。
 - 2026-09-29 00:28:37 至 01:28:37（北京时间）曾为用户网页试用授予仅限 `torchvision-keypointrcnn` 的窗口 `user-session-REDACTED`。授予后核查为 available、lease=null；不会自动发起推理。此为历史交接记录，实时状态以 `/api/v1/resources/gpu` 为准。
 
 ## Windows FFmpeg / FFprobe
@@ -52,4 +67,4 @@ models任务已实际运行，主协调读取了其记录；完整记录已集�
 
 均result=succeeded、events=[]，每个输出features/report两项artifact。姿态关键点和向量是特征，不是细动作真值；没有球员身份、击球接触时刻、时序动作分类或准确率结论。单短片的冷启动时间不用于声称整场稳态吞吐。Qwen诊断与姿态overlay检查已交付在 `docs/experiments/`；Windows worker 受控启动 WSL 模型的真实链路已由平台任务完成，主协调核验产物与计算停止证据。最终桥接代码已合入 main，未在 main 重复 GPU 实验。
 
-最新数据/环境容量快照约 18.31GB，计数范围和限制见 [容量记录](INTEGRATION_CAPACITY.json)。安装容量是历史检查点，不能与整目录最新快照再次相加。
+第一版历史数据/环境容量快照约18.31GB，计数范围和限制见[容量记录](INTEGRATION_CAPACITY.json)。本轮新增下载和安装尚未计入该旧快照；安装容量不与整目录最新快照重复相加。
