@@ -223,6 +223,9 @@ def probe_video(
                    "-hwaccel", "none", "-threads", "1", "-i", str(media),
                    "-map", "0:" + video_index, "-an", "-sn", "-dn", "-threads", "1",
                    "-fps_mode", "passthrough",
+                   # Null output still encodes timestamps. Its default 1/fps
+                   # time base can merge distinct VFR PTS before mux validation.
+                   "-enc_time_base:v", "demux",
                    "-progress", "pipe:1", "-nostats", "-f", "null", "-"]
     decoded = _run(decode_args, timeout_seconds)
     if decoded.stderr.strip():
