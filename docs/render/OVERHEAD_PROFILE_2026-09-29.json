@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "observed_at": "2026-09-29T09:51:45.081486+00:00",
+  "status": "diagnostic_only",
+  "records": [
+    {
+      "scope": "platform_controlled_owner_scans_readonly",
+      "elapsed_seconds": 3.996629,
+      "value": {
+        "data": 6607397873,
+        "platform": 196671124,
+        "models": 4922127057,
+        "render": 647036073,
+        "runtime/common": 0,
+        "runtime/models": 9553954560,
+        "runtime/platform": 1048280806,
+        "runtime/library": 0,
+        "runtime/render": 873315597
+      }
+    },
+    {
+      "scope": "platform_outside_owner_scan_readonly",
+      "elapsed_seconds": 0.403918,
+      "value": 1244804324
+    },
+    {
+      "scope": "render_owner_scan_readonly",
+      "elapsed_seconds": 0.049435,
+      "value": 647036073
+    },
+    {
+      "scope": "render_global_scan_readonly",
+      "elapsed_seconds": 4.195017,
+      "value": 25096831666
+    },
+    {
+      "scope": "three_original_source_sha256_only",
+      "elapsed_seconds": 0.002624,
+      "value": {
+        "asset-5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90": "5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+        "asset-9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956": "9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956",
+        "asset-58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13": "58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13"
+      }
+    }
+  ],
+  "limitations": [
+    "Read-only later snapshot with uncontrolled cache and other module activity; not instrumentation of the original 16 jobs.",
+    "No queue/reservation constructors, media processes, writes to D:/video, GPU, capacity-policy changes or rerender.",
+    "Original other_engine_seconds remains unattributed; these numbers cannot be subtracted from or substituted into earlier job timings.",
+    "Directory trees and other module file counts may have changed since the benchmark."
+  ]
+}

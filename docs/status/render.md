@@ -1,17 +1,19 @@
 # Render 状态
 
-## 2026-09-29 实施轮（进行中）
+## 2026-09-29 实施轮（本模块交付完成）
 
 - 设计：已读main ff2c700新轮与复用调研，见 `docs/render/ROUND_2026-09-29.md`。新分支 `codex/render-presets-acceleration`，旧work/render干净保留。
 - 已实现：30/60fps命名档、安全区文字布局、Shorts总输出180秒限制、可信CPU/NVENC/auto后端、共享GPU租约核验、原始全部引用逐字节hash+公共训练用途门禁、actual fps/field_order/faststart QA。
-- 已运行：142快测通过/1旧timeline symlink权限skip/365subtests。训练门禁正反向真实Windows junction均PASS；新增可达祖先实际hash核验，覆盖双方共同伪造source hash、多跳、仅hash来源及缺失/篡改父原片。FFmpeg9 CPU30/60各首次+重复3共8job技术PASS，CPU全流程约10.3–11.6秒/17秒片。证据 `D:/video/render/benchmarks/presets-controlled-cpu-beb256d1c5fc/`。
+- 已运行：最终150快测通过/1旧timeline symlink权限skip/378subtests（含新增8个固化benchmark异常回归，3.12秒）。训练门禁正反向及benchmark目录真实Windows junction均PASS；新增可达祖先实际hash核验，覆盖双方共同伪造source hash、多跳、仅hash来源及缺失/篡改父原片。FFmpeg9 CPU30/60各首次+重复3共8job技术PASS，CPU全流程约10.3–11.6秒/17秒片。证据 `D:/video/render/benchmarks/presets-controlled-cpu-beb256d1c5fc/`。
 - 真实预览：`render/handoff/preset-preview-f1d7b353db`，60fps实际360×640、canonical1080×1920、定制safe_area完整保留；typed/provenance/preview/confirmed四类真实素材请求负例TRAINING_ONLY拒绝，无输出目录。
 - 平台取消联测：平台独立账本实际观察FFmpeg partial.mov后取消，计算停止/.render.lock释放、后续1秒job成功；证据 `platform/research-20260929/render-cancel-cpu-r1/render-cancel-validation.json`（平台持有worker实现及报告）。
 - 失败：第一次真实NVENC probe blocked/backend_unavailable，FFmpeg9要求NVENC API13.1而驱动提供13.0，见独立issue；没有静默fallback。该job/lease已停止释放，窗口4e5823beb9ca已revoke。
-- 协调：平台GPU7354b1f、合同a7fff391已同步（本分支等价987848b、29d47c4）。library独占初始化有效空registry；正在下载的职业数据不进入本基准。当前GPU已归还models，兼容构建仅CPU/网络准备，之后重新申请。
-- 下一步：兼容8.0.1已READY，正在公平重跑同构建CPU/NVENC，随后补无损参考质量指标和原图/字幕区域审阅。没有原生60fps源，未启用NVDEC。
-- 环境/容量：复用FFmpeg9.0.2和平台只读Python，CPU4线程，无端口/新Python依赖；兼容构建预计新增<870MB峰值，runtime/render5GB内，保留旧构建不改全局驱动。输出仅D:/video/render，40GB上限。新提交SHA待产生。
-- 核心实现SHA：`4ecaf6dfcf0536fe95e720a612c7bfd3a9a54206`，来源闭包安全审查修复另提交。平台将独立render_options与Timeline ID/CAS绑定保存，重开恢复预设/安全区/profile；canonical Timeline根合同不私自增加字段。
+- 协调：平台GPU7354b1f、合同a7fff391已同步（本分支等价987848b、29d47c4）。library独占初始化有效空registry；正在下载的职业数据不进入本基准。兼容NVENC窗口`render-benchmark-6e21d23d0d7f`已在09:32:18Z撤销，active_window/lease均null，明确归还models；后续仅CPU质量任务。
+- 同版本实测：FFmpeg8.0.1 CPU/NVENC各8job全部技术PASS。30fps中位10.356806/11.194288秒、文件1,009,926/2,889,238 bytes；60fps中位11.514771/12.861280秒、文件1,086,423/3,635,540 bytes。CPU/NVENC对应512/1023帧与源映射一致。当前NVENC没有速度/体积收益，默认CPU保留；不同CRF/CQ/实际码率不称等质量。详见`docs/render/ROUND_2026-09-29_RESULTS.md`。
+- 质量：30/60各512/1023帧A/B/R PTS最大差0。比赛ROI SSIM/PSNR分别CPU .987977/43.194564、.986072/42.315934；NVENC .993735/48.324594、.994158/48.648447。每档9脚/3球候选ROI与五个邻近时间取样由agent技术审阅，无明显新增缺失/错帧；模糊/不可见保留unknown。独立质量报告与补证路径见结果页，不把静帧变成人工确认或连续观看验收。
+- 环境/容量：独立FFmpeg8.0.1已实际NVENC成功，原9.0.2保留。09:45:43Z render646,588,608 bytes/40GB，runtime/render873,315,597 bytes/5GB，磁盘剩余943,805,825,024 bytes；09:42共享可见23,948,960,885 bytes/700GB（非原子快照，其他模块仍工作）。无端口/新Python依赖/驱动修改；质量两轮各1GB和ROI200MB预留均释放，所有本模块FFmpeg已停止，.render.lock不存在，render owner已归还platform。
+- 失败/限制/下一步：FFmpeg9 API不兼容原失败保留；可显式使用compat8，默认CPU不变。原生60fps源、NVDEC、长片吞吐、连续播放听感和平台上传未测；细技法、人类内容审核和权利未知。后续由主任务集成本轮工具/报告、platform完成设置持久化与取消补丁集成，不把本模块技术通过宣布整个产品验收通过。
+- 核心实现SHA：`4ecaf6dfcf0536fe95e720a612c7bfd3a9a54206`，来源闭包修复`db587aa179ea100a199fe1c67c758b74810f9307`；主任务已集成等价6518a09/281c137。平台独立render_options与Timeline ID/CAS绑定保存，重开恢复预设/安全区/profile；canonical Timeline根合同不私自增加字段。
 
 更新：2026-09-28。任务 `01a0e88b-5005-7991-9fb0-d2dec3af8b4f`；分支 `work/render`；cwd `C:\Users\USER\.codex\worktrees\3e52\badmintonTV`。
 
