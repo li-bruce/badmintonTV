@@ -1,0 +1,33 @@
+{
+  "schema_version": "library.annotation-catalog-config/1",
+  "dataset_id": "fine-badminton-2026-zenodo-20292976-v1.0",
+  "output": "data/training/handoff/annotation-catalog.v1.json",
+  "peak_bytes": 50000000,
+  "inputs": {
+    "manifest": {
+      "relative_path": "data/training/handoff/fine-badminton-2026-zenodo-20292976-v1.0.assets.v1.json",
+      "size_bytes": 43956,
+      "sha256": "2725970f4485732e67ba249b72262c51dbba24ee17e5e97d901b18ec8a29e286"
+    },
+    "registry": {
+      "relative_path": "data/training/handoff/training-registry.v1.json",
+      "size_bytes": 24373,
+      "sha256": "63eb86de88e6c760be8ff3464318d8fd55a923e7bfa1d1c177dc2bdd643e52aa"
+    },
+    "splits": {
+      "relative_path": "data/training/handoff/training-splits.v1.json",
+      "size_bytes": 2225,
+      "sha256": "4c8ac9e928775e0f1025c64655fa24d9a9557f73cf03efda9aa3cc890109c4ef"
+    },
+    "extracted": {
+      "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted-sources.v1.json",
+      "size_bytes": 19068,
+      "sha256": "e0e4d7e20b4ce4c1cd9700662debf84e8d2d96584fa0fb816be69e0b70db02cd"
+    },
+    "bfmd": {
+      "relative_path": "data/training/handoff/bfmd.annotations.v1.json",
+      "size_bytes": 176653,
+      "sha256": "8643173ce76db81f93d28a382e9492544522c07e24ba1905761a6687a6dff1bf"
+    }
+  }
+}
