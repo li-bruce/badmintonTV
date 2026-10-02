@@ -132,7 +132,9 @@
       } catch (error) { report(error); }
     }
     function dropEvents(node, lane, recordId) {
-      node.addEventListener('dragover', event => { if (supportedDrop(event)) { event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = 'copy'; } });
+      const accept = event => { if (supportedDrop(event)) { event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = 'copy'; } };
+      // A quick entry and release can reach a small block before its first dragover.
+      node.addEventListener('dragenter', accept); node.addEventListener('dragover', accept);
       node.addEventListener('drop', event => drop(event, lane, recordId));
     }
     function draftFromEvent(event) {
