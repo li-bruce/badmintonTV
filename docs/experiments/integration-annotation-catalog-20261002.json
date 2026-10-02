@@ -1,0 +1,27 @@
+{
+  "status": "verified",
+  "catalog": {
+    "relative_path": "data/training/handoff/annotation-catalog.v1.json",
+    "sha256": "3fc6adf81e6f5229e4b4e4ae7de215be89bc415838d5e5aea64fb28ec85bea32",
+    "size_bytes": 47656
+  },
+  "summary": {
+    "asset_count": 10,
+    "raw_label_strings": 60,
+    "raw_rows": 9817,
+    "frames": 980703,
+    "duration_ms": 38592556,
+    "out_of_order_start_preserved": 3,
+    "equal_endpoints_semantics_unverified": 3,
+    "exact_duplicate_preserved": 5,
+    "human_confirmed_annotations": 0,
+    "confirmed_match_groups": 0,
+    "split": "unassigned",
+    "media_copied": 0
+  },
+  "verified_sidecars": 11,
+  "originals_rehashed": true,
+  "browser_playback": "NOT_RUN",
+  "dataset_snapshot": "NOT_RUN",
+  "checked_at": "2026-10-02T15:27:32.195729+00:00"
+}

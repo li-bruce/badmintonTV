@@ -10,8 +10,8 @@
     {
       "source": "FRAMEWORK_GUIDE.md",
       "output": "index.html",
-      "source_sha256": "cc041a9fa5e0202c00e4b911a7f27721032445ce8beacb2809e68c354a999112",
-      "html_sha256": "88de3793df41da967cabc5cc23a395537cbdd75e41adace279f346ff9556f5bb",
+      "source_sha256": "39ff9de6e73e50db8f4ba4426385dc10d4dd358a6134e856a4a2b3d40fd396f7",
+      "html_sha256": "4f5cddb7c4d91c0c7f628d83c2596e334dfc30b4879c5fef93e2032024c0d345",
       "chapters": 12
     },
     {
@@ -24,9 +24,9 @@
     {
       "source": "IMPLEMENTATION_ROUND_2026-10-02.md",
       "output": "implementation.html",
-      "source_sha256": "9b92a37cf1bc3c690d3b4efa203858e02a464c99157227ef638c33fba1be7fd1",
-      "html_sha256": "2775449c0e541226eb6ebd0b3578882611fe9bd9863287ca4fe0d08543ccf372",
-      "chapters": 6
+      "source_sha256": "5672b60f49f96b240c167f7a6d43aa40b24447ce6ba3faf7241aae85c3b07eb9",
+      "html_sha256": "81669da378b9189922a9e0e141ae6801ccc85f458498e1d55b4926f06e8d1524",
+      "chapters": 7
     },
     {
       "source": "ANNOTATION_TOOLS_RESEARCH_2026-10-02.md",
@@ -38,23 +38,23 @@
     {
       "source": "ROUND_VALIDATION_2026-10-02.md",
       "output": "validation.html",
-      "source_sha256": "a55a31e40cd0305751519b5f8924e70639aa477725e0a2660af0e502561b36f3",
-      "html_sha256": "36289c2b544e671ee93af2a534924d2211b7347cb9433890466a8ef6f57f9aaf",
-      "chapters": 3
+      "source_sha256": "6fffc5f61ef71e12acfba9b82adadccc99bc6b5c915458ed033b29bf18ba1398",
+      "html_sha256": "74025d4863835b0bc8f06f4f1fbafe175ef69010ac26296ba07fc1ca517a3e13",
+      "chapters": 4
     },
     {
       "source": "STAGE_ACCEPTANCE.md",
       "output": "stages.html",
-      "source_sha256": "f9425e985ec7bfeb7c8464841738ae8b79462dac71b92418a265214b579711d7",
-      "html_sha256": "7dba6f2a01acd56817e3a8ede0202a9033d98acabc4ac3e71ef356e90acb0ee7",
+      "source_sha256": "9a4f1e930244015c9fa2fee9f0ad29bff55543c24207c1037c6b6992594c6be4",
+      "html_sha256": "87db1649a0a7786665a1c0e673456e2116ff702f856c59b8a865f9485a524629",
       "chapters": 11
     },
     {
       "source": "QUICKSTART.md",
       "output": "quickstart.html",
-      "source_sha256": "51c814427aa888b20a822199cc4d4b907b316ca0b40b18404aa2443ebc32b8af",
-      "html_sha256": "9034222db18ccc7684a18df656c943787776cf0adf09411ea2cc4bc0ca03c48c",
-      "chapters": 4
+      "source_sha256": "0c76a92fdf0f6e9c33cb4223aa1eea61d790d77106f3dd5fd955e10473be5fe4",
+      "html_sha256": "f1fc61d7c0e2ea4dcb31abfa0b50049ddc42452d050e70b56a7d3ce08dd7328b",
+      "chapters": 5
     }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "production_asset_count": 6,
+  "production_asset_ids": [
+    "asset-057d2d6dd52eb892719b36aa1f017ac6272e19502dd93efbc0ca9f97f35b6fe0",
+    "asset-9051c7ba4daba25f1206555d73c5ee2f5c5dfff8f5749a2cc883571379536956",
+    "asset-58aecdab108bd1e1332fb5b45811cc5c4f6e0f2f5987b7da3e98c7345ddc1a13",
+    "asset-5ad7e41a0380916fab9c73d4852ae3c4aeef6ca9c6f9cf998f23f33ffe915c90",
+    "asset-52e45b704dc32cb049b879673087e7935e4b4172b43e06f734684de250f0e118",
+    "asset-276956c102cab8f8a270fd27"
+  ],
+  "training_project_count": 1,
+  "training_registered_asset_count": 1,
+  "note": "Read after source registration and before UI bundle save; raw annotations remain outside Git."
+}

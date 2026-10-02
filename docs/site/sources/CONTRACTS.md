@@ -132,3 +132,11 @@ Timeline 是可编辑工程；片段通过Asset映射解析路径，不能直接
 ```
 
 空segments必须作为无可渲染片段失败，不能生成空白视频假称成功。可运行非空示例由platform在contracts fixtures中提供，并由render共同验证。
+
+## 训练工作区兼容合同（2026-10-02）
+
+详细字段、schema与fixture见[平台训练合同](platform/TRAINING_CONTRACT.md)。`TrainingProject`描述人物/队伍、视频引用、词表和分组；`TrainingAnnotationBundle`以源时间保存点、半开区间、多主体多标签与证据；保存请求使用expected_revision，不匹配返回409并保留历史。
+
+`TrainingSnapshot`冻结项目/标注修订、词表、源资产身份、分组划分、质量摘要、审核视图及默认训练视图，通过内容hash回查。读取历史快照不得添加新默认字段改变hash。改变定义或在线标注只产生新版本，不能重写旧快照。
+
+制作与训练的format、路由和用途明确分开；training_only及其来源派生物不能进入制作Event、候选、Timeline或render，research_preview也不豁免。模型消费入口见[模型交接](models/ANNOTATION_HANDOFF.md)，四种触球范围适配见[范围交接](render/CONTACT_WINDOWS_HANDOFF.md)。范围ready仅表示时间条件完整，不将标签升级为专家真值。

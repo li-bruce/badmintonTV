@@ -1,5 +1,7 @@
 # 共享工具交接
 
+2026-10-03训练工作台轮：main人工API为127.0.0.1:18080，`/training`及`/guide/`；01私有agent验收在18082。本轮未启动常驻worker/GPU训练；下方9月29日窗口与进程仅作历史。新增WSL小型`/mnt/d/video/runtime/models/annotation-env/bin/python`只读复用已有PyAV/NumPy并补Pydantic依赖，约35MB，用于快照审计/CPU帧准备；未改全局Python、驱动或模型Torch。实际证据与新交互状态见[本轮验收](ROUND_VALIDATION_2026-10-02.md)。
+
 更新：2026-09-29。运行环境是机器本地事实，路径可随安装更新；改路径时由owner更新记录并通知消费者。
 
 ## 本轮运行状态

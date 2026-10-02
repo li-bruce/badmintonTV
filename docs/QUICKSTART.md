@@ -2,7 +2,17 @@
 
 从 `C:/Users/USER/Desktop/Program/badmintonTV` 运行。既有控制面环境无需重复安装；新增模型各自的安装和实际运行状态见[本轮验收](ROUND_VALIDATION_2026-09-29.md)，不能把部分下载的权重当作可用模型。
 
-## 启动网页与 worker
+## 先使用人工训练标注与手册
+
+已有本机服务时直接打开`http://127.0.0.1:18080/training`；手册为`http://127.0.0.1:18080/guide/`。否则在项目目录运行：
+
+```powershell
+./start-platform.ps1 -TrainingReviewer human
+```
+
+单纯打开训练原片、标记、保存和导出审计快照不需要worker或GPU。项目、人物和队伍手填；从可信训练目录登记视频，原片不复制到制作库。详细步骤和实际交付边界见[框架手册](FRAMEWORK_GUIDE.md)及[本轮验收](ROUND_VALIDATION_2026-10-02.md)。自动化验收须另用agent实例和独立数据库，不冒充人工审核。2026-09-29的worker/GPU窗口记录仅是历史，不表示当前窗口有效。
+
+## 启动制作网页与 worker
 
 在两个 PowerShell 终端分别执行下面的配置，再分别启动 API 与 worker：
 

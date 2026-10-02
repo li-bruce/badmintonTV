@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "project_id": "training-project-2b13d89789cc4e26924a6fec57fe8659",
+  "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+  "snapshot_id": "training-snapshot-cfacfc71bccb4310adbcbd555dfe7298",
+  "bundle_revision": 2,
+  "record_count": 6,
+  "people_count": 2,
+  "judgement_count": 3,
+  "contact_times_ms": [
+    63000,
+    65000
+  ],
+  "training_view_count": 0,
+  "snapshot_content_sha256": "d2deb51291cbb8ad5ac100e7a95d60afb6670e8c3762f05304daee77410a67dd",
+  "quality_summary": {
+    "blockers": [
+      "no_human_confirmed_semantically_defined_judgements",
+      "unassigned_or_unconfirmed_groups",
+      "independent_match_group_unconfirmed"
+    ],
+    "eligible_judgement_count": 0,
+    "excluded_judgement_count": 3,
+    "missing_dead_ball_rally_ids": [],
+    "record_count": 6,
+    "trainable": false,
+    "unassigned_asset_ids": [
+      "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913"
+    ],
+    "unconfirmed_match_asset_ids": [
+      "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913"
+    ]
+  },
+  "stale_revision_rejected": true,
+  "training_export_blocked": true,
+  "range_media_bytes": 256,
+  "unregistered_media_rejected": true,
+  "training_production_media_rejected": true,
+  "training_production_import_rejected": true,
+  "production_assets_unchanged": true,
+  "normal_production_media_range_pass": true,
+  "production_asset_count": 6,
+  "persistent_evidence_directory": "D:\\video\\platform\\integration-20261002",
+  "restart_check": "PASS",
+  "snapshot_freeze_after_edit": "PASS",
+  "annotation_truth": "agent_engineering_demo_not_human_truth",
+  "current_bundle_revision": 4,
+  "visible_conflict_preserved_draft": true,
+  "explicit_reload_recovered_latest_revision": true,
+  "history_revisions": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "old_snapshot_equals_saved_bytes_semantically": true,
+  "delivery_reviewer_mode": "human",
+  "agent_records_not_upgraded": true
+}

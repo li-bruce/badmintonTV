@@ -1,0 +1,289 @@
+{
+  "source_snapshot_id": "training-snapshot-cfacfc71bccb4310adbcbd555dfe7298",
+  "readiness_sha256": "4bc67db3fe78e5b21019039be497a4931a2b05644f7b5fb79617a20175460b5d",
+  "bytes": 85912,
+  "repeated_bytes_identical": true,
+  "trainable": false,
+  "strict_judgements": 0,
+  "gpu_used": false,
+  "model_run": false,
+  "training_run": false,
+  "windows": [
+    {
+      "record_id": "record-19b4c9cb-9909-4fe8-a1dc-9c4f2285c20e",
+      "record_revision": 1,
+      "review_only": true,
+      "supervision_targets": [],
+      "plan": {
+        "end_ms": 64000,
+        "first_source_frame_index": 1550,
+        "frames": [
+          {
+            "frame_index": 1550,
+            "pts": 793600,
+            "source_ms_rational": "62000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1559,
+            "pts": 798208,
+            "source_ms_rational": "62360",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1567,
+            "pts": 802304,
+            "source_ms_rational": "62680",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1575,
+            "pts": 806400,
+            "source_ms_rational": "63000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1584,
+            "pts": 811008,
+            "source_ms_rational": "63360",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1592,
+            "pts": 815104,
+            "source_ms_rational": "63680",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          }
+        ],
+        "interval_semantics": "half_open_source_milliseconds",
+        "last_source_frame_index": 1599,
+        "missing_or_duplicate_target_indices": [],
+        "requested_samples": 6,
+        "sampling_method": "first original PTS at/after uniform source-time target; no repeated or synthetic frames",
+        "source_frame_count": 50,
+        "start_ms": 62000
+      },
+      "decode": {
+        "av_version": "15.0.0",
+        "decoder": "PyAV",
+        "device": "cpu",
+        "frames": [
+          {
+            "frame_index": 1550,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 793600,
+            "rgb_sha256": "e1be0c8761269d1be432bccd08d1e378ee783e3fe1085183e1b3a08780e4f09c",
+            "source_ms_rational": "62000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1559,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 798208,
+            "rgb_sha256": "7330d169d5ebadd4936ab6fd7d16c9ec2611a27a40feb28fafe9829d358ebc45",
+            "source_ms_rational": "62360",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1567,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 802304,
+            "rgb_sha256": "8c6c9afb6c246b8fda46591a1666ff84fd38805618c692f0211b6ccb7d42cab7",
+            "source_ms_rational": "62680",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1575,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 806400,
+            "rgb_sha256": "00931599ae58ab32413ed0c099610fd335bf21e8be64344ad67d2092b7606c35",
+            "source_ms_rational": "63000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1584,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 811008,
+            "rgb_sha256": "a4e5db8e95ab205650ba19ae877aa6a11b2c50ded87a9fea26454fd41d6ced46",
+            "source_ms_rational": "63360",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1592,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 815104,
+            "rgb_sha256": "65c98a9080f01aab41f30f85bf1476885c801b035c2fe629c36ed686f72bb59a",
+            "source_ms_rational": "63680",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          }
+        ],
+        "gpu_used": false,
+        "images_written": false,
+        "model_run": false,
+        "status": "verified"
+      }
+    },
+    {
+      "record_id": "record-49380dce-47d0-439a-8c5d-9cb7c7eabcb3",
+      "record_revision": 1,
+      "review_only": true,
+      "supervision_targets": [],
+      "plan": {
+        "end_ms": 64000,
+        "first_source_frame_index": 1563,
+        "frames": [
+          {
+            "frame_index": 1563,
+            "pts": 800256,
+            "source_ms_rational": "62520",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1569,
+            "pts": 803328,
+            "source_ms_rational": "62760",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1575,
+            "pts": 806400,
+            "source_ms_rational": "63000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1582,
+            "pts": 809984,
+            "source_ms_rational": "63280",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1588,
+            "pts": 813056,
+            "source_ms_rational": "63520",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          },
+          {
+            "frame_index": 1594,
+            "pts": 816128,
+            "source_ms_rational": "63760",
+            "stream_start_pts": 0,
+            "time_base": "1/12800"
+          }
+        ],
+        "interval_semantics": "half_open_source_milliseconds",
+        "last_source_frame_index": 1599,
+        "missing_or_duplicate_target_indices": [],
+        "requested_samples": 6,
+        "sampling_method": "first original PTS at/after uniform source-time target; no repeated or synthetic frames",
+        "source_frame_count": 37,
+        "start_ms": 62500
+      },
+      "decode": {
+        "av_version": "15.0.0",
+        "decoder": "PyAV",
+        "device": "cpu",
+        "frames": [
+          {
+            "frame_index": 1563,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 800256,
+            "rgb_sha256": "aca3d91c86ab381ee7217d03640f8d669134a2096824ebdb459d8831eb675cda",
+            "source_ms_rational": "62520",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1569,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 803328,
+            "rgb_sha256": "557994a3010379788cd88f15a8091370b187dd59625bebe345354d4ecafdc291",
+            "source_ms_rational": "62760",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1575,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 806400,
+            "rgb_sha256": "00931599ae58ab32413ed0c099610fd335bf21e8be64344ad67d2092b7606c35",
+            "source_ms_rational": "63000",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1582,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 809984,
+            "rgb_sha256": "941f3a9918ebf81322d7cfa3a5f80406321fe39179f332ff25dc0cd689c4f17a",
+            "source_ms_rational": "63280",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1588,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 813056,
+            "rgb_sha256": "726e425f92e7350ba72476ae722bdd5579e633a5f8d883bffe264a609eb6283b",
+            "source_ms_rational": "63520",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          },
+          {
+            "frame_index": 1594,
+            "height": 720,
+            "pixel_format": "rgb24",
+            "pts": 816128,
+            "rgb_sha256": "2e113447f98e4419b7129737b636fc5f69bbaab7c4f57e1dc8fc99f1652517bb",
+            "source_ms_rational": "63760",
+            "stream_start_pts": 0,
+            "time_base": "1/12800",
+            "width": 1280
+          }
+        ],
+        "gpu_used": false,
+        "images_written": false,
+        "model_run": false,
+        "status": "verified"
+      }
+    }
+  ]
+}
