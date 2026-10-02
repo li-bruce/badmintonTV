@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-10-02T15:25:23.854086+00:00",
+  "command": "D:/video/runtime/platform/env/Scripts/python.exe -B -m unittest discover -s tests/library -p 'test_*.py'",
+  "tests_run": 209,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "status": "PASS",
+  "elapsed_seconds": 23.233,
+  "annotation_catalog_tests": 23,
+  "engineering_only": true,
+  "log": "docs/library/ANNOTATION_CATALOG_TESTS.txt",
+  "prior_failed_harness": "docs/library/ANNOTATION_CATALOG_TESTS_STDIN_FAILURE.json",
+  "source_sha256": {
+    "packages/library/annotation_catalog.py": "9086f1d2d5dea8288cf44e90a7cbda284ce507611e1da4ecbef76d7d0a7e1bc6",
+    "scripts/library/build_annotation_catalog.py": "672a3784f822ccb20d304b872e6ff3c59e2bdae045ea77118b275d49f121bd51",
+    "configs/library/annotation_catalog.json": "e492daa347cae713394e3868d2d375e73f75128ca00da397fb53fd345ca07b1b",
+    "tests/library/test_annotation_catalog.py": "4ccb1fee1358d8cae05288932f54b412f3cca4922335b84faeb5a188cc6fb1e0"
+  }
+}

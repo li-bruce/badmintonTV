@@ -1,0 +1,94 @@
+{
+  "status": "published",
+  "catalog": {
+    "relative_path": "data/training/handoff/annotation-catalog.v1.json",
+    "sha256": "3fc6adf81e6f5229e4b4e4ae7de215be89bc415838d5e5aea64fb28ec85bea32",
+    "size_bytes": 47656
+  },
+  "summary": {
+    "asset_count": 10,
+    "raw_label_strings": 60,
+    "raw_rows": 9817,
+    "frames": 980703,
+    "duration_ms": 38592556,
+    "out_of_order_start_preserved": 3,
+    "equal_endpoints_semantics_unverified": 3,
+    "exact_duplicate_preserved": 5,
+    "human_confirmed_annotations": 0,
+    "confirmed_match_groups": 0,
+    "split": "unassigned",
+    "media_copied": 0
+  },
+  "metadata_bytes_written": 3366509,
+  "capacity_before": {
+    "owner_used_bytes": 14802357491,
+    "project_used_bytes": 92648127281,
+    "active_reserved_bytes": 0,
+    "free_bytes": 922588332032,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 14802357491
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6998627612
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 199224674
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647917504
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "capacity_after": {
+    "owner_used_bytes": 14805728096,
+    "project_used_bytes": 92651497886,
+    "active_reserved_bytes": 0,
+    "free_bytes": 922584801280,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 14805728096
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6998627612
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 199224674
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647917504
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "checked_at": "2026-10-02T15:16:03.930477+00:00"
+}

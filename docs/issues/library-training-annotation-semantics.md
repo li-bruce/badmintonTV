@@ -2,6 +2,8 @@
 
 状态：原文件完整获取不解决以下语义问题。来源、原值和差异必须保留；不通过翻译猜测、去重或选择端点规则制造通过。
 
+2026-10-02复核：新[标注目录](../library/ANNOTATION_HANDOFF.md)已重核10原视频/完整PTS及9817行CSV，但下述语义缺口均未据此解除。目录将原行作为unreviewed hints，训练真值资格false；真实比赛confirmed_group_id为空，原registry/split不变。独立训练工作台可以另外新建人工标注，不能把这些提示或agent检查回写为human truth。README中的识别/联系视频中个人限制也保留在目录rights及原文证据中；没有发起身份识别或外联。
+
 - Fine-Badminton的10 CSV实测9817行。九份英文覆盖README29类，2010Asian另有31种中文原字串；总60原字串不是60确认语义类。5条完全重复、3条start=end均保留。0/1帧基、端点开闭、location、原广播偏移缺作者明确规则；四种假设只做越界诊断，0个Event转换。
 - Fine包分发processed clips，包含近景及非比赛镜头；未知身份与原比赛内容重叠不能因文件名或不同SHA排除。split保持unassigned，网前展搓、收搓、后退小跳启动均unknown。
 - Fine API CC BY4.0与包内CC BY-NC4.0冲突；README额外禁止未经书面允许再分发，与LICENSE的Share文字也有差异。视频画面许可不能从代码或数据许可推导。
