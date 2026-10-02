@@ -1,7 +1,7 @@
 """Synthetic engineering fixtures, never evidence of real media/annotation QA."""
 import copy
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 import csv
 import hashlib
 import io
@@ -416,6 +416,213 @@ class AnnotationCatalogTests(unittest.TestCase):
             catalog.publish_catalog(self.quota, self.config)
         self.assertEqual(old, output.read_bytes())
         self.assert_released()
+
+    def prepare_cleanup_failure(self, *, changed=True):
+        catalog.publish_catalog(self.quota, self.config)
+        output = self.root / catalog.OUTPUT
+        previous = output.read_bytes()
+        generation = self.root / f"{catalog.SIDECARS}/{hashlib.sha256(previous).hexdigest()}.manifest.json"
+        state = (generation.read_bytes(), generation.stat().st_mtime_ns)
+        if changed:
+            self.assets[0]["title"] = "Verified generation before injected cleanup failure"
+            self.flush_inputs()
+        return output, previous, generation, state
+
+    @contextmanager
+    def inject_cleanup_failure(self, phase, reservations):
+        real_reserve = self.quota.reserve
+        def reserve(*args, **kwargs):
+            reservation = real_reserve(*args, **kwargs)
+            reservations.append(reservation.reservation_id)
+            return reservation
+        with patch.object(self.quota, "reserve", side_effect=reserve):
+            if phase == "lock_release":
+                lock = self.root / (catalog.OUTPUT + ".lock")
+                real_unlink = Path.unlink
+                def unlink(path, *args, **kwargs):
+                    if path == lock:
+                        raise PermissionError("injected lock release failure")
+                    return real_unlink(path, *args, **kwargs)
+                with patch.object(Path, "unlink", unlink):
+                    yield
+            elif phase == "quota_release":
+                with patch.object(self.quota, "release", side_effect=OSError("injected quota release failure")):
+                    yield
+            elif phase == "capacity_after":
+                real_snapshot = self.quota.snapshot
+                calls = 0
+                def snapshot():
+                    nonlocal calls
+                    calls += 1
+                    if calls > 1:
+                        raise PermissionError("injected final capacity snapshot failure")
+                    return real_snapshot()
+                with patch.object(self.quota, "snapshot", side_effect=snapshot):
+                    yield
+            else:
+                raise AssertionError("Unknown fixture cleanup phase")
+
+    def assert_cleanup_warning(self, result, phase, reservations, prepared, *, changed=True):
+        output, previous, generation, state = prepared
+        self.assertEqual("published_with_audit_warning" if changed else "unchanged_with_cleanup_warning", result["status"])
+        self.assertIs(changed, result["entry_committed"])
+        self.assertTrue(result["warnings"])
+        self.assertIn(phase, str(result["warnings"]))
+        issues = [issue for issue in result["cleanup_issues"] if issue["phase"] == phase]
+        self.assertEqual(1, len(issues))
+        self.assertEqual("OSError" if phase == "quota_release" else "PermissionError", issues[0]["error_type"])
+        self.assertIn("injected", issues[0]["error"])
+        self.assertEqual(1, len(reservations))
+        self.assertEqual(reservations[0], result["recovery"]["reservation_id"])
+        lock = self.root / (catalog.OUTPUT + ".lock")
+        reported_lock = Path(result["recovery"]["lock_path"])
+        if not reported_lock.is_absolute():
+            reported_lock = self.root / reported_lock
+        self.assertEqual(lock, reported_lock)
+        self.assertEqual(state, (generation.read_bytes(), generation.stat().st_mtime_ns))
+        if changed:
+            self.assertNotEqual(previous, output.read_bytes())
+        else:
+            self.assertEqual(previous, output.read_bytes())
+        self.assertEqual("verified", catalog.verify_catalog(self.root, self.config)["status"])
+        active = self.quota.active_reservations()
+        self.assertEqual(phase == "lock_release", lock.exists())
+        if phase == "quota_release":
+            self.assertEqual([reservations[0]], [row["reservation_id"] for row in active])
+            self.assertEqual(catalog.PEAK_BYTES, active[0]["peak_bytes"])
+            self.assertGreaterEqual(result["capacity_after"]["active_reserved_bytes"], catalog.PEAK_BYTES)
+        else:
+            self.assertEqual([], active)
+        if phase == "capacity_after":
+            self.assertIsNone(result["capacity_after"])
+            self.assertIn("unknown", str(result["warnings"]).lower())
+        self.assertEqual([], list(self.root.rglob("catalog-*.tmp")))
+
+    def test_post_commit_lock_release_failure_keeps_real_lock_and_verified_generation(self):
+        prepared = self.prepare_cleanup_failure()
+        reservations = []
+        with self.inject_cleanup_failure("lock_release", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "lock_release", reservations, prepared)
+
+    def test_post_commit_quota_release_failure_keeps_real_reservation_and_verified_generation(self):
+        prepared = self.prepare_cleanup_failure()
+        reservations = []
+        with self.inject_cleanup_failure("quota_release", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "quota_release", reservations, prepared)
+
+    def test_post_commit_snapshot_failure_reports_unknown_capacity_without_rollback(self):
+        prepared = self.prepare_cleanup_failure()
+        reservations = []
+        with self.inject_cleanup_failure("capacity_after", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "capacity_after", reservations, prepared)
+
+    def test_unchanged_lock_release_failure_is_warning_and_retains_lock(self):
+        prepared = self.prepare_cleanup_failure(changed=False)
+        reservations = []
+        with self.inject_cleanup_failure("lock_release", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "lock_release", reservations, prepared, changed=False)
+        self.assertEqual(0, result["metadata_bytes_written"])
+
+    def test_unchanged_quota_release_failure_is_warning_and_retains_reservation(self):
+        prepared = self.prepare_cleanup_failure(changed=False)
+        reservations = []
+        with self.inject_cleanup_failure("quota_release", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "quota_release", reservations, prepared, changed=False)
+        self.assertEqual(0, result["metadata_bytes_written"])
+
+    def test_unchanged_snapshot_failure_is_warning_and_capacity_stays_unknown(self):
+        prepared = self.prepare_cleanup_failure(changed=False)
+        reservations = []
+        with self.inject_cleanup_failure("capacity_after", reservations):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assert_cleanup_warning(result, "capacity_after", reservations, prepared, changed=False)
+        self.assertEqual(0, result["metadata_bytes_written"])
+
+    def test_simultaneous_lock_and_quota_release_failures_preserve_both_recovery_facts(self):
+        output, previous, generation, state = self.prepare_cleanup_failure()
+        reservations = []
+        with self.inject_cleanup_failure("lock_release", reservations), \
+             patch.object(self.quota, "release", side_effect=OSError("injected second quota release failure")):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assertEqual("published_with_audit_warning", result["status"])
+        self.assertIs(True, result["entry_committed"])
+        issues = {issue["phase"]: issue for issue in result["cleanup_issues"]}
+        self.assertEqual({"lock_release", "quota_release"}, set(issues))
+        self.assertEqual("PermissionError", issues["lock_release"]["error_type"])
+        self.assertEqual("OSError", issues["quota_release"]["error_type"])
+        self.assertIn("lock_release", str(result["warnings"]))
+        self.assertIn("quota_release", str(result["warnings"]))
+        lock = self.root / result["recovery"]["lock_path"]
+        self.assertEqual(self.root / (catalog.OUTPUT + ".lock"), lock)
+        self.assertTrue(lock.is_file())
+        self.assertEqual(reservations, [row["reservation_id"] for row in self.quota.active_reservations()])
+        self.assertEqual(reservations[0], result["recovery"]["reservation_id"])
+        self.assertGreaterEqual(result["capacity_after"]["active_reserved_bytes"], catalog.PEAK_BYTES)
+        self.assertNotEqual(previous, output.read_bytes())
+        self.assertEqual(state, (generation.read_bytes(), generation.stat().st_mtime_ns))
+        self.assertEqual("verified", catalog.verify_catalog(self.root, self.config)["status"])
+
+    def test_cli_success_exit_and_stdout_warning_when_final_capacity_read_fails(self):
+        from scripts.library import build_annotation_catalog as cli
+        prepared = self.prepare_cleanup_failure()
+        config_path = self.root / "synthetic-catalog-config.json"
+        config_path.write_bytes(catalog.encode_json(self.config))
+        reservations, stdout, stderr = [], io.StringIO(), io.StringIO()
+        with self.inject_cleanup_failure("capacity_after", reservations), \
+             patch.object(cli, "QuotaManager", return_value=self.quota), \
+             redirect_stdout(stdout), redirect_stderr(stderr):
+            code = cli.main(["build", "--config", str(config_path)])
+        self.assertEqual(0, code)
+        self.assertEqual("", stderr.getvalue())
+        result = json.loads(stdout.getvalue())
+        self.assert_cleanup_warning(result, "capacity_after", reservations, prepared)
+
+    def assert_entry_write_warning(self, result, prepared, message, error_type):
+        output, previous, generation, state = prepared
+        self.assertEqual("published_with_audit_warning", result["status"])
+        self.assertIs(True, result["entry_committed"])
+        self.assertIn(message, str(result["warnings"]))
+        self.assertTrue(any(issue["error_type"] == error_type and message in issue["error"]
+                            for issue in result["cleanup_issues"]))
+        self.assertNotEqual(previous, output.read_bytes())
+        self.assertEqual(state, (generation.read_bytes(), generation.stat().st_mtime_ns))
+        self.assertEqual("verified", catalog.verify_catalog(self.root, self.config)["status"])
+        self.assert_released()
+
+    def test_replace_wrapper_raising_after_real_commit_reports_published_warning(self):
+        prepared = self.prepare_cleanup_failure()
+        output = prepared[0]
+        real_replace, committed = catalog.os.replace, []
+        def replace(source, target, *args, **kwargs):
+            result = real_replace(source, target, *args, **kwargs)
+            if Path(target) == output:
+                committed.append(target)
+                raise OSError("injected exception after real atomic replace")
+            return result
+        with patch.object(catalog.os, "replace", side_effect=replace):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assertEqual([output], committed)
+        self.assert_entry_write_warning(result, prepared, "injected exception after real atomic replace", "OSError")
+
+    def test_missing_temporary_unlink_after_entry_commit_reports_published_warning(self):
+        prepared = self.prepare_cleanup_failure()
+        real_unlink, injected = Path.unlink, []
+        def unlink(path, *args, **kwargs):
+            # Immutable-sidecar temporary files still exist when removed. Only
+            # the final os.replace consumes its temporary name before cleanup.
+            if path.name.startswith("catalog-") and path.suffix == ".tmp" and not path.exists():
+                injected.append(path)
+                raise PermissionError("injected entry temporary cleanup failure")
+            return real_unlink(path, *args, **kwargs)
+        with patch.object(Path, "unlink", unlink):
+            result = catalog.publish_catalog(self.quota, self.config)
+        self.assertEqual(1, len(injected))
+        self.assert_entry_write_warning(result, prepared, "injected entry temporary cleanup failure", "PermissionError")
 
     def test_existing_owner_lock_and_insufficient_quota_prevent_publication(self):
         output = self.root / catalog.OUTPUT

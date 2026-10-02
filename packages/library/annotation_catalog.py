@@ -385,7 +385,7 @@ def build_bundle(root, config):
     return {"manifest": manifest, "sidecars": sidecars, "summary": summary}
 
 
-def _write_atomic(path, raw, *, immutable=False):
+def _write_atomic(path, raw, *, immutable=False, on_commit=None):
     """Never replace an existing immutable sidecar, including a racing writer."""
     path.parent.mkdir(parents=True, exist_ok=True)
     _check_ancestors(path)
@@ -405,10 +405,57 @@ def _write_atomic(path, raw, *, immutable=False):
             os.link(temp, path)
         else:
             os.replace(temp, path)
+            if on_commit is not None:
+                on_commit()
         return True
     finally:
         if temp is not None:
             temp.unlink(missing_ok=True)
+
+
+class _PublicationState:
+    """Track the entry's commit independently of fallible cleanup/reporting."""
+
+    def __init__(self):
+        self.ready = False
+        self.committed = False
+        self.phase = "preparation"
+        self.issues = []
+
+    def commit(self):
+        self.committed = self.ready = True
+        self.phase = "entry_write_cleanup"
+
+    def record(self, phase, error):
+        self.issues.append({"phase": phase, "error_type": type(error).__name__, "error": str(error)})
+
+
+class _PublicationExitGuard:
+    """Record each post-commit exit failure without hiding a pending body error.
+
+    Guard exits separately so a quota release error cannot erase a lock release
+    error. Never retry failed cleanup or suppress pre-commit failures.
+    """
+
+    def __init__(self, context, state, phase):
+        self.context, self.state, self.phase = context, state, phase
+
+    def __enter__(self):
+        return self.context.__enter__()
+
+    def __exit__(self, exc_type, exc, traceback):
+        try:
+            return self.context.__exit__(exc_type, exc, traceback)
+        except Exception as cleanup_error:
+            if not self.state.ready:
+                if exc is not None:
+                    exc.add_note(f"{self.phase} also failed: {type(cleanup_error).__name__}: {cleanup_error}")
+                    return False
+                raise
+            self.state.record(self.phase, cleanup_error)
+            # False preserves any original body exception for the outer guard;
+            # with no body exception, the recorded cleanup failure is handled.
+            return False
 
 
 def publish_catalog(quota, config):
@@ -416,51 +463,81 @@ def publish_catalog(quota, config):
     root = quota.project_root
     output = quota.resolve_path(OUTPUT.removeprefix("data/"))
     before = quota.snapshot()
-    warnings = []
-    with quota.reserve(PEAK_BYTES, purpose="annotation catalog immutable metadata and atomic manifest publication"):
-        # A stale lock after a killed process requires inspection; it is never
-        # guessed expired or shared with the training registry's writer lock.
-        with SplitRegistry(output, lock_timeout_seconds=0.2)._lock():
-            bundle = build_bundle(root, config)
-            written = 0
-            for relative, raw in bundle["sidecars"].items():
-                path = quota.resolve_path(relative.removeprefix("data/"))
-                if _write_atomic(path, raw, immutable=True):
+    state = _PublicationState()
+    recovery = {"lock_path": OUTPUT + ".lock", "reservation_id": None}
+    written = 0
+    try:
+        reservation = quota.reserve(PEAK_BYTES, purpose="annotation catalog immutable metadata and atomic manifest publication")
+        recovery["reservation_id"] = reservation.reservation_id
+        with _PublicationExitGuard(reservation, state, "quota_release"):
+            # A failed cleanup leaves its lock/reservation for inspection; it
+            # is never guessed stale, retried, or shared with registry writers.
+            with _PublicationExitGuard(SplitRegistry(output, lock_timeout_seconds=0.2)._lock(), state, "lock_release"):
+                bundle = build_bundle(root, config)
+                for relative, raw in bundle["sidecars"].items():
+                    path = quota.resolve_path(relative.removeprefix("data/"))
+                    if _write_atomic(path, raw, immutable=True):
+                        written += len(raw)
+                raw = encode_json(bundle["manifest"])
+                generation = quota.resolve_path(f"{SIDECARS.removeprefix('data/')}/{hashlib.sha256(raw).hexdigest()}.manifest.json")
+                if _write_atomic(generation, raw, immutable=True):
                     written += len(raw)
-            raw = encode_json(bundle["manifest"])
-            generation = quota.resolve_path(f"{SIDECARS.removeprefix('data/')}/{hashlib.sha256(raw).hexdigest()}.manifest.json")
-            if _write_atomic(generation, raw, immutable=True):
-                written += len(raw)
-            # Recheck small pinned source manifests just before publication.
-            # Media remain read-only; the verifier rehashes them on consumption.
-            _inputs(root, config)
-            changed = True
-            if output.exists():
-                require(output.stat().st_size <= MAX_BYTES, "Existing catalog exceeds byte bound")
-                with output.open("rb") as stream:
-                    previous = stream.read(MAX_BYTES + 1)
-                require(len(previous) <= MAX_BYTES, "Existing catalog exceeds byte bound")
-                changed = previous != raw
-            if changed:
-                switched = False
-                try:
-                    with publication_audit([output], quota, reason="Verified annotation catalog generation switch"):
-                        _write_atomic(output, raw)
-                        switched = True
-                except (OSError, ValueError) as exc:
-                    if not switched:
-                        raise
-                    # The atomic replace is the commit point. Rolling back
-                    # here could invalidate a generation a reader has already
-                    # registered. Keep the valid generation and report the
-                    # bookkeeping failure explicitly; the started audit and
-                    # immutable prior generations remain available.
-                    warnings.append(f"Catalog committed; audit completion needs inspection: {exc}")
-                written += len(raw)
-    status = "published_with_audit_warning" if warnings else ("published" if changed else "unchanged")
+                # Recheck pinned inputs immediately before the commit point.
+                _inputs(root, config)
+                changed = True
+                if output.exists():
+                    require(output.stat().st_size <= MAX_BYTES, "Existing catalog exceeds byte bound")
+                    with output.open("rb") as stream:
+                        previous = stream.read(MAX_BYTES + 1)
+                    require(len(previous) <= MAX_BYTES, "Existing catalog exceeds byte bound")
+                    changed = previous != raw
+                if changed:
+                    audit = publication_audit([output], quota, reason="Verified annotation catalog generation switch")
+                    with _PublicationExitGuard(audit, state, "audit_completion"):
+                        state.phase = "entry_write"
+                        try:
+                            _write_atomic(output, raw, on_commit=state.commit)
+                        except Exception:
+                            if not state.committed:
+                                # Some filesystem wrappers can report an error
+                                # after performing the replace. The old entry
+                                # differed, so matching bounded bytes establish
+                                # that this expected generation did commit.
+                                try:
+                                    _check_ancestors(output)
+                                    if output.is_file() and output.stat().st_size == len(raw):
+                                        with output.open("rb") as stream:
+                                            if stream.read(len(raw) + 1) == raw:
+                                                state.commit()
+                                except OSError:
+                                    pass  # Preserve the original write error.
+                            raise
+                else:
+                    # Already-published bytes and every referenced sidecar
+                    # were verified; cleanup failure is not a failed build.
+                    state.ready = True
+    except Exception as exc:
+        if not state.ready:
+            raise
+        state.record(state.phase, exc)
+    if state.committed:
+        written += len(raw)
+    try:
+        after = quota.snapshot()
+    except Exception as exc:
+        state.record("capacity_after", exc)
+        after = None
+    prefix = "Catalog committed" if state.committed else "Existing catalog verified unchanged"
+    warnings = [f"{prefix}; {issue['phase']} needs inspection: {issue['error_type']}: {issue['error']}"
+                + ("; capacity_after is unknown" if issue["phase"] == "capacity_after" else "")
+                for issue in state.issues]
+    status = "published" if state.committed else "unchanged"
+    if warnings:
+        status = "published_with_audit_warning" if state.committed else "unchanged_with_cleanup_warning"
     return {"status": status, "warnings": warnings, "catalog": reference(OUTPUT, raw),
             "summary": bundle["summary"], "metadata_bytes_written": written,
-            "capacity_before": before, "capacity_after": quota.snapshot()}
+            "entry_committed": state.committed, "cleanup_issues": state.issues, "recovery": recovery,
+            "capacity_before": before, "capacity_after": after}
 
 
 def verify_catalog(root, config):
