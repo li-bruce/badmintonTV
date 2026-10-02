@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "TrainingImagePoint": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "TrainingImagePoint",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Typed evidence validator; records keep their original evidence dictionaries.",
+  "properties": {
+    "type": {
+      "const": "image_region",
+      "title": "Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "evidence_id": {
+      "minLength": 1,
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "record_id": {
+      "minLength": 1,
+      "title": "Record Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "at_ms": {
+      "minimum": 0,
+      "title": "At Ms",
+      "type": "integer"
+    },
+    "coordinate_system": {
+      "const": "image_normalized",
+      "title": "Coordinate System",
+      "type": "string"
+    },
+    "shape": {
+      "enum": [
+        "rectangle",
+        "polygon"
+      ],
+      "title": "Shape",
+      "type": "string"
+    },
+    "points": {
+      "items": {
+        "$ref": "#/$defs/TrainingImagePoint"
+      },
+      "maxItems": 64,
+      "minItems": 2,
+      "title": "Points",
+      "type": "array"
+    },
+    "subject_role": {
+      "enum": [
+        "self",
+        "opponent",
+        "partner",
+        "opponent_partner"
+      ],
+      "title": "Subject Role",
+      "type": "string"
+    },
+    "subject_person_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subject Person Id"
+    },
+    "observation_source": {
+      "enum": [
+        "agent",
+        "human",
+        "model"
+      ],
+      "title": "Observation Source",
+      "type": "string"
+    },
+    "precision": {
+      "const": "browser_time",
+      "title": "Precision",
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "schema_version",
+    "evidence_id",
+    "record_id",
+    "asset_id",
+    "at_ms",
+    "coordinate_system",
+    "shape",
+    "points",
+    "subject_role",
+    "observation_source",
+    "precision"
+  ],
+  "title": "TrainingImageRegion",
+  "type": "object"
+}

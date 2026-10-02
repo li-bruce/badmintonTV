@@ -6,6 +6,7 @@ Contracts validate structure, time, references, taxonomy, and frozen snapshots.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from fractions import Fraction
 import hashlib
 import json
 from pathlib import Path
@@ -68,6 +69,71 @@ class TrainingModel(BaseModel):
     @classmethod
     def immutable_metadata(cls, value):
         return _freeze(value)
+
+
+class TrainingImagePoint(TrainingModel):
+    x: Annotated[float, Field(strict=True, ge=0, le=1, allow_inf_nan=False)]
+    y: Annotated[float, Field(strict=True, ge=0, le=1, allow_inf_nan=False)]
+
+
+def _region_cross(a, b, c):
+    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+
+def _region_segments_intersect(a, b, c, d):
+    ab_c, ab_d = _region_cross(a, b, c), _region_cross(a, b, d)
+    cd_a, cd_b = _region_cross(c, d, a), _region_cross(c, d, b)
+    if ((ab_c > 0 and ab_d < 0) or (ab_c < 0 and ab_d > 0)) and ((cd_a > 0 and cd_b < 0) or (cd_a < 0 and cd_b > 0)):
+        return True
+    def on_segment(a, b, p):
+        return min(a[0], b[0]) <= p[0] <= max(a[0], b[0]) and min(a[1], b[1]) <= p[1] <= max(a[1], b[1])
+    return any(cross == 0 and on_segment(start, end, point) for cross, start, end, point in
+               ((ab_c, a, b, c), (ab_d, a, b, d), (cd_a, c, d, a), (cd_b, c, d, b)))
+
+
+class TrainingImageRegion(TrainingModel):
+    """Typed evidence validator; records keep their original evidence dictionaries."""
+    type: Literal["image_region"]
+    schema_version: Literal["1.0"]
+    evidence_id: Identifier
+    record_id: Identifier
+    asset_id: Identifier
+    at_ms: Milliseconds
+    coordinate_system: Literal["image_normalized"]
+    shape: Literal["rectangle", "polygon"]
+    points: Annotated[tuple[TrainingImagePoint, ...], Field(min_length=2, max_length=64)]
+    subject_role: SubjectRole
+    subject_person_id: Identifier | None = None
+    observation_source: Literal["agent", "human", "model"]
+    precision: Literal["browser_time"]
+
+    @model_validator(mode="after")
+    def valid_geometry(self):
+        points = tuple((p.x, p.y) for p in self.points)
+        _unique(points, "image region point")
+        if self.shape == "rectangle":
+            if len(points) != 2 or points[0][0] == points[1][0] or points[0][1] == points[1][1]:
+                raise ValueError("rectangle requires two opposite corners with nonzero width and height")
+            return self
+        if len(points) < 3:
+            raise ValueError("polygon requires 3 to 64 vertices")
+        # Exact rational predicates over supplied binary floats avoid tolerance-based
+        # holes and numerical cancellation for narrow but valid normalized regions.
+        points = tuple((Fraction(x), Fraction(y)) for x, y in points)
+        size = len(points)
+        area = sum(points[i][0] * points[(i + 1) % size][1] - points[(i + 1) % size][0] * points[i][1] for i in range(size))
+        if area == 0:
+            raise ValueError("polygon must have nonzero area")
+        for i, current in enumerate(points):
+            previous, following = points[i - 1], points[(i + 1) % size]
+            if _region_cross(previous, current, following) == 0 and sum((previous[k] - current[k]) * (following[k] - current[k]) for k in (0, 1)) > 0:
+                raise ValueError("polygon adjacent edges must not overlap")
+            for j in range(i + 1, size):
+                if j == i + 1 or (i == 0 and j == size - 1):
+                    continue
+                if _region_segments_intersect(current, following, points[j], points[(j + 1) % size]):
+                    raise ValueError("polygon must not self-intersect or touch a nonadjacent edge")
+        return self
 
 
 class TrainingProject(TrainingModel):
@@ -263,7 +329,60 @@ class TrainingRecord(TrainingModel):
         if self.revision > 1 and self.previous_revision != self.revision - 1:
             raise ValueError("previous_revision must immediately precede revision")
         _unique(((j.label_id, j.subject_role, j.subject_person_id) for j in self.judgements), "judgement label/subject")
+        regions = [TrainingImageRegion.model_validate(item) for item in self.evidence if item.get("type") == "image_region"]
+        _unique((region.evidence_id for region in regions), "image region evidence_id")
+        for region in regions:
+            if region.record_id != self.record_id or region.asset_id != self.asset_id:
+                raise ValueError("image region record/asset differs from containing record")
+            if self.at_ms is not None:
+                if region.at_ms != self.at_ms:
+                    raise ValueError("image region time must equal point record at_ms")
+            elif not self.start_ms <= region.at_ms < self.end_ms:
+                raise ValueError("image region time must be inside record interval")
         return self
+
+
+def _resolved_training_roles(record, people):
+    """Merge known role identities without changing any serialized record fields."""
+    roles = ("self", "opponent", "partner", "opponent_partner")
+    persons, teams = {role: set() for role in roles}, {role: set() for role in roles}
+    def add(role, person_id=None, team_id=None):
+        if person_id:
+            if person_id not in people:
+                raise ValueError("unknown person_id in subject role")
+            persons[role].add(person_id)
+            if people[person_id].team_id:
+                teams[role].add(people[person_id].team_id)
+        if team_id:
+            teams[role].add(team_id)
+    add("self", record.person_id, record.team_id)
+    if record.state:
+        for role in roles:
+            actor = getattr(record.state, role)
+            if actor:
+                add(role, actor.person_id, actor.team_id)
+    for judgement in record.judgements:
+        add(judgement.subject_role, judgement.subject_person_id)
+    for evidence in record.evidence:
+        if evidence.get("type") == "image_region":
+            add(evidence["subject_role"], evidence.get("subject_person_id"))
+    for role in roles:
+        if len(persons[role]) > 1:
+            raise ValueError("subject role has conflicting person identities")
+        if len(teams[role]) > 1:
+            raise ValueError("subject role has conflicting team identities")
+    _unique((person for values in persons.values() for person in values), "subject role person")
+    resolved = {role: (next(iter(persons[role]), None), next(iter(teams[role]), None)) for role in roles}
+    for first, second in (("self", "partner"), ("opponent", "opponent_partner")):
+        a, b = resolved[first][1], resolved[second][1]
+        if a and b and a != b:
+            raise ValueError("subject partner roles must share a team")
+    for own in ("self", "partner"):
+        for opponent in ("opponent", "opponent_partner"):
+            a, b = resolved[own][1], resolved[opponent][1]
+            if a and b and a == b:
+                raise ValueError("opposing subject roles cannot share a team")
+    return resolved
 
 
 class TrainingAnnotationBundle(TrainingModel):
@@ -296,21 +415,51 @@ class TrainingAnnotationBundle(TrainingModel):
                 raise ValueError("interval is outside source duration")
             if record.uncertainty_end_ms is not None and record.uncertainty_end_ms > duration:
                 raise ValueError("uncertainty is outside source duration")
+            regions = [item for item in record.evidence if item.get("type") == "image_region"]
+            if any(item["at_ms"] >= duration for item in regions):
+                raise ValueError("image region time must precede source duration")
             if record.deleted:
                 continue
             person(record.person_id, record.team_id)
+            resolved_roles = _resolved_training_roles(record, people)
             resolved_judgements = []
             for judgement in record.judgements:
                 person(judgement.subject_person_id, None)
                 role = getattr(record.state, judgement.subject_role) if record.state else None
                 if judgement.subject_role != "self" and role is None:
                     raise ValueError("judgement subject role requires corresponding state role")
-                expected_person = role.person_id if role else record.person_id
+                expected_person = resolved_roles[judgement.subject_role][0]
                 if judgement.subject_person_id and expected_person and judgement.subject_person_id != expected_person:
                     raise ValueError("judgement subject person differs from state/record role")
                 resolved_judgements.append((judgement.label_id, judgement.subject_role,
                                             judgement.subject_person_id or expected_person))
             _unique(resolved_judgements, "resolved judgement label/subject")
+            for region in regions:
+                subject = region.get("subject_person_id")
+                role = getattr(record.state, region["subject_role"]) if record.state else None
+                if region["subject_role"] != "self" and role is None:
+                    raise ValueError("image region subject requires corresponding state role")
+                person(subject, role.team_id if role else record.team_id)
+                expected_person = role.person_id if role else record.person_id
+                person(expected_person, role.team_id if role else record.team_id)
+                if subject and expected_person and subject != expected_person:
+                    raise ValueError("image region subject differs from state/record role")
+                resolved_person = subject or expected_person
+                resolved_team = people[resolved_person].team_id if resolved_person else None
+                own = record.state.self if record.state else None
+                own_person = own.person_id if own else record.person_id
+                person(own_person, own.team_id if own else record.team_id)
+                own_team = (own.team_id if own else record.team_id) or (people[own_person].team_id if own_person else None)
+                if region["subject_role"] in {"opponent", "opponent_partner"} and resolved_team and resolved_team == own_team:
+                    raise ValueError("image region opponent subject cannot be on self team")
+                if region["subject_role"] == "partner" and resolved_team and own_team and resolved_team != own_team:
+                    raise ValueError("image region partner subject must be on self team")
+                if region["subject_role"] in {"opponent", "opponent_partner"}:
+                    other = record.state.opponent_partner if region["subject_role"] == "opponent" else record.state.opponent
+                    other_person = people.get(other.person_id) if other else None
+                    other_team = (other.team_id or (other_person.team_id if other_person else None)) if other else None
+                    if resolved_team and other_team and resolved_team != other_team:
+                        raise ValueError("image region opponent partners must share a team")
             if record.rally_id:
                 rally = records.get(record.rally_id)
                 if rally is None or rally.kind != "rally":
@@ -431,6 +580,8 @@ def _semantic_record(record):
 def _referenced_people(record):
     result = {record.person_id} if record.person_id else set()
     result.update(j.subject_person_id for j in record.judgements if j.subject_person_id)
+    result.update(item["subject_person_id"] for item in record.evidence
+                  if item.get("type") == "image_region" and item.get("subject_person_id"))
     if record.state:
         result.update(actor.person_id for actor in (record.state.self, record.state.opponent, record.state.partner, record.state.opponent_partner) if actor and actor.person_id)
     return result
@@ -446,6 +597,7 @@ def validate_training_revision(current, incoming, expected_revision, *, actor_ty
     if current and (incoming.project_id != current.project_id or incoming.asset != current.asset):
         raise ValueError("bundle project/asset identity is immutable")
     prior_people = {p.person_id: p for p in current.people} if current else {}
+    incoming_people = {p.person_id: p for p in incoming.people}
     for person in incoming.people:
         old = prior_people.get(person.person_id)
         if actor_type != "human" and person.identity_status == "confirmed" and old != person:
@@ -455,12 +607,23 @@ def validate_training_revision(current, incoming, expected_revision, *, actor_ty
         old = prior.get(record.record_id)
         if record.review.reviewer_type == "human" and actor_type != "human" and (old is None or record.review != old.review):
             raise ValueError("trusted actor does not permit human review")
+        if actor_type != "human":
+            old_regions = {item["evidence_id"]: item for item in old.evidence if item.get("type") == "image_region"} if old else {}
+            human_regions = [item for item in record.evidence if item.get("type") == "image_region" and item["observation_source"] == "human"]
+            if human_regions:
+                old_roles = _resolved_training_roles(old, prior_people) if old else {}
+                new_roles = _resolved_training_roles(record, incoming_people)
+                for item in human_regions:
+                    if old_regions.get(item["evidence_id"]) != item or old_roles.get(item["subject_role"]) != new_roles[item["subject_role"]]:
+                        raise ValueError("trusted actor does not permit new or changed human image region")
         if record.state and actor_type != "human":
             for role in ("self", "opponent", "partner", "opponent_partner"):
                 state = getattr(record.state, role)
                 old_state = getattr(old.state, role) if old and old.state else None
-                if state and state.position and state.position.source == "human" and (not old_state or state.position != old_state.position):
-                    raise ValueError("trusted actor does not permit new or changed human position")
+                if state and state.position and state.position.source == "human":
+                    if (not old_state or state.position != old_state.position
+                        or _resolved_training_roles(old, prior_people)[role] != _resolved_training_roles(record, incoming_people)[role]):
+                        raise ValueError("trusted actor does not permit new or changed human position")
     return incoming
 
 
@@ -596,6 +759,7 @@ def _derive_training_view(assets, bundles, taxonomy, splits):
         people = {p.person_id: p for p in bundle.people}
         for record in bundle.records:
             count += 1
+            resolved_roles = _resolved_training_roles(record, people) if not record.deleted else None
             if record.kind == "rally" and not record.deleted and not record.dead_ball_id:
                 missing_ends.append(record.record_id)
             for judgement in record.judgements:
@@ -614,7 +778,7 @@ def _derive_training_view(assets, bundles, taxonomy, splits):
                 if judgement.mapping_status in {"coarse", "unverified"}:
                     reasons.append("mapping_not_semantically_confirmed")
                 role = getattr(record.state, judgement.subject_role) if record.state else None
-                subject = judgement.subject_person_id or (role.person_id if role else record.person_id)
+                subject = resolved_roles[judgement.subject_role][0] if resolved_roles else judgement.subject_person_id or (role.person_id if role else record.person_id)
                 person = people.get(subject)
                 if label.requires_person and (person is None or person.identity_status != "confirmed"):
                     reasons.append("identity_unknown")
@@ -721,6 +885,7 @@ def training_schemas():
 
 
 __all__ = ["ActorType", "RecordKind", "JudgementValue", "SubjectRole", "TrainingProject", "TrainingAssetRef", "TrainingPerson",
+    "TrainingImagePoint", "TrainingImageRegion",
     "TrainingReview", "TrainingJudgement", "TrainingPosition", "TrainingActorState", "TrainingState", "TrainingRecord",
     "TrainingAnnotationBundle", "TrainingBundleUpdate", "TrainingLabel", "TrainingTaxonomy", "TrainingSplit",
     "TrainingExample", "TrainingExclusion", "TrainingQualitySummary", "TrainingSnapshot", "validate_training_bundle",
