@@ -1,0 +1,38 @@
+{
+  "dataset_version": "classic-lin-lee-20261003",
+  "sources": [
+    {
+      "source_id": "2008-beijing-final-lin-lee",
+      "source_page_url": "https://www.bilibili.com/video/BV1eF411y7oh/",
+      "provider": "Bilibili / 奥林匹克运动会",
+      "match_id": "olympics-2008-ms-final-lin-dan-lee-chong-wei",
+      "match_title": "2008北京奥运会男单决赛：林丹—李宗伟",
+      "event_date": "2008-08-17",
+      "rights_statement": "公开官方回放；接口标记download=1、no_reprint=1、pay=0。未发现训练、商用或再分发授权；rights_status=unknown，allowed_uses=[]。",
+      "max_bytes": 600000000,
+      "source_metadata": {"bvid": "BV1eF411y7oh", "cid": 1230264691, "expected_owner_mid": 565388139, "expected_duration_seconds": 3337}
+    },
+    {
+      "source_id": "2012-london-final-lin-lee",
+      "source_page_url": "https://www.bilibili.com/video/BV1xL411z7eX/",
+      "provider": "Bilibili / 奥林匹克运动会",
+      "match_id": "olympics-2012-ms-final-lin-dan-lee-chong-wei",
+      "match_title": "2012伦敦奥运会男单决赛：林丹—李宗伟",
+      "event_date": "2012-08-05",
+      "rights_statement": "公开官方回放；接口标记download=1、no_reprint=1、pay=0。未发现训练、商用或再分发授权；rights_status=unknown，allowed_uses=[]。公开单MP4仅360p，小球与细手法识别适用性未验证。",
+      "max_bytes": 300000000,
+      "source_metadata": {"bvid": "BV1xL411z7eX", "cid": 1142191373, "expected_owner_mid": 565388139, "expected_duration_seconds": 5299}
+    },
+    {
+      "source_id": "2016-rio-semifinal-lin-lee",
+      "source_page_url": "https://www.bilibili.com/video/BV1Dm421K7NG/",
+      "provider": "Bilibili / 奥林匹克运动会",
+      "match_id": "olympics-2016-ms-semifinal-lin-dan-lee-chong-wei",
+      "match_title": "2016里约奥运会男单半决赛：林丹—李宗伟",
+      "event_date": "2016-08-19",
+      "rights_statement": "公开官方回放；接口标记download=1、no_reprint=1、pay=0。未发现训练、商用或再分发授权；rights_status=unknown，allowed_uses=[]。",
+      "max_bytes": 1000000000,
+      "source_metadata": {"bvid": "BV1Dm421K7NG", "cid": 1544932218, "expected_owner_mid": 565388139, "expected_duration_seconds": 5440}
+    }
+  ]
+}
