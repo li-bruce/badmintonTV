@@ -299,6 +299,7 @@ class TrainingAnnotationBundle(TrainingModel):
             if record.deleted:
                 continue
             person(record.person_id, record.team_id)
+            resolved_judgements = []
             for judgement in record.judgements:
                 person(judgement.subject_person_id, None)
                 role = getattr(record.state, judgement.subject_role) if record.state else None
@@ -307,6 +308,9 @@ class TrainingAnnotationBundle(TrainingModel):
                 expected_person = role.person_id if role else record.person_id
                 if judgement.subject_person_id and expected_person and judgement.subject_person_id != expected_person:
                     raise ValueError("judgement subject person differs from state/record role")
+                resolved_judgements.append((judgement.label_id, judgement.subject_role,
+                                            judgement.subject_person_id or expected_person))
+            _unique(resolved_judgements, "resolved judgement label/subject")
             if record.rally_id:
                 rally = records.get(record.rally_id)
                 if rally is None or rally.kind != "rally":

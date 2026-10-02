@@ -38,6 +38,8 @@ snapshot = build_training_snapshot(
 
 `get_default_training_taxonomy()` 返回明确 provisional 的 UI 占位词表，不是专家定义。models 可提供同格式替换词表，原始文件及适配信息由 provenance 保留；未审定语义仍为 provisional。
 
+Judgement 唯一性在解析继承主体后再次检查：同一记录中，`subject_person_id: null` 若继承 record.person_id 或 state 对应角色，与显式填写同一人物是同一个主体，不能对相同 label 同时提交 present/absent 或重复值。不同角色/人物的同名标签保留独立判断；此为跨字段校验，schema 字段不变。
+
 ## 快照与训练视图
 
 快照保存项目、完整 taxonomy、AssetRef、完整 bundle 和记录 revision 的实际值，而不只是引用 ID。创建后不可原地修改；重新读取验证 `content_sha256`。Hash 为全部规范化 JSON 字段（排除 content_sha256 自身）的 UTF-8 SHA256，键排序、紧凑分隔符、禁止 NaN。created_at 也是内容的一部分，重复读取必须使用保存的值。
@@ -57,4 +59,4 @@ Split 按 group_id 指定 train/validation/test/unassigned；未知或未确认 
 
 四个 `training.*.v1.json` fixture 明示 synthetic：含回合、两次触球、独立死球、动作区间、双方状态、多标签及 unknown。人物 confirmed 仅为合成合同角色，记录为 agent 待审核，快照训练视图为空；没有真实原片、人工运动真值或模型推理结果。
 
-本文件的自动测试覆盖 A-01 及 A-04/A-05 的合同部分：边界/关系、旧合同兼容、审核重置与 CAS、unknown、taxonomy group 禁选、split/lineage 泄漏、主体及双打角色、证据排除、快照冻结和 hash。2026-10-02 实际运行上面全合同命令：**258 passed in 1.63s**，其中新训练测试 73 项；无 GPU、原片复制或真实专家标注。A-02/A-03/A-06/A-07/A-08/A-09/A-10 的真实目录、浏览器、WSL和产品集成不由这些合成测试替代。
+本文件的自动测试覆盖 A-01 及 A-04/A-05 的合同部分：边界/关系、旧合同兼容、审核重置与 CAS、unknown、taxonomy group 禁选、split/lineage 泄漏、主体及双打角色、证据排除、快照冻结和 hash。2026-10-02 初版实际运行上面全合同命令：**258 passed in 1.63s**，其中训练测试 72 项。随后修复隐式/显式同主体重复，单独运行 `tests/contracts/test_training.py`：**75 passed in 0.36s**，schema 字段未改变。无 GPU、原片复制或真实专家标注。A-02/A-03/A-06/A-07/A-08/A-09/A-10 的真实目录、浏览器、WSL和产品集成不由这些合成测试替代。
