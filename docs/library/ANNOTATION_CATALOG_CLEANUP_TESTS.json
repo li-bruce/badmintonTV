@@ -1,0 +1,46 @@
+{
+  "schema_version": "library.annotation-catalog-cleanup-validation/1",
+  "recorded_at": "2026-10-02T15:39:18.824038+00:00",
+  "test_executor": "library subagent downloader; actual local unittest execution",
+  "command": "D:/video/runtime/platform/env/Scripts/python.exe -B -m unittest tests.library.test_annotation_catalog",
+  "status": "PASS",
+  "tests_run": 33,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 6.619,
+  "engineering_fixtures_only": true,
+  "full_library_suite_rerun": false,
+  "real_media_rehashed": false,
+  "real_data_written": false,
+  "prior_failure": {
+    "implementation_commit": "158ce5fff898a52b46de110cf53a5359ae7e14f3",
+    "tests_run": 3,
+    "errors": 3,
+    "elapsed_seconds": 0.672,
+    "phases": [
+      "lock_release",
+      "quota_release",
+      "capacity_after"
+    ],
+    "observed": "Entry had committed; cleanup errors escaped publish_catalog. These are injected temporary-fixture failures, not a real storage incident."
+  },
+  "source_sha256": {
+    "packages/library/annotation_catalog.py": "925adcdd2d0344aa78370716dfb06a3275726cb087c2a4520300936a40e02e91",
+    "tests/library/test_annotation_catalog.py": "696de0d62409241af7841fb6468430fdee93746d88157ad1e0772448f0a0a4a1"
+  },
+  "test_case_count_in_source": 33,
+  "additional_cases": [
+    "postcommit_lock_release",
+    "postcommit_quota_release",
+    "postcommit_capacity_after",
+    "unchanged_lock_release",
+    "unchanged_quota_release",
+    "unchanged_capacity_after",
+    "simultaneous_lock_quota_release",
+    "CLI_warning_exit_zero",
+    "replace_success_then_wrapper_error",
+    "postcommit_temp_unlink_error"
+  ],
+  "implementation_commit": "c4aebdbc62cc120f7ead68b8bb0cb46df89234dc"
+}
