@@ -53,6 +53,10 @@ A-02完整用例需要01真实浏览器注册、播放和源时间定位；A-05�
 
 故障审查补充：`os.replace`成功是发布提交点。之后若审计completed记录写入失败，目录已经完整切换，不能谎报“失败且旧入口不变”。此时返回 `published_with_audit_warning` 和明确warnings，新目录继续可验证；旧不可变代与started审计记录保留。消费者应检查warnings、运行verify并查审计存储失败原因，不自动回滚已经可能被注册的有效代。此项明确了原“失败保留旧发布”断言的提交点边界，不把部分sidecar暴露为有效目录。
 
+提交后收尾P2补修：上述保护现覆盖整个发布收尾，包括入口temp清理、audit完成、lock释放、quota释放和最终capacity读取。`entry_committed`只在本次入口确认替换后为true；`cleanup_issues[]`保存phase/error_type/error，`recovery.lock_path`为项目根相对锁路径、`recovery.reservation_id`为本次实际预留ID。错误不触发自动回滚、删除锁或重试释放；应核对真实残留，尤其释放报错可能发生在账本已经提交之后，不能据报错猜测预留仍活动。
+
+已提交而收尾有问题继续用兼容状态 `published_with_audit_warning`；相同目录已核验而收尾有问题返回 `unchanged_with_cleanup_warning`，此时entry_committed=false。CLI均exit0并在stdout明确warnings，不再误报failed/exit2。最终容量不可读时 `capacity_after=null` 且warning标unknown；其它成功读取的容量、实际预留与锁信息照实报告。同次多个故障分别保留，提交前异常仍失败并保留旧入口。
+
 verify不构造QuotaManager，不写容量账本、数据目录或报告；其JSON打印到stdout。本次报告由调用者重定向保存到仓库docs。它重新构建期望字节，重哈希原视频/PTS/CSV/来源文档并与全部发布sidecar比较；任何缺失、内容差异、路径别名、原PTS乱序或非有限JSON都会报错退出2。
 
 ## 真实运行结果（2026-10-02）
@@ -76,3 +80,7 @@ A-02和A-05完整工程用例在本模块仍NOT_RUN，不能由以上数据子�
 失败记录：自定义stdin runner曾触发Windows multiprocessing无法重载`<stdin>`，一个旧并发额度测试ERROR（209项/48.036秒）；[失败收据](ANNOTATION_CATALOG_TESTS_STDIN_FAILURE.json)保留。随后使用原有 `python -m unittest`入口运行同套测试通过，无实现绕过、无skip或门槛变更。发布可靠性审查及已修问题见 [publication issue](../issues/library-annotation-catalog-publication.md)。
 
 实现、配置和23项回归提交：`158ce5fff898a52b46de110cf53a5359ae7e14f3`。所有变更在 `codex/library-annotation-catalog`，未推送、未自行合并main；主任务应同时集成后续docs证据提交。原数据、许可证据、PTS及9,817行提示只在D:/video，Git只提交代码、配置和小型验收报告。
+
+收尾补修仅运行相关目录测试：**33/33 PASS、0skip、6.619秒**，其中10项新增；旧版三类异常先实际复现3 ERROR。包括新发布/unchanged的三类故障、同时失败、CLI行为，以及replace完成后包装器/temp清理失败。见[定向收据](ANNOTATION_CATALOG_CLEANUP_TESTS.json)及[问题记录](../issues/library-annotation-catalog-publication.md)。这次没有重跑全库或真实媒体hash、没有重新发布真实目录；既有目录SHA与容量是上轮实测值，不冒充本轮重新测量。只改代码、测试和小型文档，未增加下载、环境、GPU或服务端口。
+
+收尾补修独立提交：`c4aebdbc62cc120f7ead68b8bb0cb46df89234dc`。原分支保持 `codex/library-annotation-catalog`，由主任务集成；未自行推送或合并main。

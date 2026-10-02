@@ -1,5 +1,13 @@
 # Library 状态
 
+## 2026-10-02 发布收尾P2补修（已完成）
+
+- 主任务集成后指出：入口已提交，外层lock释放、quota释放、最终capacity读取错误仍可能让CLI报failed。先冻结 [A-02.library-publication补充断言](../issues/library-annotation-catalog-publication.md)，旧实现三类故障实测3 ERROR（0.672s），未把注入故障说成真实数据事故。
+- 已修复：整个收尾共享明确commit状态，各层清理错误单独记录；已提交返回published_with_audit_warning，已存在相同目录返回unchanged_with_cleanup_warning。entry_committed、cleanup_issues和recovery字段区分提交事实及后续检查；capacity不可读为null/unknown。锁/预留失败保留真实状态、不自动回滚/删除/重试释放；提交前错误仍传播。亦覆盖replace已经完成但包装器才报错、temp清理失败的边界。
+- 已运行：相关目录33/33 PASS、0skip、6.619s，含10个新增故障测试；新代可verify、旧不可变代字节/mtime保持、真实临时lock/预留残留可查，CLI exit0输出明确warning。独立代码审查未见阻断。证据：[定向测试](../library/ANNOTATION_CATALOG_CLEANUP_TESTS.json)、[交接](../library/ANNOTATION_HANDOFF.md)。未重跑全库、未重哈希真实媒体或重新发布真实目录；209项全库及真实目录证据仍为上一提交的历史结果。
+- 本地修复提交 `c4aebdbc62cc120f7ead68b8bb0cb46df89234dc`；文档/测试收据另作本地记录提交。环境仍为既有平台Python3.12.11/Pydantic2.13.5；本次命令 `D:/video/runtime/platform/env/Scripts/python.exe -B -m unittest tests.library.test_annotation_catalog`。仅仓库代码/文档和临时合成夹具变化；D:/video写入0、外部下载0、新环境0、服务端口0、GPU0，无新增真实数据容量。
+- 下一步：主任务集成本独立修复及记录。A-02/A-05完整跨模块验收继续由主任务维护；本补修只关闭library发布状态P2，不提升动作/身份/分组真值状态。
+
 ## 2026-10-02 训练标注目录（实施轮02，library已交付）
 
 - 从干净的 `3dab169` 建立 `codex/library-annotation-catalog`；只改library边界。先冻结 [A-02/A-05数据前提断言](../library/ANNOTATION_HANDOFF.md)，不修改共享训练合同、原registry或split，不自行集成main。
