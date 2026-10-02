@@ -1,3 +1,11 @@
+## 2026-10-02 训练工作台（功能交付、最终浏览器验收进行中）
+
+- 分支 codex/platform-training-workspace，从 main 3dab169 建立；旧分支保留。设计先行，见 docs/platform/TRAINING_DESIGN.md，A-01/02/03/04/05/08/09/10 已冻结断言，当前均 NOT_RUN。
+- 已实现：兼容合同6fec08f及主体语义修复2128568、独立 training_* 表与 API、可信目录后台校验、中文训练工作台、冻结快照、/guide/ 多页手册入口。交接见 docs/platform/TRAINING_HANDOFF.md。
+- 已运行：748后端PASS/8条件skip/81.84秒；18新前端PASS；16/16真实训练制作隔离负例PASS。浏览器真实登记原片/32651帧PTS、回合/2触球/动作/2匿名人物、多标签unknown/双方图像点位保存revision2并重载；最终快照与冲突演示继续中。
+- 服务：私有 127.0.0.1:18082、独立 platform/training-20261002 状态目录；首版保存后重启保留，复用原环境，CPU；无新安装、无 GPU、无主线 18080/生产库操作。
+- 容量：本轮新增峰值限 2GB，源码文档 <50MB；D盘写入前预检和预留待运行时记录。原媒体只读引用，不复制。
+- 未测：最终快照浏览器/末次重启和主线集成尚未完成；没有专家标签真值，不宣称模型训练可用。A-06/07与主线A-10由对应模块/主任务验收。
 # Platform 状态
 
 2026-09-29 更新。任务 01a0e88b-2410-7da0-970e-7f4187ed485f；cwd C:/Users/USER/.codex/worktrees/6991/badmintonTV；branch codex/platform-research-implementation（从 main ff2c700 新建，旧 work/platform 保留）。只提交平台及共享合同的授权范围，主任务集成，无推送。

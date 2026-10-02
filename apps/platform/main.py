@@ -40,6 +40,8 @@ def create_app(storage_root=None, db_path=None):
     app.state.store, app.state.queue, app.state.storage_root = store, queue, root
     templates = Jinja2Templates(directory=str(Path(__file__).parent/'templates'))
     app.mount('/static', StaticFiles(directory=Path(__file__).parent/'static'), name='static')
+    from .training_api import install_training
+    install_training(app, store, queue, templates)
     code_snapshot={'platform_version':'0.1.0','git_revision':os.getenv('BTV_CODE_REVISION','unknown'),
                    'source_sha256':{name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('main.py','store.py','retrieval.py')}}
 
