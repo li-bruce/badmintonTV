@@ -1,5 +1,19 @@
 # Render 状态
 
+## 2026-10-02 触球逻辑窗口（A-07 / A-08，本模块验证完成）
+
+- 设计：已读新轮实施和能力方案；干净工作树从 main `3dab169` 创建 `codex/render-contact-windows`。先冻结四策略、缺失/不确定/人物与回合边界、PTS/版本/用途断言，见 `docs/render/CONTACT_WINDOWS_HANDOFF.md`。
+- 已实现：球路、手法、步法、整回合四类半开逻辑范围；源 PTS/修订/规则/用途可回查，缺失、多人、不确定、阶段冲突与未来证据显式处理。只读 CLI 核真实源和完整 PTS；正式 bundle/snapshot adapter 保留原标签、四主体、审核与质量门槛。训练清单和嵌套训练段在 render/normalize 入口拒绝，general 原路径兼容。代码与 API 见 `docs/render/CONTACT_WINDOWS_HANDOFF.md`。
+- 已运行 / A-07：工程范围 PASS。新增60项全部通过；最终 render + contracts 为486 passed / 1旧symlink权限skipped / 528 subtests passed（8.12秒）。真实 b210dc39…原片 SHA、32,651行完整PTS与10窗口独立逐帧范围核对通过；正式技术 bundle/snapshot 窗口一致、快照可重复构建，eligible仍0。另核真实VFR索引229/230帧（9160/9180ms），没有按frame/fps推算。示例 CLI 进程内真实main入口exit0、10窗口、stdout41,219bytes。
+- 已运行 / A-08：render边界18/18负例PASS，涵盖normal/preview/research-preview、原训练源/元数据衍生物/整份清单/嵌套训练段/general源训练窗口；0媒体启动、0预留、0产物。原3条general实际SHA与用途检查及逻辑normalize通过（3段/512帧/30fps），本轮未重编码。制作导入/Candidate/平台Timeline API及浏览器全链由01/root验收，本模块NOT_RUN，不宣布整个A-08或产品阶段达标。
+- 追加真实网页快照 / A-07：root提供 `platform/integration-20261002/snapshot-before-restart.json`（content_sha `d2deb51291cbb8ad5ac100e7a95d60afb6670e8c3762f05304daee77410a67dd`），正式合同验证后6记录/rev2生成7窗口；未给serve/phase映射，整回合missing_serve/unavailable、两项步法candidate，6项实际范围PTS独立枚举PASS。unknown2/unobservable1、eligible0/excluded3保持；只核adapter消费，不冒充本模块执行了网页操作/重启。
+- 证据：`docs/render/CONTACT_WINDOWS_VALIDATION.md` 与同名JSON；最终报告2026-10-02 UTC16:03:28–16:03:33（北京时间10月3日00:03）、237,138bytes、源码8项SHA前后及运行后相符。输入核查见 `CONTACT_WINDOWS_DATA.md`；跟踪13项输入stat、可信registry与网页快照hash均未变。
+- 环境/容量：复用 `D:/video/runtime/platform/env/Scripts/python.exe`（Python3.12及既有Pydantic），CPU、无端口/依赖安装/GPU。原片只读、不切片不复制，D盘新增写入0，无render owner/容量预留。本轮新增源码/测试/配置/报告/文档预算<5MB。23:03北京时间非原子只读快照：render647,917,504bytes/40GB、runtime/render873,315,597bytes/5GB、D盘可用922,754,990,080bytes；不冒称本轮已重测全局700GB统计。
+- 失败/未测/阻塞：工程断言已通过，旧symlink权限skip如实保留。技术marks与人物均agent fixture，不是视频动作/身份真值；专家语义仍BLOCKED。VFR原片本轮未重新hash/解码，浏览器/人类动作审核未测。整数毫秒未含真实锚点PTS时保留差值并candidate，见 `docs/issues/render-contact-window-semantic-ground-truth.md`。
+- 提交：待下方补记本轮实现SHA；公共合同依赖为01的 `6fec08f` / `2128568`（本分支等价 `177a8e9` / `055c42a`），root已集成，不重复挑选依赖。未推送、未合并main、未发布视频。
+- 启动/验证命令：`D:/video/runtime/platform/env/Scripts/python.exe -B -m packages.render.contact_windows --request configs/render/contact-windows.example.json --storage-root D:/video`；`-B scripts/render/verify_contact_windows.py --storage-root D:/video`；`-B -m pytest tests/render tests/contracts -q -p no:cacheprovider`。完整PowerShell写法见验收记录。
+- 下一步：主任务读取本状态、最终回复和handoff集成；01接训练工作台，03消费训练窗口与原快照训练视图，root维护阶段总表并完成全链。没有跨聊天发信要求。
+
 ## 2026-09-29 质量输入 P2 复核修复（验证完成）
 
 - 设计/实现：修复 `quality_compare` 只核验原片却未绑定实际成片的问题。只读固定平台账本绑定成功 job/attempt、规范化请求和 MP4/timeline/source_map/QA Artifact；实际 SHA 复用共享用途门禁，保留 producer 来源并逐源继承。字幕从可信请求重算，命令与认证 QA 对齐。所有拒绝先于版本查询、预留和媒体进程。

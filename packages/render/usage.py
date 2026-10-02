@@ -7,6 +7,21 @@ from .storage import sha256
 from .timeline import RenderError, require, safe_path
 
 
+def reject_training_timeline(timeline):
+    """Logical training windows are not a production/editable Timeline."""
+    if not isinstance(timeline, dict):
+        return
+    segments = timeline.get("segments", [])
+    for record in [timeline, *(segments if isinstance(segments, list) else [])]:
+        if not isinstance(record, dict):
+            continue
+        provenance = record.get("provenance")
+        if (record.get("usage_scope") == "training_only"
+                or record.get("format") == "badmintonTV.training-contact-windows"
+                or isinstance(provenance, dict) and provenance.get("usage_scope") == "training_only"):
+            raise RenderError("TRAINING_ONLY", "Training windows cannot become a production Timeline", "blocked")
+
+
 def referenced_assets(timeline, assets):
     require(isinstance(timeline, dict), "timeline must be an object")
     segments = timeline.get("segments")

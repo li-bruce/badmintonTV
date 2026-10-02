@@ -125,6 +125,8 @@ def export_timeline(timeline):
 
 
 def normalize_timeline(timeline, assets, *, merge_overlaps=False, deduplicate_replays=False, preview=False, research_preview=False):
+    from .usage import reject_training_timeline
+    reject_training_timeline(timeline)
     require(isinstance(timeline, dict) and timeline.get("schema_version") == "1.0", "Timeline schema_version must be 1.0")
     t = deepcopy(timeline)
     require(text(t.get("timeline_id"), "timeline_id", 200), "timeline_id is required")
