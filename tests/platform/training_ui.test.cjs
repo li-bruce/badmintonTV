@@ -171,8 +171,8 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   elements.get('label-subject-role').value = 'self';
   const doc = new EventTarget(); doc.getElementById = id => { assert.ok(elements.has(id), 'Missing template ID ' + id); return elements.get(id); }; doc.createElement = tag => new Element(tag);
   const f = fixture(); const taxonomy = {labels: [
-    {label_id: 'directory', name: '动作目录', description: '只供导航', dimension: '动作', kinds: ['contact'], selectable: false},
-    {label_id: 'stroke', name: '网前球', parent_id: 'directory', description: '测试定义', dimension: '动作', kinds: ['contact'], selectable: true} ]};
+    {label_id: 'directory', name: '动作目录', description: '只供导航', dimension: 'stroke', kinds: ['contact'], selectable: false},
+    {label_id: 'stroke', name: '网前球', parent_id: 'directory', description: '测试定义', dimension: 'stroke', kinds: ['contact'], selectable: true} ]};
   const project = {project: f.project, assets: f.assets, taxonomy, actor_type: 'agent', splits: []};
   const win = new EventTarget(); Object.assign(win, {confirm: () => true, setTimeout, fetch: async url => ({ok: true, json: async () => {
     const p = url.replace('/api/v1/training', '');
@@ -183,6 +183,7 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   }})});
   const c = ui.mount(doc, win); await tick(); await c.openProject('project-1'); await c.openAsset('asset-a'); c.newRecord('contact', 1000);
   const descendants = node => node.children.flatMap(child => [child, ...descendants(child)]);
+  assert.equal(descendants(elements.get('taxonomy-labels')).find(node => node.tagName === 'SUMMARY').textContent, '击球 · 2 项');
   c.edit(bundle => bundle.people.push({person_id: 'person-a', display_name: '匿名 A', identity_status: 'unconfirmed'}));
   const identity = descendants(elements.get('participant-list')).find(node => node.tagName === 'SELECT');
   assert.equal(identity.options.find(option => option.value === 'confirmed').disabled, true, 'agent may not confirm participant identity');
@@ -200,4 +201,14 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   assert.equal(c.record().evidence[0].type, 'source_time'); assert.equal(c.record().evidence[0].observation_source, 'agent');
   const formEvent = new Event('submit', {cancelable: true}); elements.get('annotation-form').dispatchEvent(formEvent);
   assert.equal(formEvent.defaultPrevented, true, 'native submit must be stopped before async save'); await tick();
+  c.state.snapshots = [{snapshot_id: 'blocked-snapshot', created_at: '2026-10-02T00:00:00Z', project: f.project, content_sha256: 'a'.repeat(64),
+    quality_summary: {record_count: 2, eligible_judgement_count: 0, excluded_judgement_count: 2, trainable: false, blockers: ['independent_match_group_unconfirmed']}}];
+  c.notify();
+  let downloads = descendants(elements.get('snapshot-list')).filter(node => node.tagName === 'A');
+  assert.equal(downloads.length, 2); assert.ok(downloads.every(link => link.href.includes('view=audit')));
+  assert.ok(descendants(elements.get('snapshot-list')).some(node => node['aria-disabled'] === 'true' && !node.href && node.textContent.includes('先完成质量审核')));
+  assert.ok(descendants(elements.get('snapshot-summary')).some(node => node.textContent === '原片所属的独立比赛组尚未确认'));
+  c.state.snapshots[0].quality_summary = {...c.state.snapshots[0].quality_summary, trainable: true, blockers: []}; c.notify();
+  downloads = descendants(elements.get('snapshot-list')).filter(node => node.tagName === 'A');
+  assert.equal(downloads.length, 3); assert.equal(downloads.filter(link => link.href.includes('view=training')).length, 1);
 });
