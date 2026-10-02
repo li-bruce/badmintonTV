@@ -456,18 +456,23 @@
         for (const label of members) {
           if (label.selectable === false) { family.append(el('p', pathName(label), 'taxonomy-directory')); continue; }
           const judgement = record.judgements.find(j => j.label_id === label.label_id && matchesSubject(j));
+          const item = el('div', undefined, 'label-item');
           const row = el('div', undefined, 'label-row'), desc = el('div');
-          desc.append(el('label', pathName(label)), el('p', label.description + (label.status === 'provisional' ? '（定义待审核）' : ''), 'definition'));
+          desc.append(el('label', label.name));
           const select = el('select'); options(select, Object.entries(judgments), judgement?.value || 'unlabeled'); select.setAttribute('aria-label', pathName(label) + '判断');
           select.addEventListener('change', () => { ctl.modifyRecord(r => {
             if (subject !== 'self') { r.state ||= {}; r.state[subject] ||= {person_id: person, position: null, missing_reasons: []}; }
             let j = r.judgements.find(item => item.label_id === label.label_id && matchesSubject(item));
             if (!j) { j = {label_id: label.label_id, value: select.value, subject_role: subject, subject_person_id: person, mapping_status: 'manual'}; r.judgements.push(j); } else j.value = select.value;
-          }); }); row.append(desc, select); family.append(row);
+          }); }); row.append(desc, select); item.append(row);
           if (judgement && judgement.value !== 'unlabeled') {
             const reason = el('input'); reason.value = judgement.reason || ''; reason.placeholder = ['unknown', 'unobservable', 'absent'].includes(judgement.value) ? '本主体此项判断的具体理由（必填）' : '本主体此项判断的观察理由'; reason.setAttribute('aria-label', roles[subject] + label.name + '理由');
-            reason.addEventListener('input', () => editRecord(r => { r.judgements.find(j => j.label_id === label.label_id && matchesSubject(j)).reason = reason.value; })); family.append(reason);
+            reason.addEventListener('input', () => editRecord(r => { r.judgements.find(j => j.label_id === label.label_id && matchesSubject(j)).reason = reason.value; })); item.append(reason);
           }
+          const definition = el('details', undefined, 'label-definition'); definition.open = false;
+          definition.append(el('summary', '定义与判断依据'), el('p', pathName(label), 'taxonomy-path'), el('p', label.description, 'definition'));
+          if (label.status === 'provisional') definition.append(el('p', '定义待审核', 'muted'));
+          item.append(definition); family.append(item);
         }
         container.append(family);
       }
