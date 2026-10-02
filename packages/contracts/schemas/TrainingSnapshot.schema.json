@@ -1,0 +1,1460 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "TrainingActorState": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Person Id"
+        },
+        "team_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team Id"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingPosition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "movement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Movement"
+        },
+        "missing_reasons": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Missing Reasons",
+          "type": "array"
+        }
+      },
+      "title": "TrainingActorState",
+      "type": "object"
+    },
+    "TrainingAnnotationBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "format": {
+          "const": "badmintontv.training.annotations.v1",
+          "default": "badmintontv.training.annotations.v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset": {
+          "$ref": "#/$defs/TrainingAssetRef"
+        },
+        "revision": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "people": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TrainingPerson"
+          },
+          "title": "People",
+          "type": "array"
+        },
+        "records": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TrainingRecord"
+          },
+          "title": "Records",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset"
+      ],
+      "title": "TrainingAnnotationBundle",
+      "type": "object"
+    },
+    "TrainingAssetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-fA-F]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "usage_scope": {
+          "const": "training_only",
+          "default": "training_only",
+          "title": "Usage Scope",
+          "type": "string"
+        },
+        "source_usage_scope": {
+          "default": "training_only",
+          "enum": [
+            "general",
+            "training_only"
+          ],
+          "title": "Source Usage Scope",
+          "type": "string"
+        },
+        "match_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Match Id"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Group Id"
+        },
+        "group_status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "unconfirmed",
+            "confirmed"
+          ],
+          "title": "Group Status",
+          "type": "string"
+        },
+        "root_asset_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Root Asset Ids",
+          "type": "array"
+        },
+        "source_sha256s": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-fA-F]{64}$",
+            "type": "string"
+          },
+          "title": "Source Sha256S",
+          "type": "array"
+        },
+        "recording_session_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recording Session Id"
+        },
+        "source_group_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Group Ids",
+          "type": "array"
+        },
+        "pts_reference": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pts Reference"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "asset_id",
+        "sha256",
+        "relative_path",
+        "size_bytes",
+        "duration_ms"
+      ],
+      "title": "TrainingAssetRef",
+      "type": "object"
+    },
+    "TrainingExample": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "record_revision": {
+          "exclusiveMinimum": 0,
+          "title": "Record Revision",
+          "type": "integer"
+        },
+        "label_id": {
+          "minLength": 1,
+          "title": "Label Id",
+          "type": "string"
+        },
+        "subject_role": {
+          "default": "self",
+          "enum": [
+            "self",
+            "opponent",
+            "partner",
+            "opponent_partner"
+          ],
+          "title": "Subject Role",
+          "type": "string"
+        },
+        "subject_person_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject Person Id"
+        },
+        "value": {
+          "enum": [
+            "present",
+            "absent"
+          ],
+          "title": "Value",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test",
+            "unassigned"
+          ],
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "record_id",
+        "record_revision",
+        "label_id",
+        "value",
+        "split"
+      ],
+      "title": "TrainingExample",
+      "type": "object"
+    },
+    "TrainingExclusion": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "label_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label Id"
+        },
+        "subject_role": {
+          "default": "self",
+          "enum": [
+            "self",
+            "opponent",
+            "partner",
+            "opponent_partner"
+          ],
+          "title": "Subject Role",
+          "type": "string"
+        },
+        "subject_person_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject Person Id"
+        },
+        "reasons": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "asset_id",
+        "record_id",
+        "reasons"
+      ],
+      "title": "TrainingExclusion",
+      "type": "object"
+    },
+    "TrainingJudgement": {
+      "additionalProperties": false,
+      "properties": {
+        "label_id": {
+          "minLength": 1,
+          "title": "Label Id",
+          "type": "string"
+        },
+        "subject_role": {
+          "default": "self",
+          "enum": [
+            "self",
+            "opponent",
+            "partner",
+            "opponent_partner"
+          ],
+          "title": "Subject Role",
+          "type": "string"
+        },
+        "subject_person_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subject Person Id"
+        },
+        "value": {
+          "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable",
+            "unlabeled",
+            "unobservable"
+          ],
+          "title": "Value",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "source_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Label"
+        },
+        "mapping_status": {
+          "default": "manual",
+          "enum": [
+            "manual",
+            "exact",
+            "coarse",
+            "unverified"
+          ],
+          "title": "Mapping Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label_id",
+        "value"
+      ],
+      "title": "TrainingJudgement",
+      "type": "object"
+    },
+    "TrainingLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "label_id": {
+          "minLength": 1,
+          "title": "Label Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "kinds": {
+          "items": {
+            "enum": [
+              "rally",
+              "contact",
+              "dead_ball",
+              "segment",
+              "state"
+            ],
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "status": {
+          "default": "provisional",
+          "enum": [
+            "provisional",
+            "defined"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "selectable": {
+          "default": true,
+          "title": "Selectable",
+          "type": "boolean"
+        },
+        "requires_person": {
+          "default": true,
+          "title": "Requires Person",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label_id",
+        "name",
+        "dimension",
+        "description",
+        "kinds"
+      ],
+      "title": "TrainingLabel",
+      "type": "object"
+    },
+    "TrainingPerson": {
+      "additionalProperties": false,
+      "properties": {
+        "person_id": {
+          "minLength": 1,
+          "title": "Person Id",
+          "type": "string"
+        },
+        "display_name": {
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "team_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team Id"
+        },
+        "identity_status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "unconfirmed",
+            "confirmed"
+          ],
+          "title": "Identity Status",
+          "type": "string"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "person_id",
+        "display_name"
+      ],
+      "title": "TrainingPerson",
+      "type": "object"
+    },
+    "TrainingPosition": {
+      "additionalProperties": false,
+      "properties": {
+        "coordinate_system": {
+          "enum": [
+            "image_normalized",
+            "court_m"
+          ],
+          "title": "Coordinate System",
+          "type": "string"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "calibration_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calibration Id"
+        },
+        "source": {
+          "default": "agent",
+          "enum": [
+            "human",
+            "agent",
+            "model",
+            "import"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "coordinate_system",
+        "x",
+        "y"
+      ],
+      "title": "TrainingPosition",
+      "type": "object"
+    },
+    "TrainingProject": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "usage_scope": {
+          "const": "training_only",
+          "default": "training_only",
+          "title": "Usage Scope",
+          "type": "string"
+        },
+        "catalog_version": {
+          "minLength": 1,
+          "title": "Catalog Version",
+          "type": "string"
+        },
+        "taxonomy_id": {
+          "minLength": 1,
+          "title": "Taxonomy Id",
+          "type": "string"
+        },
+        "taxonomy_version": {
+          "minLength": 1,
+          "title": "Taxonomy Version",
+          "type": "string"
+        },
+        "asset_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Asset Ids",
+          "type": "array"
+        },
+        "revision": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "project_id",
+        "name",
+        "catalog_version",
+        "taxonomy_id",
+        "taxonomy_version"
+      ],
+      "title": "TrainingProject",
+      "type": "object"
+    },
+    "TrainingQualitySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "record_count": {
+          "minimum": 0,
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "eligible_judgement_count": {
+          "minimum": 0,
+          "title": "Eligible Judgement Count",
+          "type": "integer"
+        },
+        "excluded_judgement_count": {
+          "minimum": 0,
+          "title": "Excluded Judgement Count",
+          "type": "integer"
+        },
+        "unassigned_asset_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Unassigned Asset Ids",
+          "type": "array"
+        },
+        "unconfirmed_match_asset_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Unconfirmed Match Asset Ids",
+          "type": "array"
+        },
+        "missing_dead_ball_rally_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Missing Dead Ball Rally Ids",
+          "type": "array"
+        },
+        "trainable": {
+          "title": "Trainable",
+          "type": "boolean"
+        },
+        "blockers": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "record_count",
+        "eligible_judgement_count",
+        "excluded_judgement_count",
+        "unassigned_asset_ids",
+        "missing_dead_ball_rally_ids",
+        "trainable",
+        "blockers"
+      ],
+      "title": "TrainingQualitySummary",
+      "type": "object"
+    },
+    "TrainingRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "rally",
+            "contact",
+            "dead_ball",
+            "segment",
+            "state"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "at_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At Ms"
+        },
+        "start_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Ms"
+        },
+        "end_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Ms"
+        },
+        "uncertainty_start_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uncertainty Start Ms"
+        },
+        "uncertainty_end_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uncertainty End Ms"
+        },
+        "person_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Person Id"
+        },
+        "team_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team Id"
+        },
+        "rally_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rally Id"
+        },
+        "dead_ball_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dead Ball Id"
+        },
+        "segment_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "stroke",
+                "footwork",
+                "tactic",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Segment Type"
+        },
+        "judgements": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TrainingJudgement"
+          },
+          "title": "Judgements",
+          "type": "array"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "visibility": {
+          "default": "unknown",
+          "enum": [
+            "clear",
+            "partial",
+            "unobservable",
+            "unknown"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "unknown_reasons": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Unknown Reasons",
+          "type": "array"
+        },
+        "raw_labels": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Raw Labels",
+          "type": "array"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "type": "object"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "review": {
+          "$ref": "#/$defs/TrainingReview"
+        },
+        "revision": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "previous_revision": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previous Revision"
+        },
+        "deleted": {
+          "default": false,
+          "title": "Deleted",
+          "type": "boolean"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "record_id",
+        "project_id",
+        "asset_id",
+        "kind"
+      ],
+      "title": "TrainingRecord",
+      "type": "object"
+    },
+    "TrainingReview": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "pending",
+            "confirmed",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reviewer_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "human",
+                "agent",
+                "model",
+                "import"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer Type"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "title": "TrainingReview",
+      "type": "object"
+    },
+    "TrainingSplit": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "split": {
+          "default": "unassigned",
+          "enum": [
+            "train",
+            "validation",
+            "test",
+            "unassigned"
+          ],
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_id"
+      ],
+      "title": "TrainingSplit",
+      "type": "object"
+    },
+    "TrainingState": {
+      "additionalProperties": false,
+      "properties": {
+        "self": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingActorState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "opponent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingActorState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "partner": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingActorState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "opponent_partner": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingActorState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "incoming_ball": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Incoming Ball"
+        },
+        "outgoing_ball": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outgoing Ball"
+        },
+        "missing_reasons": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Missing Reasons",
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "title": "TrainingState",
+      "type": "object"
+    },
+    "TrainingTaxonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "format": {
+          "const": "badmintontv.training.taxonomy.v1",
+          "default": "badmintontv.training.taxonomy.v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "taxonomy_id": {
+          "minLength": 1,
+          "title": "Taxonomy Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "status": {
+          "default": "provisional",
+          "enum": [
+            "provisional",
+            "reviewed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "labels": {
+          "items": {
+            "$ref": "#/$defs/TrainingLabel"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Provenance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "taxonomy_id",
+        "version",
+        "labels"
+      ],
+      "title": "TrainingTaxonomy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "format": {
+      "const": "badmintontv.training.snapshot.v1",
+      "default": "badmintontv.training.snapshot.v1",
+      "title": "Format",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "minLength": 1,
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "usage_scope": {
+      "const": "training_only",
+      "default": "training_only",
+      "title": "Usage Scope",
+      "type": "string"
+    },
+    "project": {
+      "$ref": "#/$defs/TrainingProject"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TrainingTaxonomy"
+    },
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/TrainingAssetRef"
+      },
+      "title": "Assets",
+      "type": "array"
+    },
+    "bundles": {
+      "items": {
+        "$ref": "#/$defs/TrainingAnnotationBundle"
+      },
+      "title": "Bundles",
+      "type": "array"
+    },
+    "splits": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TrainingSplit"
+      },
+      "title": "Splits",
+      "type": "array"
+    },
+    "training_view": {
+      "items": {
+        "$ref": "#/$defs/TrainingExample"
+      },
+      "title": "Training View",
+      "type": "array"
+    },
+    "exclusions": {
+      "items": {
+        "$ref": "#/$defs/TrainingExclusion"
+      },
+      "title": "Exclusions",
+      "type": "array"
+    },
+    "quality_summary": {
+      "$ref": "#/$defs/TrainingQualitySummary"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "content_sha256": {
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "title": "Content Sha256",
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "project",
+    "taxonomy",
+    "assets",
+    "bundles",
+    "training_view",
+    "exclusions",
+    "quality_summary",
+    "content_sha256"
+  ],
+  "title": "TrainingSnapshot",
+  "type": "object"
+}

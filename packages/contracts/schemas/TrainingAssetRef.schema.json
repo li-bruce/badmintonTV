@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "JsonValue": {}
+  },
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "relative_path": {
+      "minLength": 1,
+      "title": "Relative Path",
+      "type": "string"
+    },
+    "size_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "duration_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "title": {
+      "default": "",
+      "title": "Title",
+      "type": "string"
+    },
+    "usage_scope": {
+      "const": "training_only",
+      "default": "training_only",
+      "title": "Usage Scope",
+      "type": "string"
+    },
+    "source_usage_scope": {
+      "default": "training_only",
+      "enum": [
+        "general",
+        "training_only"
+      ],
+      "title": "Source Usage Scope",
+      "type": "string"
+    },
+    "match_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Match Id"
+    },
+    "group_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Group Id"
+    },
+    "group_status": {
+      "default": "unknown",
+      "enum": [
+        "unknown",
+        "unconfirmed",
+        "confirmed"
+      ],
+      "title": "Group Status",
+      "type": "string"
+    },
+    "root_asset_ids": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Root Asset Ids",
+      "type": "array"
+    },
+    "source_sha256s": {
+      "default": [],
+      "items": {
+        "pattern": "^[0-9a-fA-F]{64}$",
+        "type": "string"
+      },
+      "title": "Source Sha256S",
+      "type": "array"
+    },
+    "recording_session_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recording Session Id"
+    },
+    "source_group_ids": {
+      "default": [],
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Source Group Ids",
+      "type": "array"
+    },
+    "pts_reference": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pts Reference"
+    },
+    "provenance": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "required": [
+    "asset_id",
+    "sha256",
+    "relative_path",
+    "size_bytes",
+    "duration_ms"
+  ],
+  "title": "TrainingAssetRef",
+  "type": "object"
+}

@@ -1,0 +1,357 @@
+{
+  "schema_version": "1.0",
+  "format": "badmintontv.training.annotations.v1",
+  "project_id": "project-synthetic",
+  "asset": {
+    "asset_id": "asset-training-synthetic",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "relative_path": "data/training/synthetic/source.mp4",
+    "size_bytes": 1000,
+    "duration_ms": 10000,
+    "title": "Synthetic training contract fixture; no media supplied",
+    "usage_scope": "training_only",
+    "source_usage_scope": "training_only",
+    "match_id": null,
+    "group_id": "group-unconfirmed-synthetic",
+    "group_status": "unconfirmed",
+    "root_asset_ids": [],
+    "source_sha256s": [],
+    "recording_session_id": null,
+    "source_group_ids": [],
+    "pts_reference": {
+      "format": "synthetic.pts.v1",
+      "relative_path": "data/training/synthetic/source.pts.json",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "frame_count": 250
+    },
+    "provenance": {
+      "fixture": "synthetic only",
+      "details": {
+        "tags": [
+          "not-expert-truth"
+        ]
+      }
+    }
+  },
+  "revision": 1,
+  "people": [
+    {
+      "person_id": "person-a",
+      "display_name": "Synthetic person A",
+      "team_id": "team-a",
+      "identity_status": "confirmed",
+      "provenance": {
+        "fixture": "Synthetic confirmed identity, not an actual athlete"
+      }
+    },
+    {
+      "person_id": "person-b",
+      "display_name": "Synthetic person B",
+      "team_id": "team-b",
+      "identity_status": "confirmed",
+      "provenance": {
+        "fixture": "Synthetic confirmed identity, not an actual athlete"
+      }
+    }
+  ],
+  "records": [
+    {
+      "record_id": "rally-1",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "rally",
+      "at_ms": null,
+      "start_ms": 1000,
+      "end_ms": 5000,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": null,
+      "team_id": null,
+      "rally_id": null,
+      "dead_ball_id": "dead-1",
+      "segment_type": null,
+      "judgements": [],
+      "state": null,
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    },
+    {
+      "record_id": "contact-1",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "contact",
+      "at_ms": 2000,
+      "start_ms": null,
+      "end_ms": null,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": "person-a",
+      "team_id": "team-a",
+      "rally_id": "rally-1",
+      "dead_ball_id": null,
+      "segment_type": null,
+      "judgements": [
+        {
+          "label_id": "stroke.net_shot",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "present",
+          "reason": null,
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        },
+        {
+          "label_id": "hand_technique.net_zhan_cuo",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "unknown",
+          "reason": "Synthetic fixture: wrist/racket evidence unavailable",
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        }
+      ],
+      "state": null,
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    },
+    {
+      "record_id": "contact-2",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "contact",
+      "at_ms": 3000,
+      "start_ms": null,
+      "end_ms": null,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": "person-b",
+      "team_id": "team-b",
+      "rally_id": "rally-1",
+      "dead_ball_id": null,
+      "segment_type": null,
+      "judgements": [
+        {
+          "label_id": "stroke.smash",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "unobservable",
+          "reason": "Synthetic fixture: contact occluded",
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        }
+      ],
+      "state": null,
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    },
+    {
+      "record_id": "dead-1",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "dead_ball",
+      "at_ms": 5000,
+      "start_ms": null,
+      "end_ms": null,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": null,
+      "team_id": null,
+      "rally_id": "rally-1",
+      "dead_ball_id": null,
+      "segment_type": null,
+      "judgements": [],
+      "state": null,
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    },
+    {
+      "record_id": "segment-1",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "segment",
+      "at_ms": null,
+      "start_ms": 1800,
+      "end_ms": 2300,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": "person-a",
+      "team_id": "team-a",
+      "rally_id": "rally-1",
+      "dead_ball_id": null,
+      "segment_type": "footwork",
+      "judgements": [
+        {
+          "label_id": "footwork.lunge",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "present",
+          "reason": null,
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        },
+        {
+          "label_id": "footwork.backward_hop",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "absent",
+          "reason": null,
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        }
+      ],
+      "state": null,
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    },
+    {
+      "record_id": "state-1",
+      "project_id": "project-synthetic",
+      "asset_id": "asset-training-synthetic",
+      "kind": "state",
+      "at_ms": 2500,
+      "start_ms": null,
+      "end_ms": null,
+      "uncertainty_start_ms": null,
+      "uncertainty_end_ms": null,
+      "person_id": "person-a",
+      "team_id": "team-a",
+      "rally_id": "rally-1",
+      "dead_ball_id": null,
+      "segment_type": null,
+      "judgements": [
+        {
+          "label_id": "state.balance",
+          "subject_role": "self",
+          "subject_person_id": null,
+          "value": "unknown",
+          "reason": "Not enough visual evidence",
+          "confidence": null,
+          "source_label": null,
+          "mapping_status": "manual"
+        }
+      ],
+      "state": {
+        "self": {
+          "person_id": "person-a",
+          "team_id": "team-a",
+          "position": {
+            "coordinate_system": "image_normalized",
+            "x": 0.3,
+            "y": 0.8,
+            "calibration_id": null,
+            "source": "agent"
+          },
+          "movement": null,
+          "missing_reasons": []
+        },
+        "opponent": {
+          "person_id": "person-b",
+          "team_id": "team-b",
+          "position": {
+            "coordinate_system": "image_normalized",
+            "x": 0.7,
+            "y": 0.2,
+            "calibration_id": null,
+            "source": "agent"
+          },
+          "movement": null,
+          "missing_reasons": []
+        },
+        "partner": null,
+        "opponent_partner": null,
+        "incoming_ball": null,
+        "outgoing_ball": null,
+        "missing_reasons": [
+          "No calibrated court coordinates"
+        ],
+        "provenance": {}
+      },
+      "visibility": "unknown",
+      "unknown_reasons": [],
+      "raw_labels": [],
+      "evidence": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "contract-fixture-agent",
+        "reviewed_at": null,
+        "note": ""
+      },
+      "revision": 1,
+      "previous_revision": null,
+      "deleted": false,
+      "provenance": {}
+    }
+  ]
+}

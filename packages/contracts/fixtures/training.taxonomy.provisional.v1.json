@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "format": "badmintontv.training.taxonomy.v1",
+  "taxonomy_id": "badmintontv-provisional",
+  "version": "2026-10-02-draft-1",
+  "status": "provisional",
+  "labels": [
+    {
+      "label_id": "stroke.net_shot",
+      "name": "网前球",
+      "dimension": "stroke",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "stroke.smash",
+      "name": "杀球",
+      "dimension": "stroke",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "stroke.clear",
+      "name": "高远球",
+      "dimension": "stroke",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "stroke.serve",
+      "name": "发球",
+      "dimension": "stroke",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "hand_technique.net_zhan_cuo",
+      "name": "网前展搓（待专家定义）",
+      "dimension": "hand_technique",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "hand_technique.net_shou_cuo",
+      "name": "网前收搓（待专家定义）",
+      "dimension": "hand_technique",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "footwork.split_step",
+      "name": "垫步启动",
+      "dimension": "footwork",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "segment",
+        "state"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "footwork.backward_hop",
+      "name": "后退小跳启动（待专家定义）",
+      "dimension": "footwork",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "footwork.lunge",
+      "name": "跨步到位",
+      "dimension": "footwork",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "footwork.recovery",
+      "name": "回位",
+      "dimension": "footwork",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "ball.high_clear",
+      "name": "高弧线球路",
+      "dimension": "ball",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": false
+    },
+    {
+      "label_id": "state.balance",
+      "name": "本人平衡状态",
+      "dimension": "state",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "state",
+        "contact",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "state.opponent_defense",
+      "name": "对手防守状态",
+      "dimension": "state",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "state"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "state.partner_cover",
+      "name": "搭档补位状态",
+      "dimension": "state",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "state"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": true
+    },
+    {
+      "label_id": "tactic.attack_transition",
+      "name": "攻防转换",
+      "dimension": "tactic",
+      "parent_id": null,
+      "description": "Provisional UI category; observable/expert definition not approved.",
+      "kinds": [
+        "rally",
+        "segment"
+      ],
+      "status": "provisional",
+      "selectable": true,
+      "requires_person": false
+    }
+  ],
+  "provenance": {
+    "owner": "models-pending",
+    "provisional": true,
+    "fixture": "Synthetic schema/UI fallback, not expert taxonomy or training truth"
+  }
+}
