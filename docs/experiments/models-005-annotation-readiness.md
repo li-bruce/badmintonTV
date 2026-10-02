@@ -1,6 +1,6 @@
 # models-005：公共标注快照的真实WSL CPU准备
 
-日期2026-10-02。断言在开发前登记于`docs/models/ANNOTATION_READINESS_PLAN.md`。本轮是A-04/A-05的models消费检查及A-06；不训练模型、不产生专家标签、不关闭CTX识别质量验收。
+日期2026-10-02。实现源码与回归/实际证据提交`e2d4348`；逐文件执行SHA见`docs/models/annotation-readiness-001.evidence.json`。断言在开发前登记于`docs/models/ANNOTATION_READINESS_PLAN.md`。本轮是A-04/A-05的models消费检查及A-06；不训练模型、不产生专家标签、不关闭CTX识别质量验收。
 
 ## 输入、版本与环境
 
