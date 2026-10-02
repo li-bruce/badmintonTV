@@ -45,15 +45,15 @@
     {
       "source": "STAGE_ACCEPTANCE.md",
       "output": "stages.html",
-      "source_sha256": "98b0d3e42b658c54e66044b2bce6cdccdbaf09fcbeaf2a074e901f6c587c0ce9",
-      "html_sha256": "00c1fc93d60d0e383f05dd2a0b05f2599fce367d0778c1118f3844b8909fdfa2",
+      "source_sha256": "f9425e985ec7bfeb7c8464841738ae8b79462dac71b92418a265214b579711d7",
+      "html_sha256": "7dba6f2a01acd56817e3a8ede0202a9033d98acabc4ac3e71ef356e90acb0ee7",
       "chapters": 11
     },
     {
       "source": "QUICKSTART.md",
       "output": "quickstart.html",
-      "source_sha256": "04c928f527507145a95adadfdaa11bf141a4648b5e19fb287022eab840f2a704",
-      "html_sha256": "1c5aa3a807a09db56bd93a73e74572c4f9aaf7aa76e94ffc58dc5b82b2dda8d7",
+      "source_sha256": "51c814427aa888b20a822199cc4d4b907b316ca0b40b18404aa2443ebc32b8af",
+      "html_sha256": "9034222db18ccc7684a18df656c943787776cf0adf09411ea2cc4bc0ca03c48c",
       "chapters": 4
     }
   ]

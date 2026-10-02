@@ -8,3 +8,5 @@
 *.toml text eol=lf
 *.ps1 text eol=crlf
 environments/models-*.txt text eol=lf
+scripts/docs/* text eol=lf
+docs/site/** text eol=lf

@@ -12,7 +12,7 @@
 
 构建7份核心页面，包含文档导航、当前页章节搜索、目录、窄屏和打印样式。没有浏览器外部依赖。Markdown原始HTML按文字显示；链接只允许http(s)、内部锚点与受控相对引用；文档不执行脚本。Mermaid代码保留在可展开的源码块中，主使用手册采用无需图形库的流程表与步骤。
 
-`build-manifest.json`保存解析器版本和每份输入/输出hash。其它被引用的docs内Markdown作为source副本提供；不把仓库代码、D:/video或任意本地路径发布成网页资源。
+`build-manifest.json`保存解析器版本和每份输入/输出hash。文本输入统一为LF换行，source hash对应此规范化内容及网页中的Markdown副本，避免Windows/WSL检出换行导致不一致。其它被引用的docs内Markdown作为source副本提供；不把仓库代码、D:/video或任意本地路径发布成网页资源。
 
 平台正在接入`/guide/`到`docs/site/`，完成集成后会提供`/guide`跳转或入口。框架首页为`index.html`；离线可直接打开。浏览器“打印/保存PDF”可输出当前完整文档，即使此前做过章节过滤。
 

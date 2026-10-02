@@ -53,6 +53,7 @@ const pages = [
 const pageMap = new Map(pages.map(([md, html]) => [path.resolve(docs, md), html]));
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+const textSource = async source => (await readFile(source, 'utf8')).replace(/\r\n?/g, '\n');
 const copies = new Map();
 const invalid = [];
 function safeLink(href, source) {
@@ -70,14 +71,14 @@ function safeLink(href, source) {
   }
   return null;
 }
-const css = await readFile(path.join(root, 'scripts/docs/handbook.css'), 'utf8');
-const browserScript = await readFile(path.join(root, 'scripts/docs/handbook.js'), 'utf8');
+const css = await textSource(path.join(root, 'scripts/docs/handbook.css'));
+const browserScript = await textSource(path.join(root, 'scripts/docs/handbook.js'));
 await regularOutput();
 const generated = new Map();
 const manifest = {format:'badmintontv-handbook', schema_version:'1.0', parser:{name:dependency.name, version:dependency.version, license:dependency.license}, pages:[]};
 for (const [filename, target, label] of pages) {
   const source = path.join(docs, filename);
-  const markdown = await readFile(await checkedSource(source), 'utf8');
+  const markdown = await textSource(await checkedSource(source));
   const headings = [];
   const usedIds = new Map();
   const renderer = {
@@ -123,11 +124,11 @@ for (const [filename, target, label] of pages) {
   manifest.pages.push({source:filename, output:target, source_sha256:digest(markdown), html_sha256:digest(html), chapters:headings.filter(h=>h.depth===2).length});
 }
 for (const [source, relative] of copies) {
-  try { generated.set(relative, await readFile(await checkedSource(source))); }
+  try { generated.set(relative, await textSource(await checkedSource(source))); }
   catch (error) { invalid.push(path.relative(root, source) + ': ' + error.message); }
 }
 if (invalid.length) throw new Error('Missing source references: ' + invalid.join(', '));
-generated.set('MARKED-LICENSE.txt', await readFile(path.join(packageRoot, 'LICENSE.md')));
+generated.set('MARKED-LICENSE.txt', await textSource(path.join(packageRoot, 'LICENSE.md')));
 generated.set('build-manifest.json', JSON.stringify(manifest, null, 2) + '\n');
 // Validate everything before replacing the generated set; old removed sources must disappear too.
 const staging = await mkdtemp(path.join(realDocs, '.site-build-'));
