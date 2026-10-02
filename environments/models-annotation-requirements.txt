@@ -1,0 +1,11 @@
+# CPU annotation contract overlay; installed only by bootstrap_annotation_runtime.py.
+# Parent: /mnt/d/video/runtime/models/env (CPython 3.11, read-only shared packages).
+# Inherited, NOT reinstalled: typing-extensions==4.16.0, av==15.0.0,
+# numpy==2.4.6, torch==2.7.1+cu128.
+# Four version-pinned wheels come from their official versioned PyPI JSON records.
+# The bootstrap records and verifies each selected wheel's official SHA256 and size.
+# Do not pass this file to an online dependency-resolving pip install.
+pydantic==2.13.5
+pydantic-core==2.46.5
+annotated-types==0.8.0
+typing-inspection==0.4.4

@@ -1,0 +1,89 @@
+{
+  "public_contract_commits": [
+    "6fec08f",
+    "2128568"
+  ],
+  "taxonomy_commit": "1a44123",
+  "scope": "A-04/A-05 models consumer; A-06 WSL CPU agent demo, no human truth or training",
+  "files": [
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/agent-demo/snapshot.json",
+      "bytes": 349285,
+      "sha256": "45baeec6df6662cefd3a0428bd583aadf5082c05de254af67698dec5440ddc30"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/audit-require-trainable/capacity.json",
+      "bytes": 195,
+      "sha256": "d75d5b55b88a9772570ed6d486f89f55e5620e206fbd0769b88b4d5a3a7cb05b"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/audit-require-trainable/readiness.json",
+      "bytes": 69457,
+      "sha256": "51223d76b017e7742c446b6dad5aab765ebcc6bf54e7a397e4d253a4281db9b0"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/inputs/public-taxonomy.json",
+      "bytes": 340048,
+      "sha256": "f4ecb3290d544c2a48febec624123f8f4db801c4b1adcf4c5e7d36ee3963c713"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/inputs/taxonomy-export-receipt.json",
+      "bytes": 580,
+      "sha256": "dfc7a6f279bff924ebccf9000eddb126c198bd2d64affbbbadb45dab5815a7d2"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/negative-checks.json",
+      "bytes": 684,
+      "sha256": "75cc8cf18764d5d0326f589278f35135bd8022e96a6b42d9cd536e93d61a1c9f"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/prepare-attempt-01/capacity.json",
+      "bytes": 195,
+      "sha256": "abe9c7ab55f6694019218b49b002c202701316504643eb913bb4dbf7512bbcd2"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/prepare-attempt-01/readiness.json",
+      "bytes": 72891,
+      "sha256": "09059688739af49822d121967cf62e01a66cb35195062200a9d109c06a0d5dc3"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/prepare-attempt-02/capacity.json",
+      "bytes": 195,
+      "sha256": "19fb1f30bdecc9ead43e8ff55a2ef98d494dec57e04cf99d659cc36435553b77"
+    },
+    {
+      "relative_path": "models/handoff/annotation-readiness-001/prepare-attempt-02/readiness.json",
+      "bytes": 72891,
+      "sha256": "09059688739af49822d121967cf62e01a66cb35195062200a9d109c06a0d5dc3"
+    }
+  ],
+  "handoff_total_bytes": 906421,
+  "repeat_byte_identical": true,
+  "windows": 1,
+  "actual_decoded_frames": 6,
+  "trainable": false,
+  "strict_judgements": 0,
+  "blockers": [
+    "group_audit_failed",
+    "missing_test_examples",
+    "missing_train_examples",
+    "missing_validation_examples",
+    "no_strict_training_examples",
+    "public:independent_match_group_unconfirmed",
+    "public:no_human_confirmed_semantically_defined_judgements",
+    "public:unassigned_or_unconfirmed_groups",
+    "taxonomy_not_reviewed"
+  ],
+  "tests": {
+    "wsl_cpu_pass": 60,
+    "skipped": 0
+  },
+  "model_source_hashes": {
+    "packages/models/training_grouping.py": "a984cd31c06d5b6a49ab8723faaa42751b142880510d9f124085f04a00aaab7f",
+    "packages/models/training_readiness.py": "736c19d225757da042b2793d17975b51247181156bfdaa4ee2cbcec9e09f7a63",
+    "packages/models/training_sources.py": "feb6d4f47fbbee708d81165c3397929bc9ae657c7a59d7d14490fe4cebe9fa22",
+    "packages/models/training_prepare.py": "d1c31f7ff6f2bc6e5da537dbf55550322b42c1b260cdaf2c474217236d31c297",
+    "scripts/models/build_agent_training_demo.py": "f4f5f41133d290e36fcc5466384213f93cb27e427cb68b3e9e379f60810ee398",
+    "scripts/models/bootstrap_annotation_runtime.py": "49ca1ac147e60a3ad182ec747e74a3278f698cc0e7157ff0dbb653271bedb119"
+  }
+}
