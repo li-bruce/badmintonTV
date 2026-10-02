@@ -10,7 +10,7 @@
 - 证据：`docs/render/CONTACT_WINDOWS_VALIDATION.md` 与同名JSON；最终报告2026-10-02 UTC16:03:28–16:03:33（北京时间10月3日00:03）、237,138bytes、源码8项SHA前后及运行后相符。输入核查见 `CONTACT_WINDOWS_DATA.md`；跟踪13项输入stat、可信registry与网页快照hash均未变。
 - 环境/容量：复用 `D:/video/runtime/platform/env/Scripts/python.exe`（Python3.12及既有Pydantic），CPU、无端口/依赖安装/GPU。原片只读、不切片不复制，D盘新增写入0，无render owner/容量预留。本轮新增源码/测试/配置/报告/文档预算<5MB。23:03北京时间非原子只读快照：render647,917,504bytes/40GB、runtime/render873,315,597bytes/5GB、D盘可用922,754,990,080bytes；不冒称本轮已重测全局700GB统计。
 - 失败/未测/阻塞：工程断言已通过，旧symlink权限skip如实保留。技术marks与人物均agent fixture，不是视频动作/身份真值；专家语义仍BLOCKED。VFR原片本轮未重新hash/解码，浏览器/人类动作审核未测。整数毫秒未含真实锚点PTS时保留差值并candidate，见 `docs/issues/render-contact-window-semantic-ground-truth.md`。
-- 提交：待下方补记本轮实现SHA；公共合同依赖为01的 `6fec08f` / `2128568`（本分支等价 `177a8e9` / `055c42a`），root已集成，不重复挑选依赖。未推送、未合并main、未发布视频。
+- 实现提交SHA：`374a5f642fe183b6b89cba8855c715473d96c463`（15个render所属文件）；本条为后续状态补记。公共合同依赖为01的 `6fec08f` / `2128568`（本分支等价 `177a8e9` / `055c42a`），root已集成，不重复挑选依赖。未推送、未合并main、未发布视频。
 - 启动/验证命令：`D:/video/runtime/platform/env/Scripts/python.exe -B -m packages.render.contact_windows --request configs/render/contact-windows.example.json --storage-root D:/video`；`-B scripts/render/verify_contact_windows.py --storage-root D:/video`；`-B -m pytest tests/render tests/contracts -q -p no:cacheprovider`。完整PowerShell写法见验收记录。
 - 下一步：主任务读取本状态、最终回复和handoff集成；01接训练工作台，03消费训练窗口与原快照训练视图，root维护阶段总表并完成全链。没有跨聊天发信要求。
 
