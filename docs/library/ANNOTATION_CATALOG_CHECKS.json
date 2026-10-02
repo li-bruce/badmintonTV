@@ -1,0 +1,146 @@
+{
+  "asset_count": 10,
+  "details": {
+    "relative_path": "data/training/handoff/annotation-catalog/600eb42efb2c80093d1b40e79abccc34728261944848fc24fe1c7e35c8d5d225.details.json",
+    "schema_version": "library.annotation-catalog/1",
+    "sha256": "600eb42efb2c80093d1b40e79abccc34728261944848fc24fe1c7e35c8d5d225",
+    "size_bytes": 84179
+  },
+  "inputs_still_match_pins": true,
+  "original_asset_snapshots_equal": true,
+  "per_asset": [
+    {
+      "asset_id": "asset-2b8095bfdc3d9e7b89242667badc21e38abe4ca0a98cd014b0540364a1d5c6ff",
+      "duration_ms": 2496040,
+      "frame_count": 62401,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/8d7c519b344166ede4bb7b13387f9bb27fd11e307e254a0492abce4984380636.hints.json",
+        "sha256": "8d7c519b344166ede4bb7b13387f9bb27fd11e307e254a0492abce4984380636",
+        "size_bytes": 179289
+      },
+      "raw_rows": 549,
+      "title": "2011 OSIM BWF World Superseries Finals-MS-MS - Group A-Chong Wei Lee vs. Peter Hoeg Gade",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-33a3ba4819650ec444ea3b562580323dbe621727a059281c31929752f4a8f211",
+      "duration_ms": 3178760,
+      "frame_count": 79469,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/4b42f777e4b90f1f308729fe35f0ac3569d1f3fb9e3b8dc996bd6a806ac35ede.hints.json",
+        "sha256": "4b42f777e4b90f1f308729fe35f0ac3569d1f3fb9e3b8dc996bd6a806ac35ede",
+        "size_bytes": 299017
+      },
+      "raw_rows": 921,
+      "title": "SF - 2014 China Open -  Lin Dan vs Chou Tien Chen",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-3857ef3cdd5e52b2badb5c0fc1432cc5359ed9a3df8e08036988be59baf9d5a2",
+      "duration_ms": 5216800,
+      "frame_count": 130420,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/258206a03f69590690377b1a65f3b58896f997bfbaf49bd58641243af0ffbc89.hints.json",
+        "sha256": "258206a03f69590690377b1a65f3b58896f997bfbaf49bd58641243af0ffbc89",
+        "size_bytes": 418162
+      },
+      "raw_rows": 1301,
+      "title": "[Full] Badminton Lin Dan vs Lee Chong Wei 2010 Asian Games MS Final",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-80d9c5be022baef9ce57773cbadfb28647d8e11c651fc4528eec5d8e7b32c4b7",
+      "duration_ms": 4794280,
+      "frame_count": 120015,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/69110823e50c0f49cf6fdbeecac882f5e68177a67c65abac4a82d45d5e738bb4.hints.json",
+        "sha256": "69110823e50c0f49cf6fdbeecac882f5e68177a67c65abac4a82d45d5e738bb4",
+        "size_bytes": 248693
+      },
+      "raw_rows": 763,
+      "title": "TOTAL BWF World Championships 2017 _ Badminton F M3-MS _ Lin Dan vs Viktor Axelsen",
+      "vfr_status": "vfr_observed"
+    },
+    {
+      "asset_id": "asset-8ac4dfb7b7cb045bb975c05827033588766e491b26402a5388a9b4507d5f0d81",
+      "duration_ms": 2930480,
+      "frame_count": 73262,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/8bfa8348d0ccf9db9907d4a3a23045dd710cc1d74c16d59fb1ead150899ea326.hints.json",
+        "sha256": "8bfa8348d0ccf9db9907d4a3a23045dd710cc1d74c16d59fb1ead150899ea326",
+        "size_bytes": 258163
+      },
+      "raw_rows": 795,
+      "title": "2011 OSIM BWF World Superseries Finals-MS-MS - Group B-Dan Lin vs. Kenichi Tago",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-8b9cac6f911b60cf3240f8426c96d55d4af931017af0c665e59002a4e54a15ed",
+      "duration_ms": 5688880,
+      "frame_count": 142222,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/98b48e9933fa66e6f26d5a83661c802b418f1e54e29b3980720b473597d331ab.hints.json",
+        "sha256": "98b48e9933fa66e6f26d5a83661c802b418f1e54e29b3980720b473597d331ab",
+        "size_bytes": 433335
+      },
+      "raw_rows": 1333,
+      "title": "2014 THE STAR AUSTRALIAN BADMINTON OPEN-F-MS-Lin Dan (CHN) VS Simon Santoso (INA)",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-a70c12f0c1ecbc21ff27ad212bbe6a87c6cff76b0a4874c7cf735158acac4aa1",
+      "duration_ms": 4728040,
+      "frame_count": 118201,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/4eceaf65bfc75bb5202ef63479ed6515babdcd847fcab9723ea8ba8cbf530cb8.hints.json",
+        "sha256": "4eceaf65bfc75bb5202ef63479ed6515babdcd847fcab9723ea8ba8cbf530cb8",
+        "size_bytes": 395650
+      },
+      "raw_rows": 1217,
+      "title": "[HD] SF - 2014 Asian Games - MS - LIN Dan vs LEE Chong Wei (1)",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "duration_ms": 1306040,
+      "frame_count": 32651,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/e65e2ba65a25dee3d9068f2f01c66c465dfe3de0d4295596fcf39578fa040d1b.hints.json",
+        "sha256": "e65e2ba65a25dee3d9068f2f01c66c465dfe3de0d4295596fcf39578fa040d1b",
+        "size_bytes": 224361
+      },
+      "raw_rows": 690,
+      "title": "[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-d3b2f63cc237ebb3f22944e12f95f8776e5a2a1031a1568f4a784e583c3e6d69",
+      "duration_ms": 3165196,
+      "frame_count": 94861,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/993e219839be91ef5e230771da40ea42100f3aac30bf324a7650fefc798acbf7.hints.json",
+        "sha256": "993e219839be91ef5e230771da40ea42100f3aac30bf324a7650fefc798acbf7",
+        "size_bytes": 322752
+      },
+      "raw_rows": 995,
+      "title": "[1080P] Lee Chong Wei vs Kento Momota - 2018 Badminton Asian Championship Semi Final",
+      "vfr_status": "cfr_observed"
+    },
+    {
+      "asset_id": "asset-e3209edc70f0ede17378609a5d7d254e5f17636d0aea7e13ff23300d27c4c17f",
+      "duration_ms": 5088040,
+      "frame_count": 127201,
+      "hints": {
+        "relative_path": "data/training/handoff/annotation-catalog/fa7fc3c2687b7c4b22eb214a68fc485ef37164f7307c700fd3519ba83545d17f.hints.json",
+        "sha256": "fa7fc3c2687b7c4b22eb214a68fc485ef37164f7307c700fd3519ba83545d17f",
+        "size_bytes": 407596
+      },
+      "raw_rows": 1253,
+      "title": "videoplayback (1) copy",
+      "vfr_status": "cfr_observed"
+    }
+  ],
+  "production_guard_denied": 10,
+  "production_guard_training_only": true,
+  "schema_version": "library.annotation-catalog-checks/1"
+}

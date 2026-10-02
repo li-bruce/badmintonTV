@@ -1,5 +1,17 @@
 # Library 状态
 
+## 2026-10-02 训练标注目录（实施轮02，library已交付）
+
+- 从干净的 `3dab169` 建立 `codex/library-annotation-catalog`；只改library边界。先冻结 [A-02/A-05数据前提断言](../library/ANNOTATION_HANDOFF.md)，不修改共享训练合同、原registry或split，不自行集成main。
+- 已设计/实现：标准AssetManifest新增provenance中的不可变附加表引用；附加表保留原Asset快照、原CSV逐行提示、原PTS、许可冲突及真实比赛组未确认状态。BFMD仍unmatched，无可播放Asset。构建/verify CLI使用既有合同验证和内容哈希；sidecar先发布，最终manifest原子切换。
+- 已运行：正式build发布、独立verify与幂等rebuild均通过；重算10视频、10PTS、10CSV和README/LICENSE；得到980,703帧、38,592,556ms、9,817原始行、60原标签字串；5重复、3同端点、3乱序提示均保留，0人审真值/0已确认比赛组。目录 `data/training/handoff/annotation-catalog.v1.json` 47,656B，SHA `3fc6adf81e6f5229e4b4e4ae7de215be89bc415838d5e5aea64fb28ec85bea32`；附加表、immutable manifest副本和入口合计新写3,366,509B，重跑新写0。原registry/splits等输入SHA不变。
+- 容量开工实测：library data14,802,357,491B；项目计费92,648,127,281B（runtime不可遍历，按70GB配额上界计，不是实际占用）；D盘可用922,754,732,032B；活动预留0。本轮元数据写入峰值硬限50,000,000B，300GB owner/700GB总体额度内。原片只读、下载0、媒体复制0。
+- 发布后容量：library data14,805,728,096B，项目保守计费92,651,497,886B（runtime仍按70GB配额上界），活动预留0，D剩余922,584,801,280B（发布收据时点）。所有数据产物位于训练子树。
+- 环境：复用 `D:/video/runtime/platform/env/Scripts/python.exe` Python3.12.11/Pydantic2.13.5及既有stdlib；新安装0、常驻服务端口0、GPU0。回归仅有已退出的临时回环fixture服务，不占18080/18082。命令：`python -B -m scripts.library.build_annotation_catalog build` / `verify`（须在仓库根目录，用上述解释器）；全回归 `python -B -m unittest discover -s tests/library -p 'test_*.py'`。
+- 验证：完整209/209 PASS、0skip、23.233s，其中新目录23项覆盖篡改/配对/未知语义/原子故障/并发锁/幂等/只读verify；旧186项亦通过。一次从stdin启动的自定义全量runner使Windows multiprocessing找不到`<stdin>`，209项中1项ERROR；失败收据保留，改为标准`-m unittest`入口后同套全PASS，未删测试或降低断言。切换后的审计故障明确返回published_with_audit_warning，详见问题记录。
+- A-02/A-05所有library数据前提PASS；A-02完整浏览器注册/播放/源定位NOT_RUN（01），A-05完整训练快照NOT_RUN（01/03）。生产共享gate对新目录10/10仍training_only拒绝，仅此子检查PASS，不代替A-08所有入口验收。S0-03/04/CTX真值/独立分组继续BLOCKED。
+- 实现与测试本地提交 `158ce5fff898a52b46de110cf53a5359ae7e14f3`；本节及完整[交接](../library/ANNOTATION_HANDOFF.md)、build/verify/checks/回归/失败收据另作交付记录提交。未推送或合并main。本轮library工作完成；下一步由主任务集成、01接入目录并做真实浏览器验证、01/03消费人工标注快照。
+
 ## 2026-09-29 18:53 最终回收中断补丁
 
 - 主任务独立复现2b81ea4在第二次Ctrl-C落于最终queue取出后、record_outcome之前时漏登记成功项。已改为不消费的完成列表与整体可重放的记账、handoff、progress；幂等DriveID记账保持首异常和旧verified，普通磁盘/预算错误不无限重试。
