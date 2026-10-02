@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "command": "./scripts/integration/check-all.ps1",
+  "full_run_revision": "d4685c6",
+  "final_code_revision": "eb5d34e",
+  "exit_code": 0,
+  "groups": [
+    {
+      "scope": "contracts/platform",
+      "passed": 836,
+      "skipped": 8
+    },
+    {
+      "scope": "frontend preview",
+      "passed": 38,
+      "skipped": 0
+    },
+    {
+      "scope": "training controller",
+      "passed": 18,
+      "skipped": 0
+    },
+    {
+      "scope": "training interactions",
+      "passed": 7,
+      "skipped": 0
+    },
+    {
+      "scope": "timeline",
+      "passed": 20,
+      "skipped": 0
+    },
+    {
+      "scope": "regions",
+      "passed": 26,
+      "skipped": 0
+    },
+    {
+      "scope": "library",
+      "passed": 219,
+      "skipped": 0
+    },
+    {
+      "scope": "models lightweight Windows",
+      "passed": 379,
+      "skipped": 14
+    },
+    {
+      "scope": "render",
+      "passed": 241,
+      "skipped": 1
+    }
+  ],
+  "passed_total_distinct": 1784,
+  "skipped_total": 23,
+  "final_patch_validation": "Timeline 18→20 after fast-drop fix; 20 timeline and 7 interaction tests rerun, overlapping results not counted twice.",
+  "real_checks": {
+    "production_assets_and_pts": 5,
+    "model_manifests": 6,
+    "actual_model_results": 5,
+    "training_sources": 10,
+    "training_sidecars": 11,
+    "training_pts": 980703
+  },
+  "skipped_note": "Existing opt-in media/WSL checks, OS symlink capability and NumPy/OpenCV checks in lightweight runtime. Skips are not PASS; no new GPU or accuracy evaluation.",
+  "logs": [
+    {
+      "path": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV\\.runtime\\integration-20261003.log",
+      "sha256": "10dbbb76775d16dd2cc5f9fcd26d9c0dd31fc45c159344e54de403de5efbb44a"
+    },
+    {
+      "path": "C:\\Users\\USER\\Desktop\\Program\\badmintonTV\\.runtime\\timeline-fix-20261003.log",
+      "sha256": "74583ca240cc74e6bb5b1f151765b76c92de94a8d730db458dedc9ad1aa8b7e9"
+    }
+  ]
+}

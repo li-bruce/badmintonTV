@@ -22,8 +22,12 @@ try {
     & $pythonPath -m pytest -q -p no:cacheprovider tests/contracts tests/platform --basetemp (Join-Path $testRoot 'pytest')
     if ($LASTEXITCODE -ne 0) { throw 'Contract/platform tests failed.' }
     if (!(Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js is required for the frontend regression tests; Python checks alone are incomplete.' }
-    & node -e "require('vm').runInThisContext(require('fs').readFileSync('tests/platform/preview_ui.test.cjs','utf8'))"
-    if ($LASTEXITCODE -ne 0) { throw 'Frontend preview and timeline tests failed.' }
+    foreach ($frontendTest in @('tests/platform/preview_ui.test.cjs', 'tests/platform/training_ui.test.cjs',
+            'tests/platform/training_interactions.test.cjs', 'tests/platform/training_timeline.test.cjs',
+            'tests/platform/training_regions.test.cjs')) {
+        & node $frontendTest
+        if ($LASTEXITCODE -ne 0) { throw "Frontend tests failed: $frontendTest" }
+    }
     foreach ($moduleName in @('library', 'models', 'render')) {
         & $pythonPath -m unittest discover -s "tests/$moduleName" -q
         if ($LASTEXITCODE -ne 0) { throw "$moduleName tests failed." }
@@ -34,6 +38,8 @@ try {
     }
     & $pythonPath scripts/models/check_contracts.py --contracts-repo $repositoryRoot --storage-root $StorageRoot
     if ($LASTEXITCODE -ne 0) { throw 'Model contract verification failed.' }
+    & $pythonPath -B -c "import json,sys; from pathlib import Path; from packages.library.annotation_catalog import load_json,verify_catalog; print(json.dumps(verify_catalog(Path(sys.argv[1]),load_json('configs/library/annotation_catalog.json')),ensure_ascii=False))" $StorageRoot
+    if ($LASTEXITCODE -ne 0) { throw 'Training annotation catalog verification failed.' }
     Write-Output 'All CPU contract/module checks passed. This does not run GPU training or measure model accuracy.'
 }
 finally {

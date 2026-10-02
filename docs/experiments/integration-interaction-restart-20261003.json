@@ -1,0 +1,19 @@
+{
+  "byte_identical_json": true,
+  "worker_started": false,
+  "gpu_started": false,
+  "database": "D:\\video\\platform\\platform.sqlite3",
+  "preserved_paths": [
+    "/api/v1/training/projects/training-project-2b13d89789cc4e26924a6fec57fe8659",
+    "/api/v1/training/projects/training-project-2b13d89789cc4e26924a6fec57fe8659/bundles/asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+    "/api/v1/training/snapshots/training-snapshot-cfacfc71bccb4310adbcbd555dfe7298",
+    "/api/v1/assets"
+  ],
+  "verified_at": "2026-10-03T01:17:32.0354864+08:00",
+  "api": "http://127.0.0.1:18080",
+  "source_revision": "eb5d34e615706c4fb96b8996682acb98528d0b06",
+  "launcher_pid": 47176,
+  "status": "PASS",
+  "api_pid": 49536,
+  "actor_type": "human"
+}

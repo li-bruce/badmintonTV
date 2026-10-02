@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-02T16:41:29.884684+00:00",
+  "main_source": "9e75f16",
+  "command": "python -B -m packages.render.contact_windows --request configs/render/contact-windows.example.json --storage-root D:/video",
+  "exit_code": 0,
+  "rule_version": "contact-windows/1.0.1",
+  "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+  "asset_sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+  "usage_scope": "training_only",
+  "window_count": 10,
+  "strategies": {
+    "ball_flight": 3,
+    "hand_technique": 3,
+    "footwork": 3,
+    "rally": 1
+  },
+  "statuses": {
+    "ready": 7,
+    "candidate": 3
+  },
+  "stdout_file_sha256": "34c4cd2a8941323c5d05f5ad3a4d1f00f9ab26e09dc00dd46d02f9954fc34ed0",
+  "stdout_bytes": 41220,
+  "marks": "agent_technical_fixture_not_human_truth",
+  "media_written": false,
+  "gpu_used": false
+}

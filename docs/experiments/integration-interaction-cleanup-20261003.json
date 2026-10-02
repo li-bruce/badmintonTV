@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "ports_listening": {
+    "18080": true,
+    "18084": false,
+    "18089": false
+  },
+  "released_reservation": "reservation-29eb1fd8be0b47c586129cb16e3a5075",
+  "reserved_peak_bytes": 100000000,
+  "root_test_directory_bytes": 1401217,
+  "free_bytes_after": 920494542848,
+  "gpu_or_worker_started": false,
+  "new_media_downloads": 0,
+  "data_preserved": true
+}

@@ -1,0 +1,268 @@
+{
+  "artifacts": [
+    {
+      "bytes": 353789,
+      "path": "D:\\video\\platform\\integration-interactions-20261003\\downstream-snapshot-ui.json",
+      "sha256": "851015516d28935e3e79b584456cdfe49d9dee15d13d03bb95d752b12b5b7002"
+    },
+    {
+      "bytes": 74559,
+      "path": "D:\\video\\platform\\integration-interactions-20261003\\downstream-model-audit.json",
+      "sha256": "fabb790e5b0c28ebff05d9ac931e0706875eb02a8ee0414f001da97d68f513c5"
+    },
+    {
+      "bytes": 32789,
+      "path": "D:\\video\\platform\\integration-interactions-20261003\\downstream-render-windows.json",
+      "sha256": "549564b163bb2ca6ef17670e4072737d63a9fd1bbc3efeb0957dd7a129e34b13"
+    },
+    {
+      "bytes": 1970,
+      "path": "D:\\video\\platform\\integration-interactions-20261003\\downstream-acceptance-summary.json",
+      "sha256": "f25ca19efd357e3ae6022788a01a66c81a04d732567b43b221c3029ae1d1cd63"
+    },
+    {
+      "bytes": 81778,
+      "path": "D:\\video\\models\\handoff\\root-interaction-20261003\\prepare-01\\readiness.json",
+      "sha256": "2b4665cbbc3b67f7ca7b6913ecdb7edbb56f61408c30facc08b7d87ceefd6209"
+    },
+    {
+      "bytes": 195,
+      "path": "D:\\video\\models\\handoff\\root-interaction-20261003\\prepare-01\\capacity.json",
+      "sha256": "720e99afbb8d33c5f7664e42c31f2a9d5121041cd01469b9b1514afc01429439"
+    }
+  ],
+  "date": "2026-10-03",
+  "human_confirmed": 0,
+  "notes": [
+    "Regions remain browser_time and do not become frame-accurate technique annotations.",
+    "render ball_flight and hand_technique ready refers to logical ranges; footwork remains candidate and rally unavailable without serve.",
+    "downstream-acceptance-summary.json used a generic kind key; render_windows.strategy here and original window report are authoritative.",
+    "No production API mutation, no media copy or image outputs."
+  ],
+  "owned_artifact_bytes_excluding_this_summary": 545080,
+  "production_guard_rejections": [
+    "source_asset:TRAINING_ONLY",
+    "source_asset_research_preview:TRAINING_ONLY",
+    "derived_windows:TRAINING_ONLY"
+  ],
+  "pts_frames": 32651,
+  "pts_index_sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+  "public_training_count": 0,
+  "render_windows": [
+    {
+      "production_eligible": false,
+      "pts": {
+        "end_frame_index_exclusive": 1750,
+        "first_frame_index": 1575,
+        "first_pts": 806400,
+        "frame_count": 175,
+        "last_pts": 895488,
+        "next_pts": 896000,
+        "origin_pts": 0,
+        "reference": {
+          "complete": true,
+          "format": "jsonl",
+          "frame_count": 32651,
+          "max_delta_ticks": 512,
+          "min_delta_ticks": 512,
+          "pts_field": "best_effort_timestamp",
+          "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913.5bdc8c2639e241309b21e15bbf9e87cb.pts.jsonl",
+          "sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+          "size_bytes": 1175271,
+          "time_base": "1/12800",
+          "vfr_status": "cfr_observed"
+        },
+        "selection": "start_ms <= source_time_ms < end_ms",
+        "status": "mapped",
+        "time_base": "1/12800"
+      },
+      "range": {
+        "end_ms": 70000,
+        "start_ms": 63000
+      },
+      "reasons": [],
+      "status": "ready",
+      "strategy": "ball_flight"
+    },
+    {
+      "production_eligible": false,
+      "pts": {
+        "end_frame_index_exclusive": 1588,
+        "first_frame_index": 1563,
+        "first_pts": 800256,
+        "frame_count": 25,
+        "last_pts": 812544,
+        "next_pts": 813056,
+        "origin_pts": 0,
+        "reference": {
+          "complete": true,
+          "format": "jsonl",
+          "frame_count": 32651,
+          "max_delta_ticks": 512,
+          "min_delta_ticks": 512,
+          "pts_field": "best_effort_timestamp",
+          "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913.5bdc8c2639e241309b21e15bbf9e87cb.pts.jsonl",
+          "sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+          "size_bytes": 1175271,
+          "time_base": "1/12800",
+          "vfr_status": "cfr_observed"
+        },
+        "selection": "start_ms <= source_time_ms < end_ms",
+        "status": "mapped",
+        "time_base": "1/12800"
+      },
+      "range": {
+        "end_ms": 63500,
+        "start_ms": 62500
+      },
+      "reasons": [],
+      "status": "ready",
+      "strategy": "hand_technique"
+    },
+    {
+      "production_eligible": false,
+      "pts": {
+        "end_frame_index_exclusive": 1625,
+        "first_frame_index": 1525,
+        "first_pts": 780800,
+        "frame_count": 100,
+        "last_pts": 831488,
+        "next_pts": 832000,
+        "origin_pts": 0,
+        "reference": {
+          "complete": true,
+          "format": "jsonl",
+          "frame_count": 32651,
+          "max_delta_ticks": 512,
+          "min_delta_ticks": 512,
+          "pts_field": "best_effort_timestamp",
+          "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913.5bdc8c2639e241309b21e15bbf9e87cb.pts.jsonl",
+          "sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+          "size_bytes": 1175271,
+          "time_base": "1/12800",
+          "vfr_status": "cfr_observed"
+        },
+        "selection": "start_ms <= source_time_ms < end_ms",
+        "status": "mapped",
+        "time_base": "1/12800"
+      },
+      "range": {
+        "end_ms": 65000,
+        "start_ms": 61000
+      },
+      "reasons": [
+        "conservative_context_without_phases"
+      ],
+      "status": "candidate",
+      "strategy": "footwork"
+    },
+    {
+      "production_eligible": false,
+      "pts": {
+        "status": "no_range"
+      },
+      "range": null,
+      "reasons": [
+        "missing_serve"
+      ],
+      "status": "unavailable",
+      "strategy": "rally"
+    }
+  ],
+  "roi_count": 2,
+  "roi_render_original_exact": true,
+  "roi_shapes": [
+    "rectangle",
+    "polygon"
+  ],
+  "roi_windows_audit_exact": true,
+  "roi_wsl_audit_exact": true,
+  "scope": "A-14 real ROI downstream preservation and A-06 WSL CPU preparation; not expert technique truth",
+  "snapshot_content_sha256": "a0b463fb924597dfa8ee4f9958fa6a830ef9a43683dc5fb92738292aa5b6c23c",
+  "snapshot_id": "training-snapshot-9871c8dfb23945eba72a1621e0ecb043",
+  "source_bytes_verified": 231500744,
+  "status": "PASS",
+  "strict_training_count": 0,
+  "trainable": false,
+  "wsl": {
+    "decoded_frames_total": 12,
+    "decoder": "PyAV 15.0.0",
+    "environment": "/mnt/d/video/runtime/models/annotation-env/bin/python",
+    "exit_code": 0,
+    "gpu_used": false,
+    "images_written": false,
+    "model_run": false,
+    "samples_per_window": 6,
+    "training_run": false,
+    "windows": [
+      {
+        "frame_indices": [
+          1549,
+          1553,
+          1557,
+          1561,
+          1565,
+          1569
+        ],
+        "kind": "segment",
+        "pts": [
+          793088,
+          795136,
+          797184,
+          799232,
+          801280,
+          803328
+        ],
+        "range": [
+          61921,
+          62921
+        ],
+        "record_id": "record-0d2f9c12-bdfe-4b9c-8043-51d1cf3aab8a",
+        "review_only": true,
+        "rgb_hash_count": 6,
+        "source_ms": [
+          "61960",
+          "62120",
+          "62280",
+          "62440",
+          "62600",
+          "62760"
+        ]
+      },
+      {
+        "frame_indices": [
+          1563,
+          1569,
+          1575,
+          1582,
+          1588,
+          1594
+        ],
+        "kind": "contact",
+        "pts": [
+          800256,
+          803328,
+          806400,
+          809984,
+          813056,
+          816128
+        ],
+        "range": [
+          62500,
+          64000
+        ],
+        "record_id": "record-37cecc9d-cd6b-48a4-91ae-255fc0fe3add",
+        "review_only": true,
+        "rgb_hash_count": 6,
+        "source_ms": [
+          "62520",
+          "62760",
+          "63000",
+          "63280",
+          "63520",
+          "63760"
+        ]
+      }
+    ]
+  }
+}

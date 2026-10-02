@@ -1,0 +1,123 @@
+{
+  "status": "PASS",
+  "recorded_at": "2026-10-02T17:20:20.140287+00:00",
+  "source_revision": "eb5d34e",
+  "scope": "Root real browser gestures on private agent 18084, followed by read-only persisted JSON assertions",
+  "project_id": "training-project-38a3c2fa61cc41e3aa5c52c6ea620a64",
+  "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+  "bundle_revision": 4,
+  "record_count": 4,
+  "people_count": 2,
+  "native_gestures": [
+    "label onto empty source timeline",
+    "quick label onto existing interval",
+    "duplicate label warning without duplication",
+    "end handle drag",
+    "start handle drag",
+    "whole interval drag preserving duration",
+    "rectangle draw/corner adjustment/whole move",
+    "polygon draw/Enter completion/vertex adjustment",
+    "black-bar rectangle rejected",
+    "unfinished polygon cancelled by Escape",
+    "third rectangle created and deleted while original two survive",
+    "save and reload"
+  ],
+  "actual_action_range_ms": [
+    62051,
+    64143
+  ],
+  "judgements": [
+    {
+      "confidence": null,
+      "label_id": "stroke.net.zhan_cuo",
+      "mapping_status": "manual",
+      "reason": "拖入候选，尚未判断是否存在",
+      "source_label": null,
+      "subject_person_id": "person-40713c79-d115-44ba-8f25-12f1456ecb2f",
+      "subject_role": "self",
+      "value": "unknown"
+    },
+    {
+      "confidence": null,
+      "label_id": "footwork.start.backward_small_hop",
+      "mapping_status": "manual",
+      "reason": "拖入候选，尚未判断是否存在",
+      "source_label": null,
+      "subject_person_id": "person-40713c79-d115-44ba-8f25-12f1456ecb2f",
+      "subject_role": "self",
+      "value": "unknown"
+    },
+    {
+      "confidence": null,
+      "label_id": "shuttle.direction.straight",
+      "mapping_status": "manual",
+      "reason": "拖入候选，尚未判断是否存在",
+      "source_label": null,
+      "subject_person_id": "person-40713c79-d115-44ba-8f25-12f1456ecb2f",
+      "subject_role": "self",
+      "value": "unknown"
+    }
+  ],
+  "regions": [
+    {
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "at_ms": 63000,
+      "coordinate_system": "image_normalized",
+      "evidence_id": "region-4a732004-5657-4c40-8770-47a86ce8b126",
+      "observation_source": "agent",
+      "points": [
+        {
+          "x": 0.536459,
+          "y": 0.349176
+        },
+        {
+          "x": 0.695313,
+          "y": 0.761213
+        }
+      ],
+      "precision": "browser_time",
+      "record_id": "record-37cecc9d-cd6b-48a4-91ae-255fc0fe3add",
+      "schema_version": "1.0",
+      "shape": "rectangle",
+      "subject_person_id": "person-40713c79-d115-44ba-8f25-12f1456ecb2f",
+      "subject_role": "self",
+      "type": "image_region"
+    },
+    {
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "at_ms": 63000,
+      "coordinate_system": "image_normalized",
+      "evidence_id": "region-7a332172-058c-48aa-ae17-8219fe7fd41c",
+      "observation_source": "agent",
+      "points": [
+        {
+          "x": 0.328125,
+          "y": 0.284361
+        },
+        {
+          "x": 0.450521,
+          "y": 0.251953
+        },
+        {
+          "x": 0.473958,
+          "y": 0.506583
+        }
+      ],
+      "precision": "browser_time",
+      "record_id": "record-37cecc9d-cd6b-48a4-91ae-255fc0fe3add",
+      "schema_version": "1.0",
+      "shape": "polygon",
+      "subject_person_id": "person-40713c79-d115-44ba-8f25-12f1456ecb2f",
+      "subject_role": "self",
+      "type": "image_region"
+    }
+  ],
+  "snapshot_id": "training-snapshot-9871c8dfb23945eba72a1621e0ecb043",
+  "snapshot_content_sha256": "a0b463fb924597dfa8ee4f9958fa6a830ef9a43683dc5fb92738292aa5b6c23c",
+  "old_snapshot_json_unchanged_after_bundle4": true,
+  "screenshot": "C:/Users/USER/.codex/visualizations/2026/09/28/01a0e880-e2f7-7e93-b05e-9fb28548aca0/training-drag-regions.jpg",
+  "human_truth_count": 0,
+  "recognition_accuracy_evaluated": false,
+  "base_information": "manually entered two anonymous people and teams",
+  "browser_console_errors": 0
+}

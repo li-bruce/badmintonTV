@@ -10,8 +10,8 @@
     {
       "source": "FRAMEWORK_GUIDE.md",
       "output": "index.html",
-      "source_sha256": "39ff9de6e73e50db8f4ba4426385dc10d4dd358a6134e856a4a2b3d40fd396f7",
-      "html_sha256": "4f5cddb7c4d91c0c7f628d83c2596e334dfc30b4879c5fef93e2032024c0d345",
+      "source_sha256": "56e1ebfd4eb19f37983e22acff26c03c374496a9c9eb33310ec5c6425fa3fa92",
+      "html_sha256": "ff94259df92a946f75adf7d78fa4c192dbd84ff972ba49b4fe9bb792129ef474",
       "chapters": 12
     },
     {
@@ -38,15 +38,15 @@
     {
       "source": "ROUND_VALIDATION_2026-10-02.md",
       "output": "validation.html",
-      "source_sha256": "6fffc5f61ef71e12acfba9b82adadccc99bc6b5c915458ed033b29bf18ba1398",
-      "html_sha256": "74025d4863835b0bc8f06f4f1fbafe175ef69010ac26296ba07fc1ca517a3e13",
-      "chapters": 4
+      "source_sha256": "2cd62b5fcf10acfcfa0ae98ed03c84e574b1b1a3299be00c2da625e18e6e9a1f",
+      "html_sha256": "e07223e4661073b35462b57b45d2d0b637fe57c0610fb8fe2a979c7f4976d40e",
+      "chapters": 7
     },
     {
       "source": "STAGE_ACCEPTANCE.md",
       "output": "stages.html",
-      "source_sha256": "9a4f1e930244015c9fa2fee9f0ad29bff55543c24207c1037c6b6992594c6be4",
-      "html_sha256": "87db1649a0a7786665a1c0e673456e2116ff702f856c59b8a865f9485a524629",
+      "source_sha256": "fff7e30fd2857605c0618ae2b665d8b8ae9c65bbff84d8d7ac944b545e321d9f",
+      "html_sha256": "55afe8f5169d1a8a27b80db62387d183d48c870e481e17e32a75108ef69f67f7",
       "chapters": 11
     },
     {
