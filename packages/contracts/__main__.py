@@ -10,8 +10,13 @@ from . import schemas
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export badmintonTV v1.0 JSON schemas")
     parser.add_argument("--output", type=Path, help="Directory for one schema file per contract")
+    parser.add_argument("--training", action="store_true", help="Export the independent training-workspace schemas")
     args = parser.parse_args()
-    exported = schemas()
+    if args.training:
+        from .training import training_schemas
+        exported = training_schemas()
+    else:
+        exported = schemas()
     if args.output is None:
         print(json.dumps(exported, ensure_ascii=False, indent=2))
         return
