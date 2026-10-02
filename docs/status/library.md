@@ -1,5 +1,16 @@
 # Library 状态
 
+## 2026-10-03 经典林李比赛首批采集（下载目标已完成）
+
+- 用户要求搜索中羽等资源并下载用于后续训练/识别；明确首批3–5场、总新增不超过30十进制GB，沿用D:/video/data/training。从main `c7e68ce4b0132a487e6de8f37d164ec45e157eda`建立 `codex/library-classic-matches`，先冻结 [S0-02/S0-04/R-04b本轮断言](../library/CLASSIC_MATCH_ACQUISITION.md)。
+- 搜索实测：中羽40场80G合集需要登录回复，部分旧阿里/115分享已失效，百度浏览器访问受站点安全策略限制；均未绕过。YouTube官方BWF/Olympics本次播放器要求登录反机器人，未继续抽流。已找到B站“奥林匹克运动会”官方公开2008北京决赛、2012伦敦决赛、2016里约半决赛；公开接口download=1、pay=0、no_reprint=1。技术可取用不等于训练/再分发授权。
+- 已设计薄批次下载：新目录classic-lin-lee-20261003；每流有字节硬限，总量30GB；CPU全片解码和原PTS；来源/哈希/实际媒体规格落盘。短期CDN签名仅内存使用，Git和普通收据只保存稳定公开页。新资产先本批review_only清单，不改中央registry/split或已固定输入的标注catalog。
+- 已实际下载3场原片1,471,408,651B：2008北京决赛1280×720、2012伦敦决赛640×360、2016里约半决赛1280×720，均25fps；合计3:54:34.640。3/3完整CPU解码和视频/PTS SHA复核通过，351,866帧原PTS独立重数通过。6张画面抽查含主球场、俯拍、热身/入场/近景，未将抽查视为身份/动作真值。真实结果见 [交付报告](../library/CLASSIC_MATCH_ACQUISITION.md) 及 [校验收据](../library/CLASSIC_MATCH_RESULTS.json)。
+- 本轮子项S0-02来源/下载/媒体PASS，R-04b本地双training_only隔离PASS；review_only、unassigned、rights unknown、allowed_uses=[]、0人工真值。中央registry/split和旧annotation catalog三者SHA均不变；新工作台导入NOT_RUN。S0-04正式独立比赛组继续BLOCKED，模型训练/识别NOT_RUN，未提升这些阶段验收。
+- 全库工程回归223/223 PASS、0 skip、28.146s；真实媒体结果与夹具结果分开。实现本地提交 `089fe6add6ea5799cd76226dad8ba6c41d981650`，来源/验收/数据报告另作本地记录提交，未推送或合并main。
+- 最终批次总新增1,484,666,698B（含原片、PTS、收据和QA），小于30GB。data16,290,398,890B；项目保守计费94,144,360,854B（runtime按70GB固定额度上界）；D可用920,509,063,168B；活动预留0，无part和批次锁。新依赖0、GPU0、服务端口0；复用平台Python3.12.11/Pydantic2.13.5与render FFmpeg9.0.2。启动命令见交付报告。
+- 下一步：用户可在 `D:/video/data/training/classic-lin-lee-20261003/raw/` 读取原片，按batch/handoff清单定位SHA与PTS。正式训练前审查用途授权、比赛同源关系与人工标注；2012细小球体/细手法质量仍未测。本轮下载工作已完成。
+
 ## 2026-10-02 发布收尾P2补修（已完成）
 
 - 主任务集成后指出：入口已提交，外层lock释放、quota释放、最终capacity读取错误仍可能让CLI报failed。先冻结 [A-02.library-publication补充断言](../issues/library-annotation-catalog-publication.md)，旧实现三类故障实测3 ERROR（0.672s），未把注入故障说成真实数据事故。

@@ -1,0 +1,1002 @@
+{
+  "schema_version": "1.0",
+  "catalog_kind": "source_candidates_not_download_receipts",
+  "checked_date": "2026-10-03",
+  "timezone": "Asia/Shanghai",
+  "intended_use": "training_and_recognition_research_candidates",
+  "scope": "Lin Dan / Lee Chong Wei classic matches and public source references",
+  "acquisition_limit": {
+    "initial_match_count_min": 3,
+    "initial_match_count_max": 5,
+    "max_new_bytes": 30000000000,
+    "includes": "media,partial_files,tools,receipts_and_PTS"
+  },
+  "verification_summary": {
+    "media_downloads_by_research_agent": 0,
+    "media_bytes_written_by_research_agent": 0,
+    "no_signed_urls": true,
+    "no_login": true,
+    "no_forum_reply": true,
+    "no_contact": true,
+    "no_captcha_completion": true
+  },
+  "status_rules": [
+    "metadata_available及reference_metadata_available不表示视频已下载、可解码或授权已确认。",
+    "advertised_size和advertised_variants是来源声明；未经真实下载/探测核验不得当作成品尺寸。",
+    "百度browser_site_policy_blocked不得改用其他浏览器、原始命令、间接执行或其他路径规避。",
+    "遇登录、回复可见、人机验证、付费或下载限制保留障碍，不绕过。",
+    "canonical_group_status保持unconfirmed、split保持unassigned；同场剪辑、回放、重传和现有Fine来源须统一分组后才划分。",
+    "本清单不含Asset、PTS、Event或人工动作真值；正式下载结果由主任务收据与handoff单独记录。"
+  ],
+  "candidates": [
+    {
+      "source_id": "cn-forum-2011-worlds-ali",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/forum.php?mod=viewthread&tid=3424498",
+      "match": {
+        "event": "World Championships",
+        "year": 2011,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.alipan.com/s/L1LAJbwe9oj",
+      "advertised_size": {
+        "text": "9.95G",
+        "bytes": null,
+        "scope": "requested_alternative_version",
+        "basis": "求档标题及另一回复；未证明与该SNG分享为同一文件",
+        "downloaded_media_verified": false
+      },
+      "access_status": "expired_share",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "expired_share",
+          "detail": "2026-10-03正常Edge页面明确显示分享已失效。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_search_forum_and_normal_edge_share_dom",
+          "detail": "原帖公开回复给出稳定分享页；分享页显示来晚啦，该分享已失效。"
+        }
+      ],
+      "source_published_date": null,
+      "share_reply_published_at": "2024-10-31T22:54:51+08:00",
+      "advertised_filename": "[2011.08.14][世界羽毛球锦标赛][MSF][SNG] 林丹VS李宗伟.mkv",
+      "notes": [
+        "9.95G不是已核验下载大小，不应用作硬字节上限。",
+        "2025-03回复请求重新分享只作补充线索；实际失效结论来自2026-10-03分享页。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-2012-olympics-baidu-multi",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/thread-2536468-1-1.html",
+      "match": {
+        "event": "London Olympics",
+        "year": 2012,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://pan.baidu.com/s/1ORlCYwWagoxi5aom5uK5oA?pwd=4nxg",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "browser_site_policy_blocked",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "browser_site_policy_blocked",
+          "detail": "浏览器站点安全策略拒绝pan.baidu.com访问；没有Auto-review或用户权限提示。不得改用其他浏览器、原始命令、间接执行或其他路径完成被拦动作。",
+          "workaround_prohibited": true
+        },
+        {
+          "code": "share_state_unknown",
+          "detail": "分享有效性、文件清单、登录/客户端要求和付费条件均未核验。",
+          "workaround_prohibited": false
+        },
+        {
+          "code": "ed2k_availability_unverified",
+          "detail": "帖子另列eD2k文件名、大小、MD4；没有启动P2P客户端或验证种源。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_page",
+          "detail": "公开正文给出百度分享和提取码，以及所列eD2k版本元数据。"
+        },
+        {
+          "observed_date": "2026-10-03",
+          "method": "normal_edge_navigation_rejected",
+          "detail": "对本shared_link的浏览器请求被站点安全策略拒绝。"
+        }
+      ],
+      "source_published_at": "2023-02-28T07:26:33+08:00",
+      "public_extraction_code": "4nxg",
+      "advertised_variants": [
+        {
+          "version": "IOC MKV",
+          "size_bytes": 4432572435,
+          "ed2k_md4": "CCAFE0A6FDAFDCC909CE02585C95669A"
+        },
+        {
+          "version": "台湾 MKV",
+          "size_bytes": 2128024220,
+          "ed2k_md4": "37CA26A92AF088F0C50A3128F5C6414F"
+        },
+        {
+          "version": "爱尔达回顾 MKV",
+          "size_bytes": 2412177717,
+          "ed2k_md4": "70931878404F5F59EFA1CE0E1271B31F"
+        },
+        {
+          "version": "CCTV 1080i HDTV MPEG2 TS",
+          "size_bytes": 13192914288,
+          "ed2k_md4": "880E445B35344FD9B500077F5946E2EB"
+        }
+      ],
+      "notes": [
+        "各版本size_bytes仅为原帖eD2k声明，尚未证明与百度目录内容相符；不是成品大小或下载成功证据。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-2012-olympics-baidu-1080p",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/thread-1392953-1-1.html",
+      "match": {
+        "event": "London Olympics",
+        "year": 2012,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://pan.baidu.com/s/1Q-LKxgBIRZdKSIUJD3WU4g",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "unverified_due_to_browser_site_policy",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "browser_site_policy_blocked",
+          "detail": "同一pan.baidu.com域的正常访问已被浏览器站点安全策略拒绝；未绕道核验该链接。",
+          "workaround_prohibited": true
+        },
+        {
+          "code": "share_state_unknown",
+          "detail": "网页抓取器未取得分享内容；不能据此断言失效、有效或免登录。",
+          "workaround_prohibited": false
+        },
+        {
+          "code": "separate_paid_collection",
+          "detail": "原帖附带约500GB的500多场合集为有偿拷贝；未联系卖家、未付费。单场公开分享是否需费用未知。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_page",
+          "detail": "原帖公开给出单场百度链接、公开提取码与1080P英文说明。"
+        }
+      ],
+      "source_published_at": "2021-01-22T20:59:14+08:00",
+      "public_extraction_code": "ex5v",
+      "advertised_quality": "1080P 英文解说",
+      "notes": [
+        "约500GB是另售合集声明，单场大小仍为null。",
+        "作者称部分视频来自BWF官方频道，不构成对本项目的画面使用授权。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-lin-lee-40-match-collection",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/forum.php?mod=viewthread&tid=3676429",
+      "match": {
+        "scope": "collection",
+        "year_range": [
+          2004,
+          2018
+        ],
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "discipline": "MS",
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": null,
+      "advertised_size": {
+        "text": "80G",
+        "bytes": null,
+        "scope": "40_match_collection",
+        "basis": "论坛标题；未取得文件目录，单位及精确bytes未确认",
+        "downloaded_media_verified": false
+      },
+      "access_status": "reply_hidden",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "login_and_forum_reply_required",
+          "detail": "两段下载内容均显示游客须回复后查看，回帖要求登录；未登录、未回帖、未尝试读取隐藏内容。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_page",
+          "detail": "公开正文列出目标五场；两段资源区均为回复可见。"
+        }
+      ],
+      "source_published_at": "2025-06-16T11:05:04+08:00",
+      "included_target_matches": [
+        {
+          "event": "All England Open",
+          "year": 2006,
+          "discipline": "MS",
+          "round": "semifinal",
+          "players": [
+            "林丹",
+            "李宗伟"
+          ],
+          "identity_basis": "source_title_or_forum_description",
+          "visual_identity_verified": false,
+          "canonical_group_status": "unconfirmed",
+          "split": "unassigned"
+        },
+        {
+          "event": "World Championships",
+          "year": 2011,
+          "discipline": "MS",
+          "round": "final",
+          "players": [
+            "林丹",
+            "李宗伟"
+          ],
+          "identity_basis": "source_title_or_forum_description",
+          "visual_identity_verified": false,
+          "canonical_group_status": "unconfirmed",
+          "split": "unassigned"
+        },
+        {
+          "event": "London Olympics",
+          "year": 2012,
+          "discipline": "MS",
+          "round": "final",
+          "players": [
+            "林丹",
+            "李宗伟"
+          ],
+          "identity_basis": "source_title_or_forum_description",
+          "visual_identity_verified": false,
+          "canonical_group_status": "unconfirmed",
+          "split": "unassigned"
+        },
+        {
+          "event": "World Championships",
+          "year": 2013,
+          "discipline": "MS",
+          "round": "final",
+          "players": [
+            "林丹",
+            "李宗伟"
+          ],
+          "identity_basis": "source_title_or_forum_description",
+          "visual_identity_verified": false,
+          "canonical_group_status": "unconfirmed",
+          "split": "unassigned"
+        },
+        {
+          "event": "Rio Olympics",
+          "year": 2016,
+          "discipline": "MS",
+          "round": "semifinal",
+          "players": [
+            "林丹",
+            "李宗伟"
+          ],
+          "identity_basis": "source_title_or_forum_description",
+          "visual_identity_verified": false,
+          "canonical_group_status": "unconfirmed",
+          "split": "unassigned"
+        }
+      ],
+      "notes": [
+        "2006年林李全英对决在该来源列为半决赛，不能误记为决赛。",
+        "来源称视频来自网络，仅供学习交流；未提供转播权利人许可。",
+        "合集标称80G超过首批30GB总新增上限；不得直接全包下载。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-lin-lee-2004-2006-115",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/thread-169079-1-1.html",
+      "match": {
+        "scope": "collection",
+        "year_range": [
+          2004,
+          2006
+        ],
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "discipline": "MS",
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://115.com/lb/5lb7x1od",
+      "advertised_size": {
+        "text": "2.82GB",
+        "bytes": null,
+        "scope": "2004_2006_collection",
+        "basis": "旧帖声明；实际文件清单及精确bytes未核验",
+        "downloaded_media_verified": false
+      },
+      "access_status": "sharing_feature_retired",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "sharing_feature_retired",
+          "detail": "2026-10-03正常Edge页面明确显示礼包分享功能已下线。",
+          "workaround_prohibited": false
+        },
+        {
+          "code": "shared_account_not_used",
+          "detail": "旧帖提及共享账户迁移；未使用其账户或凭据，不作为公开下载路径。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_search_and_normal_edge_share_dom",
+          "detail": "原帖公开索引给出礼包链接；分享页显示礼包分享功能已下线。"
+        }
+      ],
+      "source_published_at": "2011-01-21T10:07:26+08:00",
+      "share_update_date": "2013-06",
+      "notes": [
+        "未读取旧礼包文件列表，因此不能确认2006全英单场文件名或大小。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-2013-worlds-collection-index",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/forum.php?dateline=604800&fid=17&filter=typeid&mod=forumdisplay&orderby=views&typeid=1",
+      "match": {
+        "event": "World Championships",
+        "year": 2013,
+        "discipline": "MS",
+        "round": null,
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": null,
+      "advertised_size": {
+        "text": "43G",
+        "bytes": null,
+        "scope": "tournament_collection",
+        "basis": "公开论坛索引标题",
+        "downloaded_media_verified": false
+      },
+      "access_status": "index_only",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "original_thread_unresolved",
+          "detail": "网页工具点击原帖返回Internal Error，未取得原帖URL或分享URL；不能据此断言源文件失效。",
+          "workaround_prohibited": false
+        },
+        {
+          "code": "live_forum_human_verification",
+          "detail": "正常Edge索引页出现人机验证；未点击验证、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_index",
+          "detail": "索引显示标题、作者zhenmu5181及2014-01-03日期。"
+        }
+      ],
+      "source_page_kind": "forum_index_not_original_thread",
+      "source_published_date": "2014-01-03",
+      "advertised_title": "2013广州羽毛球世锦赛珍藏版合集[无广告/无台标/720p/43G/百度网盘]",
+      "notes": [
+        "合集是否实际含林李决赛、单片大小及下载限制未独立核验；不能当作已定位单场。"
+      ]
+    },
+    {
+      "source_id": "cn-forum-2016-olympics-semifinals-index",
+      "checked_date": "2026-10-03",
+      "source_page": "https://bbs.badmintoncn.com/forum.php?dateline=604800&fid=17&filter=typeid&mod=forumdisplay&orderby=views&typeid=1",
+      "match": {
+        "event": "Rio Olympics",
+        "year": 2016,
+        "scope": "semifinals_collection",
+        "round": "semifinal",
+        "disciplines": [
+          "MS",
+          "WS",
+          "MD",
+          "WD",
+          "XD"
+        ],
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": null,
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "index_only",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "original_thread_unresolved",
+          "detail": "网页工具点击原帖返回Internal Error，未取得原帖URL或真实分享URL。",
+          "workaround_prohibited": false
+        },
+        {
+          "code": "live_forum_human_verification",
+          "detail": "正常Edge索引页出现人机验证；未点击验证、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "web_forum_index",
+          "detail": "索引显示标题、作者jervise及2016-08-20日期。"
+        }
+      ],
+      "source_page_kind": "forum_index_not_original_thread",
+      "source_published_date": "2016-08-20",
+      "advertised_title": "2016年奥运会5项半决赛 SNG 1080i高清 包含(男单X2)",
+      "notes": [
+        "目标为林李男单半决赛；实际文件列表、大小、登录及付费要求均未知。"
+      ]
+    },
+    {
+      "source_id": "official-youtube-2011-worlds",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.youtube.com/watch?v=WI8Od4jBpUc",
+      "match": {
+        "event": "World Championships",
+        "year": 2011,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.youtube.com/watch?v=WI8Od4jBpUc",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "login_required",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "login_required_bot_check",
+          "detail": "2026-10-03 manifest agent按普通watch URL有界读取完整HTML，返回LOGIN_REQUIRED，提示Sign in to confirm you are not a bot；未登录、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-09-28",
+          "method": "prior_primary_source_research",
+          "local_reference": "docs/library/SOURCES.md",
+          "detail": "已有来源报告记录官方发布者、全场标题和发布日期；2026-10-03仅复核本地来源记录。"
+        },
+        {
+          "observed_date": "2026-10-03",
+          "method": "manifest_agent_bounded_watch_html_reported_by_root",
+          "detail": "本轮实际watch响应为LOGIN_REQUIRED；此研究agent据root转交结果记录。"
+        }
+      ],
+      "source_publisher": "BWF TV",
+      "source_published_date": "2011-08-14",
+      "notes": [
+        "发布日期不是比赛日期。",
+        "官方上传不等于许可本项目训练、商用或再分发。"
+      ]
+    },
+    {
+      "source_id": "official-youtube-2011-all-england",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.youtube.com/watch?v=5F1Pn8-Lp0c",
+      "match": {
+        "event": "All England Open",
+        "year": 2011,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.youtube.com/watch?v=5F1Pn8-Lp0c",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "login_required",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "login_required_bot_check",
+          "detail": "2026-10-03 manifest agent按普通watch URL有界读取完整HTML，返回LOGIN_REQUIRED，提示Sign in to confirm you are not a bot；未登录、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-09-28",
+          "method": "prior_primary_source_research",
+          "local_reference": "docs/library/SOURCES.md",
+          "detail": "已有来源报告记录官方发布者、全场标题和发布日期；2026-10-03仅复核本地来源记录。"
+        },
+        {
+          "observed_date": "2026-10-03",
+          "method": "manifest_agent_bounded_watch_html_reported_by_root",
+          "detail": "本轮实际watch响应为LOGIN_REQUIRED；此研究agent据root转交结果记录。"
+        }
+      ],
+      "source_publisher": "BWF TV",
+      "source_published_date": "2011-10-12",
+      "notes": [
+        "发布日期不是比赛日期。",
+        "官方上传不等于许可本项目训练、商用或再分发。"
+      ]
+    },
+    {
+      "source_id": "official-youtube-2012-olympics",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.youtube.com/watch?v=ytjD4f_I0sc",
+      "match": {
+        "event": "London Olympics",
+        "year": 2012,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.youtube.com/watch?v=ytjD4f_I0sc",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "login_required",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "login_required_bot_check",
+          "detail": "2026-10-03 manifest agent按普通watch URL有界读取完整HTML，返回LOGIN_REQUIRED，提示Sign in to confirm you are not a bot；未登录、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-09-28",
+          "method": "prior_primary_source_research",
+          "local_reference": "docs/library/SOURCES.md",
+          "detail": "已有来源报告记录官方发布者、全场标题和发布日期；2026-10-03仅复核本地来源记录。"
+        },
+        {
+          "observed_date": "2026-10-03",
+          "method": "manifest_agent_bounded_watch_html_reported_by_root",
+          "detail": "本轮实际watch响应为LOGIN_REQUIRED；此研究agent据root转交结果记录。"
+        }
+      ],
+      "source_publisher": "Olympic Games",
+      "source_published_date": "2012-08-07",
+      "notes": [
+        "发布日期不是比赛日期。",
+        "官方上传不等于许可本项目训练、商用或再分发。"
+      ]
+    },
+    {
+      "source_id": "official-bilibili-2008-olympics",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.bilibili.com/video/BV1eF411y7oh/",
+      "match": {
+        "event": "Beijing Olympics",
+        "year": 2008,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.bilibili.com/video/BV1eF411y7oh/",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "metadata_available",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "metadata_only_in_this_catalog",
+          "detail": "root已报告正常公开单MP4元数据可用；本研究agent未下载或探测，实际获取结果必须来自另行发布的收据/Asset。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "root_agent_report",
+          "detail": "主任务报告该BV为官方公开来源且单MP4元数据可取；未向本清单提供具体文件bytes。"
+        }
+      ],
+      "source_publisher_class": "official_account_reported_by_root",
+      "bvid": "BV1eF411y7oh",
+      "notes": [
+        "只保存稳定观看页，不保存带签名、令牌或有效期的媒体URL。",
+        "此候选状态不随主任务下载进度推断为已完成。"
+      ]
+    },
+    {
+      "source_id": "official-bilibili-2012-olympics",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.bilibili.com/video/BV1xL411z7eX/",
+      "match": {
+        "event": "London Olympics",
+        "year": 2012,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_or_forum_description",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.bilibili.com/video/BV1xL411z7eX/",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "metadata_available",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "metadata_only_in_this_catalog",
+          "detail": "root已报告正常公开单MP4元数据可用；本研究agent未下载或探测，实际获取结果必须来自另行发布的收据/Asset。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "root_agent_report",
+          "detail": "主任务报告该BV为官方公开来源且单MP4元数据可取；未向本清单提供具体文件bytes。"
+        }
+      ],
+      "source_publisher_class": "official_account_reported_by_root",
+      "bvid": "BV1xL411z7eX",
+      "notes": [
+        "只保存稳定观看页，不保存带签名、令牌或有效期的媒体URL。",
+        "此候选状态不随主任务下载进度推断为已完成。"
+      ]
+    },
+    {
+      "source_id": "official-bilibili-2016-olympics",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.bilibili.com/video/BV1Dm421K7NG/",
+      "match": {
+        "event": "Rio Olympics",
+        "year": 2016,
+        "discipline": "MS",
+        "round": "semifinal",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_title_reported_by_root",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.bilibili.com/video/BV1Dm421K7NG/",
+      "advertised_size": {
+        "text": null,
+        "bytes": 791975537,
+        "scope": "720p_public_single_mp4",
+        "basis": "另一agent本轮HTTP HEAD 200 Content-Length核验，由root转交；并非本地成品尺寸",
+        "downloaded_media_verified": false
+      },
+      "access_status": "metadata_available",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "platform_no_reprint",
+          "detail": "平台元数据rights.no_reprint=1；公开播放/下载字段不是对训练、商用或再分发的独立授权。",
+          "workaround_prohibited": false
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "source_publisher_class": "official_account_reported_by_root",
+      "bvid": "BV1Dm421K7NG",
+      "platform_rights_metadata": {
+        "download": 1,
+        "pay": 0,
+        "no_reprint": 1
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "root_report_of_independent_agent_head_check",
+          "detail": "正常公开720p单MP4，HTTP HEAD 200，Content-Length 791975537；未向本清单保存临时媒体URL。"
+        }
+      ],
+      "notes": [
+        "只保存稳定观看页；下载、SHA、解码和PTS状态由主任务独立收据/handoff记录。"
+      ]
+    },
+    {
+      "source_id": "official-youtube-2013-worlds",
+      "checked_date": "2026-10-03",
+      "source_page": "https://www.youtube.com/watch?v=1E2sxfqC15A",
+      "match": {
+        "event": "World Championships",
+        "year": 2013,
+        "discipline": "MS",
+        "round": "final",
+        "players": [
+          "林丹",
+          "李宗伟"
+        ],
+        "identity_basis": "source_reference_reported_by_root",
+        "visual_identity_verified": false,
+        "canonical_group_status": "unconfirmed",
+        "split": "unassigned"
+      },
+      "shared_link": "https://www.youtube.com/watch?v=1E2sxfqC15A",
+      "advertised_size": {
+        "text": null,
+        "bytes": null,
+        "scope": "unknown",
+        "basis": "not_observed",
+        "downloaded_media_verified": false
+      },
+      "access_status": "login_required",
+      "download_status": "not_attempted",
+      "restriction": [
+        {
+          "code": "login_required_bot_check",
+          "detail": "2026-10-03 manifest agent按普通watch URL有界读取完整HTML，返回LOGIN_REQUIRED，提示Sign in to confirm you are not a bot；未登录、未绕过。",
+          "workaround_prohibited": true
+        }
+      ],
+      "video_rights_unknown": true,
+      "rights": {
+        "video": "unverified",
+        "training_permission": "unverified",
+        "commercial_use": "unverified",
+        "redistribution": "unverified",
+        "code": "not_applicable",
+        "annotations": "not_applicable"
+      },
+      "evidence": [
+        {
+          "observed_date": "2026-10-03",
+          "method": "manifest_agent_bounded_watch_html_reported_by_root",
+          "detail": "root提供2013世锦男单决赛BWF TV稳定watch URL；manifest agent本轮普通watch有界HTML读取返回LOGIN_REQUIRED。"
+        }
+      ],
+      "source_publisher": "BWF TV",
+      "source_published_date": null,
+      "notes": [
+        "官方上传不等于许可本项目训练、商用或再分发；本清单没有获取媒体。"
+      ]
+    }
+  ],
+  "pending": []
+}

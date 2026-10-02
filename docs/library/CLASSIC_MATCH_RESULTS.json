@@ -1,0 +1,247 @@
+{
+  "schema_version": "library.classic-verification/1",
+  "verified_at": "2026-10-02T17:00:47.492900+00:00",
+  "dataset_version": "classic-lin-lee-20261003",
+  "usage_scope": "training_only",
+  "handoff_status": "review_only",
+  "human_confirmed_annotations": 0,
+  "files": [
+    {
+      "asset_id": "asset-5be9e7b28fe122c3f15892ddda026f7c505380f3ace59b85f47e0a590fdc8c01",
+      "title": "2008北京奥运会男单决赛：林丹—李宗伟",
+      "relative_path": "data/training/classic-lin-lee-20261003/raw/2008-beijing-final-lin-lee.mp4",
+      "source_page": "https://www.bilibili.com/video/BV1eF411y7oh/",
+      "sha256": "5be9e7b28fe122c3f15892ddda026f7c505380f3ace59b85f47e0a590fdc8c01",
+      "size_bytes": 482738928,
+      "duration_ms": 3336720,
+      "width": 1280,
+      "height": 720,
+      "fps_num": 25,
+      "fps_den": 1,
+      "time_base": "1/16000",
+      "decode_status": "passed",
+      "pts_index": {
+        "relative_path": "data/training/classic-lin-lee-20261003/probes/2008-beijing-final-lin-lee.ab1b753ca01b4dc39b1b68cb0401233e.pts.jsonl",
+        "sha256": "290c47463fc274ca609e0f89535aca55e5d97812f7477416a23efc27e847e0fc",
+        "size_bytes": 3057998,
+        "format": "jsonl",
+        "frame_count": 83418,
+        "time_base": "1/16000",
+        "pts_field": "best_effort_timestamp",
+        "complete": true,
+        "vfr_status": "cfr_observed",
+        "min_delta_ticks": 640,
+        "max_delta_ticks": 640
+      },
+      "pts_rows_recounted": 83418,
+      "media_and_pts_sha256_reverified": true,
+      "usage_scope": "training_only",
+      "split": "unassigned",
+      "rights_status": "unknown",
+      "allowed_uses": [],
+      "qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2008-beijing-final-lin-lee.120s.jpg",
+        "size_bytes": 29579,
+        "sha256": "2f4d93bb6bdd1d3419dc934004886554d9997a89f7102b9a2849604cacd14db0",
+        "requested_timestamp_seconds": 120,
+        "observation_status": "visually_inspected",
+        "observation": "Warmup/player close view; whole court not visible"
+      },
+      "midpoint_qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2008-beijing-final-lin-lee.midpoint.jpg",
+        "requested_timestamp_seconds": 1668.36,
+        "size_bytes": 31921,
+        "sha256": "7d3324671b2fb6981ba40b0dd9a9ae95f1339186c66b8feae516b3c930de26aa",
+        "observation_status": "visually_inspected",
+        "observation": "Broadcast rear court view and score overlay visible"
+      }
+    },
+    {
+      "asset_id": "asset-e0a3253b69ce5722f188cce17f1cc1728b96988bf2f7be41c27b7735497b719c",
+      "title": "2012伦敦奥运会男单决赛：林丹—李宗伟",
+      "relative_path": "data/training/classic-lin-lee-20261003/raw/2012-london-final-lin-lee.mp4",
+      "source_page": "https://www.bilibili.com/video/BV1xL411z7eX/",
+      "sha256": "e0a3253b69ce5722f188cce17f1cc1728b96988bf2f7be41c27b7735497b719c",
+      "size_bytes": 196694186,
+      "duration_ms": 5298560,
+      "width": 640,
+      "height": 360,
+      "fps_num": 25,
+      "fps_den": 1,
+      "time_base": "1/16000",
+      "decode_status": "passed",
+      "pts_index": {
+        "relative_path": "data/training/classic-lin-lee-20261003/probes/2012-london-final-lin-lee.150381c0dc884cd6b6899bfcb0bfdb6b.pts.jsonl",
+        "sha256": "9253d4d403ab64d73c6a1ea23a2934eeff5bf2baa523b5fe9ccc2f6c3ca071a9",
+        "size_bytes": 4905164,
+        "format": "jsonl",
+        "frame_count": 132464,
+        "time_base": "1/16000",
+        "pts_field": "best_effort_timestamp",
+        "complete": true,
+        "vfr_status": "cfr_observed",
+        "min_delta_ticks": 640,
+        "max_delta_ticks": 640
+      },
+      "pts_rows_recounted": 132464,
+      "media_and_pts_sha256_reverified": true,
+      "usage_scope": "training_only",
+      "split": "unassigned",
+      "rights_status": "unknown",
+      "allowed_uses": [],
+      "qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2012-london-final-lin-lee.120s.jpg",
+        "size_bytes": 27897,
+        "sha256": "c662de71358c8225b578d5da98065bfc3eb28e4a3e194d9ed2c903e74caddb45",
+        "requested_timestamp_seconds": 120,
+        "observation_status": "visually_inspected",
+        "observation": "Overhead court view"
+      },
+      "midpoint_qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2012-london-final-lin-lee.midpoint.jpg",
+        "requested_timestamp_seconds": 2649.28,
+        "size_bytes": 44964,
+        "sha256": "464fb502c229f53da805edcd2fb93b34c0c5f7fca23850e9a493acf22b9316fe",
+        "observation_status": "visually_inspected",
+        "observation": "Broadcast rear court view and score overlay visible; low source resolution"
+      }
+    },
+    {
+      "asset_id": "asset-edd640486b313868957b75ea3a80b0bc3450711595cd23c2dabeefb425a1df3f",
+      "title": "2016里约奥运会男单半决赛：林丹—李宗伟",
+      "relative_path": "data/training/classic-lin-lee-20261003/raw/2016-rio-semifinal-lin-lee.mp4",
+      "source_page": "https://www.bilibili.com/video/BV1Dm421K7NG/",
+      "sha256": "edd640486b313868957b75ea3a80b0bc3450711595cd23c2dabeefb425a1df3f",
+      "size_bytes": 791975537,
+      "duration_ms": 5439360,
+      "width": 1280,
+      "height": 720,
+      "fps_num": 25,
+      "fps_den": 1,
+      "time_base": "1/16000",
+      "decode_status": "passed",
+      "pts_index": {
+        "relative_path": "data/training/classic-lin-lee-20261003/probes/2016-rio-semifinal-lin-lee.1d0dc5cbbf57420da7f2932113ac4f43.pts.jsonl",
+        "sha256": "dc34c94df9d62d5d4aa65f01ae58927c651ff4e919ed69c927766c740c5ebce1",
+        "size_bytes": 5038917,
+        "format": "jsonl",
+        "frame_count": 135984,
+        "time_base": "1/16000",
+        "pts_field": "best_effort_timestamp",
+        "complete": true,
+        "vfr_status": "cfr_observed",
+        "min_delta_ticks": 640,
+        "max_delta_ticks": 640
+      },
+      "pts_rows_recounted": 135984,
+      "media_and_pts_sha256_reverified": true,
+      "usage_scope": "training_only",
+      "split": "unassigned",
+      "rights_status": "unknown",
+      "allowed_uses": [],
+      "qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2016-rio-semifinal-lin-lee.120s.jpg",
+        "size_bytes": 30915,
+        "sha256": "8b5e1a815e803200dd954d3e97fb053a8ebdee0efb94fdd7f24c34578624c3b5",
+        "requested_timestamp_seconds": 120,
+        "observation_status": "visually_inspected",
+        "observation": "Venue entrance/player close view"
+      },
+      "midpoint_qa_frame": {
+        "relative_path": "data/training/classic-lin-lee-20261003/qa/2016-rio-semifinal-lin-lee.midpoint.jpg",
+        "requested_timestamp_seconds": 2719.68,
+        "size_bytes": 16853,
+        "sha256": "f21bf47f2feceedb80a3fd777874f46dcdbe4b53732691955d552a6056b1d906",
+        "observation_status": "visually_inspected",
+        "observation": "Player close view and score overlay; whole court not visible"
+      }
+    }
+  ],
+  "central_inputs_unchanged": {
+    "training-registry.v1.json": "63eb86de88e6c760be8ff3464318d8fd55a923e7bfa1d1c177dc2bdd643e52aa",
+    "training-splits.v1.json": "4c8ac9e928775e0f1025c64655fa24d9a9557f73cf03efda9aa3cc890109c4ef",
+    "annotation-catalog.v1.json": "3fc6adf81e6f5229e4b4e4ae7de215be89bc415838d5e5aea64fb28ec85bea32"
+  },
+  "capacity_before_verification": {
+    "owner_used_bytes": 16290207300,
+    "project_used_bytes": 94144165979,
+    "active_reserved_bytes": 0,
+    "free_bytes": 920513257472,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 16290207300
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6999706247
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 206334928
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647917504
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "transient_transport_parameters_found": false,
+  "media_bytes": 1471408651,
+  "total_duration_ms": 14074640,
+  "total_pts_frames": 351866,
+  "visual_qa": {
+    "frames_inspected": 6,
+    "limitations": "Sparse frame checks only; broadcast contains introductions, overhead, close-up and main-court views. No person identity or action labels confirmed; no full-match semantic verification."
+  },
+  "batch_bytes_at_initial_verification": 1484570378,
+  "final_batch_bytes": 1484666698,
+  "capacity_after": {
+    "owner_used_bytes": 16290398890,
+    "project_used_bytes": 94144360854,
+    "active_reserved_bytes": 0,
+    "free_bytes": 920509063168,
+    "owner_limit_bytes": 300000000000,
+    "project_limit_bytes": 700000000000,
+    "min_free_bytes": 1000000000,
+    "opaque_project_owners": [
+      "runtime"
+    ],
+    "project_accounting": {
+      "data": {
+        "mode": "measured",
+        "bytes": 16290398890
+      },
+      "models": {
+        "mode": "measured",
+        "bytes": 6999706247
+      },
+      "platform": {
+        "mode": "measured",
+        "bytes": 206338213
+      },
+      "render": {
+        "mode": "measured",
+        "bytes": 647917504
+      },
+      "runtime": {
+        "mode": "allocated_upper_bound",
+        "bytes": 70000000000,
+        "reason": "OSError"
+      }
+    }
+  },
+  "verification_relative_path": "data/training/classic-lin-lee-20261003/handoff/verification.v1.json",
+  "verification_sha256": "96836ad15e5fc1d0d7bb4c4ba68b16339ed6cef33ef3ed13219131e2b812f261"
+}

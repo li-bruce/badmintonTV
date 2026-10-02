@@ -1,0 +1,21 @@
+{
+  "schema_version": "library.test-receipt/1",
+  "date_local": "2026-10-03",
+  "command": "D:/video/runtime/platform/env/Scripts/python.exe -B -m unittest discover -s tests/library -p test_*.py",
+  "exit_code": 0,
+  "tests_run": 223,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 28.146,
+  "stdout_stderr_sha256": "bb4c1efb8df92e0570c3a71b09b06be768c5caea1aa8364fdf003ac7dee715c0",
+  "tail": [
+    "...............................................................................................................................................................................................................................",
+    "----------------------------------------------------------------------",
+    "Ran 223 tests in 28.146s",
+    "",
+    "OK"
+  ],
+  "scope": "Engineering regression including synthetic media/probe fixtures; not real-video recognition acceptance",
+  "implementation_commit": "089fe6add6ea5799cd76226dad8ba6c41d981650"
+}
