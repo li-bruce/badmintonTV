@@ -204,4 +204,10 @@ prepare默认只取已有segment区间；不会擅自补回合终点或动作阶
 
 环境使用既有WSL models/env及小型annotation-env依赖环境，复用PyAV和父环境框架。启动脚本`scripts/models/bootstrap_annotation_runtime.py`默认仅显示计划，显式`--execute`才在runtime/models新路径安装四个官方小wheel；30MB总下载、100MB峰值、SHA/许可/依赖/实际导入来源均检查并记录，旧目录拒绝覆盖，失败保留。详见`environments/models-annotation-requirements.txt`与本轮实际环境回报。不得把全局Python、Windows平台依赖或新Torch安装进这个准备流程。
 
-发现的公共合同解析后重复subject边界已有消费端守卫，见[问题记录](../issues/models-training-resolved-subject-duplicates.md)。共享合同修复由01/root处理，models未自行修改合同。
+发现的公共合同解析后重复subject边界已有消费端守卫，见[问题记录](../issues/models-training-resolved-subject-duplicates.md)。公共修复2128568已由01/root处理并同步；models未自行修改合同。
+
+## 9. 本轮交付结果
+
+模型侧实现提交`e2d4348`，taxonomy `1a44123`已先行交付。主任务已有公共合同6fec08f+2128568，无需重复集成本分支的合同同步提交。最终60项WSL CPU测试PASS、0跳过；同一真实媒体agent快照两次prepare的readiness.json各72,891B、逐字节相同，SHA09059688739af49822d121967cf62e01a66cb35195062200a9d109c06a0d5dc3。报告及输入位于D:/video/models/handoff/annotation-readiness-001，数据/原片/环境未放进Git。
+
+A-06 PASS；A-04/A-05仅models消费部分PASS，Web与主线总表由root验收。实际trainable=false、strict_judgements=0、两个unknown排除，准备窗口全部review_only；没有真实human标签或模型训练。CTX专家、分组覆盖及识别质量阻塞保持。完整实际命令、资源、负例和下一步见[models-005](../experiments/models-005-annotation-readiness.md)与[验收摘要](annotation-readiness-001.evidence.json)。

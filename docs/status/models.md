@@ -13,7 +13,8 @@
 - 实际准备结论：trainable=false、strict=0、两个unknown均排除；129适用但未标项不是负例，37组不计监督类别。人物/状态/比赛组/回合未确认如实报告，window review_only。require-trainable真实exit2；写已有目录exit1且原报告hash未变，负例证据保留。
 - 验收/未测：A-06 PASS；A-04/A-05仅消费工程部分PASS，Web及阶段总表由root验收。S0-03.CTX-01、S0-04.CTX-01、S2-04.CTX-01、S3-04.CTX-01保持BLOCKED；完整态势链、消融、解释NOT_RUN。无精度/召回/正式训练成绩。详见docs/models/ANNOTATION_READINESS_PLAN.md、docs/experiments/models-005-annotation-readiness.md和annotation-readiness-001.evidence.json。
 - 运行：WSL仓库根，/mnt/d/video/runtime/models/annotation-env/bin/python -s -B -m packages.models.training_prepare prepare --snapshot <公共快照> --manifest <AssetManifest> --output-dir models/<新attempt> --samples 6；实际完整命令见实验报告/ANNOTATION_HANDOFF。无端口、GPU进程或常驻任务。
-- 下一步：主任务集成模块提交；01真实Web导出可以直接消费。专家冻结定义/双人试标、真实同源比赛分组和当前human复核仍需完成，才开展有独立评测的正式训练。本轮源码提交SHA在最终交接补记；taxonomy1a44123已先交，基线3dab169，未推送。
+- 提交SHA：实现/60项测试/真实CPU证据为`e2d4348`；taxonomy `1a44123`已由root集成。公共合同同步提交`6f851bb`/`1d75b3c`分别等价于01的`6fec08f`/`2128568`，主任务已有，不需重复cherry-pick。本模块没有推送或自行合main。
+- 下一步：主任务集成`e2d4348`及本次最终交接说明；01真实Web导出可以直接消费。专家冻结定义/双人试标、真实同源比赛分组和当前human复核仍需完成，才开展有独立评测的正式训练。无待运行GPU/安装/下载/常驻任务。
 
 ## 2026-09-29 复用实验轮：实验完成，最终交接
 
