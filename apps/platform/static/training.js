@@ -261,6 +261,8 @@
     const $ = id => doc.getElementById(id), player = $('training-player');
     const request = makeRequest(win.fetch.bind(win));
     let inEdit = false, loadedAsset = null, frameAnchor = null, pickRole = null, stepSerial = 0;
+    let timeline = null, regions = null, paletteSelection = null;
+    const interactions = win.TrainingInteractions;
     const registrations = new Map();
     function el(tag, text, className) { const node = doc.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
     function message(text = '', error = false) { $('notice').textContent = text; $('notice').hidden = !text; $('notice').classList.toggle('error', error); }
@@ -296,6 +298,7 @@
       $('source-time').textContent = '原片 ' + formatTime((player.currentTime || 0) * 1000);
       if (frameAnchor) $('frame-evidence').textContent = `源帧 ${frameAnchor.source_frame_index} · PTS ${frameAnchor.source_pts} · ${frameAnchor.source_pts_ms.toFixed(3)} ms（定位锚点，浏览器画面未逐帧核实）`;
       else $('frame-evidence').textContent = '浏览器时间定位；未进行精确源帧核查';
+      timeline?.updateTime((player.currentTime || 0) * 1000); regions?.updateTime(Math.round((player.currentTime || 0) * 1000));
     }
     function seek(ms, anchor = null) {
       if (!s.asset) return;
@@ -358,7 +361,51 @@
       $('step-next').textContent = s.frames ? '下一源 PTS →' : '后移 40 ms →';
       $('step-help').textContent = s.frames ? `已核验源 PTS，共 ${s.frames.total} 帧；使用真实时间戳定位，浏览器呈现不声明逐帧精确。` : (s.error || '源 PTS 尚未加载；临时按 40 ms 移动，不用 FPS 推算帧号。');
       renderPeople(); renderRecords(); renderSplits(); renderSnapshots();
-      if (!inEdit) renderEditor(); markers();
+      if (!inEdit) renderEditor(); markers(); renderPalette(); timeline?.render(); regions?.render();
+    }
+    function getSubject() { return {subject_role: $('palette-role').value || 'self', subject_person_id: $('palette-person').value || null}; }
+    function selectRecord(id) {
+      s.selectedId = id; cancelPick(); regions?.cancel(); ctl.notify();
+      const record = ctl.record(); if (record) seek(timeOf(record));
+    }
+    function dropLabel(labelId, target) {
+      if (!s.bundle || !interactions) throw new Error('先选择视频再放置标签');
+      const result = interactions.addLabel(s.bundle, s.taxonomy, labelId, target, getSubject(), s.actorType, () => uid('record'));
+      if (!result.added) { message('同一标签、角色和人物已存在，保留原判断。'); return; }
+      s.selectedId = result.record_id;
+      ctl.edit(bundle => { bundle.records = result.bundle.records; });
+      message('标签已放入待审核记录；请核对人物、时间和判断。');
+    }
+    function labelDropTarget(node, recordId) {
+      node.addEventListener('dragover', event => { if (event.dataTransfer?.types?.includes('application/x-btv-label')) { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; } });
+      node.addEventListener('drop', event => {
+        const label = event.dataTransfer?.getData('application/x-btv-label'); if (!label) return;
+        event.preventDefault(); event.stopPropagation(); run(() => dropLabel(label, {record_id: recordId}));
+      });
+    }
+    function renderPalette() {
+      if (!$('label-palette')) return;
+      const selected = ctl.record(), key = `${s.epoch}/${selected?.record_id || ''}`;
+      const oldPerson = $('palette-person').value;
+      if (key !== paletteSelection) paletteSelection = key;
+      const role = $('palette-role').value || 'self';
+      options($('palette-person'), (s.bundle?.people || []).map(p => [p.person_id, p.display_name]),
+        key === $('palette-person').dataset?.selection ? oldPerson : selected?.state?.[role]?.person_id || (role === 'self' ? selected?.person_id : null), '身份未知');
+      if ($('palette-person').dataset) $('palette-person').dataset.selection = key;
+      const labels = (s.taxonomy?.labels || []).filter(l => l.selectable !== false), dimension = $('palette-dimension').value;
+      const domains = [...new Set(labels.map(l => l.dimension))];
+      options($('palette-dimension'), domains.map(d => [d, dimensions[d] || d]), dimension, '全部维度');
+      const query = $('palette-filter').value.trim().toLowerCase();
+      const visible = labels.filter(l => (!dimension || l.dimension === dimension) && (l.name + l.description + l.label_id + (dimensions[l.dimension] || l.dimension)).toLowerCase().includes(query));
+      $('palette-count').textContent = `${labels.length} 个可选标签 · ${domains.length} 个维度 · 当前 ${visible.length} 项（目录不作为标签）`;
+      $('label-palette').replaceChildren();
+      for (const label of visible) {
+        const chip = button(label.name, () => dropLabel(label.label_id, $('palette-target').value === 'selected' && ctl.record() ? {record_id: s.selectedId} : {at_ms: now()}), 'label-chip');
+        chip.disabled = !s.bundle; chip.draggable = Boolean(s.bundle); chip.setAttribute('aria-label', '放置标签：' + label.name);
+        chip.setAttribute('data-label-id', label.label_id); chip.title = `${dimensions[label.dimension] || label.dimension} · ${label.name}；可拖动或点击`;
+        chip.addEventListener('dragstart', event => { if (!s.bundle) return event.preventDefault(); event.dataTransfer.setData('application/x-btv-label', label.label_id); event.dataTransfer.effectAllowed = 'copy'; });
+        $('label-palette').append(chip);
+      }
     }
     function renderCatalog() {
       $('catalog-list').replaceChildren();
@@ -404,8 +451,9 @@
       $('record-count').textContent = `${records.length} 条 · ${records.filter(r => r.review.status === 'pending').length} 条待审核`;
       const filter = $('record-filter').value;
       for (const record of records.filter(r => !filter || typeOf(r) === filter).sort((a, b) => timeOf(a) - timeOf(b))) {
-        const item = button('', () => { s.selectedId = record.record_id; cancelPick(); renderEditor(); renderRecords(); markers(); seek(timeOf(record)); }, 'record-item' + (s.selectedId === record.record_id ? ' active' : ''));
+        const item = button('', () => selectRecord(record.record_id), 'record-item' + (s.selectedId === record.record_id ? ' active' : ''));
         item.append(el('span', formatTime(timeOf(record)), 'time'), el('span', record.provenance?.title || types[typeOf(record)]), el('span', reviews[record.review.status] + ' · 来源 ' + recordOrigin(record).actorType, 'review'));
+        labelDropTarget(item, record.record_id);
         $('record-list').append(item);
       }
       if (!records.length) $('record-list').append(el('p', '在播放器下方标记触球或区间。', 'empty'));
@@ -494,7 +542,7 @@
         input.addEventListener('input', () => editRecord(r => { r.state[role].missing_reasons = input.value.trim() ? [input.value.trim()] : []; })); missing.append(input); card.append(missing);
         const position = actor.position;
         card.append(el('p', position ? `图像归一坐标 x=${position.x.toFixed(4)}, y=${position.y.toFixed(4)} · ${position.source}` : '图像位置未标；不默认为 (0, 0)', 'state-position'));
-        card.append(button('在当前画面点选位置', () => { if (!player.videoWidth) throw new Error('请等待原视频画面加载'); player.pause(); pickRole = role; $('coordinate-overlay').hidden = false; $('cancel-position').hidden = false; $('video-stage').scrollIntoView({block: 'center'}); message(`在视频画面点击${roles[role]}位置；只记录图像归一坐标。`); }));
+        card.append(button('在当前画面点选位置', () => { if (!player.videoWidth) throw new Error('请等待原视频画面加载'); regions?.cancel(); player.pause(); pickRole = role; $('coordinate-overlay').hidden = false; $('cancel-position').hidden = false; $('video-stage').scrollIntoView({block: 'center'}); message(`在视频画面点击${roles[role]}位置；只记录图像归一坐标。`); }));
         if (position) card.append(button('清除位置', () => ctl.modifyRecord(r => { r.state[role].position = null; })));
         $('state-list').append(card);
       }
@@ -535,6 +583,26 @@
       const list = el('ul', undefined, 'snapshot-blockers'); for (const reason of summary.blockers) list.append(el('li', blockers[reason] || reason)); $('snapshot-summary').append(list);
     }
     function bind(id, event, action) { $(id).addEventListener(event, e => { if (event === 'submit') e.preventDefault(); run(() => action(e)); }); }
+    if (interactions && $('source-timeline') && win.TrainingTimeline) timeline = win.TrainingTimeline.mount({doc, win, container: $('source-timeline'), getState: () => s, getTime: now,
+      onSelect: selectRecord, onSeek: seek, onError: error => message(error.message || String(error), true), onDropLabel: dropLabel,
+      onEdit: (recordId, patch) => { const records = interactions.retimeRecords(s.bundle, recordId, patch, s.actorType); ctl.edit(bundle => { bundle.records = records; }); message('时间已调整，尚未保存。'); }});
+    if (interactions && $('image-region-tools') && win.TrainingRegions) regions = win.TrainingRegions.mount({doc, win, stage: $('video-stage'), player, container: $('image-region-tools'),
+      getState: () => s, getRecord: () => ctl.record(), getTime: now, getSubject, onSeek: seek, onBegin: cancelPick, onError: error => message(error.message || String(error), true),
+      onChange: evidence => {
+        const record = ctl.record(); if (!record) throw new Error('先选择区域所属记录');
+        const records = clone(s.bundle.records), edited = records.find(r => r.record_id === record.record_id);
+        for (const region of evidence.filter(e => e.type === 'image_region')) {
+          const before = (record.evidence || []).find(e => e.evidence_id === region.evidence_id);
+          if (!before) interactions.assignSubject(edited, s.bundle.people, region);
+        }
+        edited.evidence = clone(evidence); edited.review = {status: 'pending', reviewer_type: s.actorType, reviewer: 'local-' + s.actorType};
+        interactions.validateTiming(records, s.asset.duration_ms); ctl.edit(bundle => { bundle.records = records; }); message('画面区域已更新，尚未保存；只对应取证时刻。');
+      }});
+    if ($('label-palette')) {
+      bind('palette-filter', 'input', renderPalette); bind('palette-dimension', 'change', renderPalette);
+      bind('palette-role', 'change', () => { if ($('palette-person').dataset) delete $('palette-person').dataset.selection; renderPalette(); regions?.cancel(); });
+      bind('palette-person', 'change', () => regions?.cancel());
+    }
     bind('create-project', 'click', () => ctl.createProject($('project-name').value));
     bind('project-select', 'change', () => ctl.openProject($('project-select').value));
     bind('refresh-videos', 'click', async () => { await ctl.boot(); await ctl.refreshProject(); });

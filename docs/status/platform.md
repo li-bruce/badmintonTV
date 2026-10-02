@@ -1,3 +1,12 @@
+## 2026-10-03 拖拽与圈选增补（进行中）
+
+- 新授权A-11～A-14；开发前设计 [TRAINING_INTERACTION_DESIGN.md](../platform/TRAINING_INTERACTION_DESIGN.md)。合同a0fc1db已提交；UI功能及API回归已接入，真实验收进行中，整项尚未PASS。
+- 继续codex/platform-training-workspace，自44bd583。18080人工实例不触碰；仅18082 agent测试。基础资料手填，无新增安装/GPU/视频副本。预算2GB内，D写入前重新预留。
+- 设计：独立原生Pointer/SVG模块→controller克隆校验→原bundle CAS。区域只扩展evidence字典，不给旧snapshot添加默认字段；旧实际hash必须保持。
+- 已运行：350合同/API相关PASS；新增18 ROI API PASS/无skip；最终69前端PASS/无skip。旧实际snapshot dump/hash兼容。CUA已真实拖入标签到原片61996–62996ms新建区间、点击回退追加步法、保存修订2；非人工真值。现有块投放/区间拖动/圈选真实操作仍待收束；无跳过替代PASS。
+- 私有预留2GB：reservation-69b9c1c91c83492991858e757bf4d0e2，证据D:/video/platform/training-interaction-20261003；DB复用training-20261002，18082 agent。16:40:10UTC重启parent49668。无新增安装/GPU。
+- 下一步：先交可集成的功能提交供root独立18084并行验证，本任务继续所有真实浏览器用例，后续修复/报告单独提交。主human18080不写。
+
 ## 2026-10-02 训练工作台（平台交付完成，10-03凌晨补齐报告）
 
 - 分支 codex/platform-training-workspace，从 main 3dab169 建立；旧分支保留。设计先行见 docs/platform/TRAINING_DESIGN.md；最终逐ID证据见 [TRAINING_VALIDATION.md](../platform/TRAINING_VALIDATION.md)。
