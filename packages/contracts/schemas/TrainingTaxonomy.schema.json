@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "TrainingLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "label_id": {
+          "minLength": 1,
+          "title": "Label Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "kinds": {
+          "items": {
+            "enum": [
+              "rally",
+              "contact",
+              "dead_ball",
+              "segment",
+              "state"
+            ],
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "status": {
+          "default": "provisional",
+          "enum": [
+            "provisional",
+            "defined"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "selectable": {
+          "default": true,
+          "title": "Selectable",
+          "type": "boolean"
+        },
+        "requires_person": {
+          "default": true,
+          "title": "Requires Person",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label_id",
+        "name",
+        "dimension",
+        "description",
+        "kinds"
+      ],
+      "title": "TrainingLabel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "format": {
+      "const": "badmintontv.training.taxonomy.v1",
+      "default": "badmintontv.training.taxonomy.v1",
+      "title": "Format",
+      "type": "string"
+    },
+    "taxonomy_id": {
+      "minLength": 1,
+      "title": "Taxonomy Id",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "provisional",
+      "enum": [
+        "provisional",
+        "reviewed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "labels": {
+      "items": {
+        "$ref": "#/$defs/TrainingLabel"
+      },
+      "title": "Labels",
+      "type": "array"
+    },
+    "provenance": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "required": [
+    "taxonomy_id",
+    "version",
+    "labels"
+  ],
+  "title": "TrainingTaxonomy",
+  "type": "object"
+}

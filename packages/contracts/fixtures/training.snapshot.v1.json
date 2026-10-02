@@ -1,0 +1,741 @@
+{
+  "schema_version": "1.0",
+  "format": "badmintontv.training.snapshot.v1",
+  "snapshot_id": "snapshot-synthetic",
+  "usage_scope": "training_only",
+  "project": {
+    "schema_version": "1.0",
+    "project_id": "project-synthetic",
+    "name": "Synthetic training fixture",
+    "usage_scope": "training_only",
+    "catalog_version": "synthetic-catalog-1",
+    "taxonomy_id": "badmintontv-provisional",
+    "taxonomy_version": "2026-10-02-draft-1",
+    "asset_ids": [
+      "asset-training-synthetic"
+    ],
+    "revision": 1,
+    "created_at": "2026-10-02T00:00:00Z",
+    "updated_at": "2026-10-02T00:00:00Z",
+    "provenance": {}
+  },
+  "taxonomy": {
+    "schema_version": "1.0",
+    "format": "badmintontv.training.taxonomy.v1",
+    "taxonomy_id": "badmintontv-provisional",
+    "version": "2026-10-02-draft-1",
+    "status": "provisional",
+    "labels": [
+      {
+        "label_id": "stroke.net_shot",
+        "name": "网前球",
+        "dimension": "stroke",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "stroke.smash",
+        "name": "杀球",
+        "dimension": "stroke",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "stroke.clear",
+        "name": "高远球",
+        "dimension": "stroke",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "stroke.serve",
+        "name": "发球",
+        "dimension": "stroke",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "hand_technique.net_zhan_cuo",
+        "name": "网前展搓（待专家定义）",
+        "dimension": "hand_technique",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "hand_technique.net_shou_cuo",
+        "name": "网前收搓（待专家定义）",
+        "dimension": "hand_technique",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "footwork.split_step",
+        "name": "垫步启动",
+        "dimension": "footwork",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "segment",
+          "state"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "footwork.backward_hop",
+        "name": "后退小跳启动（待专家定义）",
+        "dimension": "footwork",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "footwork.lunge",
+        "name": "跨步到位",
+        "dimension": "footwork",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "footwork.recovery",
+        "name": "回位",
+        "dimension": "footwork",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "ball.high_clear",
+        "name": "高弧线球路",
+        "dimension": "ball",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": false
+      },
+      {
+        "label_id": "state.balance",
+        "name": "本人平衡状态",
+        "dimension": "state",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "state",
+          "contact",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "state.opponent_defense",
+        "name": "对手防守状态",
+        "dimension": "state",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "state"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "state.partner_cover",
+        "name": "搭档补位状态",
+        "dimension": "state",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "state"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": true
+      },
+      {
+        "label_id": "tactic.attack_transition",
+        "name": "攻防转换",
+        "dimension": "tactic",
+        "parent_id": null,
+        "description": "Provisional UI category; observable/expert definition not approved.",
+        "kinds": [
+          "rally",
+          "segment"
+        ],
+        "status": "provisional",
+        "selectable": true,
+        "requires_person": false
+      }
+    ],
+    "provenance": {
+      "owner": "models-pending",
+      "provisional": true,
+      "fixture": "Synthetic schema/UI fallback, not expert taxonomy or training truth"
+    }
+  },
+  "assets": [
+    {
+      "asset_id": "asset-training-synthetic",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "relative_path": "data/training/synthetic/source.mp4",
+      "size_bytes": 1000,
+      "duration_ms": 10000,
+      "title": "Synthetic training contract fixture; no media supplied",
+      "usage_scope": "training_only",
+      "source_usage_scope": "training_only",
+      "match_id": null,
+      "group_id": "group-unconfirmed-synthetic",
+      "group_status": "unconfirmed",
+      "root_asset_ids": [],
+      "source_sha256s": [],
+      "recording_session_id": null,
+      "source_group_ids": [],
+      "pts_reference": {
+        "format": "synthetic.pts.v1",
+        "relative_path": "data/training/synthetic/source.pts.json",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "frame_count": 250
+      },
+      "provenance": {
+        "fixture": "synthetic only",
+        "details": {
+          "tags": [
+            "not-expert-truth"
+          ]
+        }
+      }
+    }
+  ],
+  "bundles": [
+    {
+      "schema_version": "1.0",
+      "format": "badmintontv.training.annotations.v1",
+      "project_id": "project-synthetic",
+      "asset": {
+        "asset_id": "asset-training-synthetic",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "relative_path": "data/training/synthetic/source.mp4",
+        "size_bytes": 1000,
+        "duration_ms": 10000,
+        "title": "Synthetic training contract fixture; no media supplied",
+        "usage_scope": "training_only",
+        "source_usage_scope": "training_only",
+        "match_id": null,
+        "group_id": "group-unconfirmed-synthetic",
+        "group_status": "unconfirmed",
+        "root_asset_ids": [],
+        "source_sha256s": [],
+        "recording_session_id": null,
+        "source_group_ids": [],
+        "pts_reference": {
+          "format": "synthetic.pts.v1",
+          "relative_path": "data/training/synthetic/source.pts.json",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "frame_count": 250
+        },
+        "provenance": {
+          "fixture": "synthetic only",
+          "details": {
+            "tags": [
+              "not-expert-truth"
+            ]
+          }
+        }
+      },
+      "revision": 1,
+      "people": [
+        {
+          "person_id": "person-a",
+          "display_name": "Synthetic person A",
+          "team_id": "team-a",
+          "identity_status": "confirmed",
+          "provenance": {
+            "fixture": "Synthetic confirmed identity, not an actual athlete"
+          }
+        },
+        {
+          "person_id": "person-b",
+          "display_name": "Synthetic person B",
+          "team_id": "team-b",
+          "identity_status": "confirmed",
+          "provenance": {
+            "fixture": "Synthetic confirmed identity, not an actual athlete"
+          }
+        }
+      ],
+      "records": [
+        {
+          "record_id": "rally-1",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "rally",
+          "at_ms": null,
+          "start_ms": 1000,
+          "end_ms": 5000,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": null,
+          "team_id": null,
+          "rally_id": null,
+          "dead_ball_id": "dead-1",
+          "segment_type": null,
+          "judgements": [],
+          "state": null,
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        },
+        {
+          "record_id": "contact-1",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "contact",
+          "at_ms": 2000,
+          "start_ms": null,
+          "end_ms": null,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": "person-a",
+          "team_id": "team-a",
+          "rally_id": "rally-1",
+          "dead_ball_id": null,
+          "segment_type": null,
+          "judgements": [
+            {
+              "label_id": "stroke.net_shot",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "present",
+              "reason": null,
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            },
+            {
+              "label_id": "hand_technique.net_zhan_cuo",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "unknown",
+              "reason": "Synthetic fixture: wrist/racket evidence unavailable",
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            }
+          ],
+          "state": null,
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        },
+        {
+          "record_id": "contact-2",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "contact",
+          "at_ms": 3000,
+          "start_ms": null,
+          "end_ms": null,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": "person-b",
+          "team_id": "team-b",
+          "rally_id": "rally-1",
+          "dead_ball_id": null,
+          "segment_type": null,
+          "judgements": [
+            {
+              "label_id": "stroke.smash",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "unobservable",
+              "reason": "Synthetic fixture: contact occluded",
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            }
+          ],
+          "state": null,
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        },
+        {
+          "record_id": "dead-1",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "dead_ball",
+          "at_ms": 5000,
+          "start_ms": null,
+          "end_ms": null,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": null,
+          "team_id": null,
+          "rally_id": "rally-1",
+          "dead_ball_id": null,
+          "segment_type": null,
+          "judgements": [],
+          "state": null,
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        },
+        {
+          "record_id": "segment-1",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "segment",
+          "at_ms": null,
+          "start_ms": 1800,
+          "end_ms": 2300,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": "person-a",
+          "team_id": "team-a",
+          "rally_id": "rally-1",
+          "dead_ball_id": null,
+          "segment_type": "footwork",
+          "judgements": [
+            {
+              "label_id": "footwork.lunge",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "present",
+              "reason": null,
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            },
+            {
+              "label_id": "footwork.backward_hop",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "absent",
+              "reason": null,
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            }
+          ],
+          "state": null,
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        },
+        {
+          "record_id": "state-1",
+          "project_id": "project-synthetic",
+          "asset_id": "asset-training-synthetic",
+          "kind": "state",
+          "at_ms": 2500,
+          "start_ms": null,
+          "end_ms": null,
+          "uncertainty_start_ms": null,
+          "uncertainty_end_ms": null,
+          "person_id": "person-a",
+          "team_id": "team-a",
+          "rally_id": "rally-1",
+          "dead_ball_id": null,
+          "segment_type": null,
+          "judgements": [
+            {
+              "label_id": "state.balance",
+              "subject_role": "self",
+              "subject_person_id": null,
+              "value": "unknown",
+              "reason": "Not enough visual evidence",
+              "confidence": null,
+              "source_label": null,
+              "mapping_status": "manual"
+            }
+          ],
+          "state": {
+            "self": {
+              "person_id": "person-a",
+              "team_id": "team-a",
+              "position": {
+                "coordinate_system": "image_normalized",
+                "x": 0.3,
+                "y": 0.8,
+                "calibration_id": null,
+                "source": "agent"
+              },
+              "movement": null,
+              "missing_reasons": []
+            },
+            "opponent": {
+              "person_id": "person-b",
+              "team_id": "team-b",
+              "position": {
+                "coordinate_system": "image_normalized",
+                "x": 0.7,
+                "y": 0.2,
+                "calibration_id": null,
+                "source": "agent"
+              },
+              "movement": null,
+              "missing_reasons": []
+            },
+            "partner": null,
+            "opponent_partner": null,
+            "incoming_ball": null,
+            "outgoing_ball": null,
+            "missing_reasons": [
+              "No calibrated court coordinates"
+            ],
+            "provenance": {}
+          },
+          "visibility": "unknown",
+          "unknown_reasons": [],
+          "raw_labels": [],
+          "evidence": [],
+          "review": {
+            "status": "pending",
+            "reviewer_type": "agent",
+            "reviewer": "contract-fixture-agent",
+            "reviewed_at": null,
+            "note": ""
+          },
+          "revision": 1,
+          "previous_revision": null,
+          "deleted": false,
+          "provenance": {}
+        }
+      ]
+    }
+  ],
+  "splits": [],
+  "training_view": [],
+  "exclusions": [
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "contact-1",
+      "label_id": "stroke.net_shot",
+      "subject_role": "self",
+      "subject_person_id": "person-a",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "observation_visibility_insufficient",
+        "observation_evidence_missing"
+      ]
+    },
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "contact-1",
+      "label_id": "hand_technique.net_zhan_cuo",
+      "subject_role": "self",
+      "subject_person_id": "person-a",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "unknown"
+      ]
+    },
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "contact-2",
+      "label_id": "stroke.smash",
+      "subject_role": "self",
+      "subject_person_id": "person-b",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "unobservable"
+      ]
+    },
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "segment-1",
+      "label_id": "footwork.lunge",
+      "subject_role": "self",
+      "subject_person_id": "person-a",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "observation_visibility_insufficient",
+        "observation_evidence_missing"
+      ]
+    },
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "segment-1",
+      "label_id": "footwork.backward_hop",
+      "subject_role": "self",
+      "subject_person_id": "person-a",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "observation_visibility_insufficient",
+        "observation_evidence_missing",
+        "negative_reason_missing"
+      ]
+    },
+    {
+      "asset_id": "asset-training-synthetic",
+      "record_id": "state-1",
+      "label_id": "state.balance",
+      "subject_role": "self",
+      "subject_person_id": "person-a",
+      "reasons": [
+        "not_confirmed",
+        "not_human_review",
+        "provisional_semantics",
+        "unknown"
+      ]
+    }
+  ],
+  "quality_summary": {
+    "record_count": 6,
+    "eligible_judgement_count": 0,
+    "excluded_judgement_count": 6,
+    "unassigned_asset_ids": [
+      "asset-training-synthetic"
+    ],
+    "unconfirmed_match_asset_ids": [
+      "asset-training-synthetic"
+    ],
+    "missing_dead_ball_rally_ids": [],
+    "trainable": false,
+    "blockers": [
+      "no_human_confirmed_semantically_defined_judgements",
+      "unassigned_or_unconfirmed_groups",
+      "independent_match_group_unconfirmed"
+    ]
+  },
+  "created_at": "2026-10-02T00:00:00Z",
+  "content_sha256": "cf31703628b7564120750b72bca1f780d6bd3542a566b54b4a2d09bc6cc14aaf"
+}
