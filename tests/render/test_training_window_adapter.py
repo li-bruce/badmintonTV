@@ -50,6 +50,14 @@ def find_window(result, strategy, anchor_id):
     return values[0]
 
 
+def bound_clock(bundle, pts, time_base="1/1000", origin_pts=None):
+    """Freeze synthetic index metadata before supplying its in-memory clock."""
+    reference = deepcopy(bundle["asset"]["pts_reference"])
+    reference.update(frame_count=len(pts), time_base=time_base, size_bytes=4096, complete=True)
+    bundle["asset"]["pts_reference"] = reference
+    return SourceClock(pts, time_base, origin_pts=origin_pts, reference=reference)
+
+
 class TrainingBundleAdapterTests(unittest.TestCase):
     def setUp(self):
         self.bundle = fixture("training.annotations.v1.json")
@@ -263,7 +271,7 @@ class TrainingBundleAdapterTests(unittest.TestCase):
         self.assertNotEqual(after["window_id"], before["window_id"])
 
     def test_public_at_ms_and_frame_index_evidence_map_to_source_time_without_mutating_raw(self):
-        clock = SourceClock([9000, 11000, 12000, 14000, 17500], "1/1000")
+        clock = bound_clock(self.bundle, [9000, 11000, 12000, 14000, 17500])
         for evidence, supplied_clock in (({"at_ms": 8500}, None), ({"source_frame_index": 4}, clock),
                                          ({"frame_index": 4}, clock), ({"source_pts": 17500}, clock)):
             with self.subTest(evidence=evidence):
@@ -281,7 +289,7 @@ class TrainingBundleAdapterTests(unittest.TestCase):
                 self.assertEqual(record(bundle, "contact-1")["evidence"], [evidence])
 
     def test_declared_evidence_time_cannot_override_conflicting_frame_or_pts(self):
-        clock = SourceClock(list(range(0, 10000, 40)), "1/1000")
+        clock = bound_clock(self.bundle, list(range(0, 10000, 40)))
         for evidence in ({"at_ms": 1000, "source_frame_index": 199, "source_pts": 7960},
                          {"at_ms": 1000, "frame_index": 199, "source_pts": 7960},
                          {"at_ms": 1000, "source_pts": 7960}):
@@ -296,7 +304,7 @@ class TrainingBundleAdapterTests(unittest.TestCase):
         self.assertEqual(find_window(result, "hand_technique", "contact-1")["latest_source_time_ms"], 7960)
 
     def test_conflicting_frame_index_aliases_are_rejected(self):
-        clock = SourceClock(list(range(0, 10000, 40)), "1/1000")
+        clock = bound_clock(self.bundle, list(range(0, 10000, 40)))
         record(self.bundle, "contact-1")["evidence"] = [
             {"at_ms": 1000, "source_frame_index": 25, "frame_index": 199},
         ]
@@ -326,7 +334,103 @@ class TrainingBundleAdapterTests(unittest.TestCase):
         self.assertEqual(item["status"], "candidate")
         self.assertIn("evidence_time_unresolved", item["reasons"])
         self.assertEqual(item["latest_source_time_ms"], self.asset["duration_ms"])
+        self.assertIsNone(item["wait_ms"])
         self.assertEqual(record(result["training_adapter"]["annotation_bundle"], "contact-1")["evidence"], [evidence])
+
+    def test_unassigned_boundary_evidence_updates_window_watermark_without_losing_roi_or_unknown(self):
+        boundary = record(self.bundle, "contact-2")
+        boundary["rally_id"] = None
+        boundary["evidence"] = [{"type": "source_time", "at_ms": 8500,
+                                 "roi": {"x": 10, "y": 20, "width": 30, "height": 40},
+                                 "visibility": "unknown"}]
+        original = deepcopy(self.bundle)
+        canonical = TrainingAnnotationBundle.model_validate(self.bundle).model_dump(mode="json")
+        result = self.adapt()
+        item = find_window(result, "ball_flight", "contact-1")
+        self.assertEqual(item["range"], {"start_ms": 2000, "end_ms": 5000})
+        self.assertEqual(item["status"], "candidate")
+        self.assertEqual(item["latest_source_time_ms"], 8500)
+        self.assertEqual(item["lookahead_ms"], 6500)
+        self.assertTrue(item["future_context_used"])
+        self.assertEqual(item["wait_ms"], 0)
+        self.assertIn({"record_id": "contact-2", "revision": 1}, item["annotation_refs"])
+        self.assertNotIn("evidence_time_unresolved", item["reasons"])
+        # The shorter hand window does not use this unassigned point.
+        hand = find_window(result, "hand_technique", "contact-1")
+        self.assertEqual(hand["latest_source_time_ms"], 5000)
+        self.assertNotIn({"record_id": "contact-2", "revision": 1}, hand["annotation_refs"])
+        self.assertEqual(result["training_adapter"]["annotation_bundle"], canonical)
+        self.assertEqual(self.bundle, original)
+
+    def test_unassigned_boundary_uses_uncertainty_upper_bound_as_evidence(self):
+        boundary = record(self.bundle, "contact-2")
+        boundary.update(rally_id=None, uncertainty_start_ms=2500, uncertainty_end_ms=8800)
+        boundary["evidence"] = [{"at_ms": 8500}]
+        item = find_window(self.adapt(), "ball_flight", "contact-1")
+        self.assertEqual(item["latest_source_time_ms"], 8800)
+        self.assertEqual(item["lookahead_ms"], 6800)
+
+    def test_unassigned_frame_pts_evidence_uses_the_same_clock_and_alias_checks(self):
+        clock = bound_clock(self.bundle, list(range(0, 10000, 40)))
+        boundary = record(self.bundle, "contact-2")
+        boundary["rally_id"] = None
+        for evidence in ({"source_frame_index": 199}, {"frame_index": 199}, {"source_pts": 7960},
+                         {"at_ms": 7960, "time_ms": 7960, "source_pts": 7960, "source_frame_index": 199}):
+            with self.subTest(evidence=evidence):
+                boundary["evidence"] = [evidence]
+                item = find_window(self.adapt(clock=clock), "ball_flight", "contact-1")
+                self.assertEqual(item["latest_source_time_ms"], 7960)
+                self.assertEqual(item["lookahead_ms"], 5960)
+                self.assertNotIn("evidence_time_unresolved", item["reasons"])
+        for evidence in ({"at_ms": 1000, "source_frame_index": 199},
+                         {"source_frame_index": 25, "frame_index": 199},
+                         {"source_frame_index": 199, "source_pts": 1000}):
+            with self.subTest(conflicting_evidence=evidence):
+                boundary["evidence"] = [evidence]
+                with self.assertRaises(WindowError) as raised:
+                    self.adapt(clock=clock)
+                self.assertEqual(raised.exception.code, "invalid_pts")
+
+    def test_unassigned_unknown_evidence_remains_candidate_with_full_source_watermark(self):
+        boundary = record(self.bundle, "contact-2")
+        boundary["rally_id"] = None
+        for evidence in ({"reference": "unresolved-review", "roi": [10, 20, 30, 40]},
+                         {"at_ms": 1000, "source_frame_index": 199}):
+            with self.subTest(evidence=evidence):
+                boundary["evidence"] = [deepcopy(evidence)]
+                result = self.adapt()
+                item = find_window(result, "ball_flight", "contact-1")
+                self.assertEqual(item["status"], "candidate")
+                self.assertEqual(item["latest_source_time_ms"], self.asset["duration_ms"])
+                self.assertEqual(item["lookahead_ms"], 8000)
+                self.assertIn("evidence_time_unresolved", item["reasons"])
+                self.assertIsNone(item["wait_ms"])
+                self.assertEqual(record(result["training_adapter"]["annotation_bundle"], "contact-2")["evidence"], [evidence])
+
+    def test_unassigned_time_alias_and_interval_conflicts_are_rejected_by_shared_rules(self):
+        boundary = record(self.bundle, "contact-2")
+        boundary["rally_id"] = None
+        for evidence in ({"at_ms": 8500, "time_ms": 1000},
+                         {"at_ms": 8500, "start_ms": 1000, "end_ms": 2000}):
+            with self.subTest(evidence=evidence):
+                boundary["evidence"] = [evidence]
+                with self.assertRaises(WindowError):
+                    self.adapt()
+        boundary["evidence"] = [{"at_ms": 8200, "time_ms": 8200, "start_ms": 8000, "end_ms": 8500}]
+        item = find_window(self.adapt(), "ball_flight", "contact-1")
+        self.assertEqual(item["latest_source_time_ms"], 8500)
+
+    def test_frozen_pts_path_alias_and_equivalent_time_base_are_bound(self):
+        clock = bound_clock(self.bundle, list(range(0, 10000, 40)))
+        reference = self.bundle["asset"]["pts_reference"]
+        reference["path"] = reference.pop("relative_path")
+        clock.reference["time_base"] = "2/2000"
+        clock.reference["sha256"] = clock.reference["sha256"].upper()
+        self.assertEqual(find_window(self.adapt(clock=clock), "ball_flight", "contact-1")["pts"]["status"], "mapped")
+        clock.reference["path"] = "data/training/synthetic/wrong-index.jsonl"
+        with self.assertRaises(WindowError) as raised:
+            self.adapt(clock=clock)
+        self.assertEqual(raised.exception.code, "invalid_pts")
 
     def test_source_asset_must_match_reference_identity_hash_path_and_measurements(self):
         for key, value in (("asset_id", "another-asset"), ("sha256", "c" * 64),
@@ -365,6 +469,58 @@ class TrainingSnapshotAdapterTests(unittest.TestCase):
                 self.assertEqual(result["training_truth"], "not_determined_by_window_derivation")
                 self.assertEqual(self.snapshot, original)
                 self.assertEqual(validated.model_dump(mode="json"), original)
+
+    def snapshot_clock(self):
+        clock = bound_clock(self.snapshot["bundles"][0], list(range(0, 10000, 40)))
+        self.snapshot["assets"][0]["pts_reference"] = deepcopy(self.snapshot["bundles"][0]["asset"]["pts_reference"])
+        self.snapshot["content_sha256"] = training_content_sha256(self.snapshot)
+        TrainingSnapshot.model_validate(self.snapshot)
+        return clock
+
+    def test_frozen_snapshot_reference_rejects_another_or_unidentified_clock(self):
+        clock = self.snapshot_clock()
+        original = deepcopy(self.snapshot)
+        for changes in ({"format": "different-format"}, {"relative_path": "data/training/different.pts"},
+                        {"sha256": "c" * 64}, {"size_bytes": 4097}, {"frame_count": 249},
+                        {"time_base": "1/2000"}, {"complete": False},
+                        {"source_sha256": "d" * 64}):
+            with self.subTest(changes=changes):
+                other = SourceClock(clock.pts, clock.time_base, reference={**clock.reference, **changes})
+                with self.assertRaises(WindowError) as raised:
+                    derive_training_snapshot(self.asset, self.snapshot, clock=other)
+                self.assertEqual(raised.exception.code, "invalid_pts")
+        for missing in (None, "format", "relative_path", "sha256", "size_bytes", "frame_count", "time_base", "complete"):
+            with self.subTest(missing=missing):
+                reference = deepcopy(clock.reference) if missing else {}
+                if missing:
+                    reference.pop(missing)
+                other = SourceClock(clock.pts, clock.time_base, reference=reference)
+                with self.assertRaises(WindowError) as raised:
+                    derive_training_snapshot(self.asset, self.snapshot, clock=other)
+                self.assertEqual(raised.exception.code, "invalid_pts")
+        self.assertEqual(self.snapshot, original)
+
+    def test_frozen_snapshot_count_and_time_base_are_checked_against_actual_clock(self):
+        clock = self.snapshot_clock()
+        for pts, time_base in ((clock.pts[:-1], clock.time_base), (clock.pts, "1/2000")):
+            with self.subTest(count=len(pts), time_base=str(time_base)):
+                other = SourceClock(pts, time_base, reference=clock.reference)
+                with self.assertRaises(WindowError) as raised:
+                    derive_training_snapshot(self.asset, self.snapshot, clock=other)
+                self.assertEqual(raised.exception.code, "invalid_pts")
+
+    def test_matching_frozen_snapshot_clock_maps_and_omitted_clock_remains_not_provided(self):
+        clock = self.snapshot_clock()
+        original = deepcopy(self.snapshot)
+        mapped = derive_training_snapshot(self.asset, self.snapshot, clock=clock)
+        item = find_window(mapped, "ball_flight", "contact-1")
+        self.assertEqual(item["pts"]["status"], "mapped")
+        self.assertEqual(item["pts"]["reference"], original["assets"][0]["pts_reference"])
+        self.assertEqual(item["pts"]["frame_count"], 25)
+        omitted = derive_training_snapshot(self.asset, self.snapshot)
+        self.assertTrue(all(item["pts"]["status"] == "not_provided" for item in omitted["windows"]))
+        self.assertEqual(mapped["snapshot_reference"]["content_sha256"], original["content_sha256"])
+        self.assertEqual(self.snapshot, original)
 
     def test_changed_snapshot_without_new_hash_is_rejected_before_bundle_adapter(self):
         self.snapshot["snapshot_id"] = "tampered-snapshot"

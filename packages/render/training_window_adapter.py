@@ -5,13 +5,90 @@ is deliberately no inference from the first contact or a coarse stroke label.
 """
 from __future__ import annotations
 
-from bisect import bisect_left
 from copy import deepcopy
-import math
+from fractions import Fraction
 
-from .contact_windows import WindowError, check, content_hash, derive_contact_windows
+from .contact_windows import (
+    SourceClock, WindowError, _bound_frame_evidence, check, content_hash,
+    derive_contact_windows, evidence_end,
+)
 
-ADAPTER_VERSION = "training-window-adapter/1.0.0"
+ADAPTER_VERSION = "training-window-adapter/1.0.1"
+
+
+def _bind_frozen_clock(asset_reference, clock):
+    """A supplied clock must describe the index frozen in the public bundle."""
+    if clock is None:
+        return
+    check(isinstance(clock, SourceClock), "Invalid SourceClock", "invalid_pts")
+    frozen = asset_reference.get("pts_reference")
+    actual = clock.reference
+    check(isinstance(actual, dict), "Clock reference must be an object", "invalid_pts")
+    if frozen:
+        check(actual, "Frozen PTS reference requires an identified clock", "invalid_pts")
+
+    def path(reference):
+        paths = [reference[key] for key in ("relative_path", "path") if key in reference]
+        check(not paths or all(isinstance(value, str) and value == paths[0] for value in paths),
+              "PTS path aliases conflict", "invalid_pts")
+        return paths[0] if paths else None
+
+    def time_base(value):
+        try:
+            result = Fraction(value)
+        except (ValueError, TypeError, ZeroDivisionError) as exc:
+            raise WindowError("invalid_pts", "Invalid referenced PTS time_base") from exc
+        check(result > 0, "Referenced PTS time_base must be positive", "invalid_pts")
+        return result
+
+    for reference in (frozen or {}, actual):
+        path(reference)
+        if "frame_count" in reference:
+            check(type(reference["frame_count"]) is int and reference["frame_count"] == len(clock.pts),
+                  "Referenced PTS count differs from actual clock", "invalid_pts")
+        if "time_base" in reference:
+            check(time_base(reference["time_base"]) == clock.time_base,
+                  "Referenced PTS time_base differs from actual clock", "invalid_pts")
+        if "size_bytes" in reference:
+            check(type(reference["size_bytes"]) is int and reference["size_bytes"] > 0,
+                  "Invalid referenced PTS size", "invalid_pts")
+        if "complete" in reference:
+            check(reference["complete"] is True, "Incomplete PTS reference", "invalid_pts")
+        if "source_sha256" in reference:
+            check(isinstance(reference["source_sha256"], str)
+                  and reference["source_sha256"].lower() == asset_reference["sha256"].lower(),
+                  "PTS reference belongs to a different source", "invalid_pts")
+    if not frozen:
+        return
+    if path(frozen) is not None:
+        check(path(actual) == path(frozen), "Clock PTS path differs from frozen reference", "invalid_pts")
+    for key in ("format", "sha256", "size_bytes", "frame_count", "time_base", "complete"):
+        if key not in frozen:
+            continue
+        check(key in actual, "Clock is missing frozen PTS field: " + key, "invalid_pts")
+        expected, supplied = frozen[key], actual[key]
+        if key == "sha256":
+            check(isinstance(supplied, str), "Invalid clock PTS hash", "invalid_pts")
+            expected, supplied = expected.lower(), supplied.lower()
+        elif key == "time_base":
+            expected, supplied = time_base(expected), time_base(supplied)
+        check(expected == supplied, "Clock PTS field differs from frozen reference: " + key, "invalid_pts")
+
+
+def _normalize_evidence(record, clock, duration):
+    """Use core evidence rules for every record that influences a window."""
+    for item in record["evidence"]:
+        if "at_ms" in item and "time_ms" not in item:
+            item["time_ms"] = item["at_ms"]
+    _bound_frame_evidence(record, clock, duration)
+    for item in record["evidence"]:
+        if not any(key in item for key in ("end_ms", "time_ms", "at_ms")):
+            has_frame = any(item.get(key) is not None for key in ("source_frame_index", "frame_index", "source_pts"))
+            if clock is None or not has_frame:
+                record["latest_evidence_ms"] = duration
+                record["evidence_time_status"] = "unresolved_bounded_by_source_duration"
+    check(evidence_end(record) <= duration, "Evidence exceeds media", "invalid_boundary")
+    return record
 
 
 def derive_training_bundle(asset, bundle, *, vocabulary_version, serve_mark_refs=(),
@@ -32,6 +109,7 @@ def derive_training_bundle(asset, bundle, *, vocabulary_version, serve_mark_refs
         asset = asset.model_dump(mode="json")
     for key in ("asset_id", "sha256", "relative_path", "size_bytes", "duration_ms"):
         check(asset.get(key) == raw["asset"][key], "Canonical Asset differs from training reference: " + key, "asset_mismatch")
+    _bind_frozen_clock(raw["asset"], clock)
     current = {r["record_id"]: r for r in raw["records"]}
 
     def live_ref(ref, kind):
@@ -76,23 +154,7 @@ def derive_training_bundle(asset, bundle, *, vocabulary_version, serve_mark_refs
                       visibility=r["visibility"], unknown_reason="; ".join(r["unknown_reasons"]),
                       review=deepcopy(r["review"]), provenance=deepcopy(r["provenance"]),
                       evidence=deepcopy(r["evidence"]), original_record=deepcopy(r))
-        for evidence in mapped["evidence"]:
-            if "at_ms" in evidence and "time_ms" not in evidence:
-                evidence["time_ms"] = evidence["at_ms"]
-            if not any(key in evidence for key in ("end_ms", "time_ms")):
-                index = evidence.get("source_frame_index", evidence.get("frame_index"))
-                if index is None and clock is not None and type(evidence.get("source_pts")) is int:
-                    found = bisect_left(clock.pts, evidence["source_pts"])
-                    if found < len(clock.pts) and clock.pts[found] == evidence["source_pts"]:
-                        index = found
-                if clock is not None and type(index) is int and 0 <= index < len(clock.pts):
-                    evidence["time_ms"] = math.ceil(clock.time_ms(clock.pts[index]))
-                else:
-                    # A reference alone does not prove when evidence was seen.
-                    # This offline adapter bounds it by the entire source and
-                    # keeps its timing unknown; it has no realtime mode.
-                    mapped["latest_evidence_ms"] = asset["duration_ms"]
-                    mapped["evidence_time_status"] = "unresolved_bounded_by_source_duration"
+        _normalize_evidence(mapped, clock, asset["duration_ms"])
         if r["kind"] in {"contact", "dead_ball"}:
             mapped["time_ms"] = r["at_ms"]
             if r["uncertainty_start_ms"] is not None:
@@ -110,6 +172,7 @@ def derive_training_bundle(asset, bundle, *, vocabulary_version, serve_mark_refs
                                     rules=rules, clock=clock)
     unassigned = [current[e["record_id"]] for e in excluded
                   if e["reason"] == "no_active_rally_assignment" and current[e["record_id"]]["kind"] in {"contact", "dead_ball"}]
+    normalized_competitors = {}
     for window in result["windows"]:
         interval = window["range"]
         competitors = [r for r in unassigned if interval is not None
@@ -120,6 +183,23 @@ def derive_training_bundle(asset, bundle, *, vocabulary_version, serve_mark_refs
             window["reasons"].append("unassigned_boundary_in_range")
             window["unresolved_boundary_refs"] = [{"record_id": r["record_id"], "revision": r["revision"]} for r in competitors]
             window["annotation_refs"].extend(window["unresolved_boundary_refs"])
+            latest = window["latest_source_time_ms"]
+            for competitor in competitors:
+                rid = competitor["record_id"]
+                if rid not in normalized_competitors:
+                    normalized_competitors[rid] = _normalize_evidence(deepcopy(competitor), clock, asset["duration_ms"])
+                observed = normalized_competitors[rid]
+                latest = max(latest, evidence_end(observed), observed["uncertainty_end_ms"]
+                             if observed["uncertainty_end_ms"] is not None else observed["at_ms"])
+                if observed.get("evidence_time_status") and "evidence_time_unresolved" not in window["reasons"]:
+                    window["reasons"].append("evidence_time_unresolved")
+                if observed.get("evidence_time_status"):
+                    window["wait_ms"] = None
+            anchor = current[window["anchor_id"]]
+            anchor_time = anchor["at_ms"] if anchor["at_ms"] is not None else anchor["start_ms"]
+            window["latest_source_time_ms"] = latest
+            window["future_context_used"] = latest > anchor_time
+            window["lookahead_ms"] = max(0, latest - anchor_time)
         # Bundle changes, including excluded but competing marks, invalidate
         # derived IDs. Never silently reuse a cached "ready" window after edit.
         window.pop("window_id")

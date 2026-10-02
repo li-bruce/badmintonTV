@@ -30,6 +30,8 @@ CLI：`python -B -m packages.render.contact_windows --request <json> --storage-r
 
 `evidence` 如存在必须为对象数组；每条同源证据给 `start_ms/end_ms` 或 `time_ms`。非时间证据须另给明确 `latest_evidence_ms`，不能假定标签只看了触球时刻。点可显式给 `phase_not_applicable: ["landing"]` 等阶段不适用；不与同阶段区间并存，不根据“没标落地”自动推断不适用。
 
+规则 `contact-windows/1.0.1` 起，证据同时给`at_ms/time_ms`时必须相等；区间须成对提供`start_ms/end_ms`且为非空半开范围，混合点/区间必须包含该点（末端不包含）。所有声明的证据时间均计入水印，冲突不会用字段优先级掩盖。含`at_ms`的image_region等附加JSON原样保留，本工具不执行ROI裁剪。
+
 | kind | 时间/关联字段 | 规则 |
 |---|---|---|
 | rally | `start_ms`, `end_ms`（可 null） | record_id = rally_id；半开范围，互不重叠。end 未知不会自动取最后触球 |
@@ -47,7 +49,7 @@ CLI：`python -B -m packages.render.contact_windows --request <json> --storage-r
 | ball_flight | 当前触球到时间最早的下一触球/死球，不过滤对手/搭档；缺两者 unavailable。同刻多触球/不确定包络重叠 candidate，不宣称唯一精确下一拍 |
 | hand_technique | 默认触球前 500ms、后 500ms；按不确定包络扩展，裁到当前回合/媒体。裁短或不确定均 candidate |
 | footwork | 同人同锚点已标阶段的完整包络；缺 preparation/initiation/arrival/stroke_support/landing/recovery 任一适用阶段为 candidate。倒序、重复冲突、不可见也 candidate。没有阶段时给显式 ±2000ms 保守候选，不伪造阶段 |
-| rally | 必须同时有唯一 serve 和 dead_ball；从发球到死球，默认审阅余量 0。缺项 unavailable，多义 candidate，不能把第一/最后一次普通 contact 当作发球/死球 |
+| rally | 必须同时有唯一 serve 和 dead_ball，且serve的不确定包络严格早于每个其他触球包络；从发球到死球，默认审阅余量 0。缺项 unavailable；发球前已有触球、同刻或包络相交时candidate且range=null，完整保留冲突refs。不能把第一/最后一次普通 contact 当作发球/死球 |
 
 rules 可设置 `hand_before_ms/hand_after_ms`、`footwork_before_ms/footwork_after_ms`、`rally_before_ms/rally_after_ms`（0–10000ms），规则版本固定由代码维护。窗口不改变原 mark 时间；半开范围内的源帧用真实整数 PTS + time_base + origin_pts 二分查找，不用 frame/fps。SourceClock 接受 `pts`、`time_base`、`origin_pts`（默认首 PTS）、`reference`，PTS 严格递增；非零起始 PTS 和 VFR 保留。
 
@@ -66,6 +68,8 @@ rules 可设置 `hand_before_ms/hand_after_ms`、`footwork_before_ms/footwork_af
 - footwork segment 须显式提供 `phase_bindings=[{record_id,revision,anchor_id,anchor_revision,phase}]`；同回合/同人关联由核心复验。不做未标阶段的推断。映射由调用方纳入不可变项目/快照设置，产物完整保存映射和版本/hash。
 - state、未绑定的 segment、未分回合、deleted/rejected 记录不当作边界，列出排除原因并保留原 bundle；已拒绝的回合也不提供边界。原 bundle/revision/hash、标签/审核来源、快照ID/hash/词表/项目修订与质量摘要均可回查。
 - 未分回合的触球/死球如果落在窗口内，不自动归属，也不能忽略后把更远终点称为精确下一拍：窗口为 candidate，保留 `unresolved_boundary_refs`。bundle 修订变化会重算窗口ID，防复用旧 ready 结果。
+- adapter `training-window-adapter/1.0.1` 对冻结`asset.pts_reference`与`clock.reference`的已声明索引身份逐项核对，并检查实际clock帧数/时基；已有冻结引用却无clock来源证明或存在矛盾时拒绝，不能替换索引仍声称mapped。无clock仍明确not_provided；纯内存clock的内容真实性仍须由调用方可信加载器负责。
+- 晚加入refs的未归属冲突记录也按同样规则核验时间/PTS证据，更新`latest_source_time_ms`、`lookahead_ms`和`future_context_used`。无时间证据保持unknown并按源时长保守计入，不默认为零未来信息。
 - 规范证据 `at_ms`、source_frame_index/frame_index、source_pts 均核验，混用且矛盾即拒绝。仅有外部引用而无时间时，离线 adapter 标记 evidence_time_unresolved、按源时长保守记证据上界；不宣称零未来信息。四种主体的 judgements 保留为完整列表，不能按 label_id 合并不同角色。
 - adapter 为离线审阅窗口消费口，不生成新的 training_view 或放宽原快照 eligibility；即使 ready，也只表示该逻辑范围的边界完整。训练/标注权限仍由 01 服务和公共合同控制。
 
