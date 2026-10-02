@@ -269,6 +269,7 @@
     const visibility = {unknown: '未知', clear: '清楚', partial: '部分可见', unobservable: '看不清'};
     const identities = {unknown: '身份未知', unconfirmed: '名称待确认', confirmed: '身份已核对'};
     const roles = {self: '本人', opponent: '对手', partner: '搭档', opponent_partner: '对方搭档'};
+    const dimensions = {stroke: '击球', hand_technique: '手法', footwork: '步法', ball: '球路', shuttle: '羽毛球与球路', state: '态势', player_state: '人物态势', tactic: '战术', singles_pattern: '单打多拍模式', doubles_pattern: '双打配合模式', interpretation: '解释与意图', outcome: '结果与评估'};
     const typeOf = record => record.kind === 'segment' ? ({stroke: 'action', footwork: 'footwork', tactic: 'tactics'}[record.segment_type] || 'action') : record.kind;
     const activeRecords = () => (s.bundle?.records || []).filter(record => !record.deleted);
     const timeOf = record => record.at_ms ?? record.start_ms;
@@ -441,12 +442,12 @@
       const byId = new Map(labels.map(item => [item.label_id, item]));
       const pathName = label => { const names = [label.name]; let p = byId.get(label.parent_id); while (p) { names.unshift(p.name); p = byId.get(p.parent_id); } return names.join(' › '); };
       const groups = new Map();
-      for (const label of labels.filter(label => label.kinds.includes(record.kind) && (pathName(label) + label.description + label.dimension).toLowerCase().includes(query))) {
+      for (const label of labels.filter(label => label.kinds.includes(record.kind) && (pathName(label) + label.description + label.dimension + (dimensions[label.dimension] || '')).toLowerCase().includes(query))) {
         if (!groups.has(label.dimension)) groups.set(label.dimension, []); groups.get(label.dimension).push(label);
       }
       for (const [dimension, members] of groups) {
         const family = el('details', undefined, 'label-family'); family.open = Boolean(query) || members.some(label => record.judgements.some(j => j.label_id === label.label_id));
-        family.append(el('summary', `${dimension} · ${members.length} 项`));
+        family.append(el('summary', `${dimensions[dimension] || dimension} · ${members.length} 项`));
         for (const label of members) {
           if (label.selectable === false) { family.append(el('p', pathName(label), 'taxonomy-directory')); continue; }
           const judgement = record.judgements.find(j => j.label_id === label.label_id && matchesSubject(j));
@@ -503,12 +504,15 @@
       if (s.assets.some(a => !a.group_id)) $('split-list').append(el('p', '部分视频没有可信比赛组，暂不能分配。', 'muted'));
     }
     function renderSnapshots() {
-      const blockers = {no_human_confirmed_semantically_defined_judgements: '没有语义定义已审核且由真人确认的判断', unassigned_or_unconfirmed_groups: '视频比赛组未分配或未确认', rally_dead_ball_missing: '部分回合缺少独立死球点'};
+      const blockers = {no_human_confirmed_semantically_defined_judgements: '没有语义定义已审核且由真人确认的判断', unassigned_or_unconfirmed_groups: '视频比赛组未分配或未确认', rally_dead_ball_missing: '部分回合缺少独立死球点', independent_match_group_unconfirmed: '原片所属的独立比赛组尚未确认'};
       $('snapshot-list').replaceChildren();
       for (const snapshot of s.snapshots) {
         const box = el('div', undefined, 'list-item'); box.append(el('strong', new Date(snapshot.created_at).toLocaleString('zh-CN')), el('small', `项目修订 ${snapshot.project?.revision ?? '—'} · ${snapshot.content_sha256?.slice(0, 16) || '—'}`));
         const links = el('div', undefined, 'toolbar');
         for (const [view, format, text] of [['audit', 'json', '完整审阅 JSON'], ['audit', 'jsonl', '审阅 JSONL'], ['training', 'jsonl', '训练视图 JSONL']]) {
+          if (view === 'training' && snapshot.quality_summary?.trainable !== true) {
+            const disabled = el('span', '训练视图暂不可下载：请先完成质量审核。', 'muted'); disabled.setAttribute('aria-disabled', 'true'); links.append(disabled); continue;
+          }
           const link = el('a', text); link.href = `/api/v1/training/snapshots/${encodeURIComponent(snapshot.snapshot_id)}/download?view=${view}&format=${format}`; link.setAttribute('download', ''); links.append(link);
         }
         box.append(links); $('snapshot-list').append(box);
