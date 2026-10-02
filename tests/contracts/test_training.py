@@ -374,10 +374,39 @@ def test_multiple_subjects_preserve_distinct_label_judgements(bundle_data):
         {"label_id": "state.balance", "subject_role": "self", "subject_person_id": "person-a", "value": "present"},
         {"label_id": "state.balance", "subject_role": "opponent", "subject_person_id": "person-b", "value": "absent", "reason": "Synthetic observed imbalance"},
     ]
+    record["review"] = {"status": "confirmed", "reviewer_type": "human", "reviewer": "synthetic-human"}
+    record["visibility"] = "clear"
+    record["evidence"] = [{"source_frame_index": 50}]
     validate_training_bundle(bundle_data, get_default_training_taxonomy())
+    frozen = snapshot(bundle_data, reviewed=True)
+    assert {(item.subject_role, item.subject_person_id, item.value)
+            for item in frozen.training_view if item.record_id == record["record_id"]} == {
+                ("self", "person-a", "present"), ("opponent", "person-b", "absent")}
     record["judgements"][1]["subject_person_id"] = "person-a"
     with pytest.raises(ValidationError, match="subject"):
         TrainingAnnotationBundle.model_validate(bundle_data)
+
+
+@pytest.mark.parametrize("inheritance", ["record_person", "state_self", "state_opponent"])
+def test_implicit_and_explicit_same_subject_cannot_duplicate_label(bundle_data, inheritance):
+    record = bundle_data["records"][1 if inheritance == "record_person" else -1]
+    role = "opponent" if inheritance == "state_opponent" else "self"
+    person = "person-b" if role == "opponent" else "person-a"
+    label = "stroke.net_shot" if inheritance == "record_person" else "state.balance"
+    if inheritance == "state_self":
+        record["person_id"] = record["team_id"] = None
+    record["judgements"] = [
+        {"label_id": label, "subject_role": role, "subject_person_id": None, "value": "present"},
+        {"label_id": label, "subject_role": role, "subject_person_id": person,
+         "value": "absent", "reason": "Conflicting synthetic judgement"},
+    ]
+    record["review"] = {"status": "confirmed", "reviewer_type": "human", "reviewer": "synthetic-human"}
+    record["visibility"] = "clear"
+    record["evidence"] = [{"source_frame_index": 50}]
+    with pytest.raises(ValidationError, match="duplicate resolved judgement"):
+        TrainingAnnotationBundle.model_validate(bundle_data)
+    with pytest.raises(ValidationError, match="duplicate resolved judgement"):
+        snapshot(bundle_data, reviewed=True)
 
 
 def test_opponent_partner_role_requires_opponent_team(bundle_data):
