@@ -1,11 +1,13 @@
-## 2026-10-02 训练工作台（功能交付、最终浏览器验收进行中）
+## 2026-10-02 训练工作台（平台交付完成，10-03凌晨补齐报告）
 
-- 分支 codex/platform-training-workspace，从 main 3dab169 建立；旧分支保留。设计先行，见 docs/platform/TRAINING_DESIGN.md，A-01/02/03/04/05/08/09/10 已冻结断言，当前均 NOT_RUN。
-- 已实现：兼容合同6fec08f及主体语义修复2128568、独立 training_* 表与 API、可信目录后台校验、中文训练工作台、冻结快照、/guide/ 多页手册入口。交接见 docs/platform/TRAINING_HANDOFF.md。
-- 已运行：748后端PASS/8条件skip/81.84秒；18新前端PASS；16/16真实训练制作隔离负例PASS。浏览器真实登记原片/32651帧PTS、回合/2触球/动作/2匿名人物、多标签unknown/双方图像点位保存revision2并重载；最终快照与冲突演示继续中。
-- 服务：私有 127.0.0.1:18082、独立 platform/training-20261002 状态目录；首版保存后重启保留，复用原环境，CPU；无新安装、无 GPU、无主线 18080/生产库操作。
-- 容量：本轮新增峰值限 2GB，源码文档 <50MB；D盘写入前预检和预留待运行时记录。原媒体只读引用，不复制。
-- 未测：最终快照浏览器/末次重启和主线集成尚未完成；没有专家标签真值，不宣称模型训练可用。A-06/07与主线A-10由对应模块/主任务验收。
+- 分支 codex/platform-training-workspace，从 main 3dab169 建立；旧分支保留。设计先行见 docs/platform/TRAINING_DESIGN.md；最终逐ID证据见 [TRAINING_VALIDATION.md](../platform/TRAINING_VALIDATION.md)。
+- 已实现并提交：兼容合同6fec08f、主体语义修复2128568、完整平台370ddfe、中文质量提示146f598、独立编辑来源37cd7f2、长标签说明折叠4258f16。训练项目/人物/回合/触球/区间/态势、可信原片/PTS、CAS历史、冻结快照、/guide/入口。交接见 [TRAINING_HANDOFF.md](../platform/TRAINING_HANDOFF.md)。
+- 已运行：748后端PASS/8条件skip/81.84秒；最终18前端PASS；16/16真实原始训练来源制作隔离负例PASS。浏览器播放真实1280×720原片、32651帧PTS、保存2人物/5记录/手法步法unknown/双方图像点，CAS409保留草稿后重载修订到bundle4/project6，审计JSON下载516452B且与冻结对象一致；最终服务重启及browser重载保留全部内容。
+- A-01/02/03/04/05工程PASS；A-08原始来源隔离、A-09平台手册入口、A-10私有持久化子项PASS，整项仍由root汇总。A-06/07未在本模块运行；真实派生物负例与主线旧制作链不得用当前合成alias或私有库替代。
+- 服务：私有127.0.0.1:18082、独立D:/video/platform/training-20261002；末次15:54:21UTC重启parent50456/server59504，无永久worker。启动 `.\start-platform.ps1 -Port 18082 -DatabasePath D:/video/platform/training-20261002/platform.sqlite3 -TrainingReviewer agent`；真正人工操作可显式human。复用Python环境，CPU；无安装/GPU/18080或生产库操作。
+- 容量：预留2GB及最终截图16MB均已释放；16:07:48UTC私有目录约3.82MB，platform204739901B/60GB、runtime/platform1048360620B/10GB、D余量922181832704B，reserved均0。原片未复制；非全模块700GB总审计。
+- 失败与恢复：冲突确认框后原浏览器tab自动化超时，确认框关闭后仍不可读，换新tab恢复，数据未损坏；未将原tab原地恢复记PASS。修改清审核造成来源误显“未记录”已修复37cd7f2并回归。
+- 未达标/下一步：没有专家定义/真人标签/已确认独立比赛组，真实快照0eligible/2excluded/trainable=false，正式训练下载409。主任务依次集成146f598、37cd7f2、4258f16三份UX补丁并独立完成A-08/09/10总验收；03/04消费合同完成各自用例。本轮不升级模型质量或专家真值阶段。
 # Platform 状态
 
 2026-09-29 更新。任务 01a0e88b-2410-7da0-970e-7f4187ed485f；cwd C:/Users/USER/.codex/worktrees/6991/badmintonTV；branch codex/platform-research-implementation（从 main ff2c700 新建，旧 work/platform 保留）。只提交平台及共享合同的授权范围，主任务集成，无推送。
