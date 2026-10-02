@@ -172,7 +172,7 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   const doc = new EventTarget(); doc.getElementById = id => { assert.ok(elements.has(id), 'Missing template ID ' + id); return elements.get(id); }; doc.createElement = tag => new Element(tag);
   const f = fixture(); const taxonomy = {labels: [
     {label_id: 'directory', name: '动作目录', description: '只供导航', dimension: 'stroke', kinds: ['contact'], selectable: false},
-    {label_id: 'stroke', name: '网前球', parent_id: 'directory', description: '测试定义', dimension: 'stroke', kinds: ['contact'], selectable: true} ]};
+    {label_id: 'stroke', name: '网前球', parent_id: 'directory', description: '测试定义：球在网前处理。\n所需证据：触球前后画面。\n易混项：挑球与扑球。', dimension: 'stroke', kinds: ['contact'], selectable: true} ]};
   const project = {project: f.project, assets: f.assets, taxonomy, actor_type: 'agent', splits: []};
   const win = new EventTarget(); Object.assign(win, {confirm: () => true, setTimeout, fetch: async url => ({ok: true, json: async () => {
     const p = url.replace('/api/v1/training', '');
@@ -184,6 +184,22 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   const c = ui.mount(doc, win); await tick(); await c.openProject('project-1'); await c.openAsset('asset-a'); c.newRecord('contact', 1000);
   const descendants = node => node.children.flatMap(child => [child, ...descendants(child)]);
   assert.equal(descendants(elements.get('taxonomy-labels')).find(node => node.tagName === 'SUMMARY').textContent, '击球 · 2 项');
+  let definition = descendants(elements.get('taxonomy-labels')).find(node => node.className === 'label-definition');
+  assert.equal(definition.tagName, 'DETAILS'); assert.equal(definition.open, false, 'full guidance starts collapsed');
+  assert.equal(definition.children[0].tagName, 'SUMMARY'); assert.equal(definition.children[0].textContent, '定义与判断依据');
+  assert.equal(definition.children.find(node => node.className === 'definition').textContent, taxonomy.labels[1].description, 'full definition/evidence/confusion text remains verbatim');
+  const labelRow = descendants(elements.get('taxonomy-labels')).find(node => node.className === 'label-row');
+  assert.equal(descendants(labelRow).find(node => node.tagName === 'LABEL').textContent, '网前球', 'default label uses short name');
+  assert.equal(descendants(labelRow).some(node => node.className === 'definition'), false);
+  definition.open = true; assert.equal(definition.open, true, 'native details can be expanded without mutating annotations');
+  assert.equal(c.record().judgements.length, 0);
+  for (const query of ['触球前后画面', '挑球与扑球']) {
+    elements.get('label-filter').value = query; elements.get('label-filter').dispatchEvent(new Event('input')); await tick();
+    assert.equal(descendants(elements.get('taxonomy-labels')).filter(node => node.tagName === 'SELECT').length, 1, 'search still matches collapsed evidence/confusion text');
+    definition = descendants(elements.get('taxonomy-labels')).find(node => node.className === 'label-definition');
+    assert.equal(definition.open, false); assert.equal(definition.children.find(node => node.className === 'definition').textContent, taxonomy.labels[1].description);
+  }
+  elements.get('label-filter').value = ''; elements.get('label-filter').dispatchEvent(new Event('input')); await tick();
   c.edit(bundle => bundle.people.push({person_id: 'person-a', display_name: '匿名 A', identity_status: 'unconfirmed'}));
   const identity = descendants(elements.get('participant-list')).find(node => node.tagName === 'SELECT');
   assert.equal(identity.options.find(option => option.value === 'confirmed').disabled, true, 'agent may not confirm participant identity');
@@ -196,6 +212,8 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   assert.equal(c.record().judgements.length, 2);
   assert.deepEqual(c.record().judgements.map(j => j.subject_role), ['self', 'opponent_partner']);
   assert.ok(c.record().state.opponent_partner); assert.equal(c.record().judgements[1].value, 'unknown');
+  const unknownItem = descendants(elements.get('taxonomy-labels')).find(node => node.className === 'label-item');
+  assert.ok(unknownItem.children.some(node => node.tagName === 'INPUT' && node.placeholder.includes('必填')), 'missing reason remains visible outside collapsed definition');
   assert.equal(c.record().evidence.length, 0, 'label changes must not fabricate evidence');
   elements.get('add-time-evidence').dispatchEvent(new Event('click')); await tick();
   assert.equal(c.record().evidence[0].type, 'source_time'); assert.equal(c.record().evidence[0].observation_source, 'agent');
