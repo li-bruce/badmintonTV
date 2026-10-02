@@ -166,6 +166,21 @@ test('label drops use explicit MIME and source coordinate, with record id only o
   lane.dispatchEvent(event('drop', {clientX: 550, dataTransfer: {types: [timeline.LABEL_MIME], getData: () => 'group'}}));
   await tick(); assert.equal(f.drops.length, 2); assert.match(f.errors.at(-1), /可选标签/);
 });
+
+for (const targetKind of ['record', 'lane']) test('label dragenter accepts a quick entry onto ' + targetKind + ' before any dragover', async () => {
+  const f = setup(), target = targetKind === 'record' ? f.block('segment') : all(f.container).find(node => node.dataset.track === 'stroke');
+  const dataTransfer = {types: [timeline.LABEL_MIME], getData: () => 'footwork.step', dropEffect: 'none'};
+  const enter = event('dragenter', {clientX: 350, dataTransfer});
+  target.dispatchEvent(enter);
+  assert.equal(enter.defaultPrevented, true, 'the target accepts the initial entry without waiting for dragover');
+  assert.equal(dataTransfer.dropEffect, 'copy');
+  target.dispatchEvent(event('drop', {clientX: 350, dataTransfer})); await tick();
+  assert.deepEqual(f.drops, [{id: 'footwork.step', target: {at_ms: 3500, ...(targetKind === 'record' ? {record_id: 'segment'} : {})}}]);
+  const unsupported = {types: ['text/plain'], getData: () => 'footwork.step', dropEffect: 'none'};
+  const otherEnter = event('dragenter', {clientX: 350, dataTransfer: unsupported});
+  target.dispatchEvent(otherEnter); target.dispatchEvent(event('drop', {clientX: 350, dataTransfer: unsupported}));
+  assert.equal(otherEnter.defaultPrevented, false); assert.equal(unsupported.dropEffect, 'none'); assert.equal(f.drops.length, 1);
+});
 test('whole view, rally focus, zoom and playhead report original source milliseconds', () => {
   const f = setup([{record_id: 'rally', kind: 'rally', start_ms: 3000, end_ms: 5000}]);
   f.state.selectedId = 'rally'; f.control('当前回合').dispatchEvent(new Event('click'));
