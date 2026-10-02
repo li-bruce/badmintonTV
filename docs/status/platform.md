@@ -1,11 +1,14 @@
-## 2026-10-03 拖拽与圈选增补（进行中）
+## 2026-10-03 拖拽与圈选增补（平台交付；确认框恢复另列阻塞）
 
-- 新授权A-11～A-14；开发前设计 [TRAINING_INTERACTION_DESIGN.md](../platform/TRAINING_INTERACTION_DESIGN.md)。合同a0fc1db已提交；UI功能及API回归已接入，真实验收进行中，整项尚未PASS。
+- 新授权A-11～A-14；开发前设计 [TRAINING_INTERACTION_DESIGN.md](../platform/TRAINING_INTERACTION_DESIGN.md)。合同a0fc1db、功能c97f39f、真实快速投放修复8ba5cc2已提交并由root集成。逐ID真实方法/预期/实际/证据见 [TRAINING_INTERACTION_VALIDATION.md](../platform/TRAINING_INTERACTION_VALIDATION.md)。
 - 继续codex/platform-training-workspace，自44bd583。18080人工实例不触碰；仅18082 agent测试。基础资料手填，无新增安装/GPU/视频副本。预算2GB内，D写入前重新预留。
 - 设计：独立原生Pointer/SVG模块→controller克隆校验→原bundle CAS。区域只扩展evidence字典，不给旧snapshot添加默认字段；旧实际hash必须保持。
-- 已运行：350合同/API相关PASS；新增18 ROI API PASS/无skip；最终69前端PASS/无skip。旧实际snapshot dump/hash兼容。CUA已真实拖入标签到原片61996–62996ms新建区间、点击回退追加步法、保存修订2；非人工真值。现有块投放/区间拖动/圈选真实操作仍待收束；无跳过替代PASS。
-- 私有预留2GB：reservation-69b9c1c91c83492991858e757bf4d0e2，证据D:/video/platform/training-interaction-20261003；DB复用training-20261002，18082 agent。16:40:10UTC重启parent49668。无新增安装/GPU。
-- 下一步：先交可集成的功能提交供root独立18084并行验证，本任务继续所有真实浏览器用例，后续修复/报告单独提交。主human18080不写。
+- 已运行：836合同/平台PASS+8条件skip；跨模块四批合计1506 PASS/23 SKIP，另1039 subtests单列。新增18 ROI API已包含其中。最终71前端PASS/0skip/350.8ms；最终语法检查需Node preserve-symlinks两参数，未带参数初次被沙箱lstat拒绝，补正确参数后通过。
+- A-11平台时间线/CAS、A-12标签主体、A-13区域实测PASS；A-14平台子项PASS，实际models/render消费仍由root/owner汇总。CUA真实新增61996–62996ms区间、现有块投放/去重/不同主体、整段与左右边界拖动、越界拒绝、Alt+1ms；真实矩形/多边形/移动/调角点/调顶点/取消/黑边/删除及保存重载。最终2人物/5记录/2区域，project8/bundle6。新实际快照f0a57ada…c53a9；旧d2deb512…a67dd不变。0eligible/5excluded/trainable=false/正式下载409，非人工真值。
+- 真实CAS409保留浏览器67638ms草稿，服务端仍67637ms且records/people全等；其后原生confirm让Edge自动化连接超时，原tab/同浏览器新tab恢复与最终截图BLOCKED，已请用户关闭测试弹窗。未将之前成功重载代替confirm后恢复；详见 [恢复问题](../issues/platform-browser-confirm-recovery.md)。无未测项伪装PASS。
+- 证据D:/video/platform/training-interaction-20261003；DB复用training-20261002，18082 agent。16:40:10UTC parent49668/server73300。启动 `.\start-platform.ps1 -Port 18082 -DatabasePath D:/video/platform/training-20261002/platform.sqlite3 -TrainingReviewer agent`。CPU，无新增安装/GPU/worker。
+- 容量17:18:16UTC：本轮证据约1.64MB，私有DB目录4.61MB，platform208579380B/60GB、runtime/platform1048360620B/10GB，reserved均0，D余量920498995200B。本任务2GB reservation-69b9c1c91c83492991858e757bf4d0e2已释放；非所有模块700GB总审计。
+- 收尾：root回执已独立完成18084重载、集成截图、真实ROI模型/render/WSL CPU消费；模块只提交自身事实报告，根维护阶段总表。按root要求停止Edge恢复尝试，不再要求用户关闭弹窗；本tab恢复/截图与viewport reset保持未验证限制。主human18080不由本模块写，不推送。
 
 ## 2026-10-02 训练工作台（平台交付完成，10-03凌晨补齐报告）
 

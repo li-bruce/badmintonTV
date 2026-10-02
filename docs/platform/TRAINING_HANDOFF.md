@@ -1,4 +1,16 @@
-# 2026-10-02 训练工作台交接
+# 2026-10-03 拖拽与区域增补交接
+
+本轮平台提交：合同 `a0fc1db` → 功能 `c97f39f` → 快速已有块投放修复 `8ba5cc2`；root已回执集成。详细固定A-11～A-14子项见 [本轮验收](TRAINING_INTERACTION_VALIDATION.md)，原协议见 [区域合同](TRAINING_REGIONS_CONTRACT.md)。区域只在原record.evidence中兼容扩展，没有旧snapshot默认字段变化。
+
+真实18082已完成空轨道/已有块原生投放、同主体去重/不同主体、整段/左右边界拖动/越界拒绝/键盘1ms，矩形/多边形/移动/角点/顶点/黑边/取消/删除及save/reload。836合同平台+8skip；跨模块四批1506PASS/23skip，另1039subtests单列；最终71前端PASS。旧实际hash不变，新agent快照0eligible/5excluded/正式下载409。
+
+交接实际数据：`D:/video/platform/training-interaction-20261003/snapshot-with-regions.json`，快照 `training-snapshot-a4533d2de09143aeae9d3dfe76e1b2ea` / SHA `f0a57ada2b902edde5128a78719e69c98dd86f98e933ebd7aec70255b96c53a9`，2人物/5记录/2区域。最终project8/bundle6；原片只读、不复制。root/03/04应独立消费实际区域证据，不把这里的单元测试当作跨模块实际验收。
+
+私有CAS真实409保留草稿与服务端已验；随后原生confirm让Edge自动化恢复失败，已请用户关闭测试弹窗。最终截图/旧tab恢复/临时viewport reset尚BLOCKED，详见 [问题](../issues/platform-browser-confirm-recovery.md)；不能据此声称服务端数据丢失，也不把恢复写成PASS。18082仍agent运行，PID73300，2GB预留已释放。18080 human未写，无推送、GPU或新增依赖。
+
+最终root回执已独立完成18084保存重载/集成截图，以及真实区域的models/render/WSL CPU消费，阶段总表由root更新。本模块停止Edge恢复尝试，不再要求用户关闭弹窗；保留本tab未完成恢复的限制，提交本轮事实报告即可。
+
+# 2026-10-02 训练工作台交接（此前轮次）
 
 - 分支：`codex/platform-training-workspace`；基线：`3dab169`。
 - 状态：平台功能、真实浏览器保存/冲突/导出及私有重启验证完成。详细固定ID结果见 [TRAINING_VALIDATION.md](TRAINING_VALIDATION.md)，不声称整轮或主线全部A用例通过。
