@@ -7,7 +7,7 @@
 - 真实只读复验 / A-07及A-08 render部分PASS：2026-10-03北京时间00:35:38–00:35:42，现有b210原片/完整PTS、VFR索引、正式技术bundle/snapshot与root网页快照7窗口均通过，18个制作隔离负例继续PASS；报告237,138bytes。8项源码SHA在运行前后及最终复核一致，13项输入stat、原片/registry/网页快照SHA不变。
 - 环境/容量/未测：原CPU/Python环境、无端口/安装/GPU/媒体进程/预留/D盘写入。仅小型源码/测试/文档和既有报告更新，继续小于5MB预算；容量沿用下方明确时间的只读快照。未重做网页操作/重启或新增媒体实验；专家动作真值仍BLOCKED，整个A-08由root维护。
 - 证据/命令：`docs/render/CONTACT_WINDOWS_VALIDATION.md`及同名JSON；`D:/video/runtime/platform/env/Scripts/python.exe -B -m pytest tests/render tests/contracts -q -p no:cacheprovider`；`-B scripts/render/verify_contact_windows.py --storage-root D:/video`。CLI启动与API见handoff，未改变参数。
-- 提交/下一步：待补本轮P2提交SHA；首次实现374a5f6/7c94725已由root集成，本次只挑P2补丁。主任务读取交接继续集成；不跨聊天发信、不推送、不合并main。
+- P2实现提交SHA：`badbc3c6de7c2318d84c6da78a0ec7bc4f9de21d`；本条为后续状态补记。root独立复审四反例通过，未发现新未解决P1/P2。首次实现374a5f6/7c94725已由root集成，本次只挑P2补丁。主任务读取交接继续集成；不跨聊天发信、不推送、不合并main。
 
 ## 2026-10-02 触球逻辑窗口（A-07 / A-08，本模块验证完成）
 
