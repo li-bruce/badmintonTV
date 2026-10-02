@@ -158,6 +158,87 @@ class ContactWindowTests(unittest.TestCase):
                 self.assertEqual(item["status"], "candidate")
                 self.assertTrue(item["reasons"])
 
+    def test_rally_serve_must_precede_other_contact_uncertainty_envelopes(self):
+        cases = (
+            ("earlier_contact", {}, contact("other", 1500, "B"), "serve_not_first_contact"),
+            ("same_time", {}, contact("other", 3500, "B"), "ambiguous_serve_order"),
+            ("later_nominal_overlaps", {},
+             contact("other", 4000, "B", uncertainty={"start_ms": 3000, "end_ms": 4200}),
+             "ambiguous_serve_order"),
+            ("uncertain_serve", {"uncertainty": {"start_ms": 3000, "end_ms": 4000}},
+             contact("other", 3750, "B"), "ambiguous_serve_order"),
+            ("later_envelope_touches", {"uncertainty": {"start_ms": 3000, "end_ms": 4000}},
+             contact("other", 4500, "B", uncertainty={"start_ms": 4000, "end_ms": 4600}),
+             "ambiguous_serve_order"),
+            ("earlier_envelope_touches", {"uncertainty": {"start_ms": 3000, "end_ms": 4000}},
+             contact("other", 2500, "B", uncertainty={"start_ms": 2400, "end_ms": 3000}),
+             "ambiguous_serve_order"),
+        )
+        for name, serve_changes, other, reason in cases:
+            with self.subTest(case=name):
+                items = [rally(), contact("serve-1", 3500, "A", kind="serve", **serve_changes),
+                         other, record("dead-1", "dead_ball", time_ms=8500)]
+                before = deepcopy(items)
+                result = derive(items)
+                item = window(result, "rally", "rally-1")
+                self.assertEqual(item["status"], "candidate")
+                self.assertIsNone(item["range"])
+                self.assertIn(reason, item["reasons"])
+                self.assertEqual({ref["record_id"] for ref in item["annotation_refs"]},
+                                 {"rally-1", "serve-1", "other", "dead-1"})
+                self.assertEqual(items, before)
+
+    def test_rally_retains_all_conflicting_revisions_regardless_of_input_order(self):
+        items = [
+            {**rally(), "revision": 7},
+            contact("serve-1", 3500, "A", kind="serve", revision=4),
+            contact("earlier", 1500, "B", revision=2),
+            contact("simultaneous", 3500, "C", revision=5),
+            contact("overlapping-later", 4000, "D", revision=6,
+                    uncertainty={"start_ms": 3400, "end_ms": 4200}),
+            contact("separated-later", 7000, "B", revision=8),
+            record("dead-1", "dead_ball", time_ms=8500, revision=9),
+        ]
+        expected_refs = {("rally-1", 7), ("serve-1", 4), ("earlier", 2),
+                         ("simultaneous", 5), ("overlapping-later", 6), ("dead-1", 9)}
+        baseline = None
+        for order in (items, list(reversed(items)), items[3:] + items[:3]):
+            with self.subTest(order=[item["record_id"] for item in order]):
+                before = deepcopy(order)
+                item = window(derive(order), "rally", "rally-1")
+                self.assertEqual(item["status"], "candidate")
+                self.assertIsNone(item["range"])
+                self.assertTrue({"serve_not_first_contact", "ambiguous_serve_order"} <= set(item["reasons"]))
+                refs = {(ref["record_id"], ref["revision"]) for ref in item["annotation_refs"]}
+                self.assertTrue(expected_refs <= refs)
+                self.assertEqual(len(refs), len(item["annotation_refs"]))
+                self.assertEqual(order, before)
+                if baseline is not None:
+                    self.assertEqual(item, baseline)
+                baseline = item
+
+    def test_strictly_separated_serve_and_later_contact_keep_ready_rally(self):
+        for other in (contact("later", 4500, "B"),
+                      contact("later", 4500, "B", uncertainty={"start_ms": 3501, "end_ms": 5000})):
+            with self.subTest(other=other):
+                result = derive([rally(), contact("serve-1", 3500, "A", kind="serve"),
+                                 other, record("dead-1", "dead_ball", time_ms=8500)])
+                item = window(result, "rally", "rally-1")
+                self.assert_range(item, 3500, 8500)
+                self.assertFalse({"serve_not_first_contact", "ambiguous_serve_order"} & set(item["reasons"]))
+
+    def test_serve_order_conflict_does_not_suppress_other_window_strategies(self):
+        result = derive([rally(), contact("earlier", 1500, "B"),
+                         contact("serve-1", 3500, "A", kind="serve"),
+                         record("dead-1", "dead_ball", time_ms=8500)])
+        self.assert_range(window(result, "ball_flight", "earlier"), 1500, 3500)
+        self.assert_range(window(result, "ball_flight", "serve-1"), 3500, 8500)
+        self.assert_range(window(result, "hand_technique", "serve-1"), 3000, 4000)
+        self.assert_range(window(result, "footwork", "serve-1"), 1500, 5500, "candidate")
+        for item in result["windows"]:
+            if item["strategy"] != "rally":
+                self.assertFalse({"serve_not_first_contact", "ambiguous_serve_order"} & set(item["reasons"]))
+
     def test_context_rules_clip_with_explicit_candidate_status(self):
         result = derive(rules={"hand_before_ms": 2000, "hand_after_ms": 300,
                                "rally_before_ms": 1000, "rally_after_ms": 1000})
@@ -342,6 +423,54 @@ class ContactWindowTests(unittest.TestCase):
         self.assertGreaterEqual(offline["latest_source_time_ms"], 8500)
         self.assertGreaterEqual(offline["lookahead_ms"], 6000)
         self.assertTrue(offline["future_context_used"])
+
+    def test_conflicting_evidence_time_aliases_reject_without_pts_even_before_online_filtering(self):
+        items = [rally(), contact("first", 2000, "A", evidence=[{"at_ms": 8500, "time_ms": 1500}])]
+        for cutoff in (None, 2500):
+            with self.subTest(cutoff=cutoff):
+                with self.assertRaises(WindowError) as raised:
+                    derive(items, available_until_ms=cutoff)
+                self.assertEqual(raised.exception.code, "invalid_boundary")
+
+    def test_evidence_intervals_are_paired_half_open_and_contain_all_declared_points(self):
+        invalid = (
+            {"start_ms": 1500}, {"end_ms": 2500},
+            {"start_ms": 2500, "end_ms": 1500}, {"start_ms": 1500, "end_ms": 1500},
+            {"start_ms": 1500, "end_ms": 2500, "at_ms": 1499},
+            {"start_ms": 1500, "end_ms": 2500, "at_ms": 2500},
+            {"start_ms": 1500, "end_ms": 2500, "time_ms": 2500},
+            {"start_ms": 1500, "end_ms": 2500, "at_ms": 2501, "time_ms": 2501},
+        )
+        for evidence in invalid:
+            with self.subTest(evidence=evidence):
+                items = [rally(), contact("first", 2000, "A", evidence=[evidence])]
+                with self.assertRaises(WindowError) as raised:
+                    derive(items)
+                self.assertEqual(raised.exception.code, "invalid_boundary")
+
+    def test_consistent_evidence_preserves_image_region_and_uses_latest_interval_end(self):
+        cases = (
+            {"at_ms": 8500}, {"time_ms": 8500}, {"at_ms": 8500, "time_ms": 8500},
+            {"start_ms": 1900, "end_ms": 8500},
+            {"kind": "image_region", "at_ms": 2000, "time_ms": 2000,
+             "start_ms": 1900, "end_ms": 8500,
+             "region": {"x": 0.1, "y": 0.2, "width": 0.3, "height": 0.4}},
+        )
+        for evidence in cases:
+            with self.subTest(evidence=evidence):
+                items = [rally(), contact("first", 2000, "A", evidence=[deepcopy(evidence)])]
+                before = deepcopy(items)
+                offline = derive(items)
+                item = window(offline, "hand_technique", "first")
+                self.assertEqual(item["latest_source_time_ms"], 8500)
+                self.assertEqual(item["lookahead_ms"], 6500)
+                self.assertTrue(item["future_context_used"])
+                mapped = next(row for row in offline["annotations"] if row["record_id"] == "first")
+                self.assertEqual(mapped["evidence"], [evidence])
+                online = derive(items, available_until_ms=2500)
+                self.assertFalse(any(row["anchor_id"] == "first" for row in online["windows"]))
+                self.assertNotIn("first", {row["record_id"] for row in online["annotations"]})
+                self.assertEqual(items, before)
 
     def test_untimed_evidence_requires_explicit_latest_evidence_watermark(self):
         delayed = contact("delayed", 2500, "B", evidence=[{"kind": "review_note", "note": "occlusion review"}])

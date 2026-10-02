@@ -1,5 +1,14 @@
 # Render 状态
 
+## 2026-10-03 触球窗口四项 P2（修复与验证完成）
+
+- 设计/实现：A-07四项P2断言先登记；规则与adapter升1.0.1。非首拍serve、同刻或闭合包络重叠使整回合candidate/range=null并保留全部冲突ID+revision。矛盾at_ms/time_ms及点/半开区间拒绝；冻结PTS引用绑定clock身份/帧数/时基；未归属冲突记录的全部时间/帧证据更新latest/lookahead。未知证据保留candidate与wait_ms=null。image_region等额外JSON保真，不实现ROI裁剪。
+- 已运行 / PASS：新增16项有意义回归，核心46+adapter30共76项/174子例通过；发球问题修复前已实际复现9个失败子例。最终render+contracts：502 passed / 1旧symlink权限skipped / 583 subtests passed（8.03秒）。其余P2反例由主任务复核提供，已加入本模块自动回归；失败事实见 `docs/issues/render-contact-window-review-p2.md`。
+- 真实只读复验 / A-07及A-08 render部分PASS：2026-10-03北京时间00:35:38–00:35:42，现有b210原片/完整PTS、VFR索引、正式技术bundle/snapshot与root网页快照7窗口均通过，18个制作隔离负例继续PASS；报告237,138bytes。8项源码SHA在运行前后及最终复核一致，13项输入stat、原片/registry/网页快照SHA不变。
+- 环境/容量/未测：原CPU/Python环境、无端口/安装/GPU/媒体进程/预留/D盘写入。仅小型源码/测试/文档和既有报告更新，继续小于5MB预算；容量沿用下方明确时间的只读快照。未重做网页操作/重启或新增媒体实验；专家动作真值仍BLOCKED，整个A-08由root维护。
+- 证据/命令：`docs/render/CONTACT_WINDOWS_VALIDATION.md`及同名JSON；`D:/video/runtime/platform/env/Scripts/python.exe -B -m pytest tests/render tests/contracts -q -p no:cacheprovider`；`-B scripts/render/verify_contact_windows.py --storage-root D:/video`。CLI启动与API见handoff，未改变参数。
+- 提交/下一步：待补本轮P2提交SHA；首次实现374a5f6/7c94725已由root集成，本次只挑P2补丁。主任务读取交接继续集成；不跨聊天发信、不推送、不合并main。
+
 ## 2026-10-02 触球逻辑窗口（A-07 / A-08，本模块验证完成）
 
 - 设计：已读新轮实施和能力方案；干净工作树从 main `3dab169` 创建 `codex/render-contact-windows`。先冻结四策略、缺失/不确定/人物与回合边界、PTS/版本/用途断言，见 `docs/render/CONTACT_WINDOWS_HANDOFF.md`。

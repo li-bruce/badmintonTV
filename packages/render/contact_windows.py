@@ -19,7 +19,7 @@ import sys
 from .timeline import RenderError
 
 FORMAT = "badmintonTV.training-contact-windows"
-RULE_VERSION = "contact-windows/1.0.0"
+RULE_VERSION = "contact-windows/1.0.1"
 PHASE_ORDER = ("preparation", "initiation", "arrival", "stroke_support", "landing", "recovery")
 PHASES = set(PHASE_ORDER)
 DEFAULT_RULES = dict(hand_before_ms=500, hand_after_ms=500, footwork_before_ms=2000,
@@ -101,13 +101,21 @@ def evidence_end(record):
     for item in evidence:
         check(isinstance(item, dict), "Evidence must be an object")
         check(item.get("asset_id", record["asset_id"]) == record["asset_id"], "Cross-source evidence needs an explicit clock adapter", "relation_mismatch")
-        if "end_ms" in item:
+        point_times = [integer(item[key], "evidence." + key)
+                       for key in ("time_ms", "at_ms") if key in item]
+        check(len(set(point_times)) <= 1, "Evidence point-time aliases conflict", "invalid_boundary")
+        has_interval = "start_ms" in item or "end_ms" in item
+        if has_interval:
+            check("start_ms" in item and "end_ms" in item,
+                  "Evidence interval requires both endpoints", "invalid_boundary")
+            start = integer(item["start_ms"], "evidence.start_ms")
             end = integer(item["end_ms"], "evidence.end_ms")
-            check(integer(item.get("start_ms", 0), "evidence.start_ms") <= end, "Invalid evidence range", "invalid_boundary")
+            check(start < end, "Invalid evidence half-open range", "invalid_boundary")
+            check(all(start <= point < end for point in point_times),
+                  "Evidence point lies outside its half-open interval", "invalid_boundary")
             times.append(end)
-        elif "time_ms" in item or "at_ms" in item:
-            times.append(integer(item.get("time_ms", item.get("at_ms")), "evidence.time_ms"))
-        else:
+        times.extend(point_times)
+        if not has_interval and not point_times:
             check(record.get("latest_evidence_ms") is not None,
                   "Evidence without source times requires latest_evidence_ms", "unknown_evidence_time")
     return max(times, default=0)
@@ -282,13 +290,15 @@ def derive_contact_windows(asset, records, *, project_id, vocabulary_version, ru
         if any(r.get("evidence_time_status") == "unresolved_bounded_by_source_duration" for r in [anchor, rally, *used]):
             reasons.append("evidence_time_unresolved")
         anchor_time = anchor.get("time_ms", anchor.get("start_ms", 0))
-        status = "candidate" if "ambiguous_rally_terminals" in reasons else "unavailable" if interval is None else "candidate" if reasons else "ready"
+        ambiguous_rally = any(reason in reasons for reason in (
+            "ambiguous_rally_terminals", "serve_not_first_contact", "ambiguous_serve_order"))
+        status = "candidate" if ambiguous_rally else "unavailable" if interval is None else "candidate" if reasons else "ready"
         if interval is not None:
             lo, hi = interval
             if hi <= lo:
                 interval, status = None, "unavailable"
                 reasons.append("empty_range")
-        wait_ms = 0
+        wait_ms = None if "evidence_time_unresolved" in reasons else 0
         if available_until_ms is not None and (interval is None or interval[1] > available_until_ms):
             wait_ms = max(0, interval[1] - available_until_ms) if interval else None
             status, interval = "pending", None
@@ -412,6 +422,11 @@ def derive_contact_windows(asset, records, *, project_id, vocabulary_version, ru
                     reasons.append("player_unknown")
             emit("footwork", mark, rally, interval, reasons, [mark, *stages, *dead])
         serves = [r for r in contacts if r["kind"] == "serve"]
+        # A unique serve label does not establish the first contact. Closed
+        # uncertainty envelopes must be strictly separated to prove its order;
+        # nominally later contacts can still conflict with that first boundary.
+        start_conflicts = [r for r in contacts if len(serves) == 1 and r is not serves[0]
+                           and bounds(r)[0] <= bounds(serves[0])[1]]
         reasons = []
         if len(serves) != 1 or len(dead) != 1:
             interval = None
@@ -423,6 +438,10 @@ def derive_contact_windows(asset, records, *, project_id, vocabulary_version, ru
                 reasons.append("ambiguous_rally_terminals")
         elif serves[0]["time_ms"] >= dead[0]["time_ms"]:
             interval, reasons = None, ["invalid_serve_dead_ball_order"]
+        elif start_conflicts:
+            interval = None
+            reasons = ["serve_not_first_contact" if bounds(r)[1] < bounds(serves[0])[0]
+                       else "ambiguous_serve_order" for r in start_conflicts]
         elif rally["end_ms"] is None:
             interval, reasons = None, ["rally_end_unknown"]
         else:
@@ -432,7 +451,7 @@ def derive_contact_windows(asset, records, *, project_id, vocabulary_version, ru
                 reasons.append("context_clipped_to_rally")
             if any(bounds(r)[0] != bounds(r)[1] for r in [serves[0], dead[0]]):
                 reasons.append("uncertain_rally_terminals")
-        emit("rally", serves[0] if len(serves) == 1 else rally, rally, interval, reasons, [*serves, *dead])
+        emit("rally", serves[0] if len(serves) == 1 else rally, rally, interval, reasons, [*serves, *dead, *start_conflicts])
     result = dict(format=FORMAT, schema_version="1.0", project_id=project_id, vocabulary_version=vocabulary_version,
                   usage_scope="training_only", production_eligible=False, rule_version=RULE_VERSION, rules=config,
                   source=source, annotations=visible, windows=windows, available_until_ms=available_until_ms,
