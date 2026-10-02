@@ -199,6 +199,17 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   assert.equal(c.record().evidence.length, 0, 'label changes must not fabricate evidence');
   elements.get('add-time-evidence').dispatchEvent(new Event('click')); await tick();
   assert.equal(c.record().evidence[0].type, 'source_time'); assert.equal(c.record().evidence[0].observation_source, 'agent');
+  c.record().provenance.revision_audit = {actor_type: 'agent', reviewer: 'saved-agent'};
+  c.record().review = {status: 'pending', reviewer_type: null, reviewer: null}; c.notify();
+  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核 · 来源 agent'));
+  assert.match(elements.get('review-provenance').textContent, /记录来源：agent \/ saved-agent/);
+  assert.match(elements.get('review-provenance').textContent, /审核状态：待审核；审核人：未记录 \/ 未记录/);
+  c.record().provenance.revision_audit = {actor_type: 'human', reviewer: 'last-editor'}; c.notify();
+  assert.equal(elements.get('record-review').value, 'pending', 'human edit provenance must not grant confirmed review');
+  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核 · 来源 human'));
+  delete c.record().provenance.revision_audit;
+  c.record().review = {status: 'pending', reviewer_type: 'agent', reviewer: 'legacy-agent'}; c.notify();
+  assert.match(elements.get('review-provenance').textContent, /记录来源：agent \/ legacy-agent/);
   const formEvent = new Event('submit', {cancelable: true}); elements.get('annotation-form').dispatchEvent(formEvent);
   assert.equal(formEvent.defaultPrevented, true, 'native submit must be stopped before async save'); await tick();
   c.state.snapshots = [{snapshot_id: 'blocked-snapshot', created_at: '2026-10-02T00:00:00Z', project: f.project, content_sha256: 'a'.repeat(64),

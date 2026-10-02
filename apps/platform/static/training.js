@@ -8,6 +8,10 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   const uid = prefix => prefix + '-' + (globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`);
   const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+  function recordOrigin(record) {
+    const audit = record.provenance?.revision_audit;
+    return {actorType: audit?.actor_type || record.review?.reviewer_type || '未记录', reviewer: audit?.reviewer || record.review?.reviewer || '未记录'};
+  }
   function sourceMs(value, duration) {
     const number = Number(value);
     if (!Number.isFinite(number) || number < 0 || !Number.isFinite(duration) || number > duration) throw new Error('原片时间必须在视频范围内');
@@ -401,7 +405,7 @@
       const filter = $('record-filter').value;
       for (const record of records.filter(r => !filter || typeOf(r) === filter).sort((a, b) => timeOf(a) - timeOf(b))) {
         const item = button('', () => { s.selectedId = record.record_id; cancelPick(); renderEditor(); renderRecords(); markers(); seek(timeOf(record)); }, 'record-item' + (s.selectedId === record.record_id ? ' active' : ''));
-        item.append(el('span', formatTime(timeOf(record)), 'time'), el('span', record.provenance?.title || types[typeOf(record)]), el('span', reviews[record.review.status] + ' · ' + (record.review.reviewer_type || '未记录'), 'review'));
+        item.append(el('span', formatTime(timeOf(record)), 'time'), el('span', record.provenance?.title || types[typeOf(record)]), el('span', reviews[record.review.status] + ' · 来源 ' + recordOrigin(record).actorType, 'review'));
         $('record-list').append(item);
       }
       if (!records.length) $('record-list').append(el('p', '在播放器下方标记触球或区间。', 'empty'));
@@ -428,7 +432,8 @@
       $('evidence-summary').textContent = record.evidence?.length ? `已添加 ${record.evidence.length} 条源片证据：` + record.evidence.filter(e => e.type === 'source_time').map(e => formatTime(e.at_ms)).join('、') : '尚未添加时间证据。选择标签不会自动伪造证据。';
       options($('record-review'), Object.entries(reviews), record.review.status);
       for (const option of $('record-review').options) if (option.value === 'confirmed') option.disabled = s.actorType !== 'human';
-      $('review-provenance').textContent = `记录来源：${record.review.reviewer_type || '未记录'} / ${record.review.reviewer || '未记录'}。当前服务来源：${s.actorType}。修改内容后需重新审核。`;
+      const origin = recordOrigin(record);
+      $('review-provenance').textContent = `记录来源：${origin.actorType} / ${origin.reviewer}。审核状态：${reviews[record.review.status]}；审核人：${record.review.reviewer_type || '未记录'} / ${record.review.reviewer || '未记录'}。当前服务来源：${s.actorType}。编辑来源不等于人工确认；修改内容后需重新审核。`;
       $('delete-record').hidden = false; field('incoming-ball', record.state?.incoming_ball); field('outgoing-ball', record.state?.outgoing_ball);
       const subject = $('label-subject-role').value || 'self';
       options($('label-subject-person'), s.bundle.people.map(p => [p.person_id, p.display_name]), subject === 'self' ? record.person_id : record.state?.[subject]?.person_id, '身份未知');
