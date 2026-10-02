@@ -1,0 +1,356 @@
+{
+  "asset": {
+    "schema_version": "1.0",
+    "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+    "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/876ddac3abe9141b8ce7f2fe.mp4",
+    "sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+    "size_bytes": 231500744,
+    "duration_ms": 1306040,
+    "width": 1280,
+    "height": 720,
+    "fps_num": 25,
+    "fps_den": 1,
+    "time_base": "1/12800",
+    "title": "[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships",
+    "match_id": "fine-badminton-2026:2011-world-championships-ms-lin-lee-round-unverified",
+    "source_type": "dataset",
+    "usage_scope": "training_only",
+    "source_url": "https://zenodo.org/api/records/20292976/files/Fine-Badminton.zip/content",
+    "source_page": "https://zenodo.org/records/20292976",
+    "acquired_at": "2026-09-29T09:42:34.703162Z",
+    "camera_type": "unknown",
+    "discipline": "singles",
+    "players": [
+      {
+        "player_id": "publisher-lin-dan",
+        "display_name": "Lin Dan",
+        "identity_status": "unconfirmed"
+      },
+      {
+        "player_id": "publisher-lee-chong-wei",
+        "display_name": "Lee Chong Wei",
+        "identity_status": "unconfirmed"
+      }
+    ],
+    "rights": {
+      "status": "research_only",
+      "license_url": "https://zenodo.org/records/20292976",
+      "evidence": "Author description restricts to non-commercial academic research; video copyright remains with original owners. API CC-BY metadata conflict retained in acquisition report.",
+      "allowed_uses": [
+        "noncommercial_academic_research"
+      ]
+    },
+    "split": "unassigned",
+    "probe": {
+      "ffprobe_version": "ffprobe version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2007-2026 the FFmpeg developers",
+      "ffmpeg_version": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+      "probed_at": "2026-09-29T09:54:33.601774+00:00",
+      "codec_name": "h264",
+      "stream_index": 0,
+      "fps_source": "avg_frame_rate",
+      "duration_source": "stream.duration",
+      "start_time": "0.000000",
+      "start_pts": 0,
+      "avg_frame_rate": "25/1",
+      "r_frame_rate": "25/1",
+      "vfr_status": "cfr_observed",
+      "pts_index": {
+        "relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/probes/b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913.5bdc8c2639e241309b21e15bbf9e87cb.pts.jsonl",
+        "sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+        "size_bytes": 1175271,
+        "format": "jsonl",
+        "frame_count": 32651,
+        "time_base": "1/12800",
+        "pts_field": "best_effort_timestamp",
+        "complete": true,
+        "vfr_status": "cfr_observed",
+        "min_delta_ticks": 512,
+        "max_delta_ticks": 512
+      },
+      "timing_note": "Container rates alone do not prove CFR; original timestamps retained when indexed.",
+      "decode": {
+        "status": "passed",
+        "scope": "full_video_stream",
+        "device": "cpu",
+        "frames": 32651,
+        "exit_code": 0
+      },
+      "source_sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "source_size_bytes": 231500744
+    },
+    "provenance": {
+      "usage_scope": "training_only",
+      "dataset_id": "fine-badminton-2026-zenodo-20292976-v1.0",
+      "source_archive_sha256": "a3518f52d66dd6c5d2b01ce1347de8e589516ccc24a72aae818fea64e0b04439",
+      "archive_member": "videos/[4K50FPS] BEST MS MATCH！Lin Dan vs Lee Chong Wei _ 2011 World Championships.mp4",
+      "identity_basis": "Publisher archive filename; no independent visual identity confirmation.",
+      "source_match_offset_ms": null,
+      "source_record_id": 20292976,
+      "source_version": "v1.0",
+      "annotation_alignment": "unverified",
+      "annotation_policy": "Original CSV preserved; frame-base and endpoint semantics require independent verification before Event conversion.",
+      "fine_labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "source_archive_publisher_md5": "cb3fcaca0ae9b08c564ac2a19ae4e7a0"
+    }
+  },
+  "records": [
+    {
+      "record_id": "technical-rally-1",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "rally",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 0,
+      "end_ms": 6000
+    },
+    {
+      "record_id": "technical-serve",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "serve",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "time_ms": 1000,
+      "player_id": "fixture-A",
+      "source_pts": 12800
+    },
+    {
+      "record_id": "technical-contact-2",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "contact",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "time_ms": 2000,
+      "player_id": "fixture-B",
+      "source_pts": 25600
+    },
+    {
+      "record_id": "technical-contact-3",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "contact",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "time_ms": 3000,
+      "player_id": "fixture-A",
+      "source_pts": 38400
+    },
+    {
+      "record_id": "technical-dead",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "dead_ball",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "time_ms": 6000,
+      "player_id": null,
+      "source_pts": 76800
+    },
+    {
+      "record_id": "technical-phase-preparation",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 2200,
+      "end_ms": 2400,
+      "anchor_id": "technical-contact-3",
+      "phase": "preparation",
+      "player_id": "fixture-A"
+    },
+    {
+      "record_id": "technical-phase-initiation",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 2400,
+      "end_ms": 2600,
+      "anchor_id": "technical-contact-3",
+      "phase": "initiation",
+      "player_id": "fixture-A"
+    },
+    {
+      "record_id": "technical-phase-arrival",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 2600,
+      "end_ms": 2840,
+      "anchor_id": "technical-contact-3",
+      "phase": "arrival",
+      "player_id": "fixture-A"
+    },
+    {
+      "record_id": "technical-phase-stroke_support",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 2840,
+      "end_ms": 3080,
+      "anchor_id": "technical-contact-3",
+      "phase": "stroke_support",
+      "player_id": "fixture-A"
+    },
+    {
+      "record_id": "technical-phase-landing",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 3080,
+      "end_ms": 3280,
+      "anchor_id": "technical-contact-3",
+      "phase": "landing",
+      "player_id": "fixture-A"
+    },
+    {
+      "record_id": "technical-phase-recovery",
+      "revision": 2,
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "rally_id": "technical-rally-1",
+      "kind": "movement",
+      "labels": {
+        "hand_technique": "unknown",
+        "footwork": "unknown"
+      },
+      "review_status": "unreviewed",
+      "visibility": "not_reviewed",
+      "unknown_reason": "agent technical fixture; action and identity not reviewed",
+      "provenance": {
+        "reviewer_type": "agent",
+        "purpose": "technical_fixture_only",
+        "human_action_truth": false
+      },
+      "start_ms": 3280,
+      "end_ms": 3600,
+      "anchor_id": "technical-contact-3",
+      "phase": "recovery",
+      "player_id": "fixture-A"
+    }
+  ],
+  "project_id": "render-contact-technical-verification",
+  "vocabulary_version": "technical-unknown-v1"
+}

@@ -231,6 +231,8 @@ def render(request, config=None, emit=None, cancelled=None):
         assets = assets_by_id(request["assets"])
         input_timeline = deepcopy(params.get("timeline"))
         require(isinstance(input_timeline, dict), "timeline must be an object")
+        from .usage import reject_training_timeline
+        reject_training_timeline(input_timeline)
         original_assets = referenced_assets(input_timeline, assets)
         check_usage(original_assets, assets, cfg.storage_root, params.get("research_preview", False))
         preset = resolve_preset(params, input_timeline.get("output"))
