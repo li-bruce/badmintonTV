@@ -1,5 +1,20 @@
 # models 状态
 
+## 2026-10-02 训练标注准备轮：CPU准备验收完成
+
+- 分支codex/models-annotation-readiness从main3dab169创建；开工工作树干净，上一轮分支/报告保留。已读必需架构/合同/资源/验收文件与本轮IMPLEMENTATION_ROUND、END_TO_END_CAPABILITY_PLAN；断言先登记docs/models/ANNOTATION_READINESS_PLAN.md。
+- 已完成本轮models目标：taxonomy、公共快照审计、真实WSL CPU重复窗口准备；A-04/05仅models消费部分PASS、A-06 PASS。主任务维护根阶段表，Web保存导出及专家/真值/训练效果验收保持独立。
+- 已先行提交：`1a44123`仅含configs/models/taxonomy.v1.json与docs/models/ANNOTATION_HANDOFF.md，可独立cherry-pick供01中文UI使用。193节点（37 group/156 label）、8领域、19家族；全部定义needs_expert_review，184 annotation_draft/9 unavailable，无虚构专家确认。文件297,278B，SHA256 e95d96ebaa09aa959824e8cfef51967d3df12e6b6e1900582766dbd4cc29501b。ID/父引用/无环/字段/家族结构检查PASS。
+- 已实现：按主任务授权同步01公共合同6fec08f+2128568（本分支6f851bb+1d75b3c），消费同一TrainingSnapshot，无平行交换格式。覆盖/未知/身份/4角色/修订/证据/可见性审计，完整来源与比赛闭包，严格训练视图、PTS取窗及实际CPU解码CLI。公共解析后同subject重复问题已由01修复，models保留守卫/issue；没有擅改共享合同。
+- 已验证：最终合同下60项models CPU测试在WSL annotation-env全部PASS、0跳过（grouping16/readiness20/prepare10/sources14）；native platform环境同组也通过。负例含unknown/agent/model/import、伪hash/view、同源祖先/session/history传递、四角色隔离、过量范围/跨回合/源替换及旧revision，不用合成测试宣称视频识别成功。
+- 环境/容量：在现有models/env旁建立annotation-env，复用PyAV15/numpy2.4.6/torch2.7.1+cu128，仅加4个官方MIT小wheel：pydantic2.13.5/core2.46.5/annotated-types0.8.0/typing-inspection0.4.4，2,562,857B下载；pip check与真实导入来源检查PASS、torch未import。实测新增34,929,194B（报告前），峰值估算67,119,638B<100MB。安装后runtime/models19,198,684,679B，shared7,169,319,439B，另20GB预留；D余922,484,183,040B，全部配额通过。models目录开工6,998,627,612B，所有写入先reserve；本次10份handoff文件906,421B，远低于2GB。
+- GPU/端口：只读nvidia-smi看见用户桌面进程及约1.9GB占用，未结束任何进程；18080资源账本API连接拒绝，不能声称账本空闲。本轮仅CPU，无models服务监听、GPU实验、模型下载或训练。
+- 已运行A-06：使用01适配的完整193节点词表，经公共builder冻结明确agent/draft/unknown快照（content SHA4401e0d743208a96c2d95aea3c568f61a0fb673e959ab45158294088ddde1562）。真实b210dc39…原片231,500,744B与完整PTS只读全hash；两次prepare结果各72,891B、逐字节一致，SHA09059688739af49822d121967cf62e01a66cb35195062200a9d109c06a0d5dc3。窗口120000–123000ms含75帧，6个真实解码RGB hash；无图片/视频复制、模型或训练。
+- 实际准备结论：trainable=false、strict=0、两个unknown均排除；129适用但未标项不是负例，37组不计监督类别。人物/状态/比赛组/回合未确认如实报告，window review_only。require-trainable真实exit2；写已有目录exit1且原报告hash未变，负例证据保留。
+- 验收/未测：A-06 PASS；A-04/A-05仅消费工程部分PASS，Web及阶段总表由root验收。S0-03.CTX-01、S0-04.CTX-01、S2-04.CTX-01、S3-04.CTX-01保持BLOCKED；完整态势链、消融、解释NOT_RUN。无精度/召回/正式训练成绩。详见docs/models/ANNOTATION_READINESS_PLAN.md、docs/experiments/models-005-annotation-readiness.md和annotation-readiness-001.evidence.json。
+- 运行：WSL仓库根，/mnt/d/video/runtime/models/annotation-env/bin/python -s -B -m packages.models.training_prepare prepare --snapshot <公共快照> --manifest <AssetManifest> --output-dir models/<新attempt> --samples 6；实际完整命令见实验报告/ANNOTATION_HANDOFF。无端口、GPU进程或常驻任务。
+- 下一步：主任务集成模块提交；01真实Web导出可以直接消费。专家冻结定义/双人试标、真实同源比赛分组和当前human复核仍需完成，才开展有独立评测的正式训练。本轮源码提交SHA在最终交接补记；taxonomy1a44123已先交，基线3dab169，未推送。
+
 ## 2026-09-29 复用实验轮：实验完成，最终交接
 
 - 已实现：TrackNetV3、连续COCO17 pose、YOLO11n-pose+ByteTrack、Qwen3-VL、严格BST输入适配，统一协议、usage_scope、源/权重完整校验、分项计时与失败保留。没有伪造模型进度、细标签或身份。

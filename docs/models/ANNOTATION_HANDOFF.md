@@ -166,3 +166,42 @@ print({"nodes": len(nodes), "families": len(t["coverage_groups"])})
 ```
 
 这是结构复现，不是产品全链验收脚本或专家签字。
+
+## 8. 公共快照消费与CPU准备接口
+
+消费01冻结合同`6fec08f`加兼容修复`2128568`的`packages.contracts.training.TrainingSnapshot`，不新增标注交换格式。读取时重新校验完整公共关系、推导training_view和content_sha256；文件本身另记SHA256。`audit_snapshot`返回的是models审计报告，不是新的训练快照。
+
+公共judgement用`present/absent/unknown/not_applicable/unlabeled/unobservable`；词表`unannotated → unlabeled`、`not_visible → unobservable`，unknown保持unknown，不能转成负例。同标签按`subject_role + subject_person_id`区分self/opponent/partner/opponent_partner，省略人物时遵循公共合同的角色解析。目录group的selectable=false，不统计为缺失监督标签。平台适配器把完整原词表保留于公开taxonomy.provenance；顶层仍是provisional，不能升级为reviewed。
+
+API与入口：
+
+```python
+from packages.models.training_readiness import audit_snapshot
+report = audit_snapshot(public_snapshot, source_assets=library_asset_dict_by_id)
+```
+
+```bash
+python -s -B -m packages.models.training_prepare audit \
+  --snapshot /mnt/d/video/models/handoff/PROJECT/snapshot.json \
+  --manifest /mnt/d/video/data/training/handoff/SOURCE.assets.v1.json \
+  --output-dir models/handoff/PROJECT/audit-attempt-01
+
+python -s -B -m packages.models.training_prepare prepare \
+  --snapshot /mnt/d/video/models/handoff/PROJECT/snapshot.json \
+  --manifest /mnt/d/video/data/training/handoff/SOURCE.assets.v1.json \
+  --output-dir models/handoff/PROJECT/prepare-attempt-01 --samples 6
+```
+
+从仓库根目录运行；默认root为WSL `/mnt/d/video` 或Windows `D:/video`，可显式传`--root`。上述PROJECT/SOURCE是待替换路径，实际本轮命令与hash随后记入实验报告。audit只校验快照/来源元数据，不宣称媒体已经解码；prepare必须附公共AssetManifest，严格核对源ID/path/hash/bytes/duration及冻结PTS引用，再全hash原片和完整PTS索引。即使输入是已实例化的Pydantic对象，也重新验证其dump，不能用model_construct绕过。
+
+严格训练视图保留所有公共exclusions，并增加：clear可见性、显式可判正负/负例理由、当前human审核与revision_audit身份一致、审核时间/证据、语义定义已冻结、已确认人物、整组无泄漏。match确认跟随公共quality_summary及group_evidence；group confirmed本身不能替代比赛确认。自hash、父资产/父hash、历史provenance、source_group_ids、recording_session_id、match与group先取传递闭包，未知中间节点不提前删除。可选原AssetManifest精确匹配后仅增加来源边，不提升审核或比赛确认。
+
+报告保留各label/kind/role/reviewer/visibility/value覆盖，显式unlabeled与未出现标签分开统计；不存在的标签不是负例。记录及修订、缺身份/状态/角色/终点、分组组件和每项排除原因均可回查。缺严格train/validation/test样本或公共/分组阻塞时trainable=false。此门禁不是样本量、类别均衡、专家真值认证或模型精度验收；离线元数据也不能认证填写者是真人。
+
+prepare默认只取已有segment区间；不会擅自补回合终点或动作阶段。点记录须用`--record asset_id/record_id`显式选择，`--before-ms/--after-ms`仅生成审阅上下文，同时限于已知回合及媒体；缺回合记scope_unknown。四种业务裁剪策略仍由04负责，这里不把审阅窗口冒充精确球路/手法/步法边界。窗口最多16个、每窗30秒、每窗最多32原PTS样本；实际取样缺失/重复目标明确记录，不补帧。全局不可训练时所有窗口review_only=true、无监督target。按实际PTS解码RGB并保存hash，不写图像，不训练、不调用模型、不使用GPU。
+
+新输出目录必须位于models/且不存在；写前预留100MB、检查180GB owner/700GB保守总配额及5GB磁盘余量。输出`readiness.json`确定性内容与独立`capacity.json`，后者包含实时容量不参与重复性比较。默认有效但不可训练的报告返回0；`--require-trainable`使其返回2；非法合同/hash/引用或失败返回非0。`--index-only`明确decode not_run，不能用于证明真实解码。原片只读；不会覆盖已有attempt。
+
+环境使用既有WSL models/env及小型annotation-env依赖环境，复用PyAV和父环境框架。启动脚本`scripts/models/bootstrap_annotation_runtime.py`默认仅显示计划，显式`--execute`才在runtime/models新路径安装四个官方小wheel；30MB总下载、100MB峰值、SHA/许可/依赖/实际导入来源均检查并记录，旧目录拒绝覆盖，失败保留。详见`environments/models-annotation-requirements.txt`与本轮实际环境回报。不得把全局Python、Windows平台依赖或新Torch安装进这个准备流程。
+
+发现的公共合同解析后重复subject边界已有消费端守卫，见[问题记录](../issues/models-training-resolved-subject-duplicates.md)。共享合同修复由01/root处理，models未自行修改合同。
