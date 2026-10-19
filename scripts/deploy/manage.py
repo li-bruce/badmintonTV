@@ -64,7 +64,7 @@ def source_allowed(name):
         return False
     if any(word in p.name.casefold() for word in ('credentials', 'id_rsa', 'id_ed25519', 'secrets.local')):
         return False
-    return p.suffix.casefold() in ALLOWED_SUFFIXES or p.name in ('.gitignore', 'LICENSE', 'NOTICE')
+    return p.suffix.casefold() in ALLOWED_SUFFIXES or p.name in ('.gitignore', '.gitattributes', 'LICENSE', 'NOTICE')
 
 
 def closure(names, cfg):
