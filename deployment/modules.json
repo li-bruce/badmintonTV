@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.0",
+  "modules": {
+    "core": {
+      "title": "合同与运行时",
+      "depends": [],
+      "include": [
+        "packages/contracts/",
+        "packages/runtime/",
+        "tests/contracts/"
+      ],
+      "input": [
+        "Asset/Job/Timeline JSON",
+        "storage root"
+      ],
+      "output": [
+        "validated contracts",
+        "queue and capacity records"
+      ],
+      "entry": null
+    },
+    "library": {
+      "title": "资料登记与校验",
+      "depends": [
+        "core"
+      ],
+      "include": [
+        "packages/library/",
+        "configs/library/",
+        "scripts/library/",
+        "tests/library/",
+        "docs/library/"
+      ],
+      "input": [
+        "source manifest",
+        "authorized files/URLs"
+      ],
+      "output": [
+        "AssetManifest",
+        "PTS sidecars",
+        "annotation catalog"
+      ],
+      "entry": "packages.library"
+    },
+    "workbench": {
+      "title": "播放、标注与检索工作台",
+      "depends": [
+        "core"
+      ],
+      "include": [
+        "apps/",
+        "tests/platform/",
+        "docs/platform/",
+        "docs/site/",
+        "scripts/docs/",
+        "start-platform.ps1",
+        "start-worker.ps1",
+        "start-platform.sh",
+        "start-worker.sh"
+      ],
+      "input": [
+        "AssetManifest",
+        "annotation catalog",
+        "video references"
+      ],
+      "output": [
+        "annotation revisions",
+        "training snapshots",
+        "QuerySpec/Candidate",
+        "Timeline"
+      ],
+      "entry": "apps.platform.main:app",
+      "notes": "检索为工作台内部功能。独立工作台包可以播放标注，编码须加 render 包；GPU 分析须外接 models 环境。"
+    },
+    "models": {
+      "title": "模型准备、训练与推理",
+      "depends": [
+        "core"
+      ],
+      "include": [
+        "packages/models/",
+        "configs/models/",
+        "scripts/models/",
+        "tests/models/",
+        "docs/models/",
+        "environments/models"
+      ],
+      "input": [
+        "reviewed training snapshot",
+        "AssetManifest",
+        "model/job config"
+      ],
+      "output": [
+        "readiness report",
+        "features/predictions",
+        "model card and evaluation"
+      ],
+      "entry": "packages.models"
+    },
+    "render": {
+      "title": "视频剪辑与编码",
+      "depends": [
+        "core"
+      ],
+      "include": [
+        "packages/render/",
+        "configs/render/",
+        "scripts/render/",
+        "tests/render/",
+        "docs/render/",
+        "environments/render"
+      ],
+      "input": [
+        "Timeline or render job",
+        "authorized video references"
+      ],
+      "output": [
+        "MP4",
+        "source map",
+        "QA report"
+      ],
+      "entry": "packages.render"
+    }
+  },
+  "common": [
+    "AGENTS.md",
+    "PROJECT_PLAN_SIMPLE.md",
+    "pyproject.toml",
+    ".gitignore",
+    "deployment/",
+    "scripts/deploy/",
+    "tests/deployment/",
+    "docs/deployment/",
+    "packages/__init__.py",
+    "configs/models/taxonomy.v1.json",
+    "docs/status/"
+  ],
+  "profiles": {
+    "core-cpu": {
+      "modules": [
+        "core"
+      ],
+      "requirements": "deployment/requirements-core.txt",
+      "gpu": false,
+      "ffmpeg": false,
+      "runtime_owner": "platform"
+    },
+    "workbench-cpu": {
+      "modules": [
+        "workbench"
+      ],
+      "requirements": "deployment/requirements-workbench.txt",
+      "gpu": false,
+      "ffmpeg": false,
+      "runtime_owner": "platform"
+    },
+    "library-cpu": {
+      "modules": [
+        "library"
+      ],
+      "requirements": "deployment/requirements-core.txt",
+      "gpu": false,
+      "ffmpeg": true,
+      "runtime_owner": "library"
+    },
+    "render-cpu": {
+      "modules": [
+        "render"
+      ],
+      "requirements": "deployment/requirements-core.txt",
+      "gpu": false,
+      "ffmpeg": true,
+      "runtime_owner": "render"
+    },
+    "desktop-cpu": {
+      "modules": [
+        "workbench",
+        "library",
+        "render"
+      ],
+      "requirements": "deployment/requirements-workbench.txt",
+      "gpu": false,
+      "ffmpeg": true,
+      "runtime_owner": "platform"
+    },
+    "models-cpu-prep": {
+      "modules": [
+        "models"
+      ],
+      "gpu": false,
+      "delegate_profile": "cpu-prep",
+      "runtime_owner": "models"
+    },
+    "models-gpu": {
+      "modules": [
+        "models"
+      ],
+      "gpu": true,
+      "delegate_profile": "gpu-base",
+      "runtime_owner": "models"
+    }
+  }
+}
