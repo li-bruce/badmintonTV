@@ -346,6 +346,12 @@ def export_state(args):
     output = no_links(args.output)
     if not output.is_relative_to(storage/'platform'):
         raise ValueError('--output must be within storage-root/platform for backup quota accounting; copy the completed backup separately to the destination device')
+    if output.exists() or not output.parent.is_dir():
+        raise ValueError('Output parent must exist and output must be new')
+    for value in args.database:
+        source = no_links(storage / str(safe_relative(value)))
+        if not source.is_file():
+            raise ValueError('Missing source database: ' + str(source))
     sys.path.insert(0, str(ROOT))
     from packages.runtime.storage import CapacityLedger
     ledger = CapacityLedger(storage/'platform/runtime.sqlite3', storage)
@@ -392,11 +398,15 @@ def _export_state(args):
         relative_manifest = 'source-manifests/' + str(len(source_manifests)+1).zfill(4) + '-' + manifest_path.name
         safe_relative(relative_manifest)
         source_manifests.append({'file':relative_manifest, 'original_name':manifest_path.name, 'sha256':hashlib.sha256(raw).hexdigest(), 'bytes':len(raw), '_raw':raw})
+        if not isinstance(content, dict) or not isinstance(content.get('assets', []), list):
+            raise ValueError('Asset manifest must be an object with an assets array')
         for asset in content.get('assets', []):
+            if not isinstance(asset, dict):
+                raise ValueError('Each asset must be a JSON object')
             relative = asset.get('relative_path') or asset.get('storage', {}).get('relative_path')
             safe_relative(relative or '')
             digest = asset.get('sha256')
-            if not re.fullmatch('[0-9a-f]{64}', digest or '') or not asset.get('asset_id'):
+            if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest) or not isinstance(asset.get('asset_id'), str) or not asset['asset_id']:
                 raise ValueError('Each asset must provide asset_id, relative_path and SHA256')
             identity = (relative, digest)
             if asset['asset_id'] in reference_ids and reference_ids[asset['asset_id']] != identity:

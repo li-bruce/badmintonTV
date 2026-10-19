@@ -300,4 +300,12 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'manifests exceed'):manage.export_state(args)
 
 
+
+    def test_missing_source_queue_is_not_created_by_backup(self):
+        args=self.state_args(database=['platform/runtime.sqlite3'],quiesced=True)
+        with self.assertRaisesRegex(ValueError,'Missing source'):
+            manage.export_state(args)
+        self.assertFalse(Path(args.storage_root,'platform/runtime.sqlite3').exists())
+
+
 if __name__=='__main__': unittest.main()
