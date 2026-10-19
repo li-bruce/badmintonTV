@@ -7,9 +7,10 @@ name = "badmintontv-platform"
 version = "0.1.0"
 description = "Local badminton video annotation and retrieval workbench"
 requires-python = ">=3.11"
-dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "jinja2>=3.1,<4", "httpx>=0.27,<1", "pydantic>=2.10,<3", "python-multipart>=0.0.18"]
+dependencies = ["pydantic>=2.10,<3"]
 
 [project.optional-dependencies]
+workbench = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "jinja2>=3.1,<4", "httpx>=0.27,<1", "python-multipart>=0.0.18"]
 test = ["pytest>=8,<10"]
 
 [tool.setuptools.packages.find]
