@@ -34,3 +34,5 @@
 - 代码提交：84ee9d6（实现），1fc23b0（Git 属性），0ffe641（UTF-8）；本记录所在后续提交补充结果和配置检查。
 
 迁移补验：发现 runtime_metadata.business_database 含旧绝对路径会阻止新目录启动，已在 quiesced 备份副本中移除绑定；新设备首次 API 启动重新绑定，源库不改。新增异路径恢复断言，最终测试数 25 PASS。模型/工具路径及复制后原片身份须在目标设备重新配置/校验。
+
+主线首次新环境安装发现 storage.rglob 跟随 WSL 特殊链接导致 WinError1920，改用共享 directory_bytes 非跟随扫描并增加实际目录链接负例。纯 Python -S 禁用 site-packages 验证容量引导不依赖 Pydantic；doctor 增加 Web 完整核心依赖导入、资源存在性和 pip check。此补验后 27 项 PASS。

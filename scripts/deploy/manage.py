@@ -226,7 +226,9 @@ def setup(args, root=ROOT):
     reserve = args.max_install_bytes
     if reserve <= 0 or reserve > 10_000_000_000:
         raise ValueError('--max-install-bytes must be 1..10000000000')
-    used = sum(p.stat().st_size for p in storage.rglob('*') if p.is_file() and not p.is_symlink())
+    sys.path.insert(0, str(root))
+    from packages.runtime.storage import CapacityLedger, directory_bytes
+    used = directory_bytes(storage)
     if args.max_storage_bytes > 700_000_000_000 or used + reserve > args.max_storage_bytes or shutil.disk_usage(storage).free < reserve:
         raise ValueError('Storage budget or physical free space insufficient for reserved installation peak')
     sys.path.insert(0, str(root))
@@ -277,12 +279,17 @@ def doctor(args, root=ROOT):
     required_ok = probes['python'] and probes['storage_root'] and (not plan['ffmpeg_required'] or (probes['ffmpeg'] and probes['ffprobe']))
     if probes['python']:
         imports = ['packages.contracts', 'packages.runtime']
-        imports += ['apps.platform.store'] if args.profile in ('workbench-cpu', 'desktop-cpu') else []
+        imports += ['fastapi', 'uvicorn', 'jinja2', 'httpx', 'multipart', 'apps.platform.store', 'apps.platform.artifact_response', 'apps.platform.training_catalog'] if args.profile in ('workbench-cpu', 'desktop-cpu') else []
         imports += ['packages.'+m for m in ('library', 'render') if m in closure(config(root)['profiles'][args.profile]['modules'], config(root))]
         script = 'import importlib,json,sys; [importlib.import_module(m) for m in '+repr(imports)+']; print(json.dumps({"imports":'+repr(imports)+',"torch_imported":"torch" in sys.modules}))'
         process = subprocess.run([str(py), '-s', '-c', script], cwd=root, env={**os.environ, **plan['environment_variables']}, capture_output=True, text=True)
         probes['imports'] = {'returncode': process.returncode, 'output': process.stdout.strip(), 'error': process.stderr[-2000:]}
-        required_ok = required_ok and process.returncode == 0
+        dependency_check = subprocess.run([str(py), '-m', 'pip', 'check'], cwd=root, env={**os.environ, **plan['environment_variables']}, capture_output=True, text=True)
+        probes['pip_check'] = {'returncode':dependency_check.returncode, 'output':dependency_check.stdout.strip(), 'error':dependency_check.stderr[-2000:]}
+        if args.profile in ('workbench-cpu', 'desktop-cpu'):
+            probes['web_resources'] = all((root/p).is_file() for p in ('apps/platform/templates/training.html','apps/platform/static/training.js','configs/models/taxonomy.v1.json'))
+            required_ok = required_ok and probes['web_resources']
+        required_ok = required_ok and process.returncode == 0 and dependency_check.returncode == 0
     return {'profile': args.profile, 'status': 'ready' if required_ok else 'missing_dependencies', 'checks': probes, 'plan': plan}
 
 

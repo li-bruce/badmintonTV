@@ -243,4 +243,22 @@ class DeploymentTests(unittest.TestCase):
         self.assertTrue(report['databases'][0]['database_binding_removed_in_copy'])
 
 
+
+    def test_bootstrap_without_site_packages(self):
+        command=[sys.executable,'-S','-B','-c','import sys; sys.path.insert(0,'+repr(str(REPO))+'); from packages.runtime.storage import CapacityLedger; assert "pydantic" not in sys.modules; assert "torch" not in sys.modules']
+        result=subprocess.run(command,cwd=self.base,capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_capacity_scanner_does_not_follow_directory_links(self):
+        from packages.runtime.storage import directory_bytes
+        storage=self.base/'storage';storage.mkdir()
+        outside=self.base/'outside';outside.mkdir();(outside/'large.txt').write_bytes(b'x'*1000)
+        link=storage/'linked-env'
+        try: os.symlink(outside,link,target_is_directory=True)
+        except OSError:
+            if os.name!='nt': raise
+            subprocess.run(['powershell.exe','-NoProfile','-Command',"New-Item -ItemType Junction -Path '"+str(link)+"' -Target '"+str(outside)+"' | Out-Null"],check=True)
+        self.assertEqual(directory_bytes(storage),0)
+
+
 if __name__=='__main__': unittest.main()
