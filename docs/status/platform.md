@@ -1,3 +1,15 @@
+## 2026-10-19 页面简化交付（P-01 / P-02）
+
+- 分支 codex/platform-plain-workbench，基线321a30d；设计和开发前断言见 [PLAIN_WORKBENCH_DESIGN.md](../platform/PLAIN_WORKBENCH_DESIGN.md)。本轮仅改平台模板/静态代码/相关测试，未改合同、API、安全门禁或共享部署脚本。
+- 已实现：顶部标注/数据集/设置/帮助四入口；三栏标注工作区；全视频保存和未保存状态常驻；人物/队伍在设置手填；右侧默认只展示已加入的主体标签，左侧全量标签拖拽/搜索保留。修订、来源、定位精度和版本hash收进详情。制作页统一入口、去编号、收起JSON与诊断。
+- 已运行：5份前端回归109 PASS/0 SKIP；后续标题切换/标签主体定位调整后相关2份56 PASS。覆盖既有拖拽/圈选/去重、409草稿保持、人工审核限制、来源信息保留，以及新增视图切换不改数据、隐藏播放器不响应标注快捷键、默认仅展示已加标签/搜索仍可添加。
+- 后端关键回归69 PASS/0 SKIP：training_api、training_regions_api、training_review_boundaries、production_usage、render_options；现有FastAPI/httpx弃用警告未改依赖。
+- 失败记录：首次Python测试因旧系统pytest临时目录权限报错（68 setup ERROR，非业务断言失败）；指定工作树.runtime且创建父目录后69 PASS。首次前端2处旧文案断言/新测试夹具无选中记录已修正；最终109 PASS。无数据回退或门槛降低。
+- P-01 / P-02总体仍NOT_RUN：本模块工程回归PASS，1280/390px真实布局、播放拖拽圈选和保存浏览器回归由root在隔离agent服务18086完成，不能用单元测试代替。未操作18080人工库，未启动服务/GPU/下载或安装依赖。原生删除/丢弃确认保留；不要把自动化无法处理弹窗等同于数据失败。
+- 环境：D:/video/runtime/platform/env/Scripts/python.exe，Node v18（提升权限运行）；仅工作树.runtime测试临时小夹具，不复制原视频。69项后端命令：python -B -m pytest -q -p no:cacheprovider --basetemp .runtime/pytest-plain-20261019-b tests/platform/test_training_api.py tests/platform/test_training_regions_api.py tests/platform/test_training_review_boundaries.py tests/platform/test_production_usage.py tests/platform/test_render_options.py。
+- 启动交由root集成后使用 .\\start-platform.ps1 -Port 18086 -DatabasePath D:/video/platform/portability-20261019/ui-agent.sqlite3 -TrainingReviewer agent。无本模块端口或D盘容量新增。
+- 提交SHA：见本节所在提交（报告与代码同提交，交接消息列出SHA）。下一步：root真实浏览器验收；如有布局问题追加模块修复，阶段总表由root维护。
+
 ## 2026-10-03 拖拽与圈选增补（平台交付；确认框恢复另列阻塞）
 
 - 新授权A-11～A-14；开发前设计 [TRAINING_INTERACTION_DESIGN.md](../platform/TRAINING_INTERACTION_DESIGN.md)。合同a0fc1db、功能c97f39f、真实快速投放修复8ba5cc2已提交并由root集成。逐ID真实方法/预期/实际/证据见 [TRAINING_INTERACTION_VALIDATION.md](../platform/TRAINING_INTERACTION_VALIDATION.md)。

@@ -73,12 +73,13 @@
     let lanes = [], nodes = new Map(), focusNodes = new Map();
     const el = (tag, text, className) => { const node = doc.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
     const root = el('section', undefined, 'btv-timeline'); root.setAttribute('aria-label', '原片可视标注时间线');
-    const toolbar = el('div', undefined, 'btv-timeline-toolbar'), heading = el('strong', '源时间线');
+    const toolbar = el('div', undefined, 'btv-timeline-toolbar'), heading = el('strong', '时间线');
     const range = el('output', undefined, 'btv-timeline-range'); range.setAttribute('aria-live', 'polite');
     const scroll = el('div', undefined, 'btv-timeline-scroll'), body = el('div', undefined, 'btv-timeline-body'); scroll.append(body);
-    const status = el('p', '拖动区间或边界调整原片毫秒；松手后只更新草稿。', 'btv-timeline-status'); status.setAttribute('role', 'status');
+    const status = el('p', '', 'btv-timeline-status'); status.setAttribute('role', 'status');
     const help = el('p', '块或手柄聚焦后 ← / → 微调 10 ms；Shift 为 100 ms，Alt 为 1 ms。Escape 取消拖动。色点代表不同标签维度。仍可在右侧表单精确填写，以上不是逐帧操作。', 'btv-timeline-help');
-    toolbar.append(heading); root.append(toolbar, range, scroll, status, help); container.append(root);
+    const helpDetails = el('details', undefined, 'btv-timeline-help-details'); helpDetails.append(el('summary', '拖动与快捷键'), help);
+    toolbar.append(heading); root.append(toolbar, range, scroll, status, helpDetails); container.append(root);
     const report = error => { const value = error instanceof Error ? error : new Error(String(error)); status.textContent = value.message; status.classList.add('is-error'); onError?.(value); };
     const say = text => { status.textContent = text; status.classList.remove('is-error'); };
     const call = (fn, ...args) => { try { return Promise.resolve(fn?.(...args)).catch(report); } catch (error) { report(error); return Promise.resolve(); } };
@@ -164,7 +165,7 @@
     function move(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
       event.preventDefault();
-      if (!unchanged(drag)) { cancel(); report('源视频或记录已变化，拖动已取消'); return; }
+      if (!unchanged(drag)) { cancel(); report('视频或标注已变化，请重新拖动'); return; }
       const patch = draftFromEvent(event), draft = {...drag.original, ...patch};
       const invalid = validateEdit(drag.original, patch, stateRecords(), duration());
       drag.patch = patch; drag.invalid = invalid; position(drag.node, draft); drag.node.classList.toggle('is-invalid', Boolean(invalid));
@@ -176,14 +177,14 @@
       busy = true;
       let result;
       try { result = onEdit(record.record_id, patch); } catch (error) { busy = false; report(error); render(); return; }
-      Promise.resolve(result).then(() => { if (activeKey === sourceKey(getState())) say('时间已更新到草稿；请保存标注包。'); }, report).finally(() => { busy = false; render(); });
+      Promise.resolve(result).then(() => { if (activeKey === sourceKey(getState())) say('时间已调整，尚未保存。'); }, report).finally(() => { busy = false; render(); });
     }
     function finish(event) {
       if (!drag || event.pointerId !== drag.pointerId) return;
       event.preventDefault();
       const active = drag, validContext = unchanged(active), patch = draftFromEvent(event), moved = Math.abs(event.clientX - active.x) >= 3;
       drag = null; release(active);
-      if (!validContext) { report('源视频或记录已变化，拖动已取消'); render(); return; }
+      if (!validContext) { report('视频或标注已变化，请重新拖动'); render(); return; }
       if (!moved || Object.keys(patch).every(field => patch[field] === active.original[field])) {
         say('已选中标注；时间未改写。'); render(); call(onSeek, start(active.original)); return;
       }
@@ -249,7 +250,7 @@
       const focused = doc.activeElement, focusedRecord = focused?.closest?.('.btv-timeline-record');
       const focusKey = focusedRecord ? focusedRecord.dataset.recordId + ':' + (focused.dataset.editMode || 'move') : null;
       body.replaceChildren(); lanes = []; nodes = new Map(); focusNodes = new Map();
-      if (!state.bundle || total <= 0) { body.append(el('p', '选择视频后显示原片时间线。', 'btv-timeline-empty')); updateTime(0); return; }
+      if (!state.bundle || total <= 0) { body.append(el('p', '选择视频后显示时间线。', 'btv-timeline-empty')); updateTime(0); return; }
       const ruler = el('div', undefined, 'btv-timeline-track btv-timeline-ruler'); ruler.append(el('span', '原片时间', 'btv-timeline-track-name'));
       const rulerLane = el('div', undefined, 'btv-timeline-lane');
       for (const value of ticks(view)) { const tick = el('span', timeText(value), 'btv-timeline-tick'); tick.style.left = `${(value - view.start) / (view.end - view.start) * 100}%`; if (value === view.start) tick.style.transform = 'none'; else if (value === view.end) tick.style.transform = 'translateX(-100%)'; rulerLane.append(tick); }

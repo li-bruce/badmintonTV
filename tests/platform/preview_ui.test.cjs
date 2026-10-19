@@ -193,7 +193,7 @@ test('same-asset switch to a new event draft keeps a late successful save receip
   const context=await eventUI(),{api,nodes,response}=context;await api.selectAsset('A');let release;
   context.respond=(path,init)=>path==='/api/v1/events'&&init.method==='POST'?new Promise(resolve=>{release=()=>resolve(response(JSON.parse(init.body).event))}):undefined;
   const pending=nodes.get('save-event').onclick();await nodes.get('new-event').onclick();
-  release();await pending;assert.equal(api.state.event,null);assert.equal(nodes.get('edit-state').textContent,'新标注 · revision 1');
+  release();await pending;assert.equal(api.state.event,null);assert.equal(nodes.get('edit-state').textContent,'新标注');
 });
 
 test('an event seek waiting for A metadata cannot seek B when metadata later becomes ready',async()=>{

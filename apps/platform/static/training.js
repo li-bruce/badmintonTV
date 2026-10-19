@@ -261,7 +261,7 @@
     const $ = id => doc.getElementById(id), player = $('training-player');
     const request = makeRequest(win.fetch.bind(win));
     let inEdit = false, loadedAsset = null, frameAnchor = null, pickRole = null, stepSerial = 0;
-    let timeline = null, regions = null, paletteSelection = null;
+    let timeline = null, regions = null, paletteSelection = null, workspaceView = 'annotate';
     const interactions = win.TrainingInteractions;
     const registrations = new Map();
     function el(tag, text, className) { const node = doc.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
@@ -295,7 +295,7 @@
     function editRecord(change) { inEdit = true; try { ctl.modifyRecord(change); } finally { inEdit = false; } }
     function field(id, value) { $(id).value = value ?? ''; }
     function updateTime() {
-      $('source-time').textContent = '原片 ' + formatTime((player.currentTime || 0) * 1000);
+      $('source-time').textContent = formatTime((player.currentTime || 0) * 1000);
       if (frameAnchor) $('frame-evidence').textContent = `源帧 ${frameAnchor.source_frame_index} · PTS ${frameAnchor.source_pts} · ${frameAnchor.source_pts_ms.toFixed(3)} ms（定位锚点，浏览器画面未逐帧核实）`;
       else $('frame-evidence').textContent = '浏览器时间定位；未进行精确源帧核查';
       timeline?.updateTime((player.currentTime || 0) * 1000); regions?.updateTime(Math.round((player.currentTime || 0) * 1000));
@@ -328,13 +328,13 @@
     function cancelPick() { pickRole = null; $('coordinate-overlay').hidden = true; $('cancel-position').hidden = true; }
     function render() {
       options($('project-select'), s.projects.map(p => [p.project_id, p.name]), s.project?.project_id, '选择项目');
-      $('project-meta').textContent = s.project ? `修订 ${s.project.revision} · 词表 ${s.project.taxonomy_version} · ${s.assets.length} 条视频` : '项目、修订与快照保存在独立训练空间。';
-      $('actor-type').textContent = s.actorType === 'human' ? 'Human · 服务器授权真人标注' : `${s.actorType} · 非人工真值来源`;
+      $('project-meta').textContent = s.project ? `修订 ${s.project.revision} · 词表 ${s.project.taxonomy_version} · ${s.assets.length} 条视频` : '选择项目后显示信息。';
+      $('actor-type').textContent = s.actorType === 'human' ? '人工标注' : `${s.actorType === 'agent' ? '测试程序' : '模型'}标注，不能人工确认`;
       $('actor-name').readOnly = true; field('actor-name', 'local-' + s.actorType);
       $('actor-help').textContent = s.actorType === 'human' ? '来源由服务器指定。内容修订会清除旧确认，需另行审核。' : '来源由服务器指定；此会话不能升级为真人审核。';
       for (const option of $('participant-identity').options) if (option.value === 'confirmed') option.disabled = s.actorType !== 'human';
       if (s.actorType !== 'human' && $('participant-identity').value === 'confirmed') $('participant-identity').value = 'unconfirmed';
-      $('saved-state').textContent = s.saving ? '正在保存…' : s.dirty ? '有未保存标注' : s.splitDirty ? '有未保存分组' : s.bundle ? `已加载 · 修订 ${s.saved.revision}` : '尚未编辑';
+      $('saved-state').textContent = s.saving ? '正在保存…' : s.dirty ? '未保存' : s.splitDirty ? '分组未保存' : s.bundle ? '已保存' : '尚未编辑';
       $('saved-state').classList.toggle('dirty', s.dirty || s.splitDirty);
       $('create-snapshot').disabled = !s.project || s.saving;
       for (const id of ['play-pause', 'step-prev', 'step-next', 'seek-time', 'new-rally', 'finish-rally', 'mark-contact', 'new-action', 'new-footwork', 'new-tactics', 'new-state']) $(id).disabled = !s.bundle;
@@ -345,7 +345,7 @@
       $('video-list').replaceChildren();
       const filter = $('video-filter').value.trim().toLowerCase();
       for (const asset of s.assets.filter(item => (item.title + ' ' + (item.group_id || '')).toLowerCase().includes(filter))) {
-        $('video-list').append(listButton(asset.title || '未命名视频', `${formatTime(asset.duration_ms)} · ${asset.group_status === 'confirmed' ? '比赛组已核验' : '比赛组未确认'}`, () => ctl.openAsset(asset.asset_id), asset.asset_id === s.asset?.asset_id));
+        $('video-list').append(listButton(asset.title || '未命名视频', formatTime(asset.duration_ms), () => ctl.openAsset(asset.asset_id), asset.asset_id === s.asset?.asset_id));
       }
       if (!s.assets.length) $('video-list').append(el('p', s.project ? '从下方已登记目录添加视频。' : '先选择或创建项目。', 'empty'));
       renderCatalog();
@@ -355,10 +355,11 @@
         if (s.asset?.media_url) player.src = s.asset.media_url; else player.removeAttribute('src');
         player.load(); updateTime();
       }
-      $('video-title').textContent = s.asset?.title || '选择一条已登记视频';
-      $('video-meta').textContent = s.asset ? `${formatTime(s.asset.duration_ms)} · 训练专用引用 · ${s.asset.width || '—'} × ${s.asset.height || '—'} · 原片只读` : '原片只读引用，不复制视频。';
-      $('step-prev').textContent = s.frames ? '← 上一源 PTS' : '← 前移 40 ms';
-      $('step-next').textContent = s.frames ? '下一源 PTS →' : '后移 40 ms →';
+      $('video-title').textContent = s.asset?.title || '选择视频开始标注';
+      $('session-mode').textContent = !s.project ? '本机' : s.actorType === 'human' ? '人工标注' : '测试标注';
+      $('video-meta').textContent = s.asset ? `${formatTime(s.asset.duration_ms)} · ${s.asset.width || '—'} × ${s.asset.height || '—'}` : '';
+      $('step-prev').textContent = s.frames ? '← 上一帧位置' : '← 40 ms';
+      $('step-next').textContent = s.frames ? '下一帧位置 →' : '40 ms →';
       $('step-help').textContent = s.frames ? `已核验源 PTS，共 ${s.frames.total} 帧；使用真实时间戳定位，浏览器呈现不声明逐帧精确。` : (s.error || '源 PTS 尚未加载；临时按 40 ms 移动，不用 FPS 推算帧号。');
       renderPeople(); renderRecords(); renderSplits(); renderSnapshots();
       if (!inEdit) renderEditor(); markers(); renderPalette(); timeline?.render(); regions?.render();
@@ -371,10 +372,11 @@
     function dropLabel(labelId, target) {
       if (!s.bundle || !interactions) throw new Error('先选择视频再放置标签');
       const result = interactions.addLabel(s.bundle, s.taxonomy, labelId, target, getSubject(), s.actorType, () => uid('record'));
-      if (!result.added) { message('同一标签、角色和人物已存在，保留原判断。'); return; }
+      if (!result.added) { message('此人物已添加该标签。'); return; }
       s.selectedId = result.record_id;
+      $('label-subject-role').value = getSubject().subject_role;
       ctl.edit(bundle => { bundle.records = result.bundle.records; });
-      message('标签已放入待审核记录；请核对人物、时间和判断。');
+      message('已添加标签，请核对判定。');
     }
     function labelDropTarget(node, recordId) {
       node.addEventListener('dragover', event => { if (event.dataTransfer?.types?.includes('application/x-btv-label')) { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; } });
@@ -397,7 +399,7 @@
       options($('palette-dimension'), domains.map(d => [d, dimensions[d] || d]), dimension, '全部维度');
       const query = $('palette-filter').value.trim().toLowerCase();
       const visible = labels.filter(l => (!dimension || l.dimension === dimension) && (l.name + l.description + l.label_id + (dimensions[l.dimension] || l.dimension)).toLowerCase().includes(query));
-      $('palette-count').textContent = `${labels.length} 个可选标签 · ${domains.length} 个维度 · 当前 ${visible.length} 项（目录不作为标签）`;
+      $('palette-count').textContent = `${visible.length} / ${labels.length}`;
       $('label-palette').replaceChildren();
       for (const label of visible) {
         const chip = button(label.name, () => dropLabel(label.label_id, $('palette-target').value === 'selected' && ctl.record() ? {record_id: s.selectedId} : {at_ms: now()}), 'label-chip');
@@ -452,7 +454,7 @@
       const filter = $('record-filter').value;
       for (const record of records.filter(r => !filter || typeOf(r) === filter).sort((a, b) => timeOf(a) - timeOf(b))) {
         const item = button('', () => selectRecord(record.record_id), 'record-item' + (s.selectedId === record.record_id ? ' active' : ''));
-        item.append(el('span', formatTime(timeOf(record)), 'time'), el('span', record.provenance?.title || types[typeOf(record)]), el('span', reviews[record.review.status] + ' · 来源 ' + recordOrigin(record).actorType, 'review'));
+        item.append(el('span', formatTime(timeOf(record)), 'time'), el('span', record.provenance?.title || types[typeOf(record)]), el('span', reviews[record.review.status], 'review'));
         labelDropTarget(item, record.record_id);
         $('record-list').append(item);
       }
@@ -460,7 +462,7 @@
     }
     function renderEditor() {
       const record = ctl.record(); $('annotation-form').hidden = !record; $('editor-empty').hidden = Boolean(record);
-      $('editor-title').textContent = record ? (record.provenance?.title || types[typeOf(record)]) : '新建或选择一条标注';
+      $('editor-title').textContent = record ? (record.provenance?.title || types[typeOf(record)]) : '标注属性';
       $('record-revision').textContent = record ? `记录修订 ${record.revision}` : '';
       if (!record) return;
       field('record-kind', typeOf(record)); field('record-title', record.provenance?.title);
@@ -469,7 +471,7 @@
       const point = ['contact', 'dead_ball', 'state'].includes(record.kind);
       $('point-fields').hidden = !point; $('interval-fields').hidden = point;
       $('record-kind').disabled = true;
-      $('time-help').textContent = record.kind === 'rally' ? (record.dead_ball_id ? '终点已关联独立死球标记。' : '当前终点是可编辑范围；请定位死球并点击“回合终点 / 死球”完成回合。') : '区间为 [开始, 结束)，所有时间均为原片毫秒。';
+      $('time-help').textContent = record.kind === 'rally' ? (record.dead_ball_id ? '已标记回合终点。' : '请在死球时点击“回合终点”。') : '';
       options($('record-rally'), activeRecords().filter(r => r.kind === 'rally').map(r => [r.record_id, `${r.provenance?.title || '回合'} ${formatTime(r.start_ms)}–${formatTime(r.end_ms)}`]), record.rally_id, '未关联 / 不适用');
       $('record-rally').disabled = record.kind === 'rally';
       options($('record-player'), (s.bundle.people || []).map(p => [p.person_id, p.display_name]), record.person_id, '身份未知');
@@ -477,7 +479,7 @@
       options($('record-visibility'), Object.entries(visibility), record.visibility);
       field('record-reason', (record.unknown_reasons || []).join('；'));
       field('record-notes', record.provenance?.notes || '');
-      $('evidence-summary').textContent = record.evidence?.length ? `已添加 ${record.evidence.length} 条源片证据：` + record.evidence.filter(e => e.type === 'source_time').map(e => formatTime(e.at_ms)).join('、') : '尚未添加时间证据。选择标签不会自动伪造证据。';
+      $('evidence-summary').textContent = record.evidence?.length ? `已添加 ${record.evidence.length} 条源片证据：` + record.evidence.filter(e => e.type === 'source_time').map(e => formatTime(e.at_ms)).join('、') : '尚未记录核查时间。';
       options($('record-review'), Object.entries(reviews), record.review.status);
       for (const option of $('record-review').options) if (option.value === 'confirmed') option.disabled = s.actorType !== 'human';
       const origin = recordOrigin(record);
@@ -495,7 +497,10 @@
       const byId = new Map(labels.map(item => [item.label_id, item]));
       const pathName = label => { const names = [label.name]; let p = byId.get(label.parent_id); while (p) { names.unshift(p.name); p = byId.get(p.parent_id); } return names.join(' › '); };
       const groups = new Map();
-      for (const label of labels.filter(label => label.kinds.includes(record.kind) && (pathName(label) + label.description + label.dimension + (dimensions[label.dimension] || '')).toLowerCase().includes(query))) {
+      const showAll = $('show-all-labels').checked || Boolean(query);
+      for (const label of labels.filter(label => label.kinds.includes(record.kind) &&
+        (showAll || record.judgements.some(j => j.label_id === label.label_id && matchesSubject(j) && j.value !== 'unlabeled')) &&
+        (pathName(label) + label.description + label.dimension + (dimensions[label.dimension] || '')).toLowerCase().includes(query))) {
         if (!groups.has(label.dimension)) groups.set(label.dimension, []); groups.get(label.dimension).push(label);
       }
       for (const [dimension, members] of groups) {
@@ -524,7 +529,7 @@
         }
         container.append(family);
       }
-      if (!groups.size) container.append(el('p', '此类型暂无匹配标签。', 'muted'));
+      if (!groups.size) container.append(el('p', query ? '没有匹配标签。' : '从左侧添加标签，或搜索查找。', 'muted'));
     }
     function renderStates(record) {
       $('state-list').replaceChildren();
@@ -541,8 +546,8 @@
         const missing = el('label', '缺失理由'), input = el('input'); input.value = (actor.missing_reasons || []).join('；'); input.placeholder = '例如：远端人物脚部不可见';
         input.addEventListener('input', () => editRecord(r => { r.state[role].missing_reasons = input.value.trim() ? [input.value.trim()] : []; })); missing.append(input); card.append(missing);
         const position = actor.position;
-        card.append(el('p', position ? `图像归一坐标 x=${position.x.toFixed(4)}, y=${position.y.toFixed(4)} · ${position.source}` : '图像位置未标；不默认为 (0, 0)', 'state-position'));
-        card.append(button('在当前画面点选位置', () => { if (!player.videoWidth) throw new Error('请等待原视频画面加载'); regions?.cancel(); player.pause(); pickRole = role; $('coordinate-overlay').hidden = false; $('cancel-position').hidden = false; $('video-stage').scrollIntoView({block: 'center'}); message(`在视频画面点击${roles[role]}位置；只记录图像归一坐标。`); }));
+        card.append(el('p', position ? `位置 x=${position.x.toFixed(4)}, y=${position.y.toFixed(4)}` : '尚未标记位置', 'state-position'));
+        card.append(button('在当前画面点选位置', () => { if (!player.videoWidth) throw new Error('请等待原视频画面加载'); regions?.cancel(); player.pause(); pickRole = role; $('coordinate-overlay').hidden = false; $('cancel-position').hidden = false; $('video-stage').scrollIntoView({block: 'center'}); message(`在画面中点击${roles[role]}的位置。`); }));
         if (position) card.append(button('清除位置', () => ctl.modifyRecord(r => { r.state[role].position = null; })));
         $('state-list').append(card);
       }
@@ -562,24 +567,25 @@
       if (s.assets.some(a => !a.group_id)) $('split-list').append(el('p', '部分视频没有可信比赛组，暂不能分配。', 'muted'));
     }
     function renderSnapshots() {
-      const blockers = {no_human_confirmed_semantically_defined_judgements: '没有语义定义已审核且由真人确认的判断', unassigned_or_unconfirmed_groups: '视频比赛组未分配或未确认', rally_dead_ball_missing: '部分回合缺少独立死球点', independent_match_group_unconfirmed: '原片所属的独立比赛组尚未确认'};
+      const blockers = {no_human_confirmed_semantically_defined_judgements: '尚无通过人工审核的有效标签', unassigned_or_unconfirmed_groups: '视频比赛组未分配或未确认', rally_dead_ball_missing: '部分回合缺少独立死球点', independent_match_group_unconfirmed: '尚未确认视频所属比赛'};
       $('snapshot-list').replaceChildren();
       for (const snapshot of s.snapshots) {
-        const box = el('div', undefined, 'list-item'); box.append(el('strong', new Date(snapshot.created_at).toLocaleString('zh-CN')), el('small', `项目修订 ${snapshot.project?.revision ?? '—'} · ${snapshot.content_sha256?.slice(0, 16) || '—'}`));
+        const box = el('div', undefined, 'list-item'); box.append(el('strong', new Date(snapshot.created_at).toLocaleString('zh-CN')));
+        const provenance = el('details'); provenance.append(el('summary', '版本详情'), el('small', `项目修订 ${snapshot.project?.revision ?? '—'} · ${snapshot.content_sha256 || '—'}`)); box.append(provenance);
         const links = el('div', undefined, 'toolbar');
-        for (const [view, format, text] of [['audit', 'json', '完整审阅 JSON'], ['audit', 'jsonl', '审阅 JSONL'], ['training', 'jsonl', '训练视图 JSONL']]) {
+        for (const [view, format, text] of [['audit', 'json', '完整标注 JSON'], ['audit', 'jsonl', '完整标注 JSONL'], ['training', 'jsonl', '训练文件 JSONL']]) {
           if (view === 'training' && snapshot.quality_summary?.trainable !== true) {
-            const disabled = el('span', '训练视图暂不可下载：请先完成质量审核。', 'muted'); disabled.setAttribute('aria-disabled', 'true'); links.append(disabled); continue;
+            const disabled = el('span', '训练文件不可下载：请先完成质量审核。', 'muted'); disabled.setAttribute('aria-disabled', 'true'); links.append(disabled); continue;
           }
           const link = el('a', text); link.href = `/api/v1/training/snapshots/${encodeURIComponent(snapshot.snapshot_id)}/download?view=${view}&format=${format}`; link.setAttribute('download', ''); links.append(link);
         }
         box.append(links); $('snapshot-list').append(box);
       }
       const latest = s.snapshots[0]; $('snapshot-summary').replaceChildren();
-      if (!latest) { $('snapshot-summary').textContent = '尚未生成快照'; return; }
+      if (!latest) { $('snapshot-summary').textContent = '尚未生成版本'; return; }
       const summary = latest.quality_summary, metrics = el('div', undefined, 'summary-metrics');
       metrics.append(el('span', `${summary.record_count} 条记录`), el('span', `${summary.eligible_judgement_count} 项可纳入训练`), el('span', `${summary.excluded_judgement_count} 项排除 / 待审核`)); $('snapshot-summary').append(metrics);
-      $('snapshot-summary').append(el('p', summary.trainable ? '当前快照满足合同中的训练准入条件。' : '快照已保存；训练条件仍有阻塞。'));
+      $('snapshot-summary').append(el('p', summary.trainable ? '可以下载训练文件。' : '版本已保存。训练前还需完成以下事项：'));
       const list = el('ul', undefined, 'snapshot-blockers'); for (const reason of summary.blockers) list.append(el('li', blockers[reason] || reason)); $('snapshot-summary').append(list);
     }
     function bind(id, event, action) { $(id).addEventListener(event, e => { if (event === 'submit') e.preventDefault(); run(() => action(e)); }); }
@@ -596,13 +602,29 @@
           if (!before) interactions.assignSubject(edited, s.bundle.people, region);
         }
         edited.evidence = clone(evidence); edited.review = {status: 'pending', reviewer_type: s.actorType, reviewer: 'local-' + s.actorType};
-        interactions.validateTiming(records, s.asset.duration_ms); ctl.edit(bundle => { bundle.records = records; }); message('画面区域已更新，尚未保存；只对应取证时刻。');
+        interactions.validateTiming(records, s.asset.duration_ms); ctl.edit(bundle => { bundle.records = records; }); message('圈选已更新，尚未保存。');
       }});
     if ($('label-palette')) {
       bind('palette-filter', 'input', renderPalette); bind('palette-dimension', 'change', renderPalette);
       bind('palette-role', 'change', () => { if ($('palette-person').dataset) delete $('palette-person').dataset.selection; renderPalette(); regions?.cancel(); });
       bind('palette-person', 'change', () => regions?.cancel());
     }
+    function showWorkspace(view) {
+      if (!['annotate', 'dataset', 'settings', 'help'].includes(view)) return;
+      workspaceView = view;
+      cancelPick(); regions?.cancel();
+      if (view !== 'annotate') player.pause();
+      for (const name of ['annotate', 'dataset', 'settings', 'help']) {
+        $(name === 'annotate' ? 'workbench-view' : name + '-view').hidden = name !== view;
+        $('view-' + name).setAttribute('aria-pressed', String(name === view));
+      }
+      // Repaint geometry after showing the player; never edit annotations here.
+      if (view === 'annotate') { markers(); timeline?.render(); regions?.render(); }
+    }
+    for (const name of ['annotate', 'dataset', 'settings', 'help']) bind('view-' + name, 'click', () => showWorkspace(name));
+    for (const id of ['return-annotate', 'settings-back', 'help-back']) bind(id, 'click', () => showWorkspace('annotate'));
+    bind('open-people', 'click', () => showWorkspace('settings'));
+    bind('show-all-labels', 'change', () => { if (ctl.record()) renderTaxonomy(ctl.record()); });
     bind('create-project', 'click', () => ctl.createProject($('project-name').value));
     bind('project-select', 'change', () => ctl.openProject($('project-select').value));
     bind('refresh-videos', 'click', async () => { await ctl.boot(); await ctl.refreshProject(); });
@@ -616,8 +638,8 @@
       const detail = record.kind === 'rally' ? `此回合和关联的 ${count} 条记录将一起删除。` : record.kind === 'dead_ball' ? '删除死球标记后，关联回合会恢复为终点证据缺失。' : '';
       if (win.confirm(`删除当前记录？${detail}历史修订仍保留。`)) ctl.removeRecord(true);
     });
-    bind('annotation-form', 'submit', async e => { e.preventDefault(); await ctl.save(); message('标注包已保存，历史修订保留。'); });
-    bind('save-bundle', 'click', async () => { await ctl.save(); message('本视频标注包已保存，人物与历史修订保留。'); });
+    bind('annotation-form', 'submit', async e => { e.preventDefault(); await ctl.save(); message('已保存。'); });
+    bind('save-bundle', 'click', async () => { await ctl.save(); message('已保存。'); });
     bind('add-participant', 'click', () => {
       const name = $('participant-name').value.trim(), team = $('participant-team').value.trim();
       if (!name) throw new Error('请输入人物显示名称');
@@ -674,12 +696,12 @@
         r.state[role].position = {...point, coordinate_system: 'image_normalized', source: s.actorType};
         r.state.provenance ||= {}; r.state.provenance.image_observations ||= {};
         r.state.provenance.image_observations[role] = {at_ms: now(), precision: frameAnchor ? 'pts_seek_anchor_not_verified_display' : 'browser_time'};
-      }); message('图像归一坐标及所点画面的原片时间已写入草稿，保存后持久化。');
+      }); message('位置已标记，尚未保存。');
     });
     bind('save-splits', 'click', async () => { await ctl.saveSplits(clone(s.splitDraft)); message('比赛组划分已保存。'); });
-    bind('create-snapshot', 'click', async () => { await ctl.snapshot(); message('不可变快照已生成；请查看训练准入摘要。'); });
+    bind('create-snapshot', 'click', async () => { await ctl.snapshot(); message('数据集版本已生成。'); });
     doc.addEventListener('keydown', e => {
-      const action = shortcut(e); if (!action || !s.bundle) return;
+      const action = shortcut(e); if (!action || !s.bundle || (workspaceView !== 'annotate' && action !== 'save')) return;
       e.preventDefault(); run(() => {
         if (action === 'play') return player.paused ? player.play() : player.pause();
         if (action === 'previous' || action === 'next') return step(action === 'previous' ? -1 : 1);

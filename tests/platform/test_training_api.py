@@ -191,7 +191,7 @@ def test_unknown_group_cannot_be_assigned_and_stale_project_rejected(workspace):
 def test_training_and_guide_navigation(workspace):
     c, _, _, _ = workspace
     assert c.get('/training').status_code == 200
-    assert '训练标注工作台' in c.get('/').text
+    assert '视频标注' in c.get('/').text
     response = c.get('/guide', follow_redirects=False)
     assert response.status_code == 307 and response.headers['location'] == '/guide/'
     response = c.get('/guide/')
