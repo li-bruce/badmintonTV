@@ -187,6 +187,8 @@ def env_python(prefix):
 
 
 def make_plan(args, root=ROOT):
+    if sys.version_info < (3, 11):
+        raise ValueError('Python 3.11 or newer is required')
     cfg = config(root)
     profile = cfg['profiles'][args.profile]
     storage = no_links(args.storage_root)
@@ -254,6 +256,8 @@ def setup(args, root=ROOT):
                     process.wait(timeout=15)
                     raise ValueError('Installation exceeded reserved byte budget; partial environment retained for inspection')
                 time.sleep(.5)
+            if directory_bytes(storage/owner) - before_bytes > reserve:
+                raise ValueError('Installation exceeded reserved byte budget; partial environment retained for inspection')
             if process.returncode:
                 raise subprocess.CalledProcessError(process.returncode, command)
         result = {'status': 'installed', **plan}
@@ -438,8 +442,8 @@ def parser():
         q.add_argument('--profile', choices=list(config()['profiles']), default='workbench-cpu')
         q.add_argument('--storage-root', required=True)
         q.add_argument('--env-root')
-        q.add_argument('--ffmpeg', default='ffmpeg')
-        q.add_argument('--ffprobe', default='ffprobe')
+        q.add_argument('--ffmpeg', default=os.getenv('BTV_FFMPEG', 'ffmpeg'))
+        q.add_argument('--ffprobe', default=os.getenv('BTV_FFPROBE', 'ffprobe'))
         q.add_argument('--dry-run', action='store_true')
         if operation in ('plan', 'setup'):
             q.add_argument('--dev', action='store_true')

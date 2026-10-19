@@ -21,3 +21,14 @@
 ## 进度
 
 设计已记录；实现/运行待进行。Windows，现有轻量 Python，CPU，无端口，不下载训练数据或运行 GPU。下一步：实现工具、测试负例与解包烟测。提交 SHA：本文件所在提交。
+
+
+## 子任务实际验证（2026-10-19）
+
+- 24 项标准库 unittest 全部 PASS，0 跳过。覆盖依赖闭合、任意工作目录、CPU 不导入 torch、安装 dry-run 不写磁盘、路径穿越、输出 junction、Git symlink、凭据/媒体禁入、覆盖与脏树拒绝、ZIP 篡改、活跃 WAL 备份、队列/GPU 租约拒绝与备份副本清理。
+- 基于干净提交 0ffe641 真正导出 6 份 ZIP，合计 6,043,840 bytes，全部 verify 通过并在 D 盘独立目录解包。core 等共享包可导入；library/render 的 CLI --help 可执行；workbench/full 的真实路由 /training、/guide/、/static/training.js 在解包根通过 TestClient 返回 200。
+- P-04：PASS（子任务源码包范围）；最终合并代码还须主任务重新打包核验。P-05：局部 PASS（计划、任意 cwd、隔离源码烟测），新 venv 实际 pip 安装 NOT_RUN，留给主任务在最终源码执行。P-06：PASS（活跃 WAL 小夹具、路径/容量/并发版本检查代码与源库不变；实际跨物理设备恢复 NOT_RUN）。不把旧环境 smoke 当成新设备安装成功。
+- 机器摘要：VALIDATION_2026-10-19.json。测试包目录：D:/video/platform/distributions/deployment-subtask-0ffe641，由主任务已协调 500 MB platform 预留覆盖，源码 ZIP 约 6 MB，连同解包/小 DB 低于 40 MB；没有复制媒体或源业务数据库。
+- 首轮测试发现并修复：路径返回处误插入解析器代码、SQLite backup 连接未显式关闭、合法 .gitattributes 白名单缺失；Windows 默认文本编码造成 README GBK，已转为 UTF-8 并扫描全部新增文本。共享 CapacityLedger 的 SQLite 构造连接由 GC 最后释放，测试在清理临时目录前显式 gc.collect；未改 runtime 模块。
+- 后续边界：GPU/模型安装由 models 任务验证；Linux/macOS 本机安装、真实素材编码、跨物理设备恢复尚未执行。源码分发与工程测试不提升模型识别能力或人工真值状态。
+- 代码提交：84ee9d6（实现），1fc23b0（Git 属性），0ffe641（UTF-8）；本记录所在后续提交补充结果和配置检查。

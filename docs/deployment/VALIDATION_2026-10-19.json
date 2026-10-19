@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-19",
+  "source_commit": "0ffe641",
+  "unit_tests": {
+    "passed": 24,
+    "skipped": 0,
+    "command": "python -B -m unittest discover -s tests/deployment -v"
+  },
+  "archives": [
+    {
+      "module": "core",
+      "bytes": 384004,
+      "sha256": "f7f809540c64ca278e465e7619d19361ba5f9fa2c0fd1cb1a7879173ed977681",
+      "files": 104,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "module": "library",
+      "bytes": 711336,
+      "sha256": "9f82ad687ca3968530ef08f55492b595eb529471e12e29bd7d04f17dd4aed8a6",
+      "files": 190,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        },
+        {
+          "entry": [
+            "-m",
+            "packages.library"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "oad one bounded public source\n    quota               Read owner usage and persistent reservations\n    probe               Probe and fully decode a downloaded video\n    manifest            Validate Asset objects and export a manifest\n\noptions:\n  -h, --help            show this help message and exit\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "module": "workbench",
+      "bytes": 1146082,
+      "sha256": "ac1e4e50d2bae2b6975549be35f36a0bdb75ea882992a4e3956a1b36acf45563",
+      "files": 259,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        },
+        {
+          "entry": [
+            "-c",
+            "from fastapi.testclient import TestClient; from apps.platform.main import app; c=TestClient(app); results={p:c.get(p).status_code for p in (\"/training\",\"/guide/\",\"/static/training.js\")}; assert all(v==200 for v in results.values()),results; print(results)"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "{'/training': 200, '/guide/': 200, '/static/training.js': 200}\n",
+          "stderr_tail": "D:\\video\\runtime\\platform\\env\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n  from starlette.testclient import TestClient as TestClient  # noqa\n"
+        }
+      ]
+    },
+    {
+      "module": "models",
+      "bytes": 818342,
+      "sha256": "4073c2769dae039cdcbe07326989760b995335a415cdbceb7041440c9ed40d40",
+      "files": 229,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "module": "render",
+      "bytes": 647514,
+      "sha256": "3562fe994c0b1a6a72d9abe9e05da6877ecdaec2ac2249256516180e959da1d1",
+      "files": 165,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        },
+        {
+          "entry": [
+            "-m",
+            "packages.render"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "usage: __main__.py [-h] {run} ...\n\nbadmintonTV renderer (contract 1.0)\n\npositional arguments:\n  {run}\n\noptions:\n  -h, --help  show this help message and exit\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "module": "full",
+      "bytes": 2336562,
+      "sha256": "933ac57cd8545380cfd84995de75f6cf23ea574b10ec26184d90d03c6554731f",
+      "files": 603,
+      "smoke": [
+        {
+          "entry": [
+            "-c",
+            "import packages.contracts,packages.runtime,sys; assert \"torch\" not in sys.modules"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "",
+          "stderr_tail": ""
+        },
+        {
+          "entry": [
+            "-c",
+            "from fastapi.testclient import TestClient; from apps.platform.main import app; c=TestClient(app); results={p:c.get(p).status_code for p in (\"/training\",\"/guide/\",\"/static/training.js\")}; assert all(v==200 for v in results.values()),results; print(results)"
+          ],
+          "exit_code": 0,
+          "stdout_tail": "{'/training': 200, '/guide/': 200, '/static/training.js': 200}\n",
+          "stderr_tail": "D:\\video\\runtime\\platform\\env\\Lib\\site-packages\\fastapi\\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n  from starlette.testclient import TestClient as TestClient  # noqa\n"
+        }
+      ]
+    }
+  ],
+  "scope": "Real Git source packages and extracted CPU imports/CLI/HTTP route TestClient; existing isolated platform Python; no fresh environment install, physical device transfer, GPU or media copied.",
+  "artifacts": "D:/video/platform/distributions/deployment-subtask-0ffe641",
+  "gpu_install": "NOT_RUN",
+  "fresh_venv_install": "NOT_RUN (root integration will validate)"
+}
