@@ -10,7 +10,7 @@
 | 同一台电脑做以上全部 | desktop-cpu | 工作台、资料和剪辑；需 FFmpeg | 不需要 |
 | 只开发接口与调度 | core-cpu | Pydantic 和标准库运行时 | 不需要 |
 | 训练样本检查 | models-cpu-prep | 委托模型独立 CPU 环境 | 不需要 |
-| 模型训练、推理 | models-gpu | 委托 WSL/Linux Conda 环境 | NVIDIA GPU，具体条件见模型说明 |
+| 模型训练、推理 | models-gpu | 委托 WSL Ubuntu Conda 环境 | NVIDIA GPU，具体条件见模型说明 |
 
 独立源码包与 profile 是两件事：包决定有哪些源码，profile 决定给当前设备安装哪些依赖。工作台包可独立播放标注；编码需加 render 包（或使用完整包），模型计算需模型环境。现有检索仍在工作台内部。训练入口、模型可用性与人工真值不能由环境安装成功代替。
 
@@ -33,7 +33,7 @@ python scripts/deploy/manage.py doctor --profile workbench-cpu --storage-root D:
 ./start-platform.ps1 -StorageRoot D:/video -TrainingReviewer human
 ```
 
-Linux/macOS CPU 入口（模型 GPU 仅 Linux/WSL）：
+Linux/macOS CPU 入口（模型安装入口限定 WSL Ubuntu）：
 
 ```sh
 bash scripts/deploy/setup.sh --profile workbench-cpu --storage-root /srv/btv-data
@@ -52,11 +52,11 @@ CPU 依赖版本复用本项目已运行锁定版本，只安装二进制 wheel�
 模型安装单独执行：
 
 ```sh
-bash scripts/models/setup_device.sh --profile cpu-prep --storage-root /srv/btv-data --conda-executable /path/to/conda --dry-run
-bash scripts/models/setup_device.sh --profile gpu-base --storage-root /srv/btv-data --conda-executable /path/to/conda --apply
+bash scripts/models/setup_device.sh --profile cpu-prep --storage-root /srv/btv-data --conda-executable /absolute/prefix/bin/conda --dry-run
+bash scripts/models/setup_device.sh --profile gpu-base --storage-root /srv/btv-data --conda-executable /absolute/prefix/bin/conda --apply
 ```
 
-模型包集成后以 `docs/models/DEVICE_SETUP.md` 为准；本工具 models profile 只打印委托命令，不会把 GPU 包装入 CPU 环境。历史实验脚本保留用于复现，但旧盘符和旧环境前缀不代表新设备入口。
+Windows 的 models 计划输出 `wsl.exe -d Ubuntu -- bash /mnt/...` 命令；所有传给模型脚本的路径都是 WSL 路径。仅含 core 的源码包会拒绝不存在的模型入口。当前 GPU 安装器只支持 WSL Ubuntu，不将 Linux/macOS 原生安装称为已支持。模型包集成后以 `docs/models/DEVICE_SETUP.md` 为准；本工具 models profile 只打印委托命令，不会把 GPU 包装入 CPU 环境。历史实验脚本保留用于复现，但旧盘符和旧环境前缀不代表新设备入口。
 
 ## 独立开发与模块运行
 
@@ -99,7 +99,7 @@ bundle 可能包含历史提交过的内容；本项目媒体/权重从未作为
 python scripts/deploy/manage.py export-state --storage-root D:/video --output D:/video/platform/backups/device-transfer-01 --database platform/platform.sqlite3 --database platform/runtime.sqlite3 --quiesced --manifest D:/video/data/training/handoff/annotation-catalog.v1.json --max-bytes 100000000
 ```
 
-父目录必须存在。备份写入 platform 配额内并预留明确上限；不会复制正在运行中的 WAL 文件。`migration-manifest.json` 保存库哈希及资产相对路径；默认原片哈希是来源清单声称的值，`source_verification=not_checked`。加 `--verify-assets` 会只读原片并校验哈希，可能耗时较长，仍不复制媒体。`--quiesced` 会拒绝仍有 queued/running 待执行任务或 active/orphaned GPU 租约的队列；在备份副本中关闭旧设备活跃容量预留、移除旧业务库绝对路径绑定，并记录转换结果，来源数据库不受修改；新 API 启动时重新绑定当前业务库。导出期间还用每个来源库的 data_version 前后检查并拒绝并发变更；这不替代事先停止服务。单库在线备份只关闭导出自身预留，不能直接当成多设备完整迁移。备份失败时保留 `INCOMPLETE.txt`，不能恢复该目录。
+父目录必须存在。备份写入 platform 配额内并预留明确上限；不会复制正在运行中的 WAL 文件。`source-manifests/` 原样保存所选清单 JSON（含完整用途、许可、来源、PTS 和未知扩展字段），报告记录其 SHA256 与字节数，全部计入备份上限。`migration-manifest.json` 的 assets 只是同步引用目录，不替代原始 Asset；它保存库哈希、资产相对路径和 usage_scope。默认原片哈希是来源清单声称的值，`source_verification=not_checked`。加 `--verify-assets` 会只读原片并校验哈希，可能耗时较长，仍不复制媒体。`--quiesced` 会拒绝仍有 queued/running 待执行任务或 active/orphaned GPU 租约的队列；在备份副本中关闭旧设备活跃容量预留、移除旧业务库绝对路径绑定，并记录转换结果，来源数据库不受修改；新 API 启动时重新绑定当前业务库。导出期间还用每个来源库的 data_version 前后检查并拒绝并发变更；这不替代事先停止服务。单库在线备份只关闭导出自身预留，不能直接当成多设备完整迁移。备份失败时保留 `INCOMPLETE.txt`，不能恢复该目录。
 
 把完整成功备份、原始资产清单/PTS sidecar、所需原片按相同相对路径分别复制到新设备；不自动复制全部大文件。目标设备停止 API/worker 后将备份库放回 `platform/`，核对迁移清单 SHA256，再启动服务。原片复制后文件身份会变化，应在工作台重新导入/校验原始清单；旧设备的文件验证缓存不能当新设备的校验结果。模型端点、LLM 凭据和工具路径按新设备重新配置。已经存在的目标数据库不得覆盖，先另行备份并明确选择版本。备份中可能包含用户设置和访问配置，按私密数据保管，不能提交 Git。运行中的数据库不要交给云盘实时同步；环境和缓存从定义重建。
 

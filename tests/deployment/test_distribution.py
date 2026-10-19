@@ -69,9 +69,13 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotIn('torch',sys.modules)
 
     def test_gpu_delegated(self):
-        plan=manage.make_plan(self.args(profile='models-gpu'))
+        root=self.repository(); (root/'packages/models').mkdir(); (root/'scripts/models').mkdir(parents=True); (root/'scripts/models/setup_device.sh').write_text('#!/bin/bash\n')
+        plan=manage.make_plan(self.args(profile='models-gpu'),root=root)
         self.assertTrue(plan['delegated'])
         self.assertIn('gpu-base',plan['command'])
+        if os.name == 'nt':
+            self.assertEqual(plan['command'][:5],['wsl.exe','-d','Ubuntu','--','bash'])
+            self.assertTrue(plan['command'][5].startswith('/mnt/'))
 
     def test_nonroot_cwd(self):
         result=subprocess.run([sys.executable,'-B',str(REPO/'scripts/deploy/manage.py'),'plan','--storage-root',str(self.base)],cwd=self.base,capture_output=True,text=True)
@@ -171,7 +175,7 @@ class DeploymentTests(unittest.TestCase):
         manifest.write_text(json.dumps({'assets':[{'asset_id':'asset-test','relative_path':'video.mp4','sha256':digest}]}))
         args.manifest=[str(manifest)]
         manage.export_state(args)
-        self.assertEqual([p.name for p in Path(args.output).iterdir()],['migration-manifest.json'])
+        self.assertEqual({p.name for p in Path(args.output).iterdir()},{'migration-manifest.json','source-manifests'})
         report=json.loads(Path(args.output,'migration-manifest.json').read_text())
         self.assertEqual(report['assets'][0]['source_verification'],'sha256_verified')
 
@@ -259,6 +263,41 @@ class DeploymentTests(unittest.TestCase):
             if os.name!='nt': raise
             subprocess.run(['powershell.exe','-NoProfile','-Command',"New-Item -ItemType Junction -Path '"+str(link)+"' -Target '"+str(outside)+"' | Out-Null"],check=True)
         self.assertEqual(directory_bytes(storage),0)
+
+
+
+    def test_delegate_rejects_missing_module_and_script(self):
+        root=self.repository()
+        with self.assertRaisesRegex(ValueError,'lacks modules'):
+            manage.make_plan(self.args(profile='models-gpu'),root=root)
+        (root/'packages/models').mkdir()
+        with self.assertRaisesRegex(ValueError,'setup_device.sh'):
+            manage.make_plan(self.args(profile='models-gpu'),root=root)
+
+    def test_wsl_path_conversion(self):
+        self.assertEqual(manage.wsl_path('D:/video/runtime/models/envs/gpu'),'/mnt/d/video/runtime/models/envs/gpu')
+        self.assertEqual(manage.wsl_path('C:/My Repo/setup.sh'),'/mnt/c/My Repo/setup.sh')
+        with self.assertRaises(ValueError): manage.wsl_path('//server/share/file')
+
+    def test_full_manifest_bytes_preserve_usage_provenance_and_pts(self):
+        args=self.state_args()
+        manifest=self.base/'catalog.json'
+        content={'schema_version':'1.0','custom_future_field':{'unknown':None},'assets':[{'asset_id':'asset-training','relative_path':'data/training/a.mp4','sha256':'a'*64,'usage_scope':'training_only','rights':{'status':'unknown','license_url':None},'provenance':{'pts_index':{'relative_path':'data/training/a.pts.json','sha256':'b'*64},'source_url':'https://example.invalid/source'},'future_annotation':{'value':'unknown'}}]}
+        raw=b'\xef\xbb\xbf'+json.dumps(content,indent=3).encode('utf-8')
+        manifest.write_bytes(raw);args.manifest=[str(manifest)]
+        manage.export_state(args)
+        report=json.loads(Path(args.output,'migration-manifest.json').read_text())
+        self.assertTrue(report['assets_are_reference_inventory_only'])
+        self.assertEqual(report['assets'][0]['usage_scope'],'training_only')
+        original=report['source_manifests'][0]
+        self.assertEqual(Path(args.output,original['file']).read_bytes(),raw)
+        self.assertEqual(original['sha256'],manage.hashlib.sha256(raw).hexdigest())
+
+    def test_original_manifest_budget_enforced(self):
+        args=self.state_args(max_bytes=10)
+        manifest=self.base/'catalog.json';manifest.write_text(json.dumps({'assets':[],'large':'x'*100}))
+        args.manifest=[str(manifest)]
+        with self.assertRaisesRegex(ValueError,'manifests exceed'):manage.export_state(args)
 
 
 if __name__=='__main__': unittest.main()

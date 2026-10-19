@@ -7,7 +7,7 @@ import io
 import hashlib
 import json
 import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 import shutil
 import sqlite3
@@ -186,6 +186,13 @@ def env_python(prefix):
     return prefix / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
 
 
+def wsl_path(value):
+    path = PureWindowsPath(value)
+    if len(path.drive) != 2 or path.drive[1] != ':' or not path.is_absolute():
+        raise ValueError('WSL delegation needs a local Windows drive path. For UNC/network paths run plan inside WSL with Linux paths.')
+    return '/mnt/' + path.drive[0].lower() + '/' + '/'.join(path.parts[1:])
+
+
 def make_plan(args, root=ROOT):
     if sys.version_info < (3, 11):
         raise ValueError('Python 3.11 or newer is required')
@@ -198,16 +205,23 @@ def make_plan(args, root=ROOT):
     prefix = env_root / args.profile
     if not env_root.is_relative_to(storage / 'runtime' / profile['runtime_owner']):
         raise ValueError('--env-root must stay within storage-root/runtime/' + profile['runtime_owner'] + ' for quota accounting')
-    py = env_python(prefix)
-    if 'delegate_profile' in profile:
-        return {'profile': args.profile, 'delegated': True, 'command': ['bash', str(root/'scripts/models/setup_device.sh'), '--profile', profile['delegate_profile'], '--storage-root', str(storage), '--env-prefix', str(prefix)], 'note': 'Add --conda-executable ABS and --apply in the models script. GPU environments are never installed by CPU setup.'}
-    requirement = root / ('deployment/requirements-dev.txt' if getattr(args, 'dev', False) else profile['requirements'])
-    if getattr(args, 'dev', False) and args.profile not in ('workbench-cpu', 'desktop-cpu'):
-        raise ValueError('--dev currently applies only to workbench/desktop (includes their test dependencies)')
     modules = closure(profile['modules'], cfg)
     missing = [m for m in modules if not (root / ('apps/platform' if m == 'workbench' else 'packages/contracts' if m == 'core' else 'packages/'+m)).is_dir()]
     if missing:
         raise ValueError('This source package lacks modules: ' + ', '.join(missing))
+    py = env_python(prefix)
+    if 'delegate_profile' in profile:
+        script = root/'scripts/models/setup_device.sh'
+        if not script.is_file():
+            raise ValueError('This source package lacks scripts/models/setup_device.sh; install the current models/full source package')
+        if os.name == 'nt':
+            command = ['wsl.exe', '-d', 'Ubuntu', '--', 'bash', wsl_path(script), '--profile', profile['delegate_profile'], '--storage-root', wsl_path(storage), '--env-prefix', wsl_path(prefix)]
+        else:
+            command = ['bash', str(script), '--profile', profile['delegate_profile'], '--storage-root', str(storage), '--env-prefix', str(prefix)]
+        return {'profile': args.profile, 'delegated': True, 'command': command, 'installation_platform':'WSL Ubuntu', 'note': 'Add --conda-executable /absolute/prefix/bin/conda and --apply inside WSL Ubuntu. Native Linux/macOS GPU installation is not validated/supported by this installer; CPU setup never installs GPU packages.'}
+    requirement = root / ('deployment/requirements-dev.txt' if getattr(args, 'dev', False) else profile['requirements'])
+    if getattr(args, 'dev', False) and args.profile not in ('workbench-cpu', 'desktop-cpu'):
+        raise ValueError('--dev currently applies only to workbench/desktop (includes their test dependencies)')
     return {'profile': args.profile, 'delegated': False, 'gpu': False, 'source_root': str(root), 'storage_root': str(storage), 'environment': str(prefix), 'python': str(py), 'ffmpeg_required': profile['ffmpeg'], 'commands': [[sys.executable, '-m', 'venv', str(prefix)], [str(py), '-m', 'pip', 'install', '--disable-pip-version-check', '--only-binary=:all:', '-r', str(requirement)], [str(py), '-m', 'pip', 'check']], 'environment_variables': {'BTV_STORAGE_ROOT': str(storage), 'BTV_RENDER_BACKEND': 'cpu', 'PYTHONPATH': str(root), 'PYTHONNOUSERSITE': '1', 'PIP_CACHE_DIR': str(storage/'runtime'/profile['runtime_owner']/'pip-cache'), 'TMP': str(storage/'runtime'/profile['runtime_owner']/'tmp'), 'TEMP': str(storage/'runtime'/profile['runtime_owner']/'tmp'), 'TMPDIR': str(storage/'runtime'/profile['runtime_owner']/'tmp')}}
 
 
@@ -364,11 +378,20 @@ def _export_state(args):
         raise ValueError('Insufficient free space for requested export budget')
     references = []
     reference_ids = {}
+    source_manifests = []
+    manifest_bytes = 0
     for source in args.manifest:
         manifest_path = no_links(source)
         if manifest_path.stat().st_size > 10_000_000:
             raise ValueError('Manifest exceeds 10 MB read limit')
-        content = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
+        raw = manifest_path.read_bytes()
+        manifest_bytes += len(raw)
+        if manifest_bytes > args.max_bytes:
+            raise ValueError('Original manifests exceed export budget')
+        content = json.loads(raw.decode('utf-8-sig'))
+        relative_manifest = 'source-manifests/' + str(len(source_manifests)+1).zfill(4) + '-' + manifest_path.name
+        safe_relative(relative_manifest)
+        source_manifests.append({'file':relative_manifest, 'original_name':manifest_path.name, 'sha256':hashlib.sha256(raw).hexdigest(), 'bytes':len(raw), '_raw':raw})
         for asset in content.get('assets', []):
             relative = asset.get('relative_path') or asset.get('storage', {}).get('relative_path')
             safe_relative(relative or '')
@@ -387,11 +410,13 @@ def _export_state(args):
                     for chunk in iter(lambda: handle.read(1024*1024), b''): hasher.update(chunk)
                 if hasher.hexdigest() != digest: raise ValueError('Asset SHA256 mismatch: '+asset['asset_id'])
                 verification = 'sha256_verified'
-            references.append({'asset_id': asset['asset_id'], 'relative_path': relative, 'sha256': digest, 'usage_policy': asset.get('usage_policy'), 'rights': asset.get('rights'), 'manifest': Path(source).name, 'source_verification': verification})
+            references.append({'asset_id': asset['asset_id'], 'relative_path': relative, 'sha256': digest, 'usage_scope': asset.get('usage_scope'), 'usage_policy': asset.get('usage_policy'), 'rights': asset.get('rights'), 'provenance':asset.get('provenance'), 'source_manifest':relative_manifest, 'manifest': Path(source).name, 'source_verification': verification})
     databases = []
     for value in args.database:
         rel = safe_relative(value)
         source = no_links(storage / str(rel))
+        if source.suffix.lower() not in ('.db', '.sqlite', '.sqlite3'):
+            raise ValueError('Use a .db/.sqlite/.sqlite3 database filename to prevent output name collisions')
         if not source.is_file():
             raise ValueError('Missing database: ' + str(source))
         databases.append(source)
@@ -402,8 +427,12 @@ def _export_state(args):
     output.mkdir()
     incomplete = output/'INCOMPLETE.txt'
     incomplete.write_text('Export is incomplete. Do not restore this directory. See the error from export-state.', encoding='utf-8')
-    report = {'schema_version':'1.0', 'media_copied':False, 'quiesced_asserted':args.quiesced, 'assets':references, 'databases':[], 'note':'Copy media separately by relative path; verify SHA256 at destination. Credentials in database configuration may remain sensitive; keep this backup private.'}
-    remaining = args.max_bytes
+    report = {'schema_version':'1.0', 'media_copied':False, 'quiesced_asserted':args.quiesced, 'assets':references, 'assets_are_reference_inventory_only':True, 'source_manifests':[{k:v for k,v in item.items() if k!='_raw'} for item in source_manifests], 'databases':[], 'note':'Copy media separately by relative path; verify SHA256 at destination. Credentials in database configuration may remain sensitive; keep this backup private.'}
+    remaining = args.max_bytes - manifest_bytes
+    if source_manifests:
+        (output/'source-manifests').mkdir()
+        for item in source_manifests:
+            with (output/item['file']).open('xb') as handle: handle.write(item['_raw'])
     for source in databases:
         destination = output/source.name
         started = time.monotonic()
