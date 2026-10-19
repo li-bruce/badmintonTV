@@ -1,5 +1,16 @@
 # models 状态
 
+## 2026-10-19 设备迁移：部署入口与交接说明完成
+
+- 分支 `codex/models-device-setup` 从 main `321a30d` 创建；实现提交 **04d8c450dd47142b08672c75bd91276ad98454ce**。仅提交 models 所有权内文件；未推送。先冻结 [P-07.1–7](../models/DEVICE_SETUP_ACCEPTANCE.md)，本轮七项部署工程断言 PASS；模型准确率、训练和新机器安装不包含在该结论中。
+- 已实现：`setup_device.sh`/stdlib planner-doctor；CPU prep、GPU base、pose/TrackNet、VL 四个独立 Conda profile 与依赖版本锁；统一 storage-root/env-prefix/conda-executable 参数；默认计划、dry-run/doctor 只读、显式 apply 才安装。不得修改 base/驱动或覆盖已存在 prefix。元数据目录随存储根和 BTV_MODELS_ENV 改变，Windows 默认盘符映射到常规 WSL automount，可显式覆盖。
+- 已运行：WSL bash -n、新测试 **23/23 PASS**；Windows 全部 models 测试 **416 项、398 PASS/18 SKIP**，新增 Linux/符号链项已在 WSL 通过。实际 CPU smoke 读取网页快照和真实原片/PTS，1 个窗口解码 2 帧，RGB 哈希留存；torch 未导入、无 GPU 运算或训练、无图像/视频复制。
+- 环境/端口：现有 WSL Ubuntu x86_64；只读复用 `annotation-env`（它仍继承旧父环境），未建立新环境，没有服务端口。GPU 只读信息为 RTX 5090 / 32607 MiB / 驱动 610.88。本轮不占 GPU 排期，不结束任何用户进程；没有安装技能/MCP或额外依赖。
+- 容量：受控存储 46,350,062,482 B；根外既有 Conda base/packages 5,924,496,893 B；runtime/models 19,198,700,926 B；磁盘余 919,192,240,128 B。CPU 2GB 新峰值 PASS，GPU base 18GB 新峰值会超 35GB。仅源码/小报告新增，数据、权重、环境目录均未写入；临时测试文件在临时目录由测试清理。
+- 失败/修复：开发时一次函数插入错误导致 Python SyntaxError，修复后重新跑测试和真实 dry-run。独立新环境联网安装、GPU 新环境计算、原生 Linux 部署为 **NOT_RUN**；当前原机再次并排安装 GPU 环境是 **BLOCKED**，见 [容量问题](../issues/models-device-rebuild-capacity.md)。
+- 启动：仓库根 `bash scripts/models/setup_device.sh --profile cpu-prep --storage-root /mnt/d/video --conda-executable /home/ubuntu/miniforge3/bin/conda --dry-run`；完整新设备示例、CPU smoke、输入/输出及未来工作流见 [DEVICE_SETUP.md](../models/DEVICE_SETUP.md)。旧硬编码安装/实验脚本仅保留历史，不作为新入口。
+- 下一步：主任务集成与打包；新计算设备只安装所需 profile，复核预算后验证独立安装和实际推理。先补人审数据与整比赛留出，再开发对应 trainer；没有现成统一训练循环，不把准备环境或导出特征称为训练完成。
+
 ## 2026-10-02 训练标注准备轮：CPU准备验收完成
 
 - 分支codex/models-annotation-readiness从main3dab169创建；开工工作树干净，上一轮分支/报告保留。已读必需架构/合同/资源/验收文件与本轮IMPLEMENTATION_ROUND、END_TO_END_CAPABILITY_PLAN；断言先登记docs/models/ANNOTATION_READINESS_PLAN.md。
