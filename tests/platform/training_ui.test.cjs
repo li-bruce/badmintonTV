@@ -169,6 +169,7 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   const html = fs.readFileSync(path.join(__dirname, '../../apps/platform/templates/training.html'), 'utf8');
   const elements = new Map([...html.matchAll(/<([a-z]+)[^>]*\bid="([^"]+)"[^>]*>/g)].map(match => [match[2], new Element(match[1])]));
   elements.get('label-subject-role').value = 'self';
+  elements.get('show-all-labels').checked = true;
   const doc = new EventTarget(); doc.getElementById = id => { assert.ok(elements.has(id), 'Missing template ID ' + id); return elements.get(id); }; doc.createElement = tag => new Element(tag);
   const f = fixture(); const taxonomy = {labels: [
     {label_id: 'directory', name: '动作目录', description: '只供导航', dimension: 'stroke', kinds: ['contact'], selectable: false},
@@ -219,12 +220,12 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   assert.equal(c.record().evidence[0].type, 'source_time'); assert.equal(c.record().evidence[0].observation_source, 'agent');
   c.record().provenance.revision_audit = {actor_type: 'agent', reviewer: 'saved-agent'};
   c.record().review = {status: 'pending', reviewer_type: null, reviewer: null}; c.notify();
-  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核 · 来源 agent'));
+  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核'));
   assert.match(elements.get('review-provenance').textContent, /记录来源：agent \/ saved-agent/);
   assert.match(elements.get('review-provenance').textContent, /审核状态：待审核；审核人：未记录 \/ 未记录/);
   c.record().provenance.revision_audit = {actor_type: 'human', reviewer: 'last-editor'}; c.notify();
   assert.equal(elements.get('record-review').value, 'pending', 'human edit provenance must not grant confirmed review');
-  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核 · 来源 human'));
+  assert.ok(descendants(elements.get('record-list')).some(node => node.className === 'review' && node.textContent === '待审核'));
   delete c.record().provenance.revision_audit;
   c.record().review = {status: 'pending', reviewer_type: 'agent', reviewer: 'legacy-agent'}; c.notify();
   assert.match(elements.get('review-provenance').textContent, /记录来源：agent \/ legacy-agent/);
@@ -236,8 +237,36 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   let downloads = descendants(elements.get('snapshot-list')).filter(node => node.tagName === 'A');
   assert.equal(downloads.length, 2); assert.ok(downloads.every(link => link.href.includes('view=audit')));
   assert.ok(descendants(elements.get('snapshot-list')).some(node => node['aria-disabled'] === 'true' && !node.href && node.textContent.includes('先完成质量审核')));
-  assert.ok(descendants(elements.get('snapshot-summary')).some(node => node.textContent === '原片所属的独立比赛组尚未确认'));
+  assert.ok(descendants(elements.get('snapshot-summary')).some(node => node.textContent === '尚未确认视频所属比赛'));
   c.state.snapshots[0].quality_summary = {...c.state.snapshots[0].quality_summary, trainable: true, blockers: []}; c.notify();
   downloads = descendants(elements.get('snapshot-list')).filter(node => node.tagName === 'A');
   assert.equal(downloads.length, 3); assert.equal(downloads.filter(link => link.href.includes('view=training')).length, 1);
+  // Simplified workspace views retain unsaved edits and never make a confirmation for the user.
+  c.newRecord('contact', 1500);
+  c.modifyRecord(r => r.judgements.push({label_id: 'stroke', value: 'unknown', subject_role: 'opponent_partner', subject_person_id: null, reason: '待核查'}));
+  const beforeView = ui.clone(c.state.bundle), reviewBefore = c.record().review.status;
+  elements.get('view-settings').dispatchEvent(new Event('click')); await tick();
+  assert.equal(elements.get('settings-view').hidden, false);
+  assert.equal(elements.get('workbench-view').hidden, true);
+  assert.equal(elements.get('view-settings')['aria-pressed'], 'true');
+  assert.deepEqual(c.state.bundle, beforeView);
+  assert.equal(c.record().review.status, reviewBefore);
+  const key = new Event('keydown', {cancelable: true}); Object.assign(key, {key: 'c'});
+  doc.dispatchEvent(key); await tick();
+  assert.deepEqual(c.state.bundle, beforeView, 'hidden player cannot create contact records from shortcuts');
+  for (const view of ['dataset', 'help', 'annotate']) {
+    elements.get('view-' + view).dispatchEvent(new Event('click')); await tick();
+    assert.equal(elements.get(view === 'annotate' ? 'workbench-view' : view + '-view').hidden, false);
+    assert.deepEqual(c.state.bundle, beforeView);
+  }
+  // Default inspector only includes labels already assigned to the chosen person.
+  elements.get('show-all-labels').checked = false;
+  elements.get('show-all-labels').dispatchEvent(new Event('change')); await tick();
+  assert.equal(descendants(elements.get('taxonomy-labels')).filter(node => node.tagName === 'SELECT').length, 1);
+  c.newRecord('contact', 2000);
+  assert.equal(descendants(elements.get('taxonomy-labels')).filter(node => node.tagName === 'SELECT').length, 0);
+  elements.get('label-filter').value = '网前球'; elements.get('label-filter').dispatchEvent(new Event('input')); await tick();
+  assert.equal(descendants(elements.get('taxonomy-labels')).filter(node => node.tagName === 'SELECT').length, 1, 'search still exposes unassigned labels');
+  assert.equal(c.record().judgements.length, 0, 'opening panels and searching must not add labels');
+
 });

@@ -264,8 +264,8 @@
       abort.hidden = !draft; remove.disabled = !chosen() || !!draft; locate.disabled = !valid || waitingSeek;
       rectangle.setAttribute('aria-pressed', String(draft?.shape === 'rectangle')); polygon.setAttribute('aria-pressed', String(draft?.shape === 'polygon'));
       const instruction = draft ? (draft.kind === 'edit' ? '拖动后松开以确认修改；Esc 取消' : draft.shape === 'rectangle' ? '在画面内拖出矩形，松开确认；Esc 取消' : `逐点添加顶点（${draft.points.length}/64），Enter 或按钮完成；Esc 取消`) :
-        !valid ? '先选择一条标注记录' : !inside ? '当前时间不在所选记录内，请先定位记录' : '矩形拖画；多边形逐点；选中后可移动、调整顶点或删除';
-      status.textContent = (message ? message + '。' : '') + instruction + '。单帧圈选，不自动跟踪；仅浏览器时间定位。';
+        !valid ? '先选择一条标注记录' : !inside ? '当前时间不在所选记录内，请先定位记录' : '单帧圈选，可拖动调整';
+      status.textContent = (message ? message + '。' : '') + instruction + '。';
       list.replaceChildren();
       for (const region of regions()) {
         const visible = region.at_ms === at && !waitingSeek && !player.seeking;
