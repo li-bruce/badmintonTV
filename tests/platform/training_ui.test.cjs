@@ -46,7 +46,7 @@ function fixture(options = {}) {
     throw new Error('Unexpected ' + path);
   };
   const controller = ui.createController({request, confirm: options.confirm || (() => true)});
-  return {controller, calls, seed, assets, project};
+  return {controller, calls, seed, assets, project, request};
 }
 async function open(f) { await f.controller.boot(); await f.controller.openProject('project-1'); await f.controller.openAsset('asset-a'); return f.controller; }
 
@@ -269,4 +269,76 @@ test('mounted UI matches template, hides directory labels, and keeps four subjec
   assert.equal(descendants(elements.get('taxonomy-labels')).filter(node => node.tagName === 'SELECT').length, 1, 'search still exposes unassigned labels');
   assert.equal(c.record().judgements.length, 0, 'opening panels and searching must not add labels');
 
+});
+
+
+function mountedRegistration(options = {}) {
+  const fs = require('node:fs'), path = require('node:path');
+  const html = fs.readFileSync(path.join(__dirname, '../../apps/platform/templates/training.html'), 'utf8');
+  const elements = new Map([...html.matchAll(/<([a-z]+)[^>]*\bid="([^"]+)"[^>]*>/g)].map(match => [match[2], new Element(match[1])]));
+  const doc = new EventTarget(); doc.getElementById = id => { assert.ok(elements.has(id), 'Missing template ID ' + id); return elements.get(id); }; doc.createElement = tag => new Element(tag);
+  const f = fixture(options), win = new EventTarget();
+  Object.assign(win, {confirm: () => { throw Error('Revalidation must not discard a draft'); }, setTimeout: callback => queueMicrotask(callback), fetch: async (url, options) => {
+    try {
+      const body = await f.request(url.replace('/api/v1/training', ''), options.method, options.body === undefined ? undefined : JSON.parse(options.body));
+      return {ok: true, json: async () => body};
+    } catch (error) { return {ok: false, status: error.status || 409, json: async () => ({detail: error.message})}; }
+  }});
+  let loads = 0; elements.get('training-player').load = () => { loads++; };
+  const controller = ui.mount(doc, win);
+  const retry = id => elements.get('reverify-list').children.flatMap(row => row.children).find(node => node['aria-label'] === '重新校验：' + id);
+  return {...f, controller, elements, retry, loads: () => loads};
+}
+
+test('registered project video can reverify in settings without changing draft, review or snapshots', async () => {
+  const pending = deferred(); let ready = false;
+  const f = mountedRegistration({respond: (path, method) => {
+    if (path.includes('/source-frames') && !ready) throw Error('TRAINING_REGISTRATION_STALE');
+    if (path === '/registrations' && method === 'POST') return {registration_id: 'retry-a', status: 'running'};
+    if (path === '/registrations/retry-a') return pending.promise;
+  }});
+  const c = await open(f); c.newRecord('contact', 1200);
+  c.state.snapshots = [{snapshot_id: 'frozen', content_sha256: 'a'.repeat(64), created_at: '2026-10-19', quality_summary: {trainable: false, blockers: []}}]; c.notify();
+  const before = ui.clone({bundle: c.state.bundle, saved: c.state.saved, snapshots: c.state.snapshots, selected: c.state.selectedId, actor: c.state.actorType, dirty: c.state.dirty});
+  const loads = f.loads();
+  assert.match(c.state.error, /TRAINING_REGISTRATION_STALE/);
+  f.elements.get('view-settings').dispatchEvent(new Event('click')); await tick();
+  assert.equal(f.elements.get('settings-view').hidden, false);
+  assert.equal(f.retry('asset-a').disabled, false, 'already in project must remain eligible for revalidation');
+  f.retry('asset-a').dispatchEvent(new Event('click')); await tick();
+  assert.equal(f.retry('asset-a').disabled, true);
+  assert.ok(f.elements.get('reverify-list').children[0].children.some(node => node.textContent === '正在校验…'));
+  ready = true; pending.resolve({registration_id: 'retry-a', status: 'ready'}); await tick();
+  assert.equal(f.retry('asset-a').disabled, false); assert.equal(c.state.error, null); assert.equal(c.state.frames.total, 3);
+  assert.equal(f.loads(), loads + 1, 'successful validation retries current video media');
+  assert.deepEqual({bundle: c.state.bundle, saved: c.state.saved, snapshots: c.state.snapshots, selected: c.state.selectedId, actor: c.state.actorType, dirty: c.state.dirty}, before);
+  assert.equal(c.record().review.reviewer_type, 'agent');
+  assert.deepEqual(f.calls.filter(call => call.method !== 'GET').map(call => [call.path, call.body]), [['/registrations', {asset_id: 'asset-a'}]]);
+});
+
+test('failed revalidation remains visible and retryable without changing saved or draft annotations', async () => {
+  const f = mountedRegistration({respond: (path, method) => {
+    if (path === '/registrations' && method === 'POST') return {registration_id: 'retry-a', status: 'queued'};
+    if (path === '/registrations/retry-a') return {registration_id: 'retry-a', status: 'failed', error: '原片hash不一致'};
+  }});
+  const c = await open(f); c.newRecord('contact', 1200); const before = ui.clone(c.state.bundle), loads = f.loads();
+  f.retry('asset-a').dispatchEvent(new Event('click')); await tick();
+  assert.match(f.elements.get('notice').textContent, /校验失败：原片hash不一致/);
+  assert.equal(f.retry('asset-a').disabled, false); assert.equal(f.loads(), loads);
+  assert.deepEqual(c.state.bundle, before); assert.equal(c.state.dirty, true);
+  assert.equal(f.calls.filter(call => call.method !== 'GET').length, 1);
+});
+
+test('late revalidation source frames never reload or replace another selected video', async () => {
+  const pending = deferred(); let retrying = false;
+  const f = mountedRegistration({respond: (path, method) => {
+    if (path === '/registrations' && method === 'POST') { retrying = true; return {registration_id: 'retry-a', status: 'ready'}; }
+    if (path.includes('/assets/asset-a/source-frames') && retrying) return pending.promise;
+  }});
+  const c = await open(f);
+  f.retry('asset-a').dispatchEvent(new Event('click')); await tick();
+  await c.openAsset('asset-b'); const before = ui.clone(c.state.bundle), frames = ui.clone(c.state.frames), loads = f.loads();
+  pending.resolve({source_frames: [], total: 999}); await tick();
+  assert.equal(c.state.asset.asset_id, 'asset-b'); assert.deepEqual(c.state.bundle, before); assert.deepEqual(c.state.frames, frames);
+  assert.equal(f.loads(), loads); assert.equal(c.state.dirty, false);
 });

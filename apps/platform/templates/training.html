@@ -54,6 +54,7 @@
 <section id="settings-view" class="workspace-page" hidden aria-label="项目设置">
   <div class="page-intro"><h2>项目设置</h2><button id="settings-back" class="quiet">返回标注</button></div>
   <section class="panel"><h3>当前视频人物</h3><p class="muted">姓名和队伍手动填写；只对当前视频生效。</p><div id="participant-list" class="chips"></div><div class="two-fields"><label>显示名称<input id="participant-name" maxlength="80" placeholder="姓名或人物 A"></label><label>队伍<input id="participant-team" maxlength="80" placeholder="例如：近端队，可留空"></label></div><label>身份确认<select id="participant-identity"><option value="unknown">身份未知</option><option value="unconfirmed">名称待确认</option><option value="confirmed">已核对本视频身份</option></select></label><button id="add-participant" class="secondary">添加人物</button></section>
+  <details id="reverify-panel" class="panel"><summary>视频校验</summary><p class="muted">迁移或重新复制原片后，重新校验对应视频。已有标注与导出版本保持不变。</p><div id="reverify-list" class="item-list" aria-live="polite"></div></details>
   <details class="panel"><summary>项目与操作来源</summary><p id="project-meta" class="muted"></p><p id="actor-type" class="status-pill">正在读取…</p><label>操作人<input id="actor-name" value="" maxlength="80"></label><p id="actor-help" class="muted"></p></details>
 </section>
 <section id="help-view" class="workspace-page" hidden aria-label="操作帮助">

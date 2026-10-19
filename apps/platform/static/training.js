@@ -410,34 +410,57 @@
         $('label-palette').append(chip);
       }
     }
+    async function verifyAsset(id, addToProject = false) {
+      if (registrations.has(id)) return;
+      const project = s.project?.project_id;
+      registrations.set(id, '等待校验…'); renderCatalog();
+      try {
+        let task = await request('/registrations', 'POST', {asset_id: id});
+        const started = Date.now();
+        while (['queued', 'running'].includes(task.status)) {
+          registrations.set(id, task.status === 'running' ? '正在校验…' : '等待校验…'); renderCatalog();
+          await new Promise(resolve => win.setTimeout(resolve, 1500));
+          if (Date.now() - started > 900000) throw new Error('校验仍在后台进行，请稍后重试以查看结果');
+          task = await request('/registrations/' + encodeURIComponent(task.registration_id));
+        }
+        if (task.status !== 'ready') throw new Error('校验失败：' + (task.error || '原片登记未完成'));
+        s.registered = await request('/assets');
+        if (addToProject && s.project?.project_id === project) await ctl.addAsset(id);
+        // Refresh media/PTS only. Reloading the bundle would discard a local draft.
+        if (s.asset?.asset_id === id) {
+          const epoch = s.epoch, position = now(), frameTime = Math.min(position, Math.max(0, s.asset.duration_ms - 1));
+          const frames = await request('/assets/' + encodeURIComponent(id) + '/source-frames?at_ms=' + frameTime + '&limit=128');
+          if (epoch === s.epoch && s.asset?.asset_id === id) {
+            s.frames = frames; s.error = null; frameAnchor = null; stepSerial++; player.pause();
+            player.addEventListener('loadedmetadata', () => { if (epoch === s.epoch && s.asset?.asset_id === id) seek(position); }, {once: true});
+            player.load(); ctl.notify();
+          }
+        }
+        message(addToProject ? '原片校验完成，已登记。' : '原片校验完成，标注与导出版本保持不变。');
+      } finally { registrations.delete(id); renderCatalog(); }
+    }
     function renderCatalog() {
-      $('catalog-list').replaceChildren();
+      $('catalog-list').replaceChildren(); $('reverify-list').replaceChildren();
       const inProject = new Set(s.assets.map(a => a.asset_id));
       for (const asset of s.catalog) {
         const registered = s.registered.some(item => (item.asset_id || item.asset?.asset_id) === asset.asset_id);
         const status = registrations.get(asset.asset_id);
-        const item = listButton(asset.title || '未命名视频', inProject.has(asset.asset_id) ? '已在项目中' : status || (registered ? '已登记 · 点击加入项目' : '点击校验并登记原片'), async () => {
+        const item = listButton(asset.title || '未命名视频', status || (inProject.has(asset.asset_id) ? '已在项目中' : registered ? '已登记 · 点击加入项目' : '点击校验并登记原片'), async () => {
           if (!s.project) throw new Error('先选择或创建项目');
           if (registered) return ctl.addAsset(asset.asset_id);
-          const project = s.project.project_id;
-          registrations.set(asset.asset_id, '等待原片身份校验…'); renderCatalog();
-          try {
-            let task = await request('/registrations', 'POST', {asset_id: asset.asset_id});
-            const started = Date.now();
-            while (['queued', 'running'].includes(task.status)) {
-              registrations.set(asset.asset_id, task.status === 'running' ? '正在校验原片；尚未完成' : '等待校验'); renderCatalog();
-              await new Promise(resolve => win.setTimeout(resolve, 1500));
-              if (Date.now() - started > 900000) throw new Error('登记仍在后台进行，请稍后刷新目录');
-              task = await request('/registrations/' + encodeURIComponent(task.registration_id));
-            }
-            if (task.status !== 'ready') throw new Error(task.error || '原片登记未完成');
-            s.registered = await request('/assets');
-            if (s.project?.project_id === project) await ctl.addAsset(asset.asset_id);
-            message('原片身份校验完成，已登记。');
-          } finally { registrations.delete(asset.asset_id); renderCatalog(); }
+          await verifyAsset(asset.asset_id, true);
         });
         item.disabled = !s.project || inProject.has(asset.asset_id) || registrations.has(asset.asset_id); $('catalog-list').append(item);
       }
+      for (const asset of s.registered) {
+        const id = asset.asset_id || asset.asset?.asset_id, status = registrations.get(id);
+        const row = el('div', undefined, 'person-row'); row.append(el('strong', asset.title || id));
+        const retry = button('重新校验', () => verifyAsset(id)); retry.disabled = Boolean(status);
+        retry.setAttribute('aria-label', '重新校验：' + (asset.title || id)); row.append(retry);
+        if (status) row.append(el('small', status, 'muted'));
+        $('reverify-list').append(row);
+      }
+      if (!s.registered.length) $('reverify-list').append(el('p', '尚无已登记视频。', 'muted'));
     }
     function renderPeople() {
       $('participant-list').replaceChildren();
