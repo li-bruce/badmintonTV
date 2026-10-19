@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "status": "verified_cpu_decode",
+  "snapshot_file_sha256": "851015516d28935e3e79b584456cdfe49d9dee15d13d03bb95d752b12b5b7002",
+  "source_manifest_file_sha256": "3fc6adf81e6f5229e4b4e4ae7de215be89bc415838d5e5aea64fb28ec85bea32",
+  "python": "3.11.16",
+  "environment_prefix": "/mnt/d/video/runtime/models/annotation-env",
+  "base_prefix": "/mnt/d/video/runtime/models/env",
+  "gpu_used": false,
+  "training_run": false,
+  "model_imported": false,
+  "images_written": false,
+  "windows": [
+    {
+      "asset_id": "asset-b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "record_id": "record-0d2f9c12-bdfe-4b9c-8043-51d1cf3aab8a",
+      "record_revision": 1,
+      "kind": "segment",
+      "source_relative_path": "data/training/fine-badminton-2026-zenodo-20292976-v1.0/extracted/876ddac3abe9141b8ce7f2fe.mp4",
+      "source_sha256": "b210dc39a219d5ec5bb87ef980f5bce0d3ed1ebf1234d21d5342b24273a1f913",
+      "pts_index_sha256": "b18a822e0c66dd7aa810b0d1c5684e1e9c923e2d0982ea7f520341798a2b10b9",
+      "window_semantics": "explicit_annotation_interval_not_verified_action_boundary",
+      "usage_scope": "training_only",
+      "context_scope": "rally_bounded",
+      "rally_id": "record-348833bf-1186-49d9-81dd-b36dab5d9612",
+      "rally_bounds_ms": [
+        60000,
+        70000
+      ],
+      "review_only": true,
+      "supervision_targets": [],
+      "review": {
+        "status": "pending",
+        "reviewer_type": "agent",
+        "reviewer": "local-agent",
+        "reviewed_at": "2026-10-02T17:02:40.542015Z",
+        "note": ""
+      },
+      "visibility": "unknown",
+      "plan": {
+        "start_ms": 61921,
+        "end_ms": 62921,
+        "interval_semantics": "half_open_source_milliseconds",
+        "source_frame_count": 25,
+        "first_source_frame_index": 1549,
+        "last_source_frame_index": 1573,
+        "requested_samples": 2,
+        "missing_or_duplicate_target_indices": [],
+        "sampling_method": "first original PTS at/after uniform source-time target; no repeated or synthetic frames",
+        "frames": [
+          {
+            "frame_index": 1549,
+            "pts": 793088,
+            "time_base": "1/12800",
+            "stream_start_pts": 0,
+            "source_ms_rational": "61960"
+          },
+          {
+            "frame_index": 1561,
+            "pts": 799232,
+            "time_base": "1/12800",
+            "stream_start_pts": 0,
+            "source_ms_rational": "62440"
+          }
+        ]
+      },
+      "decode": {
+        "status": "verified",
+        "device": "cpu",
+        "decoder": "PyAV",
+        "av_version": "15.0.0",
+        "frames": [
+          {
+            "frame_index": 1549,
+            "pts": 793088,
+            "time_base": "1/12800",
+            "stream_start_pts": 0,
+            "source_ms_rational": "61960",
+            "rgb_sha256": "d3ef8f2d4e600a0e2564d1a4b76ec58d939ed768a5a728b8b2bffdcc6d2285d3",
+            "width": 1280,
+            "height": 720,
+            "pixel_format": "rgb24"
+          },
+          {
+            "frame_index": 1561,
+            "pts": 799232,
+            "time_base": "1/12800",
+            "stream_start_pts": 0,
+            "source_ms_rational": "62440",
+            "rgb_sha256": "617f2abc0ce63b71186c812933f4a5ee35eb6cd932b56646817bd346746871a2",
+            "width": 1280,
+            "height": 720,
+            "pixel_format": "rgb24"
+          }
+        ],
+        "images_written": false,
+        "gpu_used": false,
+        "model_run": false
+      }
+    }
+  ]
+}

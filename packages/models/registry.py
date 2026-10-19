@@ -3,6 +3,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+from .environment import runtime_prefix
 
 VERSION = '0.1.0'
 REQUIRED_FILES = {
@@ -61,7 +62,8 @@ def catalog():
             'schema_version':'1.0','model_id':model_id,'version':VERSION,'display_name':name,
             'capabilities':[capability],'status':status,'reason':reason,
             'entrypoint':['python','-m','packages.models','run','--request','{request}','--result','{result}'],
-            'environment':{'kind':'stdlib' if not modules else 'wsl-conda','prefix':None if not modules else '/mnt/d/video/runtime/models/env'},
+            'environment':{'kind':'stdlib' if not modules else 'wsl-conda',
+                           'prefix':None if not modules else runtime_prefix(root, 'env')},
             'weights':weights,'parameters_schema':{'type':'object','required':['model_id'],
                 'properties':{'model_id':{'const':model_id},'text':{'type':'string'},'start_ms':{'type':'integer','minimum':0},
                               'end_ms':{'type':'integer','minimum':1},'sample_fps':{'type':'number','minimum':.5,'maximum':30},

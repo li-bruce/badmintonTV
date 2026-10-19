@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "profile": "gpu-vl",
+  "status": "plan_only",
+  "storage_root": "/mnt/d/video",
+  "env_prefix": "/mnt/d/video/runtime/models/envs/gpu-vl",
+  "conda_executable": "/home/ubuntu/miniforge3/bin/conda",
+  "environment": {
+    "BTV_STORAGE_ROOT": "/mnt/d/video",
+    "BTV_MODELS_ENV": "/mnt/d/video/runtime/models/envs/gpu-vl",
+    "HF_HOME": "/mnt/d/video/models/cache/huggingface",
+    "TORCH_HOME": "/mnt/d/video/models/cache/torch",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "CONDA_PKGS_DIRS": "/mnt/d/video/runtime/models/device-cache/gpu-vl/conda-pkgs",
+    "CONDA_ENVS_PATH": "/mnt/d/video/runtime/models/envs",
+    "CONDA_NO_PLUGINS": "true",
+    "CONDA_AUTO_UPDATE_CONDA": "false",
+    "CONDARC": "/dev/null",
+    "CONDA_REGISTER_ENVS": "false",
+    "CONDA_NUMBER_CHANNEL_NOTICES": "0",
+    "CONDA_NOTIFY_OUTDATED_CONDA": "false",
+    "CONDA_REPORT_ERRORS": "false",
+    "PIP_CACHE_DIR": "/mnt/d/video/runtime/models/device-cache/gpu-vl/pip",
+    "XDG_CACHE_HOME": "/mnt/d/video/runtime/models/device-cache/gpu-vl/xdg",
+    "TMPDIR": "/mnt/d/video/runtime/models/device-cache/gpu-vl/tmp",
+    "TMP": "/mnt/d/video/runtime/models/device-cache/gpu-vl/tmp",
+    "TEMP": "/mnt/d/video/runtime/models/device-cache/gpu-vl/tmp",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PIP_CONFIG_FILE": "/dev/null",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PIP_NO_CACHE_DIR": "1",
+    "PIP_INDEX_URL": "https://pypi.org/simple"
+  },
+  "commands": [
+    [
+      "/home/ubuntu/miniforge3/bin/conda",
+      "create",
+      "--yes",
+      "--prefix",
+      "/mnt/d/video/runtime/models/envs/gpu-vl",
+      "--override-channels",
+      "-c",
+      "conda-forge",
+      "--solver",
+      "classic",
+      "python=3.11",
+      "pip"
+    ],
+    [
+      "/mnt/d/video/runtime/models/envs/gpu-vl/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "install",
+      "--no-cache-dir",
+      "--no-compile",
+      "--only-binary=:all:",
+      "torch==2.8.0",
+      "torchvision==0.23.0",
+      "--index-url",
+      "https://download.pytorch.org/whl/cu128"
+    ],
+    [
+      "/mnt/d/video/runtime/models/envs/gpu-vl/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "install",
+      "--no-cache-dir",
+      "--no-compile",
+      "--only-binary=:all:",
+      "--index-url",
+      "https://pypi.org/simple",
+      "-r",
+      "/mnt/c/Users/Li/.codex/worktrees/c5b1/badmintonTV/environments/models-device-vl.txt"
+    ],
+    [
+      "/mnt/d/video/runtime/models/envs/gpu-vl/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "check"
+    ]
+  ],
+  "peak_bytes": 24000000000,
+  "requirements": "environments/models-device-vl.txt",
+  "requirements_sha256": "7231cfe88b2e39f3084e179d60df25a901bd91e0751ff28daf58775bbe08ec4c",
+  "gpu_required": true,
+  "training_loop": "not_implemented",
+  "model_status": "unavailable",
+  "model_reason": "Weights, model source locks and evaluation are separate handoffs.",
+  "installation_verified_on_new_device": false,
+  "doctor": {
+    "host": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "wsl": true,
+      "ubuntu": true,
+      "apply_supported": true
+    },
+    "conda": "available",
+    "environment": "not_installed",
+    "gpu": "visible_not_compute_tested",
+    "models": {
+      "status": "unavailable",
+      "reason": "Model weights/source locks and real inference must be checked separately."
+    },
+    "training_loop": "not_implemented",
+    "gpu_inventory": [
+      "NVIDIA GeForce RTX 5090, 32607 MiB, 610.88"
+    ]
+  }
+}
