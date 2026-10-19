@@ -10,64 +10,64 @@
     {
       "source": "FRAMEWORK_GUIDE.md",
       "output": "index.html",
-      "source_sha256": "95b31d0b0b5848ebcfcd9a838b4e6cf707d88aef55b57bbcd2e98378b51870d2",
-      "html_sha256": "0f256364ad7903298e526cc2a47f8b05e851664224ad9a49a01ff7acec50adba",
+      "source_sha256": "be0aea89d3471305e315300c770284e5674c0e0f9e996da97cadad20d46fe7b8",
+      "html_sha256": "e14b21492fec14510d2663241e56886eeef582c71c6cb5020a58721f3d80bfb7",
       "chapters": 7
     },
     {
       "source": "MODULES_AND_DEVICES.md",
       "output": "modules.html",
       "source_sha256": "18bc8a2e165f04f08581265b25e3259af808db19349ea70240afcd9994ce671c",
-      "html_sha256": "0703961c52c800d95335a2430dda67ae83a37a79caa7c6ec36c3980c77143405",
+      "html_sha256": "214133042e240bae28102c8d8e725be5763c13b34e6f78e52c67631a8306231e",
       "chapters": 5
     },
     {
       "source": "MIGRATION_GUIDE.md",
       "output": "migration.html",
-      "source_sha256": "aaee9919c7c81e87a7a24cbab3653c06d010987197610b507a116f6e7a0bd2cd",
-      "html_sha256": "22c0acd9de5109fe4938f9d4dfbd0d120e515e20d8d249983e340cf8da9c98b0",
+      "source_sha256": "87b567025210bf4f36f3e11a0b1735b0101814dc5e6781c710a68b14460132e2",
+      "html_sha256": "c67662e50ef6229f9732631b934600ebb7dc61d7d15d5a579589ce591c969190",
       "chapters": 5
     },
     {
       "source": "IMPLEMENTATION_ROUND_2026-10-19.md",
       "output": "implementation.html",
       "source_sha256": "c08607ca25ba65c57d1183f88f75cede25af0f0e95c434fd186bb269897976fe",
-      "html_sha256": "53960bee8c4d4887e0a7c2d22bd38c5e5187ff9635a5bffdc45883a34b364cc1",
+      "html_sha256": "575da922e4cedceef79e6b7d20465433f8c6d8d4be43d64f8f0b719c0a510692",
       "chapters": 4
     },
     {
       "source": "ROUND_VALIDATION_2026-10-19.md",
       "output": "validation.html",
-      "source_sha256": "4dc71fada255424394f4f0632ffb4b4c3f88dc331aad9cf3679334ee169dde7b",
-      "html_sha256": "b709db15d1cbfc11d2e27374f67ccff716a4223185e85980b35de4508f008caf",
-      "chapters": 0
+      "source_sha256": "6d9d0b1d9f83236a0d5980d43a21c153331ce1d399f94af5fe761bb045c62dcb",
+      "html_sha256": "682504c38d5988ce8a403da8eee93f16388c1725cb5ad922c2a78c9ed73d0c08",
+      "chapters": 2
     },
     {
       "source": "QUICKSTART.md",
       "output": "quickstart.html",
       "source_sha256": "9298056f86456ceab52bda39d35b94b74e07a5449b2291c72221c7aac71829a3",
-      "html_sha256": "f2ec0faaa25cba226296ef309378c6bbd67c3117a2257b2075b7b2ac36b2b7e3",
+      "html_sha256": "471aa98d4c25bf707f85231189b87f2006449dd6be4f56984a34d0aa4717fefb",
       "chapters": 5
     },
     {
       "source": "END_TO_END_CAPABILITY_PLAN.md",
       "output": "capabilities.html",
       "source_sha256": "f9f9f9db42ff2fe10ac05ca4e06a2ff9245143d833db547679b33659b537c0e2",
-      "html_sha256": "f54529971256cf9c1fe61a66e6d2458154cdcbca683abb1e5a605604e5a7ffd1",
+      "html_sha256": "44d4690511144475dfa820b98a6610890865e8fbc2c090950ff37bf4a3e52c48",
       "chapters": 11
     },
     {
       "source": "ANNOTATION_TOOLS_RESEARCH_2026-10-02.md",
       "output": "tools.html",
       "source_sha256": "957b696d24bf2a0424a8c724f068371e7ffeeccc88d6fdb62759d6ed040419c2",
-      "html_sha256": "0fb85543c7d5487f2b3742e280837c1fb630ebee23dab48e75c38667cc9c9fe7",
+      "html_sha256": "6de1c5ceb4626faa0d4bc1f6b82647081a2f237f181de1e47d245b95455bb234",
       "chapters": 4
     },
     {
       "source": "STAGE_ACCEPTANCE.md",
       "output": "stages.html",
-      "source_sha256": "fff7e30fd2857605c0618ae2b665d8b8ae9c65bbff84d8d7ac944b545e321d9f",
-      "html_sha256": "16e58436a195d2388ade79d161faa18f0d45e81c49815464baf599258197f3ec",
+      "source_sha256": "00dfd0d42a7e1fa278f69c27cd3d72392ca821fc250ffb89538a083217974288",
+      "html_sha256": "96a4093825d1b27a497bea6c5f196d47bcb4d92eb8409c96d2fe3c9d1944eb6d",
       "chapters": 11
     }
   ]

@@ -1,0 +1,86 @@
+{
+  "source_commit": "66aad19f56123fd33de3cf2493cfb602805fc388",
+  "modules": [
+    {
+      "module": "core",
+      "imports": [
+        "packages.contracts",
+        "packages.runtime"
+      ],
+      "result": "imports_pass_no_torch"
+    },
+    {
+      "module": "library",
+      "imports": [
+        "packages.library"
+      ],
+      "result": "imports_pass_no_torch",
+      "cli_help_exit": 0
+    },
+    {
+      "module": "workbench",
+      "imports": [
+        "apps.platform.store",
+        "apps.platform.training_catalog",
+        "fastapi",
+        "uvicorn"
+      ],
+      "result": "imports_pass_no_torch"
+    },
+    {
+      "module": "models",
+      "imports": [
+        "packages.models"
+      ],
+      "result": "imports_pass_no_torch",
+      "cli_help_exit": 0
+    },
+    {
+      "module": "render",
+      "imports": [
+        "packages.render"
+      ],
+      "result": "imports_pass_no_torch",
+      "cli_help_exit": 0
+    },
+    {
+      "module": "full",
+      "imports": [
+        "packages.library",
+        "packages.models",
+        "packages.render",
+        "apps.platform.store"
+      ],
+      "result": "imports_pass_no_torch"
+    }
+  ],
+  "fresh_environment_packages": {
+    "torch": false,
+    "tensorflow": false
+  },
+  "frozen_snapshot_sha256": "a0b463fb924597dfa8ee4f9958fa6a830ef9a43683dc5fb92738292aa5b6c23c",
+  "ui_saved": {
+    "bundle_revision": 6,
+    "record_id": "record-0d2f9c12-bdfe-4b9c-8043-51d1cf3aab8a",
+    "labels": 4,
+    "regions": 2,
+    "start_ms": 62051,
+    "end_ms": 64616,
+    "review_status": "pending",
+    "observation_source": "agent"
+  },
+  "migration": {
+    "different_storage_root": true,
+    "copied_media_bytes": 231500744,
+    "range_status_after_revalidation": 206,
+    "bundle_unchanged_after_revalidation": true,
+    "snapshot_unchanged": true
+  },
+  "fresh_http": {
+    "/training": 200,
+    "/guide/": 200,
+    "/guide/modules.html": 200,
+    "/guide/migration.html": 200,
+    "/static/training.js": 200
+  }
+}

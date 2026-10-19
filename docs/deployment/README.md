@@ -83,7 +83,7 @@ python scripts/deploy/manage.py verify --archive D:/video/platform/distributions
 包内不含媒体、权重、数据库、环境、凭据或 .git。路径、链接、二进制和常见凭据格式均检查，但仍应审阅自己提交的源码，不能把正则检查当成完整秘密扫描。ZIP 是源码快照；保留分支和历史需另建 Git bundle：
 
 ```powershell
-git bundle create D:/video/platform/distributions/history.bundle --all
+git bundle create D:/video/platform/distributions/history.bundle --branches HEAD
 git bundle verify D:/video/platform/distributions/history.bundle
 # 目标设备
 git clone D:/transfer/history.bundle badmintonTV

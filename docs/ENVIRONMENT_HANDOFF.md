@@ -1,5 +1,9 @@
 # 共享工具交接
 
+2026-10-19当前交接：人工API在127.0.0.1:18080，实际代码66aad19（后续文档更新即时可见）。使用新建`D:/video/runtime/platform/portable-envs-20261019/workbench-cpu`，pip check/doctor通过，无Torch/TensorFlow；原业务库D:/video/platform/platform.sqlite3保持。FFmpeg/ffprobe沿用render compat-8.0.1的已有工具路径，没有重装编码器。未启动worker/GPU；main启动回执在`.runtime/portable-20261019/main-live.json`，launcher5272仅为本次回执，不作为以后存活证明。
+
+重启命令：`./start-platform.ps1 -StorageRoot D:/video -EnvRoot D:/video/runtime/platform/portable-envs-20261019 -Profile workbench-cpu -TrainingReviewer human`。已有数据备份`D:/video/platform/backups/20261019-before-portable-start`；独立迁移验收在portability-20261019/copied-device，不能混入人类真值。模型四profile、配额和跨盘桥接限制见[模型部署](models/DEVICE_SETUP.md)。下方为历史环境状态。
+
 2026-10-03训练工作台轮：main人工API为127.0.0.1:18080，`/training`及`/guide/`；01私有agent验收在18082。main已于01:17更新eb5d34e/human（launcher47176/API49536，仅作当时回执）；根私有18084及临时18089已关闭，100MB预留释放，原DB和证据保留。本轮未启动常驻worker/GPU训练；下方9月29日窗口与进程仅作历史。新增WSL小型`/mnt/d/video/runtime/models/annotation-env/bin/python`只读复用已有PyAV/NumPy并补Pydantic依赖，约35MB，用于快照审计/CPU帧准备；未改全局Python、驱动或模型Torch。实际证据与新交互状态见[本轮验收](ROUND_VALIDATION_2026-10-02.md)。
 
 更新：2026-09-29。运行环境是机器本地事实，路径可随安装更新；改路径时由owner更新记录并通知消费者。
