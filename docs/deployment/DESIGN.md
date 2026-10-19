@@ -32,3 +32,5 @@
 - 首轮测试发现并修复：路径返回处误插入解析器代码、SQLite backup 连接未显式关闭、合法 .gitattributes 白名单缺失；Windows 默认文本编码造成 README GBK，已转为 UTF-8 并扫描全部新增文本。共享 CapacityLedger 的 SQLite 构造连接由 GC 最后释放，测试在清理临时目录前显式 gc.collect；未改 runtime 模块。
 - 后续边界：GPU/模型安装由 models 任务验证；Linux/macOS 本机安装、真实素材编码、跨物理设备恢复尚未执行。源码分发与工程测试不提升模型识别能力或人工真值状态。
 - 代码提交：84ee9d6（实现），1fc23b0（Git 属性），0ffe641（UTF-8）；本记录所在后续提交补充结果和配置检查。
+
+迁移补验：发现 runtime_metadata.business_database 含旧绝对路径会阻止新目录启动，已在 quiesced 备份副本中移除绑定；新设备首次 API 启动重新绑定，源库不改。新增异路径恢复断言，最终测试数 25 PASS。模型/工具路径及复制后原片身份须在目标设备重新配置/校验。

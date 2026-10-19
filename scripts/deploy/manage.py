@@ -415,6 +415,10 @@ def _export_state(args):
                 raise ValueError('GPU lease still active/orphaned; recover it on the original device before migration')
             origin.backup(target, pages=128, progress=progress, sleep=.05)
             reset_reservations = 0
+            reset_database_binding = 0
+            if args.quiesced and 'runtime_metadata' in tables:
+                reset_database_binding = target.execute("DELETE FROM runtime_metadata WHERE key='business_database'").rowcount
+                target.commit()
             if 'reservations' in tables:
                 if args.quiesced:
                     reset_reservations = target.execute('UPDATE reservations SET released_at=? WHERE released_at IS NULL', (time.time(),)).rowcount
@@ -424,7 +428,7 @@ def _export_state(args):
             if target.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
                 raise ValueError('Database integrity check failed')
         remaining -= destination.stat().st_size
-        report['databases'].append({'source':source.relative_to(storage).as_posix(), 'file':destination.name, 'capacity_reservations_closed_in_copy': reset_reservations, 'bytes':destination.stat().st_size, 'sha256':hashlib.sha256(destination.read_bytes()).hexdigest()})
+        report['databases'].append({'source':source.relative_to(storage).as_posix(), 'file':destination.name, 'capacity_reservations_closed_in_copy': reset_reservations, 'database_binding_removed_in_copy': bool(reset_database_binding), 'bytes':destination.stat().st_size, 'sha256':hashlib.sha256(destination.read_bytes()).hexdigest()})
     data = json.dumps(report, ensure_ascii=False, indent=2).encode('utf-8')
     if len(data) > remaining:
         raise ValueError('Manifest exceeds remaining export budget')

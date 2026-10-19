@@ -226,4 +226,21 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'GPU lease'): manage.export_state(args)
 
 
+
+    def test_restore_rebinds_database_on_another_path(self):
+        args=self.state_args(database=['platform/runtime.sqlite3'],quiesced=True)
+        from packages.runtime.queue import Queue
+        source=Queue(Path(args.storage_root)/'platform/runtime.sqlite3')
+        old_path=Path(args.storage_root)/'platform/platform.sqlite3'
+        source.bind_business_database(old_path)
+        manage.export_state(args)
+        relocated=Queue(Path(args.output)/'runtime.sqlite3')
+        new_path=Path(args.output)/'platform.sqlite3'
+        relocated.bind_business_database(new_path)
+        with source.connection() as db:
+            self.assertEqual(db.execute("SELECT value FROM runtime_metadata WHERE key='business_database'").fetchone()[0],str(old_path.resolve()))
+        report=json.loads(Path(args.output,'migration-manifest.json').read_text())
+        self.assertTrue(report['databases'][0]['database_binding_removed_in_copy'])
+
+
 if __name__=='__main__': unittest.main()
