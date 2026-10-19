@@ -344,6 +344,7 @@
       $('conflict-panel').hidden = !s.conflict;
       $('video-list').replaceChildren();
       const filter = $('video-filter').value.trim().toLowerCase();
+      $('video-filter').hidden = s.assets.length <= 1 && !filter;
       for (const asset of s.assets.filter(item => (item.title + ' ' + (item.group_id || '')).toLowerCase().includes(filter))) {
         $('video-list').append(listButton(asset.title || '未命名视频', formatTime(asset.duration_ms), () => ctl.openAsset(asset.asset_id), asset.asset_id === s.asset?.asset_id));
       }
