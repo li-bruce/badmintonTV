@@ -47,7 +47,24 @@ bash scripts/models/setup_device.sh --profile gpu-vl \
 
 `--doctor` 只检查主机和已安装包的元信息，不导入模型、不使用 GPU 运算；GPU 可见不等于 CUDA 算子通过。`--dry-run` 的通过仅表示容量检查通过，仍需阅读 `doctor` 中 Conda、环境和 GPU 状态。
 
-安装后可先用小窗口做实际验证：`"$BTV_MODELS_ENV/bin/python" -s -B scripts/models/device_cpu_smoke.py --storage-root "$BTV_STORAGE_ROOT" --snapshot SNAPSHOT.json --manifest MANIFEST.json --samples 2`。该命令只读原片，输出真实帧 PTS/RGB 哈希，不写数据集、不使用 GPU。
+安装后先设置当前终端的路径，再用一份已同步的快照和素材清单验证小窗口。修改下面的根目录、环境和文件名，使其对应实际文件：
+
+```bash
+export BTV_STORAGE_ROOT=/mnt/e/badminton-data
+export BTV_MODELS_ENV="$BTV_STORAGE_ROOT/runtime/models/envs/cpu-prep"
+export HF_HOME="$BTV_STORAGE_ROOT/models/cache/huggingface"
+export TORCH_HOME="$BTV_STORAGE_ROOT/models/cache/torch"
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONNOUSERSITE=1
+export TMPDIR="$BTV_STORAGE_ROOT/runtime/models/device-cache/cpu-prep/tmp"
+
+"$BTV_MODELS_ENV/bin/python" -s -B scripts/models/device_cpu_smoke.py \
+  --storage-root "$BTV_STORAGE_ROOT" \
+  --snapshot "$BTV_STORAGE_ROOT/platform/handoff/training-snapshot.json" \
+  --manifest "$BTV_STORAGE_ROOT/data/training/handoff/annotation-catalog.v1.json" \
+  --samples 2
+```
+
+该命令只读原片，输出真实帧 PTS/RGB 哈希，不写数据集、不使用 GPU。
 
 安装时按官方 conda-forge/PyPI/PyTorch cu128 源取依赖，不下载视频或模型权重。所有新环境独立，不使用 `--system-site-packages`。CPU 依赖文件不含 torch/CUDA；GPU 的框架版本和完整 pip 版本锁分别保存。版本锁不包含全部下载文件哈希，也未锁 Conda Python 的补丁版本，因此不宣称逐字节复现；安装收据记录实际命令、版本探测与失败信息。
 
@@ -102,6 +119,8 @@ export TMPDIR="$BTV_STORAGE_ROOT/runtime/models/device-cache/cpu-prep/tmp"
 默认选显式动作区间；需要触球点用 `--record asset_id/record_id` 选择（可重复）。`--index-only` 不解码；不能把它称真实帧通过。`--require-trainable` 会在真值、划分或定义不足时返回 2；不加时可以完成审核报告而 `trainable=false`。
 
 将来工作流：标注电脑冻结快照 → 按 asset_id/hash 同步选中的原片和 PTS → 计算电脑重新校验并生成特征/评测 → 通过 models/handoff 交还工作台 → 人审 → 检索与剪辑。保持相对路径与 hash；设备绝对路径只放部署配置。迁移完成后仍需由平台注册各模型的受控启动命令和 GPU 排期，源码包本身不会自动启动远程 worker。
+
+**当前跨盘编排限制：** 模型独立 CLI 可使用上述新存储根，但现有 Windows → WSL 桥接器仍固定 `D:/video` / `/mnt/d/video`。在新盘部署后，网页队列不能仅靠注册模型卡或修改启动命令重新接通；需要先改造桥接器的存储根、交换文件与环境路径校验，再验证作业、取消、心跳和 GPU 租约。这个平台改造未在本轮执行。期间通过独立 CLI 和 `models/handoff` 文件交接继续开发，详见 [跨盘桥接限制](../issues/models-new-device-bridge-root.md)。
 
 ## 6. 旧实验脚本的边界
 
