@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "module": "models",
+  "entrypoint": "scripts/models/setup_device.sh",
+  "python": "3.11",
+  "supported_apply_host": "WSL Ubuntu x86_64",
+  "fresh_device_install_verified": false,
+  "profiles": {
+    "cpu-prep": {
+      "description": "标注快照检查、真实源帧解码；无需 GPU",
+      "gpu_required": false,
+      "requirements": "environments/models-device-cpu.txt",
+      "peak_bytes": 2000000000,
+      "packages": ["pydantic", "av", "numpy"],
+      "torch": null,
+      "torchvision": null,
+      "training_loop": "not_implemented"
+    },
+    "gpu-base": {
+      "description": "既有姿态、图像向量与中文查询推理基础；无权重时不可用",
+      "gpu_required": true,
+      "requirements": "environments/models-device-base.txt",
+      "peak_bytes": 18000000000,
+      "packages": ["pydantic", "av", "numpy", "torch", "torchvision", "transformers"],
+      "torch": "2.7.1",
+      "torchvision": "0.22.1",
+      "training_loop": "not_implemented"
+    },
+    "gpu-pose-tracknet": {
+      "description": "YOLO 姿态、TrackNet 球路及 BST 实验依赖，各自仍需权重和来源锁",
+      "gpu_required": true,
+      "requirements": "environments/models-device-pose.txt",
+      "peak_bytes": 20000000000,
+      "packages": ["pydantic", "av", "numpy", "torch", "torchvision", "ultralytics", "opencv-python"],
+      "torch": "2.7.1",
+      "torchvision": "0.22.1",
+      "training_loop": "not_implemented"
+    },
+    "gpu-vl": {
+      "description": "视频语言向量实验；与 2.7.1 环境分开",
+      "gpu_required": true,
+      "requirements": "environments/models-device-vl.txt",
+      "peak_bytes": 24000000000,
+      "packages": ["pydantic", "av", "numpy", "torch", "torchvision", "transformers", "qwen-vl-utils"],
+      "torch": "2.8.0",
+      "torchvision": "0.23.0",
+      "training_loop": "not_implemented"
+    }
+  }
+}

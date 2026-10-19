@@ -1,7 +1,9 @@
 """Metadata-only registry for bounded reuse experiments; never loads ML code."""
 import importlib.util
 import json
+import os
 from .protocol import resolve_relative
+from .environment import runtime_prefix
 
 
 def catalog_entries(root):
@@ -62,7 +64,8 @@ def catalog_entries(root):
         entries.append({'schema_version':'1.0','model_id':mid,'version':'0.1.0','display_name':name,
             'capabilities':[capability],'status':status,'reason':reason,
             'entrypoint':['python','-m','packages.models','run','--request','{request}','--result','{result}'],
-            'environment':{'kind':'wsl-venv' if environment=='yolo-env' else 'wsl-conda','prefix':'/mnt/d/video/runtime/models/'+environment},
+            'environment':{'kind':'wsl-venv' if environment=='yolo-env' and not os.environ.get('BTV_MODELS_ENV') else 'wsl-conda',
+                           'prefix':runtime_prefix(root, environment)},
             'weights':weights,'parameters_schema':{'type':'object','required':['model_id'],
                 'properties':{'model_id':{'const':mid}},'description':'See bounded adapter parameters in docs/models/'+report},
             'input_schema':'JobRequest@1.0','output_schema':'JobResult@1.0','supported_labels':[],

@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "profile": "cpu-prep",
+  "status": "dry_run_passed",
+  "storage_root": "/mnt/d/video",
+  "env_prefix": "/mnt/d/video/runtime/models/envs/cpu-prep",
+  "conda_executable": "/home/ubuntu/miniforge3/bin/conda",
+  "environment": {
+    "BTV_STORAGE_ROOT": "/mnt/d/video",
+    "BTV_MODELS_ENV": "/mnt/d/video/runtime/models/envs/cpu-prep",
+    "HF_HOME": "/mnt/d/video/models/cache/huggingface",
+    "TORCH_HOME": "/mnt/d/video/models/cache/torch",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "CONDA_PKGS_DIRS": "/mnt/d/video/runtime/models/device-cache/cpu-prep/conda-pkgs",
+    "CONDA_ENVS_PATH": "/mnt/d/video/runtime/models/envs",
+    "CONDA_NO_PLUGINS": "true",
+    "CONDA_AUTO_UPDATE_CONDA": "false",
+    "CONDARC": "/dev/null",
+    "CONDA_REGISTER_ENVS": "false",
+    "CONDA_NUMBER_CHANNEL_NOTICES": "0",
+    "CONDA_NOTIFY_OUTDATED_CONDA": "false",
+    "CONDA_REPORT_ERRORS": "false",
+    "PIP_CACHE_DIR": "/mnt/d/video/runtime/models/device-cache/cpu-prep/pip",
+    "XDG_CACHE_HOME": "/mnt/d/video/runtime/models/device-cache/cpu-prep/xdg",
+    "TMPDIR": "/mnt/d/video/runtime/models/device-cache/cpu-prep/tmp",
+    "TMP": "/mnt/d/video/runtime/models/device-cache/cpu-prep/tmp",
+    "TEMP": "/mnt/d/video/runtime/models/device-cache/cpu-prep/tmp",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PIP_CONFIG_FILE": "/dev/null",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PIP_NO_CACHE_DIR": "1",
+    "PIP_INDEX_URL": "https://pypi.org/simple",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "commands": [
+    [
+      "/home/ubuntu/miniforge3/bin/conda",
+      "create",
+      "--yes",
+      "--prefix",
+      "/mnt/d/video/runtime/models/envs/cpu-prep",
+      "--override-channels",
+      "-c",
+      "conda-forge",
+      "--solver",
+      "classic",
+      "python=3.11",
+      "pip"
+    ],
+    [
+      "/mnt/d/video/runtime/models/envs/cpu-prep/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "install",
+      "--no-cache-dir",
+      "--no-compile",
+      "--only-binary=:all:",
+      "--index-url",
+      "https://pypi.org/simple",
+      "-r",
+      "/mnt/c/Users/Li/.codex/worktrees/c5b1/badmintonTV/environments/models-device-cpu.txt"
+    ],
+    [
+      "/mnt/d/video/runtime/models/envs/cpu-prep/bin/python",
+      "-s",
+      "-B",
+      "-m",
+      "pip",
+      "check"
+    ]
+  ],
+  "peak_bytes": 2000000000,
+  "requirements": "environments/models-device-cpu.txt",
+  "requirements_sha256": "4ded8c2881a3901a0ef02535954ee98ef55d9a1cf08c827ad9b1b52625cfb352",
+  "gpu_required": false,
+  "training_loop": "not_implemented",
+  "model_status": "unavailable",
+  "model_reason": "Weights, model source locks and evaluation are separate handoffs.",
+  "installation_verified_on_new_device": false,
+  "doctor": {
+    "host": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "wsl": true,
+      "ubuntu": true,
+      "apply_supported": true
+    },
+    "conda": "available",
+    "environment": "not_installed",
+    "gpu": "not_required",
+    "models": {
+      "status": "unavailable",
+      "reason": "Model weights/source locks and real inference must be checked separately."
+    },
+    "training_loop": "not_implemented"
+  },
+  "capacity": {
+    "passed": true,
+    "checks": {
+      "data_quota": true,
+      "platform_quota": true,
+      "models_quota": true,
+      "render_quota": true,
+      "runtime_quota": true,
+      "models_runtime_35GB": true,
+      "shared_conda_15GB": true,
+      "global_actual_700GB": true,
+      "global_allocations_700GB": true,
+      "disk_free_margin": true
+    },
+    "usage_bytes": {
+      "data": 16290398890,
+      "platform": 210225045,
+      "models": 6999788220,
+      "render": 647917504,
+      "runtime": 22201732823
+    },
+    "models_runtime_bytes": 19198700926,
+    "external_conda_base_bytes": 5924496893,
+    "unowned_bytes": 0,
+    "total_bytes": 46350062482,
+    "free_bytes": 919192240128,
+    "reserved_peak_bytes": 2000000000,
+    "accounting": "Fixed disjoint owner quotas; external Conda base/packages count toward shared 15GB. No database access."
+  }
+}
