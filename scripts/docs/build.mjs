@@ -42,13 +42,15 @@ if (dependency.name !== 'marked' || dependency.version !== '17.0.5') {
   throw new Error('This build is pinned to marked 17.0.5; review and validate before updating the parser.');
 }
 const pages = [
-  ['FRAMEWORK_GUIDE.md', 'index.html', '框架与使用手册', '01'],
-  ['END_TO_END_CAPABILITY_PLAN.md', 'capabilities.html', '能力与论文路线', '02'],
-  ['IMPLEMENTATION_ROUND_2026-10-02.md', 'implementation.html', '本轮开发计划', '03'],
-  ['ANNOTATION_TOOLS_RESEARCH_2026-10-02.md', 'tools.html', '开源工具比较', '04'],
-  ['ROUND_VALIDATION_2026-10-02.md', 'validation.html', '本轮验收记录', '05'],
-  ['STAGE_ACCEPTANCE.md', 'stages.html', '长期阶段验收', '06'],
-  ['QUICKSTART.md', 'quickstart.html', '启动与运行', '07'],
+  ['FRAMEWORK_GUIDE.md', 'index.html', '标注使用指南', '01'],
+  ['MODULES_AND_DEVICES.md', 'modules.html', '模块与设备', '02'],
+  ['MIGRATION_GUIDE.md', 'migration.html', '换设备与继续开发', '03'],
+  ['IMPLEMENTATION_ROUND_2026-10-19.md', 'implementation.html', '本轮开发计划', '04'],
+  ['ROUND_VALIDATION_2026-10-19.md', 'validation.html', '本轮验收记录', '05'],
+  ['QUICKSTART.md', 'quickstart.html', '启动与运行', '06'],
+  ['END_TO_END_CAPABILITY_PLAN.md', 'capabilities.html', '能力与论文路线', '07'],
+  ['ANNOTATION_TOOLS_RESEARCH_2026-10-02.md', 'tools.html', '开源工具比较', '08'],
+  ['STAGE_ACCEPTANCE.md', 'stages.html', '长期阶段验收', '09'],
 ];
 const pageMap = new Map(pages.map(([md, html]) => [path.resolve(docs, md), html]));
 const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

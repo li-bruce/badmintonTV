@@ -1,48 +1,53 @@
 # 本机启动与第一条工作流
 
-从 `C:/Users/USER/Desktop/Program/badmintonTV` 运行。既有控制面环境无需重复安装；新增模型各自的安装和实际运行状态见[本轮验收](ROUND_VALIDATION_2026-09-29.md)，不能把部分下载的权重当作可用模型。
+新设备先按[迁移指南](MIGRATION_GUIDE.md)和[部署命令](deployment/README.md)选择workbench-cpu或desktop-cpu环境，运行plan、setup和doctor。播放/标注不需要安装GPU框架，完整源码包也不强制安装全部环境。当前设备已有控制面环境，无需重复安装。
+
+以下D:/video是本机示例；其他设备替换为自己的storage root。根启动脚本支持显式环境与数据路径，并从脚本所在仓库启动；部署入口为`python scripts/deploy/manage.py --help`。本轮结果见[2026-10-19验证](ROUND_VALIDATION_2026-10-19.md)。
 
 ## 先使用人工训练标注与手册
 
 已有本机服务时直接打开`http://127.0.0.1:18080/training`；手册为`http://127.0.0.1:18080/guide/`。否则在项目目录运行：
 
 ```powershell
-./start-platform.ps1 -TrainingReviewer human
+./start-platform.ps1 -StorageRoot D:/video -Profile workbench-cpu -TrainingReviewer human
 ```
 
-单纯打开训练原片、标记、保存和导出审计快照不需要worker或GPU。项目、人物和队伍手填；从可信训练目录登记视频，原片不复制到制作库。详细步骤和实际交付边界见[框架手册](FRAMEWORK_GUIDE.md)及[本轮验收](ROUND_VALIDATION_2026-10-02.md)。自动化验收须另用agent实例和独立数据库，不冒充人工审核。2026-09-29的worker/GPU窗口记录仅是历史，不表示当前窗口有效。
+单纯打开训练原片、标记、保存和导出数据不需要worker或GPU。项目、人物和队伍手填；从已登记目录添加视频。操作见[标注使用指南](FRAMEWORK_GUIDE.md)。自动化验收另用agent实例和独立数据库；旧worker/GPU窗口记录均属历史，不表示现在仍运行。
 
-## 启动制作网页与 worker
+## 启动制作网页与 CPU worker
 
-在两个 PowerShell 终端分别执行下面的配置，再分别启动 API 与 worker：
+在完整源码包中安装desktop-cpu环境并配置FFmpeg。使用两个PowerShell终端分别启动API与worker；只装workbench-cpu时继续用上面的标注入口，不启动渲染worker：
 
 ```powershell
-$renderTools = Get-Content environments/render-runtime-compat.json -Raw | ConvertFrom-Json
-. ./configure-platform-adapters.ps1 -EnableExperimentalYolo -EnableVlEmbedding -FfmpegPath $renderTools.checks.ffmpeg -FfprobePath $renderTools.checks.ffprobe
+# 两个终端分别设置当前设备的实际工具路径：
+$env:BTV_FFMPEG = 'D:/tools/ffmpeg/bin/ffmpeg.exe'
+$env:BTV_FFPROBE = 'D:/tools/ffmpeg/bin/ffprobe.exe'
 # 第一个终端：
-./start-platform.ps1
-# 第二个已执行上述配置的终端：
-./start-worker.ps1
+./start-platform.ps1 -StorageRoot D:/video -Profile desktop-cpu
+# 第二个终端：
+./start-worker.ps1 -StorageRoot D:/video -Profile desktop-cpu
 ```
 
 打开 http://127.0.0.1:18080 。已存在的资料、标注、修订、任务和时间线保存在 `D:/video/platform`，重启后继续使用；启动脚本不会终止已有服务。Label Studio 的独立启动与配置见 [标注工具说明](platform/LABEL_STUDIO.md)。
 
 ## 第一个可用案例
 
-1. 素材与标注：使用已有研究资料库，或导入 `D:/video/data/handoff/assets.v1.json` / `assets.doubles.v1.json`。目前是五段真实下载小样，另有一条大文件回归派生；不能当成六场独立比赛。
-2. 选择素材后展开“兼容预览窗口与画质”，设置不超过120秒的窗口和720p/1080p，提交生成；worker完成后“刷新预览”。用缩略图、源时间定位、逐源帧和区间循环选择区间。降帧代理显示帧与源帧覆盖分别展示；需要看拍面时显式点“原分辨率核查”（同样需要worker），可1:1/2x/4x查看。普通逐帧不创建原图提取任务。
+1. 素材与片段：使用已有研究资料库，或导入 `D:/video/data/handoff/assets.v1.json` / `assets.doubles.v1.json`。目前是五段真实下载小样，另有一条大文件回归派生；不能当成六场独立比赛。
+2. 选择素材后展开“预览设置”，设置不超过120秒的窗口和720p/1080p，提交生成；worker完成后“刷新预览”。用缩略图、源时间定位、逐源帧和区间循环选择区间。降帧代理显示帧与源帧覆盖分别展示；需要看拍面时显式点“原始画面”（同样需要worker），可1:1/2x/4x查看。普通逐帧不创建原图提取任务。
 3. 设置区间、球员/回合和可见标签。不确定细手法时保留 unknown。普通用户选 human，自动化演示选 agent；二者分别记录。
 4. 技战术检索：解析中文后检查并修改条件，再检索；候选附原片时间、命中条件及不确定原因。
 5. 确认选片，生成时间线，调整排序、边界、标题和速度，选择30/60fps预设、安全区和可选平台时长规则，保存当前剪辑审核。导出设置随工程修订回载。
-6. 提交竖屏导出，在模型与任务页查看真实进度、日志和成片。当前研究样片需勾选研究预览；正式导出要求对应的人类确认记录。
+6. 提交竖屏导出，在任务页查看真实进度、日志和成片。当前研究样片需勾选研究预览；正式导出要求对应的人类确认记录。
 
 默认使用规则解析。LLM 端点可在设置中配置，密钥通过环境变量提供，不保存到数据库或 Git。本地 Qwen 0.6B 是开发实验，当前提示配置未通过可靠解析验收，不作为默认入口。
 
 ## GPU 姿态实验
 
-网页经 Windows worker 调用 WSL 环境，不让 WSL 打开 SQLite。默认登记规则解析、COCO17稀疏/连续姿态和TrackNet；`-EnableExperimentalYolo`显式映射独立`yolo-env`。VL使用`-EnableVlEmbedding`及独立`vl-env`，须以本轮最终模型卡与实测状态为准；未完成依赖时不启用。`-EnableExperimentalBst`只启用命令映射，当前缺少连续有效输入，不能当作粗球种已可用。没有GPU窗口时任务明确blocked。
+以下是原设备历史GPU实验的说明，不是新设备CPU部署步骤。`configure-platform-adapters.ps1`依赖旧的D:/video环境布局；新设备先按模型部署指南独立运行，跨盘接回网页仍需改造WSL桥。
 
-本轮模型实验已结束、GPU与队列已归还，main worker现已常驻。2026-09-29 19:08–20:08已开放pose/continuous-pose/TrackNet/YOLO/VL试用窗口；root补充一项4秒/6秒单窗验收后已归还，供手动使用，过期后如实blocked。后续每次先与models任务协调，确认独立实验已停止且账本没有 active/orphaned 计算，再为交互会话开启至多一小时窗口；下面命令示例只授权COCO17：
+网页经 Windows worker 调用 WSL 环境，不让 WSL 打开 SQLite。默认登记规则解析、COCO17稀疏/连续姿态和TrackNet；`-EnableExperimentalYolo`显式映射独立`yolo-env`。VL使用`-EnableVlEmbedding`及独立`vl-env`，须以模型卡与实测状态为准；未完成依赖时不启用。`-EnableExperimentalBst`只启用命令映射，当前缺少连续有效输入，不能当作粗球种已可用。没有GPU窗口时任务明确blocked。
+
+历史上2026-09-29 19:08–20:08曾开放pose/continuous-pose/TrackNet/YOLO/VL试用窗口；补充验收后已归还。这不代表当前worker或GPU窗口仍有效。后续每次先与models任务协调，确认独立实验已停止且账本没有 active/orphaned 计算，再为交互会话开启至多一小时窗口；下面命令示例只授权COCO17：
 
 ```powershell
 $gpuSession = 'interactive-' + [guid]::NewGuid().ToString('N')
