@@ -99,9 +99,9 @@ bundle 可能包含历史提交过的内容；本项目媒体/权重从未作为
 python scripts/deploy/manage.py export-state --storage-root D:/video --output D:/video/platform/backups/device-transfer-01 --database platform/platform.sqlite3 --database platform/runtime.sqlite3 --quiesced --manifest D:/video/data/training/handoff/annotation-catalog.v1.json --max-bytes 100000000
 ```
 
-父目录必须存在。备份写入 platform 配额内并预留明确上限；不会复制正在运行中的 WAL 文件。`migration-manifest.json` 保存库哈希及资产相对路径；默认原片哈希是来源清单声称的值，`source_verification=not_checked`。加 `--verify-assets` 会只读原片并校验哈希，可能耗时较长，仍不复制媒体。`--quiesced` 会拒绝仍有 queued/running 待执行任务或 active/orphaned GPU 租约的队列；在备份副本中关闭旧设备活跃容量预留，并记录数量，来源数据库不受修改。导出期间还用每个来源库的 data_version 前后检查并拒绝并发变更；这不替代事先停止服务。单库在线备份只关闭导出自身预留，不能直接当成多设备完整迁移。备份失败时保留 `INCOMPLETE.txt`，不能恢复该目录。
+父目录必须存在。备份写入 platform 配额内并预留明确上限；不会复制正在运行中的 WAL 文件。`migration-manifest.json` 保存库哈希及资产相对路径；默认原片哈希是来源清单声称的值，`source_verification=not_checked`。加 `--verify-assets` 会只读原片并校验哈希，可能耗时较长，仍不复制媒体。`--quiesced` 会拒绝仍有 queued/running 待执行任务或 active/orphaned GPU 租约的队列；在备份副本中关闭旧设备活跃容量预留、移除旧业务库绝对路径绑定，并记录转换结果，来源数据库不受修改；新 API 启动时重新绑定当前业务库。导出期间还用每个来源库的 data_version 前后检查并拒绝并发变更；这不替代事先停止服务。单库在线备份只关闭导出自身预留，不能直接当成多设备完整迁移。备份失败时保留 `INCOMPLETE.txt`，不能恢复该目录。
 
-把完整成功备份、原始资产清单/PTS sidecar、所需原片按相同相对路径分别复制到新设备；不自动复制全部大文件。目标设备停止 API/worker 后将备份库放回 `platform/`，核对迁移清单 SHA256，再启动服务。已经存在的目标数据库不得覆盖，先另行备份并明确选择版本。备份中可能包含用户设置和访问配置，按私密数据保管，不能提交 Git。运行中的数据库不要交给云盘实时同步；环境和缓存从定义重建。
+把完整成功备份、原始资产清单/PTS sidecar、所需原片按相同相对路径分别复制到新设备；不自动复制全部大文件。目标设备停止 API/worker 后将备份库放回 `platform/`，核对迁移清单 SHA256，再启动服务。原片复制后文件身份会变化，应在工作台重新导入/校验原始清单；旧设备的文件验证缓存不能当新设备的校验结果。模型端点、LLM 凭据和工具路径按新设备重新配置。已经存在的目标数据库不得覆盖，先另行备份并明确选择版本。备份中可能包含用户设置和访问配置，按私密数据保管，不能提交 Git。运行中的数据库不要交给云盘实时同步；环境和缓存从定义重建。
 
 ## 验证范围
 
