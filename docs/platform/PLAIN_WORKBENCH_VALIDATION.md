@@ -37,3 +37,12 @@ D:/video/runtime/platform/env/Scripts/python.exe -B -m pytest -q -p no:cacheprov
 首次Python测试未开始业务断言：旧系统pytest临时目录拒绝访问，指定独立目录并创建父目录后恢复。首次前端旧文字断言及新测试选中记录夹具已修正。没有重置用户数据、降低安全门槛或伪造人工审核。
 
 本模块没有启动服务，没有接触18080人工库、GPU、原始视频、权重或D盘长期数据。仅在工作树.runtime生成小型测试夹具。主任务使用18086隔离Agent库执行真实交互。
+## P-06补充：迁移后的原片校验入口
+
+设置 → 视频校验 → 对应视频的“重新校验”。已加入项目的视频仍可操作，任务进行中按钮禁用并显示等待/正在校验，失败显示原因并允许重试。复用现有registrations API，不新增数据合同。成功仅刷新原片证明、当前视频媒体和源帧索引；不会自动保存、重载或改变标注草稿、快照、人审来源。
+
+- PASS：全前端112项/0失败/0跳过；新增3项挂载回归验证成功保留草稿/快照/agent来源、失败可重试、切换视频后的晚到结果不会替换当前视频。
+- PASS：已有后端8项/5未选中/0失败，验证重复登记保留原引用与已有工作，源关键身份变化拒绝覆盖、中断后显式重试。命令：`python -B -m pytest -q -p no:cacheprovider --basetemp .runtime/pytest-reverify-20261019 tests/platform/test_training_review_boundaries.py -k 'repeat_registration or source_critical_refresh or startup_marks_interrupted'`。
+- NOT_RUN：真实设备迁移、复制后的原片/PTS重校验和真实浏览器恢复播放由主任务独立实例验收；上述测试不能替代该项。
+
+无新增依赖/端口/GPU使用。沿用既有独立环境；测试小夹具只在本worktree `.runtime`。当前功能提交基线8554857，集成提交SHA由主任务记录。
