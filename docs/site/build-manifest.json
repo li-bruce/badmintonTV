@@ -66,8 +66,8 @@
     {
       "source": "STAGE_ACCEPTANCE.md",
       "output": "stages.html",
-      "source_sha256": "00dfd0d42a7e1fa278f69c27cd3d72392ca821fc250ffb89538a083217974288",
-      "html_sha256": "96a4093825d1b27a497bea6c5f196d47bcb4d92eb8409c96d2fe3c9d1944eb6d",
+      "source_sha256": "c2009dc85ee21fed5c74a4bf41bdaa66a7dffb54fe65761250fdb729934a58e6",
+      "html_sha256": "2da2809d76ace18afcdefc23a7c5340beaae4676dcd5b0aa2d4cb1191db8d361",
       "chapters": 11
     }
   ]

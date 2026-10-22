@@ -4,6 +4,8 @@
 
 工作台用于整理比赛、标注动作、检索片段和制作集锦。普通电脑可播放、标注与CPU剪辑，模型数据准备和GPU模型开发分别使用独立环境。
 
+完整仓库：[li-bruce/badmintonTV](https://github.com/li-bruce/badmintonTV)。新设备先看[GitHub与会话交接](docs/GITHUB_HANDOFF.md)：包含克隆、模块选择、继续开发提示词、隐私边界和历史提交说明。
+
 先看[标注使用指南](docs/FRAMEWORK_GUIDE.md)。需要换设备或单独开发一个模块，查看[模块输入输出与设备分工](docs/MODULES_AND_DEVICES.md)、[迁移指南](docs/MIGRATION_GUIDE.md)和[部署命令](docs/deployment/README.md)。完整源码、模块源码与Git历史分别打包；不包含视频、权重、数据库或虚拟环境。
 
 2026-10-19本轮改版、打包和部署的实际结果见[验收记录](docs/ROUND_VALIDATION_2026-10-19.md)。细技法训练仍需合格标注、独立比赛划分和专门训练器，不能把GPU环境就绪当成识别能力达标。

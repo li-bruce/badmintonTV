@@ -23,6 +23,23 @@ node_modules/
 *.pem
 *.key
 config.local.*
+*.local.json
+*.local.yaml
+*.local.yml
+secrets/
+credentials/
+cookies.txt
+cookies*.json
+*.p12
+*.pfx
+*.jks
+.git-credentials
+.netrc
+_netrc
+.codex/
+.agents/
+.idea/
+.vscode/
 
 # Runtime data must not be committed
 .runtime/
@@ -39,6 +56,12 @@ logs/
 *.mov
 *.avi
 *.webm
+*.m4v
+*.flv
+*.mpeg
+*.mpg
+*.mts
+*.m2ts
 *.wav
 *.mp3
 *.pt
@@ -46,6 +69,9 @@ logs/
 *.safetensors
 *.onnx
 *.ckpt
+*.h5
+*.hdf5
+*.tflite
 *.bin
 *.npy
 *.npz
@@ -55,5 +81,6 @@ logs/
 *.tar
 *.gz
 *.part
+*.bundle
 .DS_Store
 Thumbs.db
