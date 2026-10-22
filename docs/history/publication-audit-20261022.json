@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-22",
+  "repository": "https://github.com/li-bruce/badmintonTV",
+  "privacy": {
+    "all_reachable_history": "PASS",
+    "branches": 18,
+    "commits": 246,
+    "historical_paths": 654,
+    "unique_blobs": 1077,
+    "largest_blob_bytes": 320550,
+    "forbidden_paths": 0,
+    "binary_blobs": 0,
+    "privacy_or_secret_matches": 0,
+    "manual_review": "Synthetic security-test literals and package version strings were reviewed separately; no live credential identified."
+  },
+  "history": {
+    "commit_count": 246,
+    "branch_count": 18,
+    "changed_blobs": 147,
+    "all_parent_edges_dates_messages_verified": true,
+    "source_unchanged": true
+  },
+  "validation": {
+    "pytest_command": "python -m pytest tests/deployment tests/contracts tests/platform/test_training_api.py -q",
+    "passed": 369,
+    "subtests_passed": 11,
+    "html_pages": 9,
+    "markdown_source_copies": 47,
+    "cpu_deployment_plan": "PASS",
+    "git_fsck": "PASS",
+    "remote_push": "NOT_RUN",
+    "remote_clone": "NOT_RUN"
+  },
+  "note": "No actual media, model weights, databases, API keys, raw conversations or private device configuration are included."
+}
