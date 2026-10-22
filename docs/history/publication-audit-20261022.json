@@ -28,8 +28,46 @@
     "markdown_source_copies": 47,
     "cpu_deployment_plan": "PASS",
     "git_fsck": "PASS",
-    "remote_push": "NOT_RUN",
-    "remote_clone": "NOT_RUN"
+    "remote_push": "PASS",
+    "remote_clone": "PASS"
   },
-  "note": "No actual media, model weights, databases, API keys, raw conversations or private device configuration are included."
+  "note": "All GH-01 through GH-05 passed. This receipt is a documentation-only follow-up to the verified remote snapshot; media, credentials and private machine configuration remain excluded.",
+  "remote_verification": {
+    "branch_count": 18,
+    "main": "62ee74484794b807c6485461b8a833191039fe5e",
+    "branch_heads_exact_match": true,
+    "remote_clone_fsck": "PASS",
+    "branches": {
+      "codex/library-annotation-catalog": "697b449387ff36de46303e995ff79bf91b7c2a52",
+      "codex/library-classic-hd": "d190db7a50c842785be15fe964bbc45d5e6c30b2",
+      "codex/library-classic-matches": "7314618b613ea1b51228c92ab468e33db212782c",
+      "codex/library-training-datasets": "f3a2f3ee3b38d16ec845e684d59e3639fe0a4d5e",
+      "codex/models-annotation-readiness": "1e10157c4daeb27bd88bac3daf7c237b613328fb",
+      "codex/models-device-setup": "1270a45817df197f00947707693ca70a64c6013e",
+      "codex/models-reuse-experiments": "272ce617c4c9b0b07db576aae18e729d0ad6dd7c",
+      "codex/platform-plain-workbench": "b8b8835568006249d7ec7d2232fc775619685059",
+      "codex/platform-research-implementation": "c04e70154cb5df05776e243c26fd2593e173c7bb",
+      "codex/platform-training-workspace": "83897e7f2de28a2d3f2b357a0ed9266386e7eb16",
+      "codex/portable-distribution": "3beef13ac0f51fe40374f091377d5ed3c129ceba",
+      "codex/render-contact-windows": "3659175df432e78eaafba3dc6baba27150de0d2c",
+      "codex/render-presets-acceleration": "67f661717c71d1cfe8b230118603ce4a444b9c72",
+      "main": "62ee74484794b807c6485461b8a833191039fe5e",
+      "work/library": "cf74bb1dcb274ee90d31095019d998cce5b54636",
+      "work/models": "788ad29efe95ba8219e5490e5abcc58b0661aa63",
+      "work/platform": "f158f99980df13e7be3d5fd103eca0e35c7222f7",
+      "work/render": "f8766bd6185e421e9319e00026e079b97eeee2ed"
+    }
+  },
+  "remote_privacy": {
+    "all_reachable_history": "PASS",
+    "branches": 18,
+    "commits": 248,
+    "historical_paths": 656,
+    "unique_blobs": 1080,
+    "largest_blob_bytes": 320550,
+    "forbidden_paths": 0,
+    "binary_blobs": 0,
+    "privacy_or_secret_matches": 0,
+    "manual_review": "Synthetic security-test literals and package version strings were reviewed separately; no live credential identified."
+  }
 }
